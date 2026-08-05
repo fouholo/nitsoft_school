@@ -1,0 +1,10 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Livewire\Students\Index as StudentsIndex;
+use App\Livewire\Students\Show as StudentsShow;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/students', StudentsIndex::class)->name('students.index');
+Route::get('/students/{student}', StudentsShow::class)->name('students.show');

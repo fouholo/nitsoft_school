@@ -1,0 +1,100 @@
+<div>
+    <a href="{{ route('students.index') }}" class="text-sm text-slate-500 hover:text-slate-900">&larr; Retour aux élèves</a>
+
+    <div class="mt-2 flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-900">{{ $student->last_name }} {{ $student->first_name }}</h1>
+            <p class="text-sm text-slate-500">Matricule {{ $student->student_number }}</p>
+        </div>
+
+        @can('create', \App\Domain\Enrollment\Models\Enrollment::class)
+            <button type="button" wire:click="addEnrollment" class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800">
+                Nouvelle inscription
+            </button>
+        @endcan
+    </div>
+
+    @if ($showEnrollmentForm)
+        <form wire:submit="saveEnrollment" class="mt-4 grid grid-cols-1 gap-4 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-3">
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Classe</label>
+                <select wire:model="classroom_id" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                    <option value="">—</option>
+                    @foreach ($classrooms as $classroom)
+                        <option value="{{ $classroom->id }}">{{ $classroom->name }}</option>
+                    @endforeach
+                </select>
+                @error('classroom_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Année scolaire</label>
+                <select wire:model="school_year_id" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                    <option value="">—</option>
+                    @foreach ($schoolYears as $schoolYear)
+                        <option value="{{ $schoolYear->id }}">{{ $schoolYear->label }}</option>
+                    @endforeach
+                </select>
+                @error('school_year_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Date d'inscription</label>
+                <input type="date" wire:model="enrolled_on" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                @error('enrolled_on') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div class="flex gap-2 sm:col-span-3">
+                <button type="submit" class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800">
+                    Enregistrer
+                </button>
+                <button type="button" wire:click="cancelEnrollment" class="rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50">
+                    Annuler
+                </button>
+            </div>
+        </form>
+    @endif
+
+    <h2 class="mt-8 text-sm font-semibold uppercase tracking-wide text-slate-500">Inscriptions</h2>
+
+    <div class="mt-2 overflow-hidden rounded-md border border-slate-200 bg-white">
+        <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="px-4 py-2 text-left font-medium text-slate-500">Année scolaire</th>
+                    <th class="px-4 py-2 text-left font-medium text-slate-500">Classe</th>
+                    <th class="px-4 py-2 text-left font-medium text-slate-500">Date</th>
+                    <th class="px-4 py-2 text-left font-medium text-slate-500">Statut</th>
+                    <th class="px-4 py-2"></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                @forelse ($enrollments as $enrollment)
+                    <tr wire:key="enrollment-{{ $enrollment->id }}">
+                        <td class="px-4 py-2 text-slate-900">{{ $enrollment->schoolYear?->label }}</td>
+                        <td class="px-4 py-2 text-slate-600">{{ $enrollment->classroom?->name }}</td>
+                        <td class="px-4 py-2 text-slate-600">{{ $enrollment->enrolled_on->format('d/m/Y') }}</td>
+                        <td class="px-4 py-2 text-slate-600">{{ $enrollment->status }}</td>
+                        <td class="px-4 py-2 text-right">
+                            @can('update', $enrollment)
+                                @if ($enrollment->status === 'active')
+                                    <button
+                                        wire:click="withdrawEnrollment({{ $enrollment->id }})"
+                                        wire:confirm="Marquer cette inscription comme retirée ?"
+                                        class="text-red-500 hover:text-red-700"
+                                    >
+                                        Retirer
+                                    </button>
+                                @endif
+                            @endcan
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="5" class="px-4 py-6 text-center text-slate-500">Aucune inscription.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,5 +1,7 @@
 <?php
 
+use App\Domain\Establishments\Models\Establishment;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -44,7 +46,25 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+/**
+ * Crée un utilisateur rattaché à l'établissement donné avec le rôle fourni
+ * (voir establishment_user.role — pas de rôles globaux Spatie, cf. plan
+ * d'architecture section 2.2).
+ */
+function createUserWithRole(Establishment $establishment, string $role): User
 {
-    // ..
+    $user = User::factory()->create();
+
+    $establishment->users()->attach($user->id, ['role' => $role, 'is_active' => true]);
+
+    return $user;
+}
+
+/**
+ * Lie le tenant courant au container, comme le ferait
+ * ResolveTenantFromSession/ResolveTenantFromToken en production.
+ */
+function actingInEstablishment(Establishment $establishment): void
+{
+    app()->instance('currentEstablishmentId', $establishment->id);
 }
