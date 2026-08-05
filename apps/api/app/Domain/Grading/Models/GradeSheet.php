@@ -65,6 +65,9 @@ class GradeSheet extends Model
         return $this->belongsTo(User::class, 'teacher_id');
     }
 
+    /**
+     * @return HasMany<Grade, $this>
+     */
     public function grades(): HasMany
     {
         return $this->hasMany(Grade::class);

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Academics\Models\Subject;
+use App\Domain\Academics\Models\Term;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Models\Establishment;
@@ -16,6 +17,7 @@ use App\Domain\Establishments\Models\Establishment;
  */
 dataset('policy_models', [
     'school_years' => [SchoolYear::class],
+    'terms' => [Term::class],
     'classrooms' => [Classroom::class],
     'subjects' => [Subject::class],
     'students' => [Student::class],

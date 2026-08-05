@@ -20,4 +20,6 @@ Route::middleware('auth')->group(function (): void {
 
     require __DIR__.'/academics.php';
     require __DIR__.'/enrollment.php';
+    require __DIR__.'/grading.php';
+    require __DIR__.'/attendance.php';
 });

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Domain\Academics\Models\TeacherAssignment;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\EstablishmentUserPivot;
 use Database\Factories\UserFactory;
@@ -93,6 +94,21 @@ class User extends Authenticatable
         return $this->establishments()
             ->wherePivot('role', 'super_admin')
             ->wherePivot('is_active', true)
+            ->exists();
+    }
+
+    /**
+     * Vérifie que l'enseignant est bien affecté à cette classe (et,
+     * optionnellement, à cette matière précise) — cf. plan d'architecture,
+     * section 2.2 : une Policy ne doit pas vérifier que le rôle "teacher",
+     * mais aussi l'appartenance métier réelle (classe/matière assignée).
+     */
+    public function isAssignedToClassroom(int $classroomId, ?int $subjectId = null): bool
+    {
+        return TeacherAssignment::query()
+            ->where('user_id', $this->id)
+            ->where('classroom_id', $classroomId)
+            ->when($subjectId !== null, fn ($query) => $query->where('subject_id', $subjectId))
             ->exists();
     }
 }

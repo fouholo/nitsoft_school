@@ -35,6 +35,9 @@ class Grade extends Model
         'client_updated_at' => 'datetime',
     ];
 
+    /**
+     * @return BelongsTo<GradeSheet, $this>
+     */
     public function gradeSheet(): BelongsTo
     {
         return $this->belongsTo(GradeSheet::class);

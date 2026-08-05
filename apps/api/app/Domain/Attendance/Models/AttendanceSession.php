@@ -54,6 +54,9 @@ class AttendanceSession extends Model
         return $this->belongsTo(User::class, 'teacher_id');
     }
 
+    /**
+     * @return HasMany<AttendanceRecord, $this>
+     */
     public function records(): HasMany
     {
         return $this->hasMany(AttendanceRecord::class);
