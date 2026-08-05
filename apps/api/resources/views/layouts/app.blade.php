@@ -33,6 +33,7 @@
                         </div>
 
                         <a href="{{ route('students.index') }}" class="rounded-md px-2 py-1 hover:bg-slate-100 hover:text-slate-900">Élèves</a>
+                        <a href="{{ route('guardians.index') }}" class="rounded-md px-2 py-1 hover:bg-slate-100 hover:text-slate-900">Tuteurs</a>
 
                         <div class="relative" x-data="{ open: false }">
                             <button type="button" @click="open = !open" class="rounded-md px-2 py-1 hover:bg-slate-100 hover:text-slate-900">
@@ -45,6 +46,26 @@
                         </div>
 
                         <a href="{{ route('attendance.sessions.index') }}" class="rounded-md px-2 py-1 hover:bg-slate-100 hover:text-slate-900">Présences</a>
+
+                        <div class="relative" x-data="{ open: false }">
+                            <button type="button" @click="open = !open" class="rounded-md px-2 py-1 hover:bg-slate-100 hover:text-slate-900">
+                                Facturation
+                            </button>
+                            <div x-show="open" @click.outside="open = false" x-cloak class="absolute left-0 z-10 mt-1 w-48 rounded-md border border-slate-200 bg-white py-1 shadow-lg">
+                                <a href="{{ route('billing.fee-schedules.index') }}" class="block px-4 py-2 hover:bg-slate-50">Grilles tarifaires</a>
+                                <a href="{{ route('billing.invoices.index') }}" class="block px-4 py-2 hover:bg-slate-50">Factures</a>
+                            </div>
+                        </div>
+
+                        <div class="relative" x-data="{ open: false }">
+                            <button type="button" @click="open = !open" class="rounded-md px-2 py-1 hover:bg-slate-100 hover:text-slate-900">
+                                SMS
+                            </button>
+                            <div x-show="open" @click.outside="open = false" x-cloak class="absolute left-0 z-10 mt-1 w-48 rounded-md border border-slate-200 bg-white py-1 shadow-lg">
+                                <a href="{{ route('notifications.sms-templates.index') }}" class="block px-4 py-2 hover:bg-slate-50">Modèles</a>
+                                <a href="{{ route('notifications.sms-messages.index') }}" class="block px-4 py-2 hover:bg-slate-50">Journal</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

@@ -34,11 +34,17 @@ class AttendanceRecord extends Model
         'client_updated_at' => 'datetime',
     ];
 
+    /**
+     * @return BelongsTo<AttendanceSession, $this>
+     */
     public function session(): BelongsTo
     {
         return $this->belongsTo(AttendanceSession::class, 'attendance_session_id');
     }
 
+    /**
+     * @return BelongsTo<Student, $this>
+     */
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);

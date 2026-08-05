@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Attendance\Sessions;
 
+use App\Domain\Attendance\Events\StudentMarkedAbsent;
 use App\Domain\Attendance\Models\AttendanceRecord;
 use App\Domain\Attendance\Models\AttendanceSession;
 use App\Domain\Enrollment\Models\Student;
@@ -55,14 +56,20 @@ class Mark extends Component
 
         $this->validate($rules);
 
+        $previousStatuses = $this->session->records()->pluck('status', 'student_id');
+
         foreach ($this->statuses as $studentId => $status) {
-            AttendanceRecord::updateOrCreate(
+            $record = AttendanceRecord::updateOrCreate(
                 ['attendance_session_id' => $this->session->id, 'student_id' => $studentId],
                 [
                     'status' => $status,
                     'note' => $this->notes[$studentId] !== '' ? $this->notes[$studentId] : null,
                 ]
             );
+
+            if ($status === 'absent' && $previousStatuses->get($studentId) !== 'absent') {
+                StudentMarkedAbsent::dispatch($record);
+            }
         }
 
         $this->justSaved = true;

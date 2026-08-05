@@ -32,6 +32,15 @@ trait ChecksEstablishmentMembership
         return $user->roleFor((int) app('currentEstablishmentId')) === 'admin';
     }
 
+    protected function isBillingManagerOfCurrentEstablishment(User $user): bool
+    {
+        if (! app()->bound('currentEstablishmentId')) {
+            return false;
+        }
+
+        return in_array($user->roleFor((int) app('currentEstablishmentId')), ['admin', 'accountant'], true);
+    }
+
     protected function belongsToSameEstablishment(User $user, int $modelEstablishmentId): bool
     {
         return app()->bound('currentEstablishmentId')

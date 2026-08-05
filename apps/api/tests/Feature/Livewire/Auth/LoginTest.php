@@ -13,7 +13,7 @@ test('un utilisateur peut se connecter avec des identifiants valides', function 
         ->set('email', $user->email)
         ->set('password', 'secret-password')
         ->call('login')
-        ->assertRedirect(route('dashboard'));
+        ->assertRedirect(route('home'));
 
     $this->assertAuthenticatedAs($user);
 });

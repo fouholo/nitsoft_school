@@ -1,0 +1,43 @@
+<div>
+    <h1 class="text-2xl font-semibold text-slate-900">Journal SMS</h1>
+
+    <div class="mt-6 overflow-hidden rounded-md border border-slate-200 bg-white">
+        <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="px-4 py-2 text-left font-medium text-slate-500">Date</th>
+                    <th class="px-4 py-2 text-left font-medium text-slate-500">Destinataire</th>
+                    <th class="px-4 py-2 text-left font-medium text-slate-500">Message</th>
+                    <th class="px-4 py-2 text-left font-medium text-slate-500">Statut</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                @forelse ($smsMessages as $smsMessage)
+                    <tr wire:key="sms-message-{{ $smsMessage->id }}">
+                        <td class="px-4 py-2 text-slate-900">{{ $smsMessage->created_at->format('d/m/Y H:i') }}</td>
+                        <td class="px-4 py-2 text-slate-600">{{ $smsMessage->guardian?->first_name }} {{ $smsMessage->guardian?->last_name }} ({{ $smsMessage->phone }})</td>
+                        <td class="px-4 py-2 text-slate-600">{{ $smsMessage->body_rendered }}</td>
+                        <td class="px-4 py-2">
+                            <span @class([
+                                'rounded-full px-2 py-0.5 text-xs font-medium',
+                                'bg-emerald-100 text-emerald-700' => in_array($smsMessage->status, ['sent', 'delivered']),
+                                'bg-slate-100 text-slate-700' => $smsMessage->status === 'queued',
+                                'bg-red-100 text-red-700' => $smsMessage->status === 'failed',
+                            ])>
+                                {{ $smsMessage->status }}
+                            </span>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="4" class="px-4 py-6 text-center text-slate-500">Aucun SMS envoyé.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+
+        <div class="border-t border-slate-200 px-4 py-3">
+            {{ $smsMessages->links() }}
+        </div>
+    </div>
+</div>

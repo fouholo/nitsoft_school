@@ -39,6 +39,9 @@ class Student extends Model
         'client_updated_at' => 'datetime',
     ];
 
+    /**
+     * @return BelongsToMany<Guardian, $this>
+     */
     public function guardians(): BelongsToMany
     {
         return $this->belongsToMany(Guardian::class, 'guardian_student')

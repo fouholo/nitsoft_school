@@ -97,4 +97,80 @@
             </tbody>
         </table>
     </div>
+
+    <div class="mt-8 flex items-center justify-between">
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Tuteurs</h2>
+
+        @can('update', $student)
+            <button type="button" wire:click="addGuardian" class="text-sm text-slate-500 hover:text-slate-900">
+                Lier un tuteur
+            </button>
+        @endcan
+    </div>
+
+    @if ($showGuardianForm)
+        <form wire:submit="saveGuardian" class="mt-2 grid grid-cols-1 gap-4 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-3">
+            <div class="sm:col-span-2">
+                <label class="block text-sm font-medium text-slate-700">Tuteur</label>
+                <select wire:model="guardian_id" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                    <option value="">—</option>
+                    @foreach ($availableGuardians as $availableGuardian)
+                        <option value="{{ $availableGuardian->id }}">{{ $availableGuardian->last_name }} {{ $availableGuardian->first_name }}</option>
+                    @endforeach
+                </select>
+                @error('guardian_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <label class="flex items-center gap-2 self-end text-sm text-slate-600">
+                <input type="checkbox" wire:model="is_primary_contact" class="rounded border-slate-300">
+                Contact principal
+            </label>
+
+            <div class="flex gap-2 sm:col-span-3">
+                <button type="submit" class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800">
+                    Enregistrer
+                </button>
+                <button type="button" wire:click="cancelGuardian" class="rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50">
+                    Annuler
+                </button>
+            </div>
+        </form>
+    @endif
+
+    <div class="mt-2 overflow-hidden rounded-md border border-slate-200 bg-white">
+        <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="px-4 py-2 text-left font-medium text-slate-500">Nom</th>
+                    <th class="px-4 py-2 text-left font-medium text-slate-500">Téléphone</th>
+                    <th class="px-4 py-2 text-left font-medium text-slate-500">Contact principal</th>
+                    <th class="px-4 py-2"></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                @forelse ($guardians as $guardian)
+                    <tr wire:key="student-guardian-{{ $guardian->id }}">
+                        <td class="px-4 py-2 text-slate-900">{{ $guardian->last_name }} {{ $guardian->first_name }}</td>
+                        <td class="px-4 py-2 text-slate-600">{{ $guardian->phone }}</td>
+                        <td class="px-4 py-2 text-slate-600">{{ $guardian->pivot->is_primary_contact ? 'Oui' : '' }}</td>
+                        <td class="px-4 py-2 text-right">
+                            @can('update', $student)
+                                <button
+                                    wire:click="removeGuardian({{ $guardian->id }})"
+                                    wire:confirm="Délier ce tuteur ?"
+                                    class="text-red-500 hover:text-red-700"
+                                >
+                                    Délier
+                                </button>
+                            @endcan
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="4" class="px-4 py-6 text-center text-slate-500">Aucun tuteur lié.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 </div>

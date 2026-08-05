@@ -6,11 +6,13 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Domain\Academics\Models\TeacherAssignment;
+use App\Domain\Enrollment\Models\Guardian;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\EstablishmentUserPivot;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -110,5 +112,13 @@ class User extends Authenticatable
             ->where('classroom_id', $classroomId)
             ->when($subjectId !== null, fn ($query) => $query->where('subject_id', $subjectId))
             ->exists();
+    }
+
+    /**
+     * @return HasOne<Guardian, $this>
+     */
+    public function guardianProfile(): HasOne
+    {
+        return $this->hasOne(Guardian::class, 'user_id');
     }
 }

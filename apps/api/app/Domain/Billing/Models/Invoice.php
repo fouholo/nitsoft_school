@@ -58,6 +58,9 @@ class Invoice extends Model
         return $this->belongsTo(FeeSchedule::class);
     }
 
+    /**
+     * @return HasMany<Payment, $this>
+     */
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
