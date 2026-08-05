@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Establishments\Models;
 
+use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
@@ -17,4 +19,12 @@ class FoundationUserPivot extends Pivot
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 }

@@ -23,6 +23,7 @@
                     'banknote' => '<rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="12" cy="12" r="3" /><path d="M6 9v.01M18 15v.01" />',
                     'chat' => '<path d="M4 5h16v11H8l-4 4z" />',
                     'logout' => '<path d="M9 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3" /><path d="m16 17 5-5-5-5" /><path d="M21 12H9" />',
+                    'building' => '<rect x="4" y="3" width="16" height="18" rx="1" /><path d="M8 7h2M14 7h2M8 11h2M14 11h2M8 15h2M14 15h2" />',
                     default => '',
                 };
             };
@@ -52,6 +53,10 @@
                     ['label' => 'Journal', 'route' => 'notifications.sms-messages.index'],
                 ]],
             ];
+
+            if (auth()->user()->isSuperAdmin()) {
+                $navItems[] = ['type' => 'link', 'label' => 'Groupes scolaires', 'route' => 'foundations.index', 'active' => 'foundations.*', 'icon' => 'building'];
+            }
 
             $initials = collect(explode(' ', auth()->user()->name))
                 ->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))
