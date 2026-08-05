@@ -1,0 +1,8 @@
+# IDE / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# apps/desktop et apps/mobile (NativePHP) auront leurs propres .gitignore
+# quand ils seront initialisés (Phase 3 / Phase 4).

@@ -1,0 +1,43 @@
+name: API CI
+
+on:
+  push:
+    branches: [main]
+    paths: ["apps/api/**"]
+  pull_request:
+    paths: ["apps/api/**"]
+
+defaults:
+  run:
+    working-directory: apps/api
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, pdo_sqlite, sqlite3, bcmath, ctype, fileinfo, tokenizer, xml
+          coverage: none
+
+      - name: Installer les dépendances Composer
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Copier le fichier .env
+        run: cp .env.example .env
+
+      - name: Générer la clé d'application
+        run: php artisan key:generate
+
+      - name: Vérifier le style de code (Pint)
+        run: ./vendor/bin/pint --test
+
+      - name: Analyse statique (Larastan)
+        run: ./vendor/bin/phpstan analyse --no-progress --memory-limit=512M
+
+      - name: Exécuter les tests (Pest)
+        run: php artisan test
