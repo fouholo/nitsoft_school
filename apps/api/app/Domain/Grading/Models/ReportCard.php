@@ -35,16 +35,25 @@ class ReportCard extends Model
         'generated_at' => 'datetime',
     ];
 
+    /**
+     * @return BelongsTo<Student, $this>
+     */
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);
     }
 
+    /**
+     * @return BelongsTo<Term, $this>
+     */
     public function term(): BelongsTo
     {
         return $this->belongsTo(Term::class);
     }
 
+    /**
+     * @return BelongsTo<Classroom, $this>
+     */
     public function classroom(): BelongsTo
     {
         return $this->belongsTo(Classroom::class);

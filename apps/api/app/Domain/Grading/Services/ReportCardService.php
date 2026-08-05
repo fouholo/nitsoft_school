@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Domain\Grading\Services;
 
 use App\Domain\Academics\Models\Classroom;
+use App\Domain\Academics\Models\Subject;
 use App\Domain\Academics\Models\Term;
 use App\Domain\Grading\Models\Grade;
 use App\Domain\Grading\Models\ReportCard;
+use App\Domain\Grading\ValueObjects\SubjectAverage;
 use Illuminate\Support\Collection;
 
 /**
@@ -64,6 +66,44 @@ class ReportCardService
         }
 
         return $reportCards;
+    }
+
+    /**
+     * Détail par matière pour l'affichage du bulletin (PDF) : moyenne
+     * pondérée de chaque matière où l'élève a au moins une note sur la
+     * période. N'est pas persisté — calculé à la volée à chaque
+     * consultation, cf. demande explicite de ne pas pré-générer de PDF.
+     *
+     * @return Collection<int, SubjectAverage>
+     */
+    public function subjectBreakdown(ReportCard $reportCard): Collection
+    {
+        $grades = Grade::query()
+            ->where('student_id', $reportCard->student_id)
+            ->whereNotNull('score')
+            ->whereHas('gradeSheet', function ($query) use ($reportCard): void {
+                $query->where('classroom_id', $reportCard->classroom_id)->where('term_id', $reportCard->term_id);
+            })
+            ->with(['gradeSheet.subject'])
+            ->get();
+
+        $rows = [];
+
+        foreach ($grades->groupBy(fn (Grade $grade) => $grade->gradeSheet->subject_id) as $subjectGrades) {
+            $rows[] = new SubjectAverage($this->subjectFor($subjectGrades), $this->weightedAverage($subjectGrades));
+        }
+
+        usort($rows, fn (SubjectAverage $a, SubjectAverage $b) => $a->subject->name <=> $b->subject->name);
+
+        return collect($rows);
+    }
+
+    /**
+     * @param  Collection<int, Grade>  $grades
+     */
+    private function subjectFor(Collection $grades): Subject
+    {
+        return $grades->first()->gradeSheet->subject;
     }
 
     /**

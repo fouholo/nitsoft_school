@@ -45,21 +45,33 @@ class GradeSheet extends Model
         'client_updated_at' => 'datetime',
     ];
 
+    /**
+     * @return BelongsTo<Classroom, $this>
+     */
     public function classroom(): BelongsTo
     {
         return $this->belongsTo(Classroom::class);
     }
 
+    /**
+     * @return BelongsTo<Subject, $this>
+     */
     public function subject(): BelongsTo
     {
         return $this->belongsTo(Subject::class);
     }
 
+    /**
+     * @return BelongsTo<Term, $this>
+     */
     public function term(): BelongsTo
     {
         return $this->belongsTo(Term::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function teacher(): BelongsTo
     {
         return $this->belongsTo(User::class, 'teacher_id');

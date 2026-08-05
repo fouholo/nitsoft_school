@@ -105,3 +105,44 @@ test('les élèves ex-aequo partagent le même rang', function () {
         ->and($rankFor($second->id))->toBe(1)
         ->and($rankFor($third->id))->toBe(3);
 });
+
+test('le détail par matière du bulletin liste chaque matière notée avec sa moyenne', function () {
+    $establishment = Establishment::factory()->create();
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+    $term = Term::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+    $maths = Subject::factory()->create(['establishment_id' => $establishment->id, 'name' => 'Mathématiques']);
+    $francais = Subject::factory()->create(['establishment_id' => $establishment->id, 'name' => 'Français']);
+
+    $sheetMaths = GradeSheet::factory()->create([
+        'establishment_id' => $establishment->id,
+        'classroom_id' => $classroom->id,
+        'subject_id' => $maths->id,
+        'term_id' => $term->id,
+        'max_score' => 20,
+        'weight' => 1,
+    ]);
+    $sheetFrancais = GradeSheet::factory()->create([
+        'establishment_id' => $establishment->id,
+        'classroom_id' => $classroom->id,
+        'subject_id' => $francais->id,
+        'term_id' => $term->id,
+        'max_score' => 20,
+        'weight' => 1,
+    ]);
+
+    $student = makeGradedStudent($establishment, $classroom, $term, [[$sheetMaths, 18], [$sheetFrancais, 12]]);
+
+    $service = new ReportCardService;
+    $reportCard = $service->generateForClassroomAndTerm($classroom, $term)->firstWhere('student_id', $student->id);
+
+    $breakdown = $service->subjectBreakdown($reportCard);
+
+    expect($breakdown)->toHaveCount(2);
+
+    $mathsRow = $breakdown->firstWhere('subject.id', $maths->id);
+    $francaisRow = $breakdown->firstWhere('subject.id', $francais->id);
+
+    expect($mathsRow->average)->toBe(18.0)
+        ->and($francaisRow->average)->toBe(12.0);
+});

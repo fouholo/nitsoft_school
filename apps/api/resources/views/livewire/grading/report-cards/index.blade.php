@@ -41,6 +41,7 @@
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Rang</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Élève</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Moyenne / 20</th>
+                    <th class="px-4 py-2"></th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
@@ -49,10 +50,18 @@
                         <td class="px-4 py-2 text-slate-900">{{ $reportCard->rank }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $reportCard->student?->last_name }} {{ $reportCard->student?->first_name }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $reportCard->average }}</td>
+                        <td class="px-4 py-2 text-right">
+                            <a href="{{ route('grading.report-cards.pdf', $reportCard) }}" target="_blank" class="text-slate-500 hover:text-slate-900">
+                                Voir le PDF
+                            </a>
+                            <a href="{{ route('grading.report-cards.pdf', ['reportCard' => $reportCard, 'download' => 1]) }}" class="ml-3 text-slate-500 hover:text-slate-900">
+                                Télécharger
+                            </a>
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="3" class="px-4 py-6 text-center text-slate-500">
+                        <td colspan="4" class="px-4 py-6 text-center text-slate-500">
                             Sélectionnez une classe et une période{{ $classroom_id && $term_id ? ', puis générez les bulletins' : '' }}.
                         </td>
                     </tr>
