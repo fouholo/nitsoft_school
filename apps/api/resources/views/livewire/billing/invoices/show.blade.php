@@ -72,6 +72,7 @@
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Moyen</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Reçu</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Encaissé par</th>
+                    <th class="px-4 py-2 text-left font-medium text-slate-500"></th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
@@ -82,10 +83,17 @@
                         <td class="px-4 py-2 text-slate-600">{{ $payment->method }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $payment->receipt?->receipt_number }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $payment->receivedBy?->name }}</td>
+                        <td class="px-4 py-2 text-slate-600">
+                            @can('view', $payment)
+                                <a href="{{ route('billing.payments.receipt', $payment) }}" target="_blank" class="text-slate-700 hover:text-slate-900">Voir le reçu</a>
+                                &middot;
+                                <a href="{{ route('billing.payments.receipt', ['payment' => $payment, 'download' => 1]) }}" class="text-slate-700 hover:text-slate-900">Télécharger</a>
+                            @endcan
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-4 py-6 text-center text-slate-500">Aucun paiement enregistré.</td>
+                        <td colspan="6" class="px-4 py-6 text-center text-slate-500">Aucun paiement enregistré.</td>
                     </tr>
                 @endforelse
             </tbody>

@@ -41,21 +41,33 @@ class Payment extends Model
         'client_updated_at' => 'datetime',
     ];
 
+    /**
+     * @return BelongsTo<Invoice, $this>
+     */
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
     }
 
+    /**
+     * @return BelongsTo<Student, $this>
+     */
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function receivedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'received_by');
     }
 
+    /**
+     * @return HasOne<Receipt, $this>
+     */
     public function receipt(): HasOne
     {
         return $this->hasOne(Receipt::class);
