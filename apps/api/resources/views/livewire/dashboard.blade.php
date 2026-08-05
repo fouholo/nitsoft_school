@@ -1,7 +1,7 @@
 <div>
     <h1 class="text-2xl font-semibold text-slate-900">Tableau de bord</h1>
     <p class="mt-1 text-sm text-slate-500">
-        Connecté en tant que <span class="font-medium text-slate-700">{{ ucfirst($role ?? 'aucun rôle') }}</span> sur cet établissement.
+        Connecté en tant que <span class="font-medium text-slate-700">{{ $roleLabel }}</span> sur cet établissement.
     </p>
 
     <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -33,7 +33,7 @@
             </div>
         </div>
 
-        @if (in_array($role, ['admin', 'accountant'], true))
+        @if (in_array($role, ['admin', 'accountant', 'founder'], true))
             <div class="rounded-xl border border-slate-200 bg-white p-5">
                 <div class="flex items-center gap-3">
                     <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
@@ -50,7 +50,7 @@
             </div>
         @endif
 
-        @if ($role === 'admin')
+        @if (in_array($role, ['admin', 'founder'], true))
             <div class="rounded-xl border border-slate-200 bg-white p-5">
                 <div class="flex items-center gap-3">
                     <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">

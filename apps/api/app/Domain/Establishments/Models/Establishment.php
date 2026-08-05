@@ -7,6 +7,7 @@ namespace App\Domain\Establishments\Models;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -16,6 +17,7 @@ class Establishment extends Model
     use SoftDeletes;
 
     protected $fillable = [
+        'foundation_id',
         'name',
         'slug',
         'type',
@@ -28,6 +30,14 @@ class Establishment extends Model
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
+    /**
+     * @return BelongsTo<Foundation, $this>
+     */
+    public function foundation(): BelongsTo
+    {
+        return $this->belongsTo(Foundation::class);
+    }
 
     public function users(): BelongsToMany
     {

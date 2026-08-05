@@ -57,7 +57,7 @@ class Index extends Component
         /** @var User $user */
         $user = Auth::user();
 
-        if ($user->currentRole() !== 'admin' && ! $user->isAssignedToClassroom((int) $data['classroom_id'])) {
+        if (! $user->hasAdminRightsOnCurrentEstablishment() && ! $user->isAssignedToClassroom((int) $data['classroom_id'])) {
             abort(403, "Vous n'êtes pas affecté à cette classe.");
         }
 
@@ -77,7 +77,7 @@ class Index extends Component
     {
         /** @var User $user */
         $user = Auth::user();
-        $isAdmin = $user->currentRole() === 'admin';
+        $isAdmin = $user->hasAdminRightsOnCurrentEstablishment();
 
         $sessions = AttendanceSession::query()
             ->with(['classroom', 'subject'])

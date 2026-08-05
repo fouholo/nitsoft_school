@@ -20,16 +20,12 @@ trait ChecksEstablishmentMembership
             return false;
         }
 
-        return $user->belongsToEstablishment((int) app('currentEstablishmentId'));
+        return $user->hasAccessTo((int) app('currentEstablishmentId'));
     }
 
     protected function isAdminOfCurrentEstablishment(User $user): bool
     {
-        if (! app()->bound('currentEstablishmentId')) {
-            return false;
-        }
-
-        return $user->roleFor((int) app('currentEstablishmentId')) === 'admin';
+        return $user->hasAdminRightsOnCurrentEstablishment();
     }
 
     protected function isBillingManagerOfCurrentEstablishment(User $user): bool
@@ -38,13 +34,16 @@ trait ChecksEstablishmentMembership
             return false;
         }
 
-        return in_array($user->roleFor((int) app('currentEstablishmentId')), ['admin', 'accountant'], true);
+        $establishmentId = (int) app('currentEstablishmentId');
+
+        return in_array($user->roleFor($establishmentId), ['admin', 'accountant'], true)
+            || $user->isFounderOfEstablishment($establishmentId);
     }
 
     protected function belongsToSameEstablishment(User $user, int $modelEstablishmentId): bool
     {
         return app()->bound('currentEstablishmentId')
             && (int) app('currentEstablishmentId') === $modelEstablishmentId
-            && $user->belongsToEstablishment($modelEstablishmentId);
+            && $user->hasAccessTo($modelEstablishmentId);
     }
 }

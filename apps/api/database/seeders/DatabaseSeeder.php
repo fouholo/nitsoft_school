@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Domain\Establishments\Models\Establishment;
+use App\Domain\Establishments\Models\Foundation;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -16,7 +17,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $foundation = Foundation::create([
+            'name' => 'Groupe Nitsoft Education',
+            'slug' => 'groupe-nitsoft-education',
+            'is_active' => true,
+        ]);
+
         $establishment = Establishment::create([
+            'foundation_id' => $foundation->id,
             'name' => 'Groupe Scolaire Excellence',
             'slug' => 'groupe-scolaire-excellence',
             'type' => 'college',
@@ -26,8 +34,19 @@ class DatabaseSeeder extends Seeder
             'is_active' => true,
         ]);
 
+        Establishment::create([
+            'foundation_id' => $foundation->id,
+            'name' => 'Institut Nitsoft Nord',
+            'slug' => 'institut-nitsoft-nord',
+            'type' => 'lycee',
+            'address' => 'Bouaké, Côte d\'Ivoire',
+            'phone' => '+225 07 00 00 00 01',
+            'timezone' => 'Africa/Abidjan',
+            'is_active' => true,
+        ]);
+
         $accounts = [
-            ['name' => 'Fondateur SaaS', 'email' => 'superadmin@nitsoft.test', 'role' => 'super_admin'],
+            ['name' => 'Super Admin SaaS', 'email' => 'superadmin@nitsoft.test', 'role' => 'super_admin'],
             ['name' => 'Directeur Etablissement', 'email' => 'admin@nitsoft.test', 'role' => 'admin'],
             ['name' => 'Enseignant Demo', 'email' => 'teacher@nitsoft.test', 'role' => 'teacher'],
             ['name' => 'Comptable Demo', 'email' => 'accountant@nitsoft.test', 'role' => 'accountant'],
@@ -44,5 +63,15 @@ class DatabaseSeeder extends Seeder
                 'is_active' => true,
             ]);
         }
+
+        $founder = User::factory()->create([
+            'name' => 'Fondateur Groupe',
+            'email' => 'founder@nitsoft.test',
+        ]);
+
+        $foundation->users()->attach($founder->id, [
+            'role' => 'founder',
+            'is_active' => true,
+        ]);
     }
 }

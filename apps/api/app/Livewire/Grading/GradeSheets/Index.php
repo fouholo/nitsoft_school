@@ -68,7 +68,7 @@ class Index extends Component
         /** @var User $user */
         $user = Auth::user();
 
-        if ($user->currentRole() !== 'admin' && ! $user->isAssignedToClassroom((int) $data['classroom_id'], (int) $data['subject_id'])) {
+        if (! $user->hasAdminRightsOnCurrentEstablishment() && ! $user->isAssignedToClassroom((int) $data['classroom_id'], (int) $data['subject_id'])) {
             abort(403, "Vous n'êtes pas affecté à cette classe pour cette matière.");
         }
 
@@ -86,7 +86,7 @@ class Index extends Component
     {
         /** @var User $user */
         $user = Auth::user();
-        $isAdmin = $user->currentRole() === 'admin';
+        $isAdmin = $user->hasAdminRightsOnCurrentEstablishment();
 
         $gradeSheets = GradeSheet::query()
             ->with(['classroom', 'subject', 'term'])

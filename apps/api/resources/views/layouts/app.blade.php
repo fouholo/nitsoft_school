@@ -112,7 +112,7 @@
                         </span>
                         <div class="min-w-0 flex-1">
                             <p class="truncate text-sm font-medium text-slate-900">{{ auth()->user()->name }}</p>
-                            <p class="truncate text-xs text-slate-500">{{ ucfirst(auth()->user()->currentRole() ?? '') }}</p>
+                            <p class="truncate text-xs text-slate-500">{{ auth()->user()->currentRoleLabel() }}</p>
                         </div>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf

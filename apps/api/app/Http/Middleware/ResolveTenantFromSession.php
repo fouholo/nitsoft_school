@@ -27,16 +27,14 @@ class ResolveTenantFromSession
         $establishmentId = $request->session()->get('current_establishment_id');
 
         if ($establishmentId === null) {
-            $establishmentId = $user->establishments()
-                ->wherePivot('is_active', true)
-                ->value('establishments.id');
+            $establishmentId = $user->accessibleEstablishments()->first()?->id;
 
             if ($establishmentId !== null) {
                 $request->session()->put('current_establishment_id', $establishmentId);
             }
         }
 
-        if ($establishmentId !== null && $user->belongsToEstablishment((int) $establishmentId)) {
+        if ($establishmentId !== null && $user->hasAccessTo((int) $establishmentId)) {
             app()->instance('currentEstablishmentId', (int) $establishmentId);
         }
 

@@ -24,6 +24,7 @@ class Dashboard extends Component
 
         return view('livewire.dashboard', [
             'role' => $role,
+            'roleLabel' => $user->currentRoleLabel(),
             'studentsCount' => Student::where('is_active', true)->count(),
             'classroomsCount' => Classroom::whereHas('schoolYear', fn ($query) => $query->where('is_current', true))->count(),
             'pendingInvoicesCount' => Invoice::whereIn('status', ['pending', 'partially_paid'])->count(),

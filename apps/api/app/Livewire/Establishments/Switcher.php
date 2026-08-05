@@ -15,7 +15,7 @@ class Switcher extends Component
         /** @var User $user */
         $user = Auth::user();
 
-        abort_unless($user->belongsToEstablishment($establishmentId), 403);
+        abort_unless($user->hasAccessTo($establishmentId), 403);
 
         session(['current_establishment_id' => $establishmentId]);
 
@@ -28,7 +28,7 @@ class Switcher extends Component
         $user = Auth::user();
 
         return view('livewire.establishments.switcher', [
-            'establishments' => $user->establishments()->wherePivot('is_active', true)->get(),
+            'establishments' => $user->accessibleEstablishments(),
             'currentEstablishmentId' => session('current_establishment_id'),
         ]);
     }

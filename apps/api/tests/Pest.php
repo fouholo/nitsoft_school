@@ -1,6 +1,7 @@
 <?php
 
 use App\Domain\Establishments\Models\Establishment;
+use App\Domain\Establishments\Models\Foundation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -67,4 +68,18 @@ function createUserWithRole(Establishment $establishment, string $role): User
 function actingInEstablishment(Establishment $establishment): void
 {
     app()->instance('currentEstablishmentId', $establishment->id);
+}
+
+/**
+ * Crée un utilisateur fondateur (foundation_user.role = founder) — voir
+ * Foundation : accès admin-équivalent à tous les établissements du groupe
+ * sans ligne establishment_user par école.
+ */
+function createFounder(Foundation $foundation): User
+{
+    $user = User::factory()->create();
+
+    $foundation->users()->attach($user->id, ['role' => 'founder', 'is_active' => true]);
+
+    return $user;
 }
