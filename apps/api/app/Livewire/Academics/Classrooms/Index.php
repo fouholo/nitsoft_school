@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Livewire\Academics\Classrooms;
 
+use App\Domain\Academics\Enums\Cycle;
 use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\SchoolYear;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -21,6 +23,8 @@ class Index extends Component
     public string $name = '';
 
     public string $level = '';
+
+    public string $cycle = Cycle::Secondaire->value;
 
     public ?int $capacity = null;
 
@@ -49,6 +53,7 @@ class Index extends Component
         $this->editingId = $classroom->id;
         $this->name = $classroom->name;
         $this->level = (string) $classroom->level;
+        $this->cycle = $classroom->cycle->value;
         $this->capacity = $classroom->capacity;
         $this->school_year_id = $classroom->school_year_id;
         $this->showForm = true;
@@ -59,6 +64,7 @@ class Index extends Component
         $data = $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'level' => ['nullable', 'string', 'max:255'],
+            'cycle' => ['required', Rule::enum(Cycle::class)],
             'capacity' => ['nullable', 'integer', 'min:1'],
             'school_year_id' => ['required', 'exists:school_years,id'],
         ]);
@@ -95,7 +101,8 @@ class Index extends Component
 
     protected function resetForm(): void
     {
-        $this->reset(['editingId', 'name', 'level', 'capacity', 'school_year_id']);
+        $this->reset(['editingId', 'name', 'level', 'cycle', 'capacity', 'school_year_id']);
+        $this->cycle = Cycle::Secondaire->value;
     }
 
     public function render()
@@ -103,6 +110,7 @@ class Index extends Component
         return view('livewire.academics.classrooms.index', [
             'classrooms' => Classroom::with('schoolYear')->orderBy('name')->get(),
             'schoolYears' => SchoolYear::orderByDesc('starts_on')->get(),
+            'cycles' => Cycle::cases(),
         ]);
     }
 }

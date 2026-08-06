@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Grading\GradeSheets;
 
+use App\Domain\Academics\Enums\Cycle;
 use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\Subject;
 use App\Domain\Academics\Models\TeacherAssignment;
@@ -11,6 +12,7 @@ use App\Domain\Academics\Models\Term;
 use App\Domain\Grading\Models\GradeSheet;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -72,6 +74,14 @@ class Index extends Component
             abort(403, "Vous n'êtes pas affecté à cette classe pour cette matière.");
         }
 
+        $classroom = Classroom::findOrFail($data['classroom_id']);
+
+        if (! $classroom->isGradable()) {
+            throw ValidationException::withMessages([
+                'classroom_id' => "Ce niveau n'a pas de notation.",
+            ]);
+        }
+
         GradeSheet::create([...$data, 'teacher_id' => $user->id]);
 
         $this->showForm = false;
@@ -96,12 +106,13 @@ class Index extends Component
 
         $assignments = TeacherAssignment::query()
             ->when(! $isAdmin, fn ($query) => $query->where('user_id', $user->id))
+            ->whereHas('classroom', fn ($query) => $query->where('cycle', '!=', Cycle::Prescolaire))
             ->with(['classroom', 'subject'])
             ->get();
 
         return view('livewire.grading.grade-sheets.index', [
             'gradeSheets' => $gradeSheets,
-            'classrooms' => $isAdmin ? Classroom::orderBy('name')->get() : $assignments->pluck('classroom')->unique('id'),
+            'classrooms' => $isAdmin ? Classroom::gradable()->orderBy('name')->get() : $assignments->pluck('classroom')->unique('id'),
             'subjects' => $isAdmin ? Subject::orderBy('name')->get() : $assignments->pluck('subject')->unique('id'),
             'terms' => Term::orderBy('sequence')->get(),
         ]);

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Domain\Academics\Enums\Cycle;
+use App\Domain\Academics\Models\Classroom;
+use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\Foundation;
 use App\Models\User;
@@ -43,6 +46,43 @@ class DatabaseSeeder extends Seeder
             'phone' => '+225 07 00 00 00 01',
             'timezone' => 'Africa/Abidjan',
             'is_active' => true,
+        ]);
+
+        $mixedEstablishment = Establishment::create([
+            'foundation_id' => $foundation->id,
+            'name' => 'École La Pouponnière',
+            'slug' => 'ecole-la-pouponniere',
+            'type' => 'préscolaire-primaire',
+            'address' => 'Yamoussoukro, Côte d\'Ivoire',
+            'phone' => '+225 07 00 00 00 02',
+            'timezone' => 'Africa/Abidjan',
+            'is_active' => true,
+        ]);
+
+        $mixedSchoolYear = SchoolYear::create([
+            'establishment_id' => $mixedEstablishment->id,
+            'label' => '2026-2027',
+            'starts_on' => '2026-09-01',
+            'ends_on' => '2027-06-30',
+            'is_current' => true,
+        ]);
+
+        Classroom::create([
+            'establishment_id' => $mixedEstablishment->id,
+            'school_year_id' => $mixedSchoolYear->id,
+            'name' => 'Grande Section A',
+            'level' => 'Grande Section',
+            'cycle' => Cycle::Prescolaire,
+            'capacity' => 25,
+        ]);
+
+        Classroom::create([
+            'establishment_id' => $mixedEstablishment->id,
+            'school_year_id' => $mixedSchoolYear->id,
+            'name' => 'CP A',
+            'level' => 'CP',
+            'cycle' => Cycle::Primaire,
+            'capacity' => 30,
         ]);
 
         $accounts = [

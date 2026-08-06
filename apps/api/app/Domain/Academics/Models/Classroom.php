@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Domain\Academics\Models;
 
+use App\Domain\Academics\Enums\Cycle;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Establishments\Concerns\TenantScoped;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,7 +25,12 @@ class Classroom extends Model
         'school_year_id',
         'name',
         'level',
+        'cycle',
         'capacity',
+    ];
+
+    protected $casts = [
+        'cycle' => Cycle::class,
     ];
 
     public function schoolYear(): BelongsTo
@@ -34,5 +41,15 @@ class Classroom extends Model
     public function enrollments(): HasMany
     {
         return $this->hasMany(Enrollment::class);
+    }
+
+    public function isGradable(): bool
+    {
+        return $this->cycle !== Cycle::Prescolaire;
+    }
+
+    public function scopeGradable(Builder $query): Builder
+    {
+        return $query->where('cycle', '!=', Cycle::Prescolaire);
     }
 }

@@ -23,6 +23,16 @@
             </div>
 
             <div>
+                <label class="block text-sm font-medium text-slate-700">Cycle</label>
+                <select wire:model="cycle" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                    @foreach ($cycles as $cycleOption)
+                        <option value="{{ $cycleOption->value }}">{{ $cycleOption->label() }}</option>
+                    @endforeach
+                </select>
+                @error('cycle') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
                 <label class="block text-sm font-medium text-slate-700">Capacité</label>
                 <input type="number" wire:model="capacity" min="1" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
                 @error('capacity') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
@@ -56,6 +66,7 @@
                 <tr>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Nom</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Niveau</th>
+                    <th class="px-4 py-2 text-left font-medium text-slate-500">Cycle</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Capacité</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Année scolaire</th>
                     <th class="px-4 py-2"></th>
@@ -66,6 +77,11 @@
                     <tr wire:key="classroom-{{ $classroom->id }}">
                         <td class="px-4 py-2 text-slate-900">{{ $classroom->name }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $classroom->level }}</td>
+                        <td class="px-4 py-2">
+                            <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $classroom->cycle->badgeClass() }}">
+                                {{ $classroom->cycle->label() }}
+                            </span>
+                        </td>
                         <td class="px-4 py-2 text-slate-600">{{ $classroom->capacity }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $classroom->schoolYear?->label }}</td>
                         <td class="px-4 py-2 text-right">
@@ -85,7 +101,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-4 py-6 text-center text-slate-500">Aucune classe.</td>
+                        <td colspan="6" class="px-4 py-6 text-center text-slate-500">Aucune classe.</td>
                     </tr>
                 @endforelse
             </tbody>

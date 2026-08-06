@@ -146,3 +146,13 @@ test('le détail par matière du bulletin liste chaque matière notée avec sa m
     expect($mathsRow->average)->toBe(18.0)
         ->and($francaisRow->average)->toBe(12.0);
 });
+
+test('la génération de bulletin est refusée pour une classe préscolaire', function () {
+    $establishment = Establishment::factory()->create();
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $classroom = Classroom::factory()->prescolaire()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+    $term = Term::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+
+    expect(fn () => (new ReportCardService)->generateForClassroomAndTerm($classroom, $term))
+        ->toThrow(Illuminate\Validation\ValidationException::class);
+});

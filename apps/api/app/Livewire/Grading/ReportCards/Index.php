@@ -57,7 +57,7 @@ class Index extends Component
 
         return view('livewire.grading.report-cards.index', [
             'reportCards' => $reportCards,
-            'classrooms' => Classroom::orderBy('name')->get(),
+            'classrooms' => Classroom::gradable()->orderBy('name')->get(),
             'terms' => Term::orderBy('sequence')->get(),
         ]);
     }

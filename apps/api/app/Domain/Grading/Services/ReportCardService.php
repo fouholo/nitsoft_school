@@ -11,6 +11,7 @@ use App\Domain\Grading\Models\Grade;
 use App\Domain\Grading\Models\ReportCard;
 use App\Domain\Grading\ValueObjects\SubjectAverage;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Calcul de la moyenne pondérée (par le coefficient de chaque évaluation,
@@ -25,6 +26,12 @@ class ReportCardService
      */
     public function generateForClassroomAndTerm(Classroom $classroom, Term $term): Collection
     {
+        if (! $classroom->isGradable()) {
+            throw ValidationException::withMessages([
+                'classroom_id' => "Ce niveau n'a pas de notation.",
+            ]);
+        }
+
         $gradesByStudent = Grade::query()
             ->whereNotNull('score')
             ->whereHas('gradeSheet', function ($query) use ($classroom, $term): void {
