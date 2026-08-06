@@ -11,6 +11,7 @@ use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\EstablishmentUserPivot;
 use App\Domain\Establishments\Models\Foundation;
 use App\Domain\Establishments\Models\FoundationUserPivot;
+use App\Domain\Sync\Concerns\Syncable;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -23,7 +24,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, Syncable;
 
     /**
      * The attributes that are mass assignable.
@@ -35,6 +36,9 @@ class User extends Authenticatable
         'email',
         'phone',
         'password',
+        'uid',
+        'device_id',
+        'client_updated_at',
     ];
 
     /**
@@ -57,6 +61,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'client_updated_at' => 'datetime',
         ];
     }
 

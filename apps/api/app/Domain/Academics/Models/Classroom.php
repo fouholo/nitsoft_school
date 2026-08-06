@@ -7,6 +7,7 @@ namespace App\Domain\Academics\Models;
 use App\Domain\Academics\Enums\Cycle;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Establishments\Concerns\TenantScoped;
+use App\Domain\Sync\Concerns\Syncable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,6 +19,7 @@ class Classroom extends Model
 {
     use HasFactory;
     use SoftDeletes;
+    use Syncable;
     use TenantScoped;
 
     protected $fillable = [
@@ -27,10 +29,14 @@ class Classroom extends Model
         'level',
         'cycle',
         'capacity',
+        'uid',
+        'device_id',
+        'client_updated_at',
     ];
 
     protected $casts = [
         'cycle' => Cycle::class,
+        'client_updated_at' => 'datetime',
     ];
 
     public function schoolYear(): BelongsTo

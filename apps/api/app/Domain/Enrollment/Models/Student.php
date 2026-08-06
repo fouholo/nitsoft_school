@@ -28,7 +28,7 @@ class Student extends Model
         'student_number',
         'photo_path',
         'is_active',
-        'uuid',
+        'uid',
         'device_id',
         'client_updated_at',
     ];

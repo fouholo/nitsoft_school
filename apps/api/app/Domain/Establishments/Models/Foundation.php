@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Establishments\Models;
 
+use App\Domain\Sync\Concerns\Syncable;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -22,15 +23,20 @@ class Foundation extends Model
 {
     use HasFactory;
     use SoftDeletes;
+    use Syncable;
 
     protected $fillable = [
         'name',
         'slug',
         'is_active',
+        'uid',
+        'device_id',
+        'client_updated_at',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'client_updated_at' => 'datetime',
     ];
 
     /**

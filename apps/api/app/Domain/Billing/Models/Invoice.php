@@ -31,7 +31,7 @@ class Invoice extends Model
         'amount_paid',
         'status',
         'due_date',
-        'uuid',
+        'uid',
         'device_id',
         'client_updated_at',
     ];

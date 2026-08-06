@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Academics\Models;
 
 use App\Domain\Establishments\Concerns\TenantScoped;
+use App\Domain\Sync\Concerns\Syncable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +15,7 @@ class Term extends Model
 {
     use HasFactory;
     use SoftDeletes;
+    use Syncable;
     use TenantScoped;
 
     protected $fillable = [
@@ -23,11 +25,15 @@ class Term extends Model
         'starts_on',
         'ends_on',
         'sequence',
+        'uid',
+        'device_id',
+        'client_updated_at',
     ];
 
     protected $casts = [
         'starts_on' => 'date',
         'ends_on' => 'date',
+        'client_updated_at' => 'datetime',
     ];
 
     public function schoolYear(): BelongsTo

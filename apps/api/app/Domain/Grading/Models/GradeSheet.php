@@ -33,7 +33,7 @@ class GradeSheet extends Model
         'max_score',
         'weight',
         'graded_on',
-        'uuid',
+        'uid',
         'device_id',
         'client_updated_at',
     ];

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Establishments\Models;
 
+use App\Domain\Sync\Concerns\Syncable;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +16,7 @@ class Establishment extends Model
 {
     use HasFactory;
     use SoftDeletes;
+    use Syncable;
 
     protected $fillable = [
         'foundation_id',
@@ -25,10 +27,14 @@ class Establishment extends Model
         'phone',
         'timezone',
         'is_active',
+        'uid',
+        'device_id',
+        'client_updated_at',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'client_updated_at' => 'datetime',
     ];
 
     /**

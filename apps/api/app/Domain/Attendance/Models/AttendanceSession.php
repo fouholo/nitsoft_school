@@ -29,7 +29,7 @@ class AttendanceSession extends Model
         'teacher_id',
         'session_date',
         'started_at',
-        'uuid',
+        'uid',
         'device_id',
         'client_updated_at',
     ];

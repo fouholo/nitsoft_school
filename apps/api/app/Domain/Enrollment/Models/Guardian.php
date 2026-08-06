@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Enrollment\Models;
 
 use App\Domain\Establishments\Concerns\TenantScoped;
+use App\Domain\Sync\Concerns\Syncable;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,6 +17,7 @@ class Guardian extends Model
 {
     use HasFactory;
     use SoftDeletes;
+    use Syncable;
     use TenantScoped;
 
     protected $fillable = [
@@ -26,6 +28,13 @@ class Guardian extends Model
         'phone',
         'email',
         'relationship',
+        'uid',
+        'device_id',
+        'client_updated_at',
+    ];
+
+    protected $casts = [
+        'client_updated_at' => 'datetime',
     ];
 
     public function user(): BelongsTo

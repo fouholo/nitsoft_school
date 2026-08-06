@@ -25,7 +25,7 @@ class AttendanceRecord extends Model
         'student_id',
         'status',
         'note',
-        'uuid',
+        'uid',
         'device_id',
         'client_updated_at',
     ];

@@ -27,7 +27,7 @@ class Enrollment extends Model
         'school_year_id',
         'enrolled_on',
         'status',
-        'uuid',
+        'uid',
         'device_id',
         'client_updated_at',
     ];

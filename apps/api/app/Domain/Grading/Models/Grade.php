@@ -25,7 +25,7 @@ class Grade extends Model
         'student_id',
         'score',
         'comment',
-        'uuid',
+        'uid',
         'device_id',
         'client_updated_at',
     ];

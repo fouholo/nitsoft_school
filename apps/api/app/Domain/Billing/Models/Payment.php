@@ -30,7 +30,7 @@ class Payment extends Model
         'paid_at',
         'received_by',
         'reference',
-        'uuid',
+        'uid',
         'device_id',
         'client_updated_at',
     ];
