@@ -8,7 +8,7 @@
         </div>
 
         @can('create', \App\Domain\Enrollment\Models\Enrollment::class)
-            <button type="button" wire:click="addEnrollment" class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800">
+            <button type="button" wire:click="addEnrollment" class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700">
                 Nouvelle inscription
             </button>
         @endcan
@@ -45,7 +45,7 @@
             </div>
 
             <div class="flex gap-2 sm:col-span-3">
-                <button type="submit" class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800">
+                <button type="submit" class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700">
                     Enregistrer
                 </button>
                 <button type="button" wire:click="cancelEnrollment" class="rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50">
@@ -127,7 +127,7 @@
             </label>
 
             <div class="flex gap-2 sm:col-span-3">
-                <button type="submit" class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800">
+                <button type="submit" class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700">
                     Enregistrer
                 </button>
                 <button type="button" wire:click="cancelGuardian" class="rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50">

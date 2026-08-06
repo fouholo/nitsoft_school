@@ -49,7 +49,7 @@
             </table>
         </div>
 
-        <button type="submit" class="mt-4 rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800">
+        <button type="submit" class="mt-4 rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700">
             Enregistrer les présences
         </button>
     </form>

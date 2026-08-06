@@ -46,7 +46,7 @@
                         <option value="{{ $establishment->id }}">{{ $establishment->name }}</option>
                     @endforeach
                 </select>
-                <button type="submit" class="shrink-0 rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800">
+                <button type="submit" class="shrink-0 rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700">
                     Rattacher
                 </button>
             </form>
@@ -99,7 +99,7 @@
                     @error('founder_email') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     <p class="mt-1 text-xs text-slate-400">Si un compte existe déjà avec cet e-mail, il est simplement rattaché comme fondateur.</p>
                 </div>
-                <button type="submit" class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800">
+                <button type="submit" class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700">
                     Ajouter le fondateur
                 </button>
             </form>
