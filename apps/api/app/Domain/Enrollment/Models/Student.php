@@ -8,6 +8,7 @@ use App\Domain\Establishments\Concerns\TenantScoped;
 use App\Domain\Sync\Concerns\Syncable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -34,6 +35,12 @@ class Student extends Model
         'mother_phone',
         'tutor_name',
         'tutor_phone',
+        'birth_place',
+        'nationalite_code',
+        'birth_certificate_number',
+        'birth_certificate_date',
+        'birth_certificate_place',
+        'residence',
         'uid',
         'device_id',
         'client_updated_at',
@@ -41,6 +48,7 @@ class Student extends Model
 
     protected $casts = [
         'birth_date' => 'date',
+        'birth_certificate_date' => 'date',
         'is_active' => 'boolean',
         'client_updated_at' => 'datetime',
     ];
@@ -59,5 +67,10 @@ class Student extends Model
     public function enrollments(): HasMany
     {
         return $this->hasMany(Enrollment::class);
+    }
+
+    public function nationalite(): BelongsTo
+    {
+        return $this->belongsTo(Nationalite::class, 'nationalite_code', 'code');
     }
 }

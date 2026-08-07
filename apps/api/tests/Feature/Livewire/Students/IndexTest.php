@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domain\Enrollment\Models\Nationalite;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Models\Establishment;
 use App\Livewire\Students\Index;
@@ -68,6 +69,33 @@ test('les contacts familiaux de référence sont enregistrés et normalisés', f
         ->and($student->mother_name)->toBeNull()
         ->and($student->mother_phone)->toBeNull()
         ->and($student->tutor_name)->toBeNull();
+});
+
+test('les informations d’identité sont enregistrées, avec normalisation de la date d’acte de naissance vide', function () {
+    Nationalite::create(['code' => 'CIV', 'libelle' => 'Ivoirienne']);
+
+    Livewire::test(Index::class)
+        ->call('create')
+        ->set('first_name', 'Awa')
+        ->set('last_name', 'Traoré')
+        ->set('student_number', 'MAT-0003')
+        ->set('birth_place', 'Abidjan')
+        ->set('nationalite_code', 'CIV')
+        ->set('birth_certificate_number', '2024/1234')
+        ->set('birth_certificate_date', '')
+        ->set('birth_certificate_place', 'Abidjan')
+        ->set('residence', 'Cocody')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $student = Student::sole();
+
+    expect($student->birth_place)->toBe('Abidjan')
+        ->and($student->nationalite_code)->toBe('CIV')
+        ->and($student->birth_certificate_number)->toBe('2024/1234')
+        ->and($student->birth_certificate_date)->toBeNull()
+        ->and($student->birth_certificate_place)->toBe('Abidjan')
+        ->and($student->residence)->toBe('Cocody');
 });
 
 test('un enseignant ne peut pas créer d’élève', function () {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Students;
 
+use App\Domain\Enrollment\Models\Nationalite;
 use App\Domain\Enrollment\Models\Student;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
@@ -45,6 +46,18 @@ class Index extends Component
 
     public string $tutor_phone = '';
 
+    public string $birth_place = '';
+
+    public string $nationalite_code = '';
+
+    public string $birth_certificate_number = '';
+
+    public string $birth_certificate_date = '';
+
+    public string $birth_certificate_place = '';
+
+    public string $residence = '';
+
     public function mount(): void
     {
         $this->authorize('viewAny', Student::class);
@@ -81,6 +94,12 @@ class Index extends Component
         $this->mother_phone = (string) $student->mother_phone;
         $this->tutor_name = (string) $student->tutor_name;
         $this->tutor_phone = (string) $student->tutor_phone;
+        $this->birth_place = (string) $student->birth_place;
+        $this->nationalite_code = (string) $student->nationalite_code;
+        $this->birth_certificate_number = (string) $student->birth_certificate_number;
+        $this->birth_certificate_date = $student->birth_certificate_date?->toDateString() ?? '';
+        $this->birth_certificate_place = (string) $student->birth_certificate_place;
+        $this->residence = (string) $student->residence;
         $this->showForm = true;
     }
 
@@ -104,13 +123,20 @@ class Index extends Component
             'mother_phone' => ['nullable', 'string', 'max:255'],
             'tutor_name' => ['nullable', 'string', 'max:255'],
             'tutor_phone' => ['nullable', 'string', 'max:255'],
+            'birth_place' => ['nullable', 'string', 'max:255'],
+            'nationalite_code' => ['nullable', 'string', 'exists:nationalites,code'],
+            'birth_certificate_number' => ['nullable', 'string', 'max:255'],
+            'birth_certificate_date' => ['nullable', 'date'],
+            'birth_certificate_place' => ['nullable', 'string', 'max:255'],
+            'residence' => ['nullable', 'string', 'max:255'],
         ]);
 
         // Les champs optionnels vides arrivent comme '' (pas null) depuis les
         // inputs HTML ; il faut normaliser avant insertion (date/enum SQL stricts).
         $data['birth_date'] = $data['birth_date'] !== '' ? $data['birth_date'] : null;
         $data['gender'] = $data['gender'] !== '' ? $data['gender'] : null;
-        foreach (['father_name', 'father_phone', 'mother_name', 'mother_phone', 'tutor_name', 'tutor_phone'] as $field) {
+        $data['birth_certificate_date'] = $data['birth_certificate_date'] !== '' ? $data['birth_certificate_date'] : null;
+        foreach (['father_name', 'father_phone', 'mother_name', 'mother_phone', 'tutor_name', 'tutor_phone', 'birth_place', 'nationalite_code', 'birth_certificate_number', 'birth_certificate_place', 'residence'] as $field) {
             $data[$field] = $data[$field] !== '' ? $data[$field] : null;
         }
 
@@ -149,6 +175,8 @@ class Index extends Component
         $this->reset([
             'editingId', 'first_name', 'last_name', 'birth_date', 'gender', 'student_number',
             'father_name', 'father_phone', 'mother_name', 'mother_phone', 'tutor_name', 'tutor_phone',
+            'birth_place', 'nationalite_code', 'birth_certificate_number', 'birth_certificate_date',
+            'birth_certificate_place', 'residence',
         ]);
     }
 
@@ -167,6 +195,7 @@ class Index extends Component
 
         return view('livewire.students.index', [
             'students' => $students,
+            'nationalites' => Nationalite::orderBy('libelle')->get(),
         ]);
     }
 }

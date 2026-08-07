@@ -54,6 +54,51 @@
             </div>
 
             <div class="sm:col-span-4">
+                <h2 class="text-sm font-semibold text-slate-700">Identité</h2>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Lieu de naissance</label>
+                <input type="text" wire:model="birth_place" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                @error('birth_place') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Nationalité</label>
+                <select wire:model="nationalite_code" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                    <option value="">—</option>
+                    @foreach ($nationalites as $nationalite)
+                        <option value="{{ $nationalite->code }}">{{ $nationalite->libelle }}</option>
+                    @endforeach
+                </select>
+                @error('nationalite_code') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">N° acte de naissance</label>
+                <input type="text" wire:model="birth_certificate_number" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                @error('birth_certificate_number') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Date de l'acte de naissance</label>
+                <input type="date" wire:model="birth_certificate_date" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                @error('birth_certificate_date') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Lieu de l'acte de naissance</label>
+                <input type="text" wire:model="birth_certificate_place" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                @error('birth_certificate_place') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Résidence</label>
+                <input type="text" wire:model="residence" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                @error('residence') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div class="sm:col-span-4">
                 <h2 class="text-sm font-semibold text-slate-700">Contacts familiaux (référence)</h2>
                 <p class="text-xs text-slate-500">Informations connues par l'établissement, utilisées pour vérifier les demandes de liaison des parents.</p>
             </div>

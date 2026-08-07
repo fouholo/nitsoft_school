@@ -14,6 +14,47 @@
         @endcan
     </div>
 
+    @if ($student->birth_place || $student->nationalite || $student->birth_certificate_number || $student->birth_certificate_date || $student->birth_certificate_place || $student->residence)
+        <h2 class="mt-8 text-sm font-semibold uppercase tracking-wide text-slate-500">Identité</h2>
+        <div class="mt-2 grid grid-cols-1 gap-4 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-3">
+            @if ($student->birth_place)
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Lieu de naissance</p>
+                    <p class="text-sm text-slate-900">{{ $student->birth_place }}</p>
+                </div>
+            @endif
+
+            @if ($student->nationalite)
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Nationalité</p>
+                    <p class="text-sm text-slate-900">{{ $student->nationalite->libelle }}</p>
+                </div>
+            @endif
+
+            @if ($student->residence)
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Résidence</p>
+                    <p class="text-sm text-slate-900">{{ $student->residence }}</p>
+                </div>
+            @endif
+
+            @if ($student->birth_certificate_number || $student->birth_certificate_date || $student->birth_certificate_place)
+                <div class="sm:col-span-3">
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Acte de naissance</p>
+                    <p class="text-sm text-slate-900">
+                        {{ $student->birth_certificate_number ?: '—' }}
+                        @if ($student->birth_certificate_date)
+                            &middot; {{ $student->birth_certificate_date->format('d/m/Y') }}
+                        @endif
+                        @if ($student->birth_certificate_place)
+                            &middot; {{ $student->birth_certificate_place }}
+                        @endif
+                    </p>
+                </div>
+            @endif
+        </div>
+    @endif
+
     @if ($showEnrollmentForm)
         <form wire:submit="saveEnrollment" class="mt-4 grid grid-cols-1 gap-4 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-3">
             <div>

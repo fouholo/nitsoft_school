@@ -45,7 +45,7 @@ class Show extends Component
     {
         $this->authorize('view', $student);
 
-        $this->student = $student;
+        $this->student = $student->loadMissing('nationalite');
     }
 
     public function addEnrollment(): void

@@ -7,6 +7,7 @@ namespace Database\Seeders;
 use App\Domain\Academics\Enums\Cycle;
 use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\SchoolYear;
+use App\Domain\Enrollment\Models\Nationalite;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\Foundation;
 use App\Models\User;
@@ -20,6 +21,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $nationalites = [
+            ['code' => 'CIV', 'libelle' => 'Ivoirienne'],
+            ['code' => 'FRA', 'libelle' => 'Française'],
+            ['code' => 'MLI', 'libelle' => 'Malienne'],
+            ['code' => 'BFA', 'libelle' => 'Burkinabè'],
+            ['code' => 'GHA', 'libelle' => 'Ghanéenne'],
+        ];
+
+        foreach ($nationalites as $nationalite) {
+            Nationalite::create($nationalite);
+        }
+
         $foundation = Foundation::create([
             'name' => 'Groupe Nitsoft Education',
             'slug' => 'groupe-nitsoft-education',
