@@ -43,5 +43,9 @@
         >
             Se connecter
         </button>
+
+        <p class="text-center text-sm text-slate-500">
+            Vous êtes parent d'élève ? <a href="{{ route('register') }}" wire:navigate class="text-indigo-600 hover:underline">S'inscrire</a>
+        </p>
     </form>
 </div>

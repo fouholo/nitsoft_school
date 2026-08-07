@@ -17,12 +17,18 @@
                     {{ config('app.name') }} — Espace parents
                 </a>
 
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="text-sm text-slate-500 hover:text-slate-900">
-                        Déconnexion
-                    </button>
-                </form>
+                <div class="flex items-center gap-4">
+                    <a href="{{ route('guardian-portal.link-child') }}" wire:navigate class="text-sm text-indigo-600 hover:text-indigo-700">
+                        Lier un enfant
+                    </a>
+
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="text-sm text-slate-500 hover:text-slate-900">
+                            Déconnexion
+                        </button>
+                    </form>
+                </div>
             </div>
         </nav>
 

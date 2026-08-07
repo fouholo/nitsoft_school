@@ -39,6 +39,9 @@
                 ]],
                 ['type' => 'link', 'label' => 'Élèves', 'route' => 'students.index', 'active' => 'students.*', 'icon' => 'users'],
                 ['type' => 'link', 'label' => 'Tuteurs', 'route' => 'guardians.index', 'active' => 'guardians.*', 'icon' => 'identification'],
+                ...(auth()->user()->hasAdminRightsOnCurrentEstablishment() ? [
+                    ['type' => 'link', 'label' => 'Demandes de liaison', 'route' => 'guardian-link-requests.index', 'active' => 'guardian-link-requests.*', 'icon' => 'identification'],
+                ] : []),
                 ['type' => 'group', 'label' => 'Notes', 'icon' => 'document-text', 'active' => 'grading.*', 'children' => [
                     ['label' => 'Évaluations', 'route' => 'grading.grade-sheets.index'],
                     ['label' => 'Bulletins', 'route' => 'grading.report-cards.index'],

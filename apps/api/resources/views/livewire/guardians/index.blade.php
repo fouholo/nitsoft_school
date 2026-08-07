@@ -41,16 +41,6 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-slate-700">Lien de parenté</label>
-                <select wire:model="relationship" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
-                    <option value="">—</option>
-                    <option value="pere">Père</option>
-                    <option value="mere">Mère</option>
-                    <option value="tuteur">Tuteur</option>
-                </select>
-            </div>
-
-            <div>
                 <label class="block text-sm font-medium text-slate-700">Téléphone</label>
                 <input type="text" wire:model="phone" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
                 @error('phone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
@@ -83,7 +73,6 @@
             <thead class="bg-slate-50">
                 <tr>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Nom</th>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">Lien</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Téléphone</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">E-mail</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Portail</th>
@@ -94,7 +83,6 @@
                 @forelse ($guardians as $guardian)
                     <tr wire:key="guardian-{{ $guardian->id }}">
                         <td class="px-4 py-2 text-slate-900">{{ $guardian->last_name }} {{ $guardian->first_name }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ $guardian->relationship }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $guardian->phone }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $guardian->email }}</td>
                         <td class="px-4 py-2">
@@ -121,7 +109,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-4 py-6 text-center text-slate-500">Aucun tuteur.</td>
+                        <td colspan="5" class="px-4 py-6 text-center text-slate-500">Aucun tuteur.</td>
                     </tr>
                 @endforelse
             </tbody>

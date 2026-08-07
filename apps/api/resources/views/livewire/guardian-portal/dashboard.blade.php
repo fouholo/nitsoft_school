@@ -20,7 +20,10 @@
                 </div>
             </div>
         @empty
-            <p class="text-slate-500">Aucun enfant rattaché à votre compte.</p>
+            <p class="text-slate-500">
+                Aucun enfant rattaché à votre compte.
+                <a href="{{ route('guardian-portal.link-child') }}" wire:navigate class="text-indigo-600 hover:underline">Lier un enfant</a>
+            </p>
         @endforelse
     </div>
 </div>

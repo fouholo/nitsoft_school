@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Auth\LogoutController;
 use App\Livewire\Auth\Login;
+use App\Livewire\Auth\Register;
 use App\Livewire\Dashboard;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
@@ -16,11 +17,12 @@ Route::get('/', function () {
     /** @var User $user */
     $user = auth()->user();
 
-    return redirect()->route($user->currentRole() === 'parent' ? 'guardian-portal.dashboard' : 'dashboard');
+    return redirect()->route($user->guardianProfile ? 'guardian-portal.dashboard' : 'dashboard');
 })->name('home');
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', Login::class)->name('login');
+    Route::get('/register', Register::class)->name('register');
 });
 
 Route::middleware('auth')->group(function (): void {

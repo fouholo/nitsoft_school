@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Domain\Attendance\Events\StudentMarkedAbsent;
 use App\Domain\Attendance\Models\AttendanceRecord;
 use App\Domain\Attendance\Models\AttendanceSession;
+use App\Domain\Enrollment\Enums\GuardianLinkStatus;
+use App\Domain\Enrollment\Enums\GuardianRelationship;
 use App\Domain\Enrollment\Models\Guardian;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Models\Establishment;
@@ -14,7 +16,99 @@ use App\Domain\Notifications\Models\SmsMessage;
 use App\Domain\Notifications\ValueObjects\SmsSendResult;
 use Illuminate\Support\Facades\Queue;
 
-test('une absence crée un SmsMessage en file et déclenche SendSmsJob pour chaque tuteur joignable', function () {
+function markAbsent(Establishment $establishment, Student $student): AttendanceRecord
+{
+    $session = AttendanceSession::factory()->create(['establishment_id' => $establishment->id]);
+
+    return AttendanceRecord::factory()->create([
+        'establishment_id' => $establishment->id,
+        'attendance_session_id' => $session->id,
+        'student_id' => $student->id,
+        'status' => 'absent',
+    ]);
+}
+
+test('le contact principal approuvé et joignable reçoit un SMS unique', function () {
+    Queue::fake();
+
+    $establishment = Establishment::factory()->create();
+    actingInEstablishment($establishment);
+
+    $student = Student::factory()->create(['establishment_id' => $establishment->id]);
+    $primary = Guardian::factory()->create(['phone' => '+2250700000000']);
+    $other = Guardian::factory()->create(['phone' => '+2250700000001']);
+
+    $student->guardians()->attach([
+        $primary->id => [
+            'establishment_id' => $establishment->id,
+            'status' => GuardianLinkStatus::Approved,
+            'relationship' => GuardianRelationship::Mere,
+            'is_primary_contact' => true,
+        ],
+        $other->id => [
+            'establishment_id' => $establishment->id,
+            'status' => GuardianLinkStatus::Approved,
+            'relationship' => GuardianRelationship::Pere,
+            'is_primary_contact' => false,
+        ],
+    ]);
+
+    StudentMarkedAbsent::dispatch(markAbsent($establishment, $student));
+
+    $smsMessage = SmsMessage::sole();
+
+    expect($smsMessage->guardian_id)->toBe($primary->id)
+        ->and($smsMessage->status)->toBe('queued')
+        ->and($smsMessage->body_rendered)->toContain($student->first_name);
+
+    Queue::assertPushed(SendSmsJob::class, fn (SendSmsJob $job) => $job->smsMessageId === $smsMessage->id);
+});
+
+test('un contact principal encore en attente ne reçoit aucun SMS', function () {
+    Queue::fake();
+
+    $establishment = Establishment::factory()->create();
+    actingInEstablishment($establishment);
+
+    $student = Student::factory()->create(['establishment_id' => $establishment->id]);
+    $guardian = Guardian::factory()->create(['phone' => '+2250700000000']);
+
+    $student->guardians()->attach($guardian->id, [
+        'establishment_id' => $establishment->id,
+        'status' => GuardianLinkStatus::Pending,
+        'relationship' => GuardianRelationship::Mere,
+        'is_primary_contact' => true,
+    ]);
+
+    StudentMarkedAbsent::dispatch(markAbsent($establishment, $student));
+
+    expect(SmsMessage::count())->toBe(0);
+    Queue::assertNotPushed(SendSmsJob::class);
+});
+
+test('un tuteur approuvé mais pas principal ne reçoit aucun SMS', function () {
+    Queue::fake();
+
+    $establishment = Establishment::factory()->create();
+    actingInEstablishment($establishment);
+
+    $student = Student::factory()->create(['establishment_id' => $establishment->id]);
+    $guardian = Guardian::factory()->create(['phone' => '+2250700000000']);
+
+    $student->guardians()->attach($guardian->id, [
+        'establishment_id' => $establishment->id,
+        'status' => GuardianLinkStatus::Approved,
+        'relationship' => GuardianRelationship::Mere,
+        'is_primary_contact' => false,
+    ]);
+
+    StudentMarkedAbsent::dispatch(markAbsent($establishment, $student));
+
+    expect(SmsMessage::count())->toBe(0);
+    Queue::assertNotPushed(SendSmsJob::class);
+});
+
+test('aucun contact principal désigné ne déclenche aucun SMS', function () {
     Queue::fake();
 
     $establishment = Establishment::factory()->create();
@@ -22,37 +116,17 @@ test('une absence crée un SmsMessage en file et déclenche SendSmsJob pour chaq
 
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
 
-    $guardianWithPhone = Guardian::factory()->create(['establishment_id' => $establishment->id, 'phone' => '+2250700000000']);
-    $guardianWithoutPhone = Guardian::factory()->create(['establishment_id' => $establishment->id, 'phone' => null]);
-    $student->guardians()->attach([
-        $guardianWithPhone->id => ['establishment_id' => $establishment->id],
-        $guardianWithoutPhone->id => ['establishment_id' => $establishment->id],
-    ]);
+    StudentMarkedAbsent::dispatch(markAbsent($establishment, $student));
 
-    $session = AttendanceSession::factory()->create(['establishment_id' => $establishment->id]);
-    $record = AttendanceRecord::factory()->create([
-        'establishment_id' => $establishment->id,
-        'attendance_session_id' => $session->id,
-        'student_id' => $student->id,
-        'status' => 'absent',
-    ]);
-
-    StudentMarkedAbsent::dispatch($record);
-
-    $smsMessage = SmsMessage::sole();
-
-    expect($smsMessage->guardian_id)->toBe($guardianWithPhone->id)
-        ->and($smsMessage->status)->toBe('queued')
-        ->and($smsMessage->body_rendered)->toContain($student->first_name);
-
-    Queue::assertPushed(SendSmsJob::class, fn (SendSmsJob $job) => $job->smsMessageId === $smsMessage->id);
+    expect(SmsMessage::count())->toBe(0);
+    Queue::assertNotPushed(SendSmsJob::class);
 });
 
 test('SendSmsJob marque le message comme envoyé via le provider configuré', function () {
     $establishment = Establishment::factory()->create();
     actingInEstablishment($establishment);
 
-    $guardian = Guardian::factory()->create(['establishment_id' => $establishment->id, 'phone' => '+2250700000000']);
+    $guardian = Guardian::factory()->create(['phone' => '+2250700000000']);
 
     $smsMessage = SmsMessage::create([
         'establishment_id' => $establishment->id,

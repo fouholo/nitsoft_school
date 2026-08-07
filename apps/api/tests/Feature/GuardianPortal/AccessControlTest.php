@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domain\Enrollment\Enums\GuardianLinkStatus;
 use App\Domain\Enrollment\Models\Guardian;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Models\Establishment;
@@ -18,12 +19,14 @@ beforeEach(function () {
     actingInEstablishment($this->establishment);
 
     $this->guardian = Guardian::factory()->create([
-        'establishment_id' => $this->establishment->id,
         'user_id' => $this->parentUser->id,
     ]);
 
     $this->ownChild = Student::factory()->create(['establishment_id' => $this->establishment->id]);
-    $this->guardian->students()->attach($this->ownChild->id, ['establishment_id' => $this->establishment->id]);
+    $this->guardian->students()->attach($this->ownChild->id, [
+        'establishment_id' => $this->establishment->id,
+        'status' => GuardianLinkStatus::Approved,
+    ]);
 
     $this->otherChild = Student::factory()->create(['establishment_id' => $this->establishment->id]);
 
@@ -46,5 +49,16 @@ test('un utilisateur sans profil tuteur associé est rejeté', function () {
     $this->actingAs($userWithoutGuardianProfile);
 
     Livewire::test(StudentGrades::class, ['student' => $this->ownChild])
+        ->assertForbidden();
+});
+
+test('un lien en attente de validation ne donne pas accès à l’élève', function () {
+    $pendingChild = Student::factory()->create(['establishment_id' => $this->establishment->id]);
+    $this->guardian->students()->attach($pendingChild->id, [
+        'establishment_id' => $this->establishment->id,
+        'status' => GuardianLinkStatus::Pending,
+    ]);
+
+    Livewire::test(StudentGrades::class, ['student' => $pendingChild])
         ->assertForbidden();
 });

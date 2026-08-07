@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\GuardianPortal;
 
+use App\Domain\Enrollment\Enums\GuardianLinkStatus;
 use App\Livewire\GuardianPortal\Concerns\EnsuresGuardianAccess;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -23,7 +24,10 @@ class Dashboard extends Component
     public function render()
     {
         return view('livewire.guardian-portal.dashboard', [
-            'students' => $this->currentGuardian()->students()->with('enrollments.classroom')->get(),
+            'students' => $this->currentGuardian()->students()
+                ->wherePivot('status', GuardianLinkStatus::Approved)
+                ->with('enrollments.classroom')
+                ->get(),
         ]);
     }
 }

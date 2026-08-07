@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Guardians;
 
+use App\Domain\Enrollment\Enums\GuardianLinkStatus;
 use App\Domain\Enrollment\Models\Guardian;
 use App\Domain\Establishments\Models\Establishment;
 use App\Models\User;
@@ -32,8 +33,6 @@ class Index extends Component
     public string $phone = '';
 
     public string $email = '';
-
-    public string $relationship = '';
 
     public bool $createPortalAccount = false;
 
@@ -70,7 +69,6 @@ class Index extends Component
         $this->last_name = $guardian->last_name;
         $this->phone = (string) $guardian->phone;
         $this->email = (string) $guardian->email;
-        $this->relationship = (string) $guardian->relationship;
         $this->createPortalAccount = false;
         $this->showForm = true;
     }
@@ -85,10 +83,9 @@ class Index extends Component
             'last_name' => ['required', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
-            'relationship' => ['nullable', 'string', 'max:255'],
         ]);
 
-        foreach (['phone', 'email', 'relationship'] as $optional) {
+        foreach (['phone', 'email'] as $optional) {
             $data[$optional] = $data[$optional] !== '' ? $data[$optional] : null;
         }
 
@@ -155,12 +152,15 @@ class Index extends Component
 
     protected function resetForm(): void
     {
-        $this->reset(['editingId', 'first_name', 'last_name', 'phone', 'email', 'relationship', 'createPortalAccount']);
+        $this->reset(['editingId', 'first_name', 'last_name', 'phone', 'email', 'createPortalAccount']);
     }
 
     public function render()
     {
         $guardians = Guardian::query()
+            ->whereHas('students', fn ($query) => $query
+                ->wherePivot('establishment_id', app('currentEstablishmentId'))
+                ->wherePivot('status', GuardianLinkStatus::Approved))
             ->when($this->search !== '', function ($query): void {
                 $query->where(function ($query): void {
                     $query->where('first_name', 'like', "%{$this->search}%")

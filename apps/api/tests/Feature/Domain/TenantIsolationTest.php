@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Academics\Models\Subject;
-use App\Domain\Enrollment\Models\Guardian;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Notifications\Models\SmsTemplate;
@@ -13,11 +12,13 @@ use App\Domain\Notifications\Models\SmsTemplate;
  * Isolation multi-tenant (défense en profondeur du Global Scope) — voir plan
  * d'architecture, section 2.1 et 9. Deux établissements factices, on vérifie
  * qu'aucune requête sur un modèle tenant-aware ne fuit d'un établissement
- * à l'autre, quel que soit le domaine.
+ * à l'autre, quel que soit le domaine. `Guardian` n'est plus tenant-aware
+ * depuis l'auto-inscription des parents (un parent peut avoir des enfants
+ * dans des établissements différents) — voir
+ * docs/superpowers/specs/2026-08-06-parents-autoinscription-design.md.
  */
 dataset('tenant_aware_models', [
     'students' => [Student::class],
-    'guardians' => [Guardian::class],
     'subjects' => [Subject::class],
     'sms_templates' => [SmsTemplate::class],
     'school_years' => [SchoolYear::class],

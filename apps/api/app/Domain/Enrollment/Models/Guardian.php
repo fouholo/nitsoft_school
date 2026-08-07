@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Domain\Enrollment\Models;
 
-use App\Domain\Establishments\Concerns\TenantScoped;
 use App\Domain\Sync\Concerns\Syncable;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,16 +17,13 @@ class Guardian extends Model
     use HasFactory;
     use SoftDeletes;
     use Syncable;
-    use TenantScoped;
 
     protected $fillable = [
-        'establishment_id',
         'user_id',
         'first_name',
         'last_name',
         'phone',
         'email',
-        'relationship',
         'uid',
         'device_id',
         'client_updated_at',
@@ -43,12 +39,13 @@ class Guardian extends Model
     }
 
     /**
-     * @return BelongsToMany<Student, $this>
+     * @return BelongsToMany<Student, $this, GuardianStudentPivot, 'pivot'>
      */
     public function students(): BelongsToMany
     {
         return $this->belongsToMany(Student::class, 'guardian_student')
-            ->withPivot('is_primary_contact')
+            ->using(GuardianStudentPivot::class)
+            ->withPivot(['id', 'establishment_id', 'is_primary_contact', 'status', 'relationship'])
             ->withTimestamps();
     }
 }

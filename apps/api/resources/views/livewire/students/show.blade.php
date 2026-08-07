@@ -111,6 +111,11 @@
     @if ($showGuardianForm)
         <form wire:submit="saveGuardian" class="mt-2 grid grid-cols-1 gap-4 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-3">
             <div class="sm:col-span-2">
+                <label class="block text-sm font-medium text-slate-700">Rechercher un tuteur</label>
+                <input type="text" wire:model.live.debounce.300ms="guardianSearch" placeholder="Nom du tuteur" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+            </div>
+
+            <div class="sm:col-span-2">
                 <label class="block text-sm font-medium text-slate-700">Tuteur</label>
                 <select wire:model="guardian_id" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
                     <option value="">—</option>
@@ -119,6 +124,17 @@
                     @endforeach
                 </select>
                 @error('guardian_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Rôle</label>
+                <select wire:model="relationship" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                    <option value="">—</option>
+                    @foreach (\App\Domain\Enrollment\Enums\GuardianRelationship::cases() as $relationshipOption)
+                        <option value="{{ $relationshipOption->value }}">{{ $relationshipOption->label() }}</option>
+                    @endforeach
+                </select>
+                @error('relationship') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <label class="flex items-center gap-2 self-end text-sm text-slate-600">
@@ -142,6 +158,7 @@
             <thead class="bg-slate-50">
                 <tr>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Nom</th>
+                    <th class="px-4 py-2 text-left font-medium text-slate-500">Rôle</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Téléphone</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Contact principal</th>
                     <th class="px-4 py-2"></th>
@@ -151,6 +168,7 @@
                 @forelse ($guardians as $guardian)
                     <tr wire:key="student-guardian-{{ $guardian->id }}">
                         <td class="px-4 py-2 text-slate-900">{{ $guardian->last_name }} {{ $guardian->first_name }}</td>
+                        <td class="px-4 py-2 text-slate-600">{{ $guardian->pivot->relationship?->label() }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $guardian->phone }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $guardian->pivot->is_primary_contact ? 'Oui' : '' }}</td>
                         <td class="px-4 py-2 text-right">
@@ -167,7 +185,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="px-4 py-6 text-center text-slate-500">Aucun tuteur lié.</td>
+                        <td colspan="5" class="px-4 py-6 text-center text-slate-500">Aucun tuteur lié.</td>
                     </tr>
                 @endforelse
             </tbody>

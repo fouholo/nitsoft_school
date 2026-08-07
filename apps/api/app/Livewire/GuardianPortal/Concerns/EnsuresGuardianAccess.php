@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\GuardianPortal\Concerns;
 
+use App\Domain\Enrollment\Enums\GuardianLinkStatus;
 use App\Domain\Enrollment\Models\Guardian;
 use App\Domain\Enrollment\Models\Student;
 use App\Models\User;
@@ -34,7 +35,10 @@ trait EnsuresGuardianAccess
         $guardian = $this->currentGuardian();
 
         abort_unless(
-            $guardian->students()->where('students.id', $student->id)->exists(),
+            $guardian->students()
+                ->where('students.id', $student->id)
+                ->wherePivot('status', GuardianLinkStatus::Approved)
+                ->exists(),
             403,
             "Cet élève n'est pas rattaché à votre compte."
         );
