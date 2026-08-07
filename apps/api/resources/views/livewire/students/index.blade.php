@@ -21,15 +21,15 @@
     @if ($showForm)
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-4">
             <div>
-                <label class="block text-sm font-medium text-slate-700">Prénom</label>
-                <input type="text" wire:model="first_name" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
-                @error('first_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-            </div>
-
-            <div>
                 <label class="block text-sm font-medium text-slate-700">Nom</label>
                 <input type="text" wire:model="last_name" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
                 @error('last_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Prénom</label>
+                <input type="text" wire:model="first_name" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                @error('first_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
