@@ -39,6 +39,12 @@
             </div>
 
             <div>
+                <label class="block text-sm font-medium text-slate-700">Lieu de naissance</label>
+                <input type="text" wire:model="birth_place" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                @error('birth_place') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
                 <label class="block text-sm font-medium text-slate-700">Genre</label>
                 <select wire:model="gender" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
                     <option value="">—</option>
@@ -53,14 +59,21 @@
                 @error('student_number') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
-            <div class="sm:col-span-4">
-                <h2 class="text-sm font-semibold text-slate-700">Identité</h2>
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Photo</label>
+                <input type="file" wire:model="photo" accept=".jpg,.jpeg,.png,.webp,.gif" class="mt-1 block w-full text-sm">
+                <p class="mt-1 text-xs text-slate-500">JPG, PNG, WebP ou GIF, 100 Ko max.</p>
+                @error('photo') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+
+                @if ($photo)
+                    <img src="{{ $photo->temporaryUrl() }}" alt="Aperçu" class="mt-2 h-16 w-16 rounded-md object-cover">
+                @elseif ($existingPhotoPath)
+                    <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($existingPhotoPath) }}" alt="Photo actuelle" class="mt-2 h-16 w-16 rounded-md object-cover">
+                @endif
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-slate-700">Lieu de naissance</label>
-                <input type="text" wire:model="birth_place" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
-                @error('birth_place') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            <div class="sm:col-span-4">
+                <h2 class="text-sm font-semibold text-slate-700">Identité</h2>
             </div>
 
             <div>
@@ -99,8 +112,7 @@
             </div>
 
             <div class="sm:col-span-4">
-                <h2 class="text-sm font-semibold text-slate-700">Contacts familiaux (référence)</h2>
-                <p class="text-xs text-slate-500">Informations connues par l'établissement, utilisées pour vérifier les demandes de liaison des parents.</p>
+                <h2 class="text-sm font-semibold text-slate-700">Contacts familiaux</h2>
             </div>
 
             <div>

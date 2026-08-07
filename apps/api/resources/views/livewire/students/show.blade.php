@@ -2,9 +2,15 @@
     <a href="{{ route('students.index') }}" class="text-sm text-slate-500 hover:text-slate-900">&larr; Retour aux élèves</a>
 
     <div class="mt-2 flex items-center justify-between">
-        <div>
-            <h1 class="text-2xl font-semibold text-slate-900">{{ $student->last_name }} {{ $student->first_name }}</h1>
-            <p class="text-sm text-slate-500">Matricule {{ $student->student_number }}</p>
+        <div class="flex items-center gap-4">
+            @if ($student->photo_path)
+                <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($student->photo_path) }}" alt="Photo de {{ $student->first_name }}" class="h-16 w-16 rounded-md object-cover">
+            @endif
+
+            <div>
+                <h1 class="text-2xl font-semibold text-slate-900">{{ $student->last_name }} {{ $student->first_name }}</h1>
+                <p class="text-sm text-slate-500">Matricule {{ $student->student_number }}</p>
+            </div>
         </div>
 
         @can('create', \App\Domain\Enrollment\Models\Enrollment::class)

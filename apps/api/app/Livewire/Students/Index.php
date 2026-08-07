@@ -6,16 +6,20 @@ namespace App\Livewire\Students;
 
 use App\Domain\Enrollment\Models\Nationalite;
 use App\Domain\Enrollment\Models\Student;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
 #[Title('Élèves')]
 class Index extends Component
 {
+    use WithFileUploads;
     use WithPagination;
 
     public bool $showForm = false;
@@ -57,6 +61,10 @@ class Index extends Component
     public string $birth_certificate_place = '';
 
     public string $residence = '';
+
+    public ?TemporaryUploadedFile $photo = null;
+
+    public string $existingPhotoPath = '';
 
     public function mount(): void
     {
@@ -100,6 +108,7 @@ class Index extends Component
         $this->birth_certificate_date = $student->birth_certificate_date?->toDateString() ?? '';
         $this->birth_certificate_place = (string) $student->birth_certificate_place;
         $this->residence = (string) $student->residence;
+        $this->existingPhotoPath = (string) $student->photo_path;
         $this->showForm = true;
     }
 
@@ -129,6 +138,7 @@ class Index extends Component
             'birth_certificate_date' => ['nullable', 'date'],
             'birth_certificate_place' => ['nullable', 'string', 'max:255'],
             'residence' => ['nullable', 'string', 'max:255'],
+            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:100'],
         ]);
 
         // Les champs optionnels vides arrivent comme '' (pas null) depuis les
@@ -140,12 +150,22 @@ class Index extends Component
             $data[$field] = $data[$field] !== '' ? $data[$field] : null;
         }
 
+        unset($data['photo']);
+
         if ($this->editingId) {
             $student = Student::findOrFail($this->editingId);
             $this->authorize('update', $student);
         } else {
             $this->authorize('create', Student::class);
             $student = new Student;
+        }
+
+        if ($this->photo) {
+            if ($student->photo_path) {
+                Storage::disk('public')->delete($student->photo_path);
+            }
+
+            $data['photo_path'] = $this->photo->store('students-photos', 'public');
         }
 
         $student->fill($data);
@@ -176,7 +196,7 @@ class Index extends Component
             'editingId', 'first_name', 'last_name', 'birth_date', 'gender', 'student_number',
             'father_name', 'father_phone', 'mother_name', 'mother_phone', 'tutor_name', 'tutor_phone',
             'birth_place', 'nationalite_code', 'birth_certificate_number', 'birth_certificate_date',
-            'birth_certificate_place', 'residence',
+            'birth_certificate_place', 'residence', 'photo', 'existingPhotoPath',
         ]);
     }
 

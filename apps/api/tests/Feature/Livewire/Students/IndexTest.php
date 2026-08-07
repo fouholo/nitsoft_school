@@ -6,6 +6,8 @@ use App\Domain\Enrollment\Models\Nationalite;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Models\Establishment;
 use App\Livewire\Students\Index;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -96,6 +98,60 @@ test('les informations d’identité sont enregistrées, avec normalisation de l
         ->and($student->birth_certificate_date)->toBeNull()
         ->and($student->birth_certificate_place)->toBe('Abidjan')
         ->and($student->residence)->toBe('Cocody');
+});
+
+test('un admin peut téléverser une photo pour un élève', function () {
+    Storage::fake('public');
+
+    Livewire::test(Index::class)
+        ->call('create')
+        ->set('first_name', 'Awa')
+        ->set('last_name', 'Traoré')
+        ->set('student_number', 'MAT-0004')
+        ->set('photo', UploadedFile::fake()->image('photo.jpg')->size(50))
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $student = Student::sole();
+
+    expect($student->photo_path)->not->toBeNull();
+    Storage::disk('public')->assertExists($student->photo_path);
+});
+
+test('une photo de plus de 100 Ko est rejetée', function () {
+    Storage::fake('public');
+
+    Livewire::test(Index::class)
+        ->call('create')
+        ->set('first_name', 'Awa')
+        ->set('last_name', 'Traoré')
+        ->set('student_number', 'MAT-0005')
+        ->set('photo', UploadedFile::fake()->image('photo.jpg')->size(500))
+        ->call('save')
+        ->assertHasErrors('photo');
+
+    expect(Student::count())->toBe(0);
+});
+
+test('remplacer la photo d’un élève supprime l’ancienne du stockage', function () {
+    Storage::fake('public');
+    Storage::disk('public')->put('students-photos/old.jpg', 'contenu-factice');
+
+    $student = Student::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'photo_path' => 'students-photos/old.jpg',
+    ]);
+
+    Livewire::test(Index::class)
+        ->call('edit', $student->id)
+        ->set('photo', UploadedFile::fake()->image('new.jpg')->size(50))
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $student->refresh();
+
+    Storage::disk('public')->assertMissing('students-photos/old.jpg');
+    Storage::disk('public')->assertExists($student->photo_path);
 });
 
 test('un enseignant ne peut pas créer d’élève', function () {
