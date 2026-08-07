@@ -98,6 +98,35 @@
         </table>
     </div>
 
+    @if ($student->father_name || $student->father_phone || $student->mother_name || $student->mother_phone || $student->tutor_name || $student->tutor_phone)
+        <h2 class="mt-8 text-sm font-semibold uppercase tracking-wide text-slate-500">Contacts familiaux (référence école)</h2>
+        <div class="mt-2 grid grid-cols-1 gap-4 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-3">
+            @if ($student->father_name || $student->father_phone)
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Père</p>
+                    <p class="text-sm text-slate-900">{{ $student->father_name ?: '—' }}</p>
+                    <p class="text-sm text-slate-600">{{ $student->father_phone ?: '—' }}</p>
+                </div>
+            @endif
+
+            @if ($student->mother_name || $student->mother_phone)
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Mère</p>
+                    <p class="text-sm text-slate-900">{{ $student->mother_name ?: '—' }}</p>
+                    <p class="text-sm text-slate-600">{{ $student->mother_phone ?: '—' }}</p>
+                </div>
+            @endif
+
+            @if ($student->tutor_name || $student->tutor_phone)
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Tuteur</p>
+                    <p class="text-sm text-slate-900">{{ $student->tutor_name ?: '—' }}</p>
+                    <p class="text-sm text-slate-600">{{ $student->tutor_phone ?: '—' }}</p>
+                </div>
+            @endif
+        </div>
+    @endif
+
     <div class="mt-8 flex items-center justify-between">
         <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Tuteurs</h2>
 

@@ -49,6 +49,27 @@ test('le matricule doit être unique au sein d’un même établissement', funct
         ->assertHasErrors('student_number');
 });
 
+test('les contacts familiaux de référence sont enregistrés et normalisés', function () {
+    Livewire::test(Index::class)
+        ->call('create')
+        ->set('first_name', 'Awa')
+        ->set('last_name', 'Traoré')
+        ->set('student_number', 'MAT-0002')
+        ->set('father_name', 'Koffi Traoré')
+        ->set('father_phone', '+2250700000001')
+        ->set('mother_name', '')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $student = Student::sole();
+
+    expect($student->father_name)->toBe('Koffi Traoré')
+        ->and($student->father_phone)->toBe('+2250700000001')
+        ->and($student->mother_name)->toBeNull()
+        ->and($student->mother_phone)->toBeNull()
+        ->and($student->tutor_name)->toBeNull();
+});
+
 test('un enseignant ne peut pas créer d’élève', function () {
     $teacher = createUserWithRole($this->establishment, 'teacher');
     $this->actingAs($teacher);

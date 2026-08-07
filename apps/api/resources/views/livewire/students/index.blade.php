@@ -53,6 +53,47 @@
                 @error('student_number') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
+            <div class="sm:col-span-4">
+                <h2 class="text-sm font-semibold text-slate-700">Contacts familiaux (référence)</h2>
+                <p class="text-xs text-slate-500">Informations connues par l'établissement, utilisées pour vérifier les demandes de liaison des parents.</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Nom du père</label>
+                <input type="text" wire:model="father_name" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                @error('father_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Téléphone du père</label>
+                <input type="text" wire:model="father_phone" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                @error('father_phone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Nom de la mère</label>
+                <input type="text" wire:model="mother_name" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                @error('mother_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Téléphone de la mère</label>
+                <input type="text" wire:model="mother_phone" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                @error('mother_phone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Nom du tuteur</label>
+                <input type="text" wire:model="tutor_name" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                @error('tutor_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Téléphone du tuteur</label>
+                <input type="text" wire:model="tutor_phone" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                @error('tutor_phone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
             <div class="flex gap-2 sm:col-span-4">
                 <button type="submit" class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700">
                     Enregistrer

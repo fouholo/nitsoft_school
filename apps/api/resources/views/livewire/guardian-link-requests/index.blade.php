@@ -10,12 +10,21 @@
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Contact</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Élève</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Rôle demandé</th>
+                    <th class="px-4 py-2 text-left font-medium text-slate-500">Référence école</th>
                     <th class="px-4 py-2"></th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
                 @forelse ($pendingLinks as $link)
-                    @php $roleFilled = $roleAlreadyFilled->contains("{$link->student_id}:{$link->relationship?->value}"); @endphp
+                    @php
+                        $roleFilled = $roleAlreadyFilled->contains("{$link->student_id}:{$link->relationship?->value}");
+                        $reference = match ($link->relationship?->value) {
+                            'pere' => ['name' => $link->student->father_name, 'phone' => $link->student->father_phone],
+                            'mere' => ['name' => $link->student->mother_name, 'phone' => $link->student->mother_phone],
+                            'tuteur' => ['name' => $link->student->tutor_name, 'phone' => $link->student->tutor_phone],
+                            default => ['name' => null, 'phone' => null],
+                        };
+                    @endphp
                     <tr wire:key="link-request-{{ $link->id }}">
                         <td class="px-4 py-2 text-slate-900">{{ $link->guardian->last_name }} {{ $link->guardian->first_name }}</td>
                         <td class="px-4 py-2 text-slate-600">
@@ -29,6 +38,14 @@
                             {{ $link->relationship?->label() }}
                             @if ($roleFilled)
                                 <span class="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">Déjà pourvu</span>
+                            @endif
+                        </td>
+                        <td class="px-4 py-2 text-slate-600">
+                            @if ($reference['name'] || $reference['phone'])
+                                {{ $reference['name'] ?: '—' }}
+                                <br><span class="text-xs text-slate-400">{{ $reference['phone'] ?: '—' }}</span>
+                            @else
+                                <span class="text-xs text-slate-400">Non renseigné</span>
                             @endif
                         </td>
                         <td class="px-4 py-2 text-right">
@@ -50,7 +67,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-4 py-6 text-center text-slate-500">Aucune demande en attente.</td>
+                        <td colspan="6" class="px-4 py-6 text-center text-slate-500">Aucune demande en attente.</td>
                     </tr>
                 @endforelse
             </tbody>

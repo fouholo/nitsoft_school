@@ -85,6 +85,19 @@ test('approuver un rôle déjà pourvu rejette l’ancien titulaire', function (
         ->and($existingLink->status)->toBe(GuardianLinkStatus::Rejected);
 });
 
+test('la référence école correspondant au rôle demandé est affichée', function () {
+    $admin = createUserWithRole($this->establishment, 'admin');
+    $this->actingAs($admin);
+
+    $this->student->update(['mother_name' => 'Aya Kouassi', 'mother_phone' => '+2250700000099']);
+
+    pendingLink($this->establishment, $this->student, 'mere');
+
+    Livewire::test(Index::class)
+        ->assertSee('Aya Kouassi')
+        ->assertSee('+2250700000099');
+});
+
 test('rejeter une demande ne provisionne aucun accès', function () {
     $admin = createUserWithRole($this->establishment, 'admin');
     $this->actingAs($admin);

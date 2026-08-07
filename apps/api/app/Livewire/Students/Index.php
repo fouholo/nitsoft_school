@@ -33,6 +33,18 @@ class Index extends Component
 
     public string $student_number = '';
 
+    public string $father_name = '';
+
+    public string $father_phone = '';
+
+    public string $mother_name = '';
+
+    public string $mother_phone = '';
+
+    public string $tutor_name = '';
+
+    public string $tutor_phone = '';
+
     public function mount(): void
     {
         $this->authorize('viewAny', Student::class);
@@ -63,6 +75,12 @@ class Index extends Component
         $this->birth_date = $student->birth_date?->toDateString() ?? '';
         $this->gender = (string) $student->gender;
         $this->student_number = $student->student_number;
+        $this->father_name = (string) $student->father_name;
+        $this->father_phone = (string) $student->father_phone;
+        $this->mother_name = (string) $student->mother_name;
+        $this->mother_phone = (string) $student->mother_phone;
+        $this->tutor_name = (string) $student->tutor_name;
+        $this->tutor_phone = (string) $student->tutor_phone;
         $this->showForm = true;
     }
 
@@ -80,12 +98,21 @@ class Index extends Component
             'birth_date' => ['nullable', 'date'],
             'gender' => ['nullable', 'string', 'in:m,f'],
             'student_number' => ['required', 'string', 'max:255', $uniqueStudentNumber],
+            'father_name' => ['nullable', 'string', 'max:255'],
+            'father_phone' => ['nullable', 'string', 'max:255'],
+            'mother_name' => ['nullable', 'string', 'max:255'],
+            'mother_phone' => ['nullable', 'string', 'max:255'],
+            'tutor_name' => ['nullable', 'string', 'max:255'],
+            'tutor_phone' => ['nullable', 'string', 'max:255'],
         ]);
 
         // Les champs optionnels vides arrivent comme '' (pas null) depuis les
         // inputs HTML ; il faut normaliser avant insertion (date/enum SQL stricts).
         $data['birth_date'] = $data['birth_date'] !== '' ? $data['birth_date'] : null;
         $data['gender'] = $data['gender'] !== '' ? $data['gender'] : null;
+        foreach (['father_name', 'father_phone', 'mother_name', 'mother_phone', 'tutor_name', 'tutor_phone'] as $field) {
+            $data[$field] = $data[$field] !== '' ? $data[$field] : null;
+        }
 
         if ($this->editingId) {
             $student = Student::findOrFail($this->editingId);
@@ -119,7 +146,10 @@ class Index extends Component
 
     protected function resetForm(): void
     {
-        $this->reset(['editingId', 'first_name', 'last_name', 'birth_date', 'gender', 'student_number']);
+        $this->reset([
+            'editingId', 'first_name', 'last_name', 'birth_date', 'gender', 'student_number',
+            'father_name', 'father_phone', 'mother_name', 'mother_phone', 'tutor_name', 'tutor_phone',
+        ]);
     }
 
     public function render()
