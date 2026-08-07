@@ -6,7 +6,9 @@ namespace App\Livewire\Academics\Classrooms;
 
 use App\Domain\Academics\Enums\Cycle;
 use App\Domain\Academics\Models\Classroom;
+use App\Domain\Academics\Models\Level;
 use App\Domain\Academics\Models\SchoolYear;
+use App\Domain\Academics\Models\Serie;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -20,11 +22,13 @@ class Index extends Component
 
     public ?int $editingId = null;
 
-    public string $name = '';
-
-    public string $level = '';
-
     public string $cycle = Cycle::Secondaire->value;
+
+    public ?int $level_id = null;
+
+    public ?int $serie_id = null;
+
+    public string $numero = '';
 
     public ?int $capacity = null;
 
@@ -33,6 +37,16 @@ class Index extends Component
     public function mount(): void
     {
         $this->authorize('viewAny', Classroom::class);
+    }
+
+    public function updatedCycle(): void
+    {
+        $this->reset(['level_id', 'serie_id', 'numero']);
+    }
+
+    public function updatedLevelId(): void
+    {
+        $this->reset(['serie_id', 'numero']);
     }
 
     public function create(): void
@@ -51,9 +65,10 @@ class Index extends Component
         $this->authorize('update', $classroom);
 
         $this->editingId = $classroom->id;
-        $this->name = $classroom->name;
-        $this->level = (string) $classroom->level;
-        $this->cycle = $classroom->cycle->value;
+        $this->cycle = $classroom->level->cycle->value;
+        $this->level_id = $classroom->level_id;
+        $this->serie_id = $classroom->serie_id;
+        $this->numero = $classroom->numero;
         $this->capacity = $classroom->capacity;
         $this->school_year_id = $classroom->school_year_id;
         $this->showForm = true;
@@ -62,12 +77,16 @@ class Index extends Component
     public function save(): void
     {
         $data = $this->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'level' => ['nullable', 'string', 'max:255'],
-            'cycle' => ['required', Rule::enum(Cycle::class)],
+            'level_id' => ['required', 'exists:levels,id'],
+            'serie_id' => [Rule::requiredIf(fn () => $this->selectedLevelRequiresSeries()), 'nullable', 'exists:series,id'],
+            'numero' => ['required', 'string', 'max:2'],
             'capacity' => ['nullable', 'integer', 'min:1'],
             'school_year_id' => ['required', 'exists:school_years,id'],
         ]);
+
+        if (! $this->selectedLevelRequiresSeries()) {
+            $data['serie_id'] = null;
+        }
 
         if ($this->editingId) {
             $classroom = Classroom::findOrFail($this->editingId);
@@ -101,16 +120,39 @@ class Index extends Component
 
     protected function resetForm(): void
     {
-        $this->reset(['editingId', 'name', 'level', 'cycle', 'capacity', 'school_year_id']);
+        $this->reset(['editingId', 'level_id', 'serie_id', 'numero', 'capacity', 'school_year_id']);
         $this->cycle = Cycle::Secondaire->value;
+    }
+
+    public function selectedLevelRequiresSeries(): bool
+    {
+        if (! $this->level_id) {
+            return false;
+        }
+
+        return (bool) Level::whereKey($this->level_id)->value('requires_series');
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function numeroOptions(): array
+    {
+        return in_array($this->cycle, [Cycle::Prescolaire->value, Cycle::Primaire->value], true)
+            ? ['A', 'B', 'C', 'D', 'E', 'F']
+            : array_map('strval', range(1, 10));
     }
 
     public function render()
     {
         return view('livewire.academics.classrooms.index', [
-            'classrooms' => Classroom::with('schoolYear')->orderBy('name')->get(),
+            'classrooms' => Classroom::with(['schoolYear', 'level', 'serie'])->orderBy('name')->get(),
             'schoolYears' => SchoolYear::orderByDesc('starts_on')->get(),
             'cycles' => Cycle::cases(),
+            'levels' => $this->cycle !== ''
+                ? Level::where('cycle', $this->cycle)->orderBy('level_wording')->get()
+                : collect(),
+            'series' => Serie::orderBy('serie')->get(),
         ]);
     }
 }

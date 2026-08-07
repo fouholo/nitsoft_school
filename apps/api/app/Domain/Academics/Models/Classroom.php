@@ -26,8 +26,9 @@ class Classroom extends Model
         'establishment_id',
         'school_year_id',
         'name',
-        'level',
-        'cycle',
+        'level_id',
+        'serie_id',
+        'numero',
         'capacity',
         'uid',
         'device_id',
@@ -35,13 +36,40 @@ class Classroom extends Model
     ];
 
     protected $casts = [
-        'cycle' => Cycle::class,
         'client_updated_at' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        static::saving(function (Classroom $classroom): void {
+            $classroom->name = trim(sprintf(
+                '%s%s %s',
+                $classroom->level->level_wording,
+                $classroom->serie_id ? ' '.$classroom->serie->serie : '',
+                $classroom->numero,
+            ));
+        });
+    }
 
     public function schoolYear(): BelongsTo
     {
         return $this->belongsTo(SchoolYear::class);
+    }
+
+    /**
+     * @return BelongsTo<Level, $this>
+     */
+    public function level(): BelongsTo
+    {
+        return $this->belongsTo(Level::class);
+    }
+
+    /**
+     * @return BelongsTo<Serie, $this>
+     */
+    public function serie(): BelongsTo
+    {
+        return $this->belongsTo(Serie::class);
     }
 
     public function enrollments(): HasMany
@@ -51,11 +79,11 @@ class Classroom extends Model
 
     public function isGradable(): bool
     {
-        return $this->cycle !== Cycle::Prescolaire;
+        return $this->level->cycle !== Cycle::Prescolaire;
     }
 
     public function scopeGradable(Builder $query): Builder
     {
-        return $query->where('cycle', '!=', Cycle::Prescolaire);
+        return $query->whereHas('level', fn (Builder $q) => $q->where('cycle', '!=', Cycle::Prescolaire));
     }
 }

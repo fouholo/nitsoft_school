@@ -6,7 +6,9 @@ namespace Database\Seeders;
 
 use App\Domain\Academics\Enums\Cycle;
 use App\Domain\Academics\Models\Classroom;
+use App\Domain\Academics\Models\Level;
 use App\Domain\Academics\Models\SchoolYear;
+use App\Domain\Academics\Models\Serie;
 use App\Domain\Enrollment\Models\Nationalite;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\Foundation;
@@ -31,6 +33,40 @@ class DatabaseSeeder extends Seeder
 
         foreach ($nationalites as $nationalite) {
             Nationalite::create($nationalite);
+        }
+
+        $levels = [
+            ['level' => 'PS', 'level_wording' => 'Petite Section', 'cycle' => Cycle::Prescolaire->value, 'requires_series' => false],
+            ['level' => 'MS', 'level_wording' => 'Moyenne Section', 'cycle' => Cycle::Prescolaire->value, 'requires_series' => false],
+            ['level' => 'GS', 'level_wording' => 'Grande Section', 'cycle' => Cycle::Prescolaire->value, 'requires_series' => false],
+            ['level' => 'CP1', 'level_wording' => 'CP1', 'cycle' => Cycle::Primaire->value, 'requires_series' => false],
+            ['level' => 'CP2', 'level_wording' => 'CP2', 'cycle' => Cycle::Primaire->value, 'requires_series' => false],
+            ['level' => 'CE1', 'level_wording' => 'CE1', 'cycle' => Cycle::Primaire->value, 'requires_series' => false],
+            ['level' => 'CE2', 'level_wording' => 'CE2', 'cycle' => Cycle::Primaire->value, 'requires_series' => false],
+            ['level' => 'CM1', 'level_wording' => 'CM1', 'cycle' => Cycle::Primaire->value, 'requires_series' => false],
+            ['level' => 'CM2', 'level_wording' => 'CM2', 'cycle' => Cycle::Primaire->value, 'requires_series' => false],
+            ['level' => '6EME', 'level_wording' => '6ème', 'cycle' => Cycle::Secondaire->value, 'requires_series' => false],
+            ['level' => '5EME', 'level_wording' => '5ème', 'cycle' => Cycle::Secondaire->value, 'requires_series' => false],
+            ['level' => '4EME', 'level_wording' => '4ème', 'cycle' => Cycle::Secondaire->value, 'requires_series' => false],
+            ['level' => '3EME', 'level_wording' => '3ème', 'cycle' => Cycle::Secondaire->value, 'requires_series' => false],
+            ['level' => '2ND', 'level_wording' => 'Seconde', 'cycle' => Cycle::Secondaire->value, 'requires_series' => true],
+            ['level' => '1ERE', 'level_wording' => 'Première', 'cycle' => Cycle::Secondaire->value, 'requires_series' => true],
+            ['level' => 'TLE', 'level_wording' => 'Terminale', 'cycle' => Cycle::Secondaire->value, 'requires_series' => true],
+        ];
+
+        foreach ($levels as $level) {
+            Level::create($level);
+        }
+
+        $series = [
+            ['serie' => 'A1', 'serie_wording' => 'Lettres-Langues'],
+            ['serie' => 'A2', 'serie_wording' => 'Lettres-Philosophie'],
+            ['serie' => 'C', 'serie_wording' => 'Mathématiques-Sciences physiques'],
+            ['serie' => 'D', 'serie_wording' => 'Mathématiques-Sciences de la vie et de la terre'],
+        ];
+
+        foreach ($series as $serie) {
+            Serie::create($serie);
         }
 
         $foundation = Foundation::create([
@@ -80,21 +116,22 @@ class DatabaseSeeder extends Seeder
             'is_current' => true,
         ]);
 
+        $grandeSection = Level::where('level', 'GS')->sole();
+        $cp1 = Level::where('level', 'CP1')->sole();
+
         Classroom::create([
             'establishment_id' => $mixedEstablishment->id,
             'school_year_id' => $mixedSchoolYear->id,
-            'name' => 'Grande Section A',
-            'level' => 'Grande Section',
-            'cycle' => Cycle::Prescolaire,
+            'level_id' => $grandeSection->id,
+            'numero' => 'A',
             'capacity' => 25,
         ]);
 
         Classroom::create([
             'establishment_id' => $mixedEstablishment->id,
             'school_year_id' => $mixedSchoolYear->id,
-            'name' => 'CP A',
-            'level' => 'CP',
-            'cycle' => Cycle::Primaire,
+            'level_id' => $cp1->id,
+            'numero' => 'A',
             'capacity' => 30,
         ]);
 

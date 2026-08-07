@@ -12,24 +12,47 @@
     @if ($showForm)
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-4">
             <div>
-                <label class="block text-sm font-medium text-slate-700">Nom</label>
-                <input type="text" wire:model="name" placeholder="6ème A" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
-                @error('name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-slate-700">Niveau</label>
-                <input type="text" wire:model="level" placeholder="6ème" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
-            </div>
-
-            <div>
                 <label class="block text-sm font-medium text-slate-700">Cycle</label>
-                <select wire:model="cycle" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                <select wire:model.live="cycle" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
                     @foreach ($cycles as $cycleOption)
                         <option value="{{ $cycleOption->value }}">{{ $cycleOption->label() }}</option>
                     @endforeach
                 </select>
-                @error('cycle') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Niveau</label>
+                <select wire:model.live="level_id" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                    <option value="">—</option>
+                    @foreach ($levels as $level)
+                        <option value="{{ $level->id }}">{{ $level->level_wording }}</option>
+                    @endforeach
+                </select>
+                @error('level_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            @if ($this->selectedLevelRequiresSeries())
+                <div>
+                    <label class="block text-sm font-medium text-slate-700">Série</label>
+                    <select wire:model="serie_id" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                        <option value="">—</option>
+                        @foreach ($series as $serie)
+                            <option value="{{ $serie->id }}">{{ $serie->serie }}</option>
+                        @endforeach
+                    </select>
+                    @error('serie_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                </div>
+            @endif
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Numéro</label>
+                <select wire:model="numero" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                    <option value="">—</option>
+                    @foreach ($this->numeroOptions() as $numeroOption)
+                        <option value="{{ $numeroOption }}">{{ $numeroOption }}</option>
+                    @endforeach
+                </select>
+                @error('numero') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
@@ -76,10 +99,10 @@
                 @forelse ($classrooms as $classroom)
                     <tr wire:key="classroom-{{ $classroom->id }}">
                         <td class="px-4 py-2 text-slate-900">{{ $classroom->name }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ $classroom->level }}</td>
+                        <td class="px-4 py-2 text-slate-600">{{ $classroom->level->level_wording }}</td>
                         <td class="px-4 py-2">
-                            <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $classroom->cycle->badgeClass() }}">
-                                {{ $classroom->cycle->label() }}
+                            <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $classroom->level->cycle->badgeClass() }}">
+                                {{ $classroom->level->cycle->label() }}
                             </span>
                         </td>
                         <td class="px-4 py-2 text-slate-600">{{ $classroom->capacity }}</td>

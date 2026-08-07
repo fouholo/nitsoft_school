@@ -32,5 +32,5 @@ test('le scope gradable exclut les classes préscolaires', function () {
 test('le cycle par défaut est secondaire', function () {
     $classroom = Classroom::factory()->create();
 
-    expect($classroom->cycle)->toBe(Cycle::Secondaire);
+    expect($classroom->level->cycle)->toBe(Cycle::Secondaire);
 });

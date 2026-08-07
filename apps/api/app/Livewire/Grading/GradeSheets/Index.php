@@ -106,7 +106,7 @@ class Index extends Component
 
         $assignments = TeacherAssignment::query()
             ->when(! $isAdmin, fn ($query) => $query->where('user_id', $user->id))
-            ->whereHas('classroom', fn ($query) => $query->where('cycle', '!=', Cycle::Prescolaire))
+            ->whereHas('classroom.level', fn ($query) => $query->where('cycle', '!=', Cycle::Prescolaire))
             ->with(['classroom', 'subject'])
             ->get();
 
