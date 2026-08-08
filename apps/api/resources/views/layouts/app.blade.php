@@ -57,8 +57,12 @@
                 ]],
             ];
 
-            if (auth()->user()->isSuperAdmin()) {
+            if (auth()->user()->isSaasAdmin()) {
                 $navItems[] = ['type' => 'link', 'label' => 'Groupes scolaires', 'route' => 'foundations.index', 'active' => 'foundations.*', 'icon' => 'building'];
+            }
+
+            if (auth()->user()->isMainSaasAdmin()) {
+                $navItems[] = ['type' => 'link', 'label' => 'Administrateurs SaaS', 'route' => 'saas-admins.index', 'active' => 'saas-admins.*', 'icon' => 'users'];
             }
 
             $initials = collect(explode(' ', auth()->user()->name))

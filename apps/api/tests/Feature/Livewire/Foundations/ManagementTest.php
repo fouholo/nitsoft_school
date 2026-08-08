@@ -12,7 +12,7 @@ use Livewire\Livewire;
 
 beforeEach(function () {
     $this->establishment = Establishment::factory()->create();
-    $this->superAdmin = createUserWithRole($this->establishment, 'super_admin');
+    $this->superAdmin = createSaasAdmin('main');
 
     actingInEstablishment($this->establishment);
     $this->actingAs($this->superAdmin);

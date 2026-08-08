@@ -1,7 +1,9 @@
 <?php
 
+use App\Domain\Establishments\Enums\SaasAdminType;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\Foundation;
+use App\Domain\Establishments\Models\SaasAdmin;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -80,6 +82,24 @@ function createFounder(Foundation $foundation): User
     $user = User::factory()->create();
 
     $foundation->users()->attach($user->id, ['role' => 'founder', 'is_active' => true]);
+
+    return $user;
+}
+
+/**
+ * Crée un administrateur SaaS (table saas_admins, indépendante des
+ * établissements) — remplace l'ancien rôle establishment_user.super_admin.
+ */
+function createSaasAdmin(string $type = 'main'): User
+{
+    $user = User::factory()->create();
+
+    SaasAdmin::create([
+        'user_id' => $user->id,
+        'type' => SaasAdminType::from($type),
+        'is_active' => true,
+        'is_main' => $type === 'main' ? true : null,
+    ]);
 
     return $user;
 }

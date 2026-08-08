@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\LogoutController;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Dashboard;
+use App\Livewire\SaasAdmins\Register as SaasAdminsRegister;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -17,12 +18,17 @@ Route::get('/', function () {
     /** @var User $user */
     $user = auth()->user();
 
+    if ($user->isSaasAdmin()) {
+        return redirect()->route('foundations.index');
+    }
+
     return redirect()->route($user->guardianProfile ? 'guardian-portal.dashboard' : 'dashboard');
 })->name('home');
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', Login::class)->name('login');
     Route::get('/register', Register::class)->name('register');
+    Route::get('/saas-admin/register', SaasAdminsRegister::class)->name('saas-admins.register');
 });
 
 Route::middleware('auth')->group(function (): void {
@@ -38,4 +44,5 @@ Route::middleware('auth')->group(function (): void {
     require __DIR__.'/notifications.php';
     require __DIR__.'/guardian-portal.php';
     require __DIR__.'/foundations.php';
+    require __DIR__.'/saas-admins.php';
 });

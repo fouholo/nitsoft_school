@@ -7,10 +7,12 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Domain\Academics\Models\TeacherAssignment;
 use App\Domain\Enrollment\Models\Guardian;
+use App\Domain\Establishments\Enums\SaasAdminType;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\EstablishmentUserPivot;
 use App\Domain\Establishments\Models\Foundation;
 use App\Domain\Establishments\Models\FoundationUserPivot;
+use App\Domain\Establishments\Models\SaasAdmin;
 use App\Domain\Sync\Concerns\Syncable;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -178,7 +180,6 @@ class User extends Authenticatable
     public function currentRoleLabel(): string
     {
         return match ($this->currentRole()) {
-            'super_admin' => 'Super Admin',
             'admin' => 'Admin',
             'teacher' => 'Enseignant',
             'accountant' => 'Comptable',
@@ -188,12 +189,19 @@ class User extends Authenticatable
         };
     }
 
-    public function isSuperAdmin(): bool
+    public function saasAdmin(): HasOne
     {
-        return $this->establishments()
-            ->wherePivot('role', 'super_admin')
-            ->wherePivot('is_active', true)
-            ->exists();
+        return $this->hasOne(SaasAdmin::class);
+    }
+
+    public function isSaasAdmin(): bool
+    {
+        return $this->saasAdmin()->where('is_active', true)->exists();
+    }
+
+    public function isMainSaasAdmin(): bool
+    {
+        return $this->saasAdmin()->where('is_active', true)->where('type', SaasAdminType::Main)->exists();
     }
 
     /**

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Domain\Attendance\Events\StudentMarkedAbsent;
+use App\Domain\Establishments\Models\SaasAdmin;
 use App\Domain\Notifications\Contracts\SmsProviderInterface;
 use App\Domain\Notifications\Listeners\NotifyGuardiansOfAbsence;
 use App\Models\User;
@@ -45,9 +46,23 @@ class AppServiceProvider extends ServiceProvider
             fn (string $modelName): string => 'Database\\Factories\\'.class_basename($modelName).'Factory'
         );
 
-        // Bypass global et unique pour le Super Admin SaaS — toute autre
-        // vérification d'autorisation passe par les Policies par domaine.
-        Gate::before(fn (User $user, string $ability): ?bool => $user->isSuperAdmin() ? true : null);
+        // Bypass global pour les administrateurs SaaS (MAIN et SECOND) — sauf
+        // pour les actions mutantes sur le roster des admins SaaS eux-mêmes,
+        // où on laisse SaasAdminPolicy trancher (seul MAIN peut y toucher).
+        Gate::before(function (User $user, string $ability, array $arguments = []): ?bool {
+            if (! $user->isSaasAdmin()) {
+                return null;
+            }
+
+            $target = $arguments[0] ?? null;
+            $targetsSaasAdmin = $target === SaasAdmin::class || $target instanceof SaasAdmin;
+
+            if ($targetsSaasAdmin && ! in_array($ability, ['viewAny', 'view'], true)) {
+                return null;
+            }
+
+            return true;
+        });
 
         Event::listen(StudentMarkedAbsent::class, NotifyGuardiansOfAbsence::class);
     }

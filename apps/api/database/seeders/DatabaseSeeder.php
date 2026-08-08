@@ -10,8 +10,10 @@ use App\Domain\Academics\Models\Level;
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Academics\Models\Serie;
 use App\Domain\Enrollment\Models\Nationalite;
+use App\Domain\Establishments\Enums\SaasAdminType;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\Foundation;
+use App\Domain\Establishments\Models\SaasAdmin;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -135,8 +137,19 @@ class DatabaseSeeder extends Seeder
             'capacity' => 30,
         ]);
 
+        $superAdminUser = User::factory()->create([
+            'name' => 'Super Admin SaaS',
+            'email' => 'superadmin@nitsoft.test',
+        ]);
+
+        SaasAdmin::create([
+            'user_id' => $superAdminUser->id,
+            'type' => SaasAdminType::Main,
+            'is_active' => true,
+            'is_main' => true,
+        ]);
+
         $accounts = [
-            ['name' => 'Super Admin SaaS', 'email' => 'superadmin@nitsoft.test', 'role' => 'super_admin'],
             ['name' => 'Directeur Etablissement', 'email' => 'admin@nitsoft.test', 'role' => 'admin'],
             ['name' => 'Enseignant Demo', 'email' => 'teacher@nitsoft.test', 'role' => 'teacher'],
             ['name' => 'Comptable Demo', 'email' => 'accountant@nitsoft.test', 'role' => 'accountant'],

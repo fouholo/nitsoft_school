@@ -14,7 +14,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('establishment_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('role'); // super_admin | admin | teacher | accountant | parent
+            $table->string('role'); // admin | teacher | accountant | parent
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 

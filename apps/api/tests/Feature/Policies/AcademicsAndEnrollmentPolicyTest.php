@@ -70,9 +70,8 @@ test('un admin d’un autre établissement ne peut ni voir ni modifier', functio
 })->with('policy_models');
 
 test('le Super Admin SaaS contourne toutes les Policies', function (string $modelClass) {
-    $establishment = Establishment::factory()->create();
     $otherEstablishment = Establishment::factory()->create();
-    $superAdmin = createUserWithRole($establishment, 'super_admin');
+    $superAdmin = createSaasAdmin('main');
 
     actingInEstablishment($otherEstablishment);
     $record = $modelClass::factory()->create(['establishment_id' => $otherEstablishment->id]);
