@@ -73,7 +73,7 @@ function actingInEstablishment(Establishment $establishment): void
 }
 
 /**
- * Crée un utilisateur fondateur (foundation_user.role = founder) — voir
+ * Crée un utilisateur fondateur (foundation_user.role = fondateur) — voir
  * Foundation : accès admin-équivalent à tous les établissements du groupe
  * sans ligne establishment_user par école.
  */
@@ -81,7 +81,33 @@ function createFounder(Foundation $foundation): User
 {
     $user = User::factory()->create();
 
-    $foundation->users()->attach($user->id, ['role' => 'founder', 'is_active' => true]);
+    $foundation->users()->attach($user->id, ['role' => 'fondateur', 'is_active' => true]);
+
+    return $user;
+}
+
+/**
+ * Crée un GENERAL_ADMIN pour une fondation ou un établissement indépendant
+ * (is_general_admin=true sur le pivot pertinent — voir User::isGeneralAdminOf()).
+ */
+function createGeneralAdmin(Foundation|Establishment $org, string $role = 'fondateur'): User
+{
+    $user = User::factory()->create();
+
+    $org->users()->attach($user->id, ['role' => $role, 'is_active' => true, 'is_general_admin' => true]);
+
+    return $user;
+}
+
+/**
+ * Crée un LOCAL_ADMIN pour un établissement (is_local_admin=true sur
+ * establishment_user — voir User::isLocalAdminOf()).
+ */
+function createLocalAdmin(Establishment $establishment, string $role = 'directeur'): User
+{
+    $user = User::factory()->create();
+
+    $establishment->users()->attach($user->id, ['role' => $role, 'is_active' => true, 'is_local_admin' => true]);
 
     return $user;
 }

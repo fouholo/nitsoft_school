@@ -45,7 +45,7 @@ test('un super admin peut créer, renommer et supprimer un groupe scolaire', fun
 });
 
 test('un admin d’établissement ne peut pas accéder aux groupes scolaires', function () {
-    $admin = createUserWithRole($this->establishment, 'admin');
+    $admin = createUserWithRole($this->establishment, 'directeur');
     $this->actingAs($admin);
 
     Livewire::test(Index::class)->assertForbidden();
@@ -81,7 +81,7 @@ test('un super admin peut ajouter un nouveau fondateur puis le retirer', functio
     $user = User::where('email', 'nouveau.fondateur@nitsoft.test')->sole();
     $pivot = FoundationUserPivot::where('foundation_id', $foundation->id)->where('user_id', $user->id)->sole();
 
-    expect($pivot->role)->toBe('founder')
+    expect($pivot->role)->toBe('fondateur')
         ->and($user->isFounderOf($foundation->id))->toBeTrue();
 
     Livewire::test(Show::class, ['foundation' => $foundation])

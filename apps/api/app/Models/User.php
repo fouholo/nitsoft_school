@@ -121,7 +121,8 @@ class User extends Authenticatable
 
     public function hasAdminRightsOn(int $establishmentId): bool
     {
-        return $this->roleFor($establishmentId) === 'admin' || $this->isFounderOfEstablishment($establishmentId);
+        return in_array($this->roleFor($establishmentId), ['directeur', 'gestionnaire'], true)
+            || $this->isFounderOfEstablishment($establishmentId);
     }
 
     public function hasAdminRightsOnCurrentEstablishment(): bool
@@ -165,7 +166,7 @@ class User extends Authenticatable
             return $directRole;
         }
 
-        return $this->isFounderOfEstablishment($establishmentId) ? 'founder' : null;
+        return $this->isFounderOfEstablishment($establishmentId) ? 'fondateur' : null;
     }
 
     public function currentRole(): ?string
@@ -180,13 +181,66 @@ class User extends Authenticatable
     public function currentRoleLabel(): string
     {
         return match ($this->currentRole()) {
-            'admin' => 'Admin',
-            'teacher' => 'Enseignant',
-            'accountant' => 'Comptable',
+            'directeur' => 'Directeur',
+            'gestionnaire' => 'Gestionnaire',
+            'enseignant' => 'Enseignant',
+            'comptable' => 'Comptable',
             'parent' => 'Parent',
-            'founder' => 'Fondateur',
+            'fondateur' => 'Fondateur',
             default => 'Aucun rôle',
         };
+    }
+
+    /**
+     * GENERAL_ADMIN : un seul titulaire par fondation, ou par établissement
+     * indépendant s'il n'appartient à aucune fondation — jamais les deux à
+     * la fois pour un même établissement (voir migration
+     * add_admin_power_flags_to_pivots, contraintes uniques composites).
+     */
+    public function isGeneralAdminOf(Foundation|Establishment $org): bool
+    {
+        if ($org instanceof Establishment && $org->foundation_id !== null) {
+            return $this->isGeneralAdminOf($org->foundation()->firstOrFail());
+        }
+
+        $pivot = $org instanceof Foundation
+            ? FoundationUserPivot::where('foundation_id', $org->id)
+            : EstablishmentUserPivot::where('establishment_id', $org->id);
+
+        return $pivot->where('user_id', $this->id)->where('is_general_admin', true)->exists();
+    }
+
+    /**
+     * Utilisé pour décider si le lien nav "Mon organisation" doit être
+     * affiché — un fondateur peut y accéder même sans pouvoir actuel, pour
+     * réclamer le GENERAL_ADMIN (voir Staff\ManageOrganization::mount()).
+     */
+    public function isFondateurSomewhere(): bool
+    {
+        return FoundationUserPivot::where('user_id', $this->id)
+            ->where('role', 'fondateur')
+            ->where('is_active', true)
+            ->exists()
+            || EstablishmentUserPivot::where('user_id', $this->id)
+                ->where('role', 'fondateur')
+                ->where('is_active', true)
+                ->exists();
+    }
+
+    /**
+     * LOCAL_ADMIN : un seul titulaire par établissement. Un GENERAL_ADMIN
+     * qui délègue son is_local_admin à quelqu'un d'autre ne doit jamais
+     * perdre l'accès aux actions LOCAL_ADMIN de son propre périmètre — d'où
+     * l'inclusion de isGeneralAdminOf() ici plutôt que de recomposer les
+     * deux vérifications à chaque point d'appel (Policies, nav, mount()).
+     */
+    public function isLocalAdminOf(Establishment $establishment): bool
+    {
+        return EstablishmentUserPivot::where('establishment_id', $establishment->id)
+            ->where('user_id', $this->id)
+            ->where('is_local_admin', true)
+            ->exists()
+            || $this->isGeneralAdminOf($establishment);
     }
 
     public function saasAdmin(): HasOne

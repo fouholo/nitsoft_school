@@ -12,7 +12,7 @@ function makePaymentIn(Establishment $establishment): Payment
 {
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
     $invoice = Invoice::factory()->create(['establishment_id' => $establishment->id, 'student_id' => $student->id]);
-    $accountant = createUserWithRole($establishment, 'accountant');
+    $accountant = createUserWithRole($establishment, 'comptable');
 
     return (new PaymentService)->recordPayment($invoice, [
         'amount' => 25,
@@ -24,7 +24,7 @@ function makePaymentIn(Establishment $establishment): Payment
 
 test('un comptable peut consulter le reçu PDF d’un paiement en ligne', function () {
     $establishment = Establishment::factory()->create();
-    $accountant = createUserWithRole($establishment, 'accountant');
+    $accountant = createUserWithRole($establishment, 'comptable');
 
     actingInEstablishment($establishment);
     $payment = makePaymentIn($establishment);
@@ -38,7 +38,7 @@ test('un comptable peut consulter le reçu PDF d’un paiement en ligne', functi
 
 test('le paramètre download force le téléchargement du reçu', function () {
     $establishment = Establishment::factory()->create();
-    $accountant = createUserWithRole($establishment, 'accountant');
+    $accountant = createUserWithRole($establishment, 'comptable');
 
     actingInEstablishment($establishment);
     $payment = makePaymentIn($establishment);
@@ -51,7 +51,7 @@ test('le paramètre download force le téléchargement du reçu', function () {
 
 test('un enseignant ne peut pas consulter le reçu (réservé aux gestionnaires facturation)', function () {
     $establishment = Establishment::factory()->create();
-    $teacher = createUserWithRole($establishment, 'teacher');
+    $teacher = createUserWithRole($establishment, 'enseignant');
 
     actingInEstablishment($establishment);
     $payment = makePaymentIn($establishment);
@@ -64,7 +64,7 @@ test('un enseignant ne peut pas consulter le reçu (réservé aux gestionnaires 
 test('un membre d’un autre établissement ne peut même pas résoudre le paiement (isolation tenant)', function () {
     $establishmentA = Establishment::factory()->create();
     $establishmentB = Establishment::factory()->create();
-    $adminB = createUserWithRole($establishmentB, 'admin');
+    $adminB = createUserWithRole($establishmentB, 'directeur');
 
     actingInEstablishment($establishmentA);
     $payment = makePaymentIn($establishmentA);

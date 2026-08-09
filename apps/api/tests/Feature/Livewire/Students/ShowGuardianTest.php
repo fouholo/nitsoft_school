@@ -11,7 +11,7 @@ use Livewire\Livewire;
 
 beforeEach(function () {
     $this->establishment = Establishment::factory()->create();
-    $this->admin = createUserWithRole($this->establishment, 'admin');
+    $this->admin = createUserWithRole($this->establishment, 'directeur');
     actingInEstablishment($this->establishment);
     $this->actingAs($this->admin);
 

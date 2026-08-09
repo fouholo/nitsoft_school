@@ -8,7 +8,7 @@ use App\Domain\Establishments\Models\Establishment;
 
 test('un paiement partiel passe la facture en partially_paid et génère un reçu', function () {
     $establishment = Establishment::factory()->create();
-    $accountant = createUserWithRole($establishment, 'accountant');
+    $accountant = createUserWithRole($establishment, 'comptable');
 
     $invoice = Invoice::factory()->create([
         'establishment_id' => $establishment->id,
@@ -34,7 +34,7 @@ test('un paiement partiel passe la facture en partially_paid et génère un reç
 
 test('un paiement qui couvre le solde restant passe la facture à paid', function () {
     $establishment = Establishment::factory()->create();
-    $accountant = createUserWithRole($establishment, 'accountant');
+    $accountant = createUserWithRole($establishment, 'comptable');
 
     $invoice = Invoice::factory()->create([
         'establishment_id' => $establishment->id,
@@ -58,7 +58,7 @@ test('un paiement qui couvre le solde restant passe la facture à paid', functio
 
 test('les numéros de reçus sont séquentiels par établissement', function () {
     $establishment = Establishment::factory()->create();
-    $accountant = createUserWithRole($establishment, 'accountant');
+    $accountant = createUserWithRole($establishment, 'comptable');
     $service = new PaymentService;
 
     $invoiceA = Invoice::factory()->create(['establishment_id' => $establishment->id, 'amount_due' => 100]);

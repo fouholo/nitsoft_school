@@ -33,7 +33,7 @@
             </div>
         </div>
 
-        @if (in_array($role, ['admin', 'accountant', 'founder'], true))
+        @if (in_array($role, ['directeur', 'gestionnaire', 'comptable', 'fondateur'], true))
             <div class="rounded-xl border border-slate-200 bg-white p-5">
                 <div class="flex items-center gap-3">
                     <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
@@ -50,7 +50,7 @@
             </div>
         @endif
 
-        @if (in_array($role, ['admin', 'founder'], true))
+        @if (in_array($role, ['directeur', 'gestionnaire', 'fondateur'], true))
             <div class="rounded-xl border border-slate-200 bg-white p-5">
                 <div class="flex items-center gap-3">
                     <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">

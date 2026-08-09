@@ -33,7 +33,7 @@ class Dashboard extends Component
                 ->value('balance') ?? 0),
             'staffCount' => EstablishmentUserPivot::query()
                 ->where('establishment_id', app('currentEstablishmentId'))
-                ->whereIn('role', ['admin', 'teacher', 'accountant'])
+                ->whereIn('role', ['directeur', 'gestionnaire', 'enseignant', 'comptable'])
                 ->where('is_active', true)
                 ->count(),
         ]);

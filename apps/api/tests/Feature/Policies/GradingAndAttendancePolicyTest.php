@@ -12,7 +12,7 @@ use App\Domain\Grading\Models\ReportCard;
 
 test('un admin peut créer, modifier et supprimer une évaluation sans être affecté', function () {
     $establishment = Establishment::factory()->create();
-    $admin = createUserWithRole($establishment, 'admin');
+    $admin = createUserWithRole($establishment, 'directeur');
 
     actingInEstablishment($establishment);
     $gradeSheet = GradeSheet::factory()->create(['establishment_id' => $establishment->id]);
@@ -24,7 +24,7 @@ test('un admin peut créer, modifier et supprimer une évaluation sans être aff
 
 test('un enseignant sans aucune affectation ne peut pas créer d’évaluation', function () {
     $establishment = Establishment::factory()->create();
-    $teacher = createUserWithRole($establishment, 'teacher');
+    $teacher = createUserWithRole($establishment, 'enseignant');
 
     actingInEstablishment($establishment);
 
@@ -33,7 +33,7 @@ test('un enseignant sans aucune affectation ne peut pas créer d’évaluation',
 
 test('un enseignant affecté peut créer une évaluation et gérer la sienne', function () {
     $establishment = Establishment::factory()->create();
-    $teacher = createUserWithRole($establishment, 'teacher');
+    $teacher = createUserWithRole($establishment, 'enseignant');
     $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id]);
     $subject = Subject::factory()->create(['establishment_id' => $establishment->id]);
 
@@ -60,8 +60,8 @@ test('un enseignant affecté peut créer une évaluation et gérer la sienne', f
 
 test('un enseignant ne peut pas modifier l’évaluation d’un collègue', function () {
     $establishment = Establishment::factory()->create();
-    $teacherA = createUserWithRole($establishment, 'teacher');
-    $teacherB = createUserWithRole($establishment, 'teacher');
+    $teacherA = createUserWithRole($establishment, 'enseignant');
+    $teacherB = createUserWithRole($establishment, 'enseignant');
     $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id]);
     $subject = Subject::factory()->create(['establishment_id' => $establishment->id]);
 
@@ -89,7 +89,7 @@ test('un enseignant ne peut pas modifier l’évaluation d’un collègue', func
 
 test('un enseignant affecté à une classe peut créer un appel de présence sans matière', function () {
     $establishment = Establishment::factory()->create();
-    $teacher = createUserWithRole($establishment, 'teacher');
+    $teacher = createUserWithRole($establishment, 'enseignant');
     $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id]);
 
     TeacherAssignment::factory()->create([
@@ -112,8 +112,8 @@ test('un enseignant affecté à une classe peut créer un appel de présence san
 
 test('seul un admin gère les affectations enseignants', function () {
     $establishment = Establishment::factory()->create();
-    $admin = createUserWithRole($establishment, 'admin');
-    $teacher = createUserWithRole($establishment, 'teacher');
+    $admin = createUserWithRole($establishment, 'directeur');
+    $teacher = createUserWithRole($establishment, 'enseignant');
 
     actingInEstablishment($establishment);
 
@@ -125,8 +125,8 @@ test('seul un admin gère les affectations enseignants', function () {
 
 test('seul un admin peut générer les bulletins, tout le monde peut les consulter', function () {
     $establishment = Establishment::factory()->create();
-    $admin = createUserWithRole($establishment, 'admin');
-    $teacher = createUserWithRole($establishment, 'teacher');
+    $admin = createUserWithRole($establishment, 'directeur');
+    $teacher = createUserWithRole($establishment, 'enseignant');
 
     actingInEstablishment($establishment);
 

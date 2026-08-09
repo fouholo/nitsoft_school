@@ -26,7 +26,7 @@ function makeReportCardIn(Establishment $establishment): ReportCard
 
 test('un membre de l’établissement peut consulter le PDF du bulletin en ligne', function () {
     $establishment = Establishment::factory()->create();
-    $admin = createUserWithRole($establishment, 'admin');
+    $admin = createUserWithRole($establishment, 'directeur');
 
     actingInEstablishment($establishment);
     $reportCard = makeReportCardIn($establishment);
@@ -40,7 +40,7 @@ test('un membre de l’établissement peut consulter le PDF du bulletin en ligne
 
 test('le paramètre download force le téléchargement du PDF', function () {
     $establishment = Establishment::factory()->create();
-    $admin = createUserWithRole($establishment, 'admin');
+    $admin = createUserWithRole($establishment, 'directeur');
 
     actingInEstablishment($establishment);
     $reportCard = makeReportCardIn($establishment);
@@ -54,7 +54,7 @@ test('le paramètre download force le téléchargement du PDF', function () {
 test('un membre d’un autre établissement ne peut même pas résoudre le bulletin (isolation tenant)', function () {
     $establishmentA = Establishment::factory()->create();
     $establishmentB = Establishment::factory()->create();
-    $adminB = createUserWithRole($establishmentB, 'admin');
+    $adminB = createUserWithRole($establishmentB, 'directeur');
 
     actingInEstablishment($establishmentA);
     $reportCard = makeReportCardIn($establishmentA);

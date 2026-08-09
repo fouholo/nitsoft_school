@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Foundations;
 
 use App\Domain\Establishments\Models\Establishment;
+use App\Domain\Establishments\Models\EstablishmentUserPivot;
 use App\Domain\Establishments\Models\Foundation;
 use App\Domain\Establishments\Models\FoundationUserPivot;
 use App\Models\User;
@@ -43,6 +44,13 @@ class Show extends Component
         $data = $this->validate([
             'establishment_to_link' => ['required', 'integer', 'exists:establishments,id'],
         ]);
+
+        // Garde-fou minimal contre un GENERAL_ADMIN "orphelin" : un établissement
+        // indépendant rattaché à une fondation ne doit plus porter son propre
+        // is_general_admin (l'autorité bascule au niveau fondation) — sinon ce
+        // flag resterait dormant et pourrait ressusciter au unlink.
+        EstablishmentUserPivot::where('establishment_id', $data['establishment_to_link'])
+            ->update(['is_general_admin' => null]);
 
         Establishment::whereKey($data['establishment_to_link'])
             ->whereNull('foundation_id')
@@ -88,7 +96,7 @@ class Show extends Component
         }
 
         FoundationUserPivot::firstOrCreate(
-            ['foundation_id' => $this->foundation->id, 'user_id' => $user->id, 'role' => 'founder'],
+            ['foundation_id' => $this->foundation->id, 'user_id' => $user->id, 'role' => 'fondateur'],
             ['is_active' => true]
         );
 
@@ -110,7 +118,7 @@ class Show extends Component
             'establishments' => $this->foundation->establishments()->orderBy('name')->get(),
             'availableEstablishments' => Establishment::whereNull('foundation_id')->orderBy('name')->get(),
             'founders' => FoundationUserPivot::where('foundation_id', $this->foundation->id)
-                ->where('role', 'founder')
+                ->where('role', 'fondateur')
                 ->with('user')
                 ->get(),
         ]);

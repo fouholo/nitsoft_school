@@ -18,7 +18,7 @@ test('un fondateur a accès admin à un établissement de son groupe sans ligne 
     expect($founder->belongsToEstablishment($establishment->id))->toBeFalse()
         ->and($founder->hasAccessTo($establishment->id))->toBeTrue()
         ->and($founder->hasAdminRightsOnCurrentEstablishment())->toBeTrue()
-        ->and($founder->roleFor($establishment->id))->toBe('founder');
+        ->and($founder->roleFor($establishment->id))->toBe('fondateur');
 });
 
 test('un fondateur peut consulter et créer des élèves et des factures sur un établissement de son groupe', function () {
@@ -52,9 +52,9 @@ test('un rôle direct establishment_user est prioritaire sur le statut de fondat
     $establishment = Establishment::factory()->create(['foundation_id' => $foundation->id]);
     $founder = createFounder($foundation);
 
-    $establishment->users()->attach($founder->id, ['role' => 'teacher', 'is_active' => true]);
+    $establishment->users()->attach($founder->id, ['role' => 'enseignant', 'is_active' => true]);
 
-    expect($founder->roleFor($establishment->id))->toBe('teacher');
+    expect($founder->roleFor($establishment->id))->toBe('enseignant');
 });
 
 test('le switcher d’établissement liste les écoles accessibles via la foundation', function () {

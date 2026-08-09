@@ -31,14 +31,14 @@ function pendingLink(Establishment $establishment, Student $student, string $rel
 }
 
 test('un non-admin ne peut pas accéder à l’écran', function () {
-    $teacher = createUserWithRole($this->establishment, 'teacher');
+    $teacher = createUserWithRole($this->establishment, 'enseignant');
     $this->actingAs($teacher);
 
     Livewire::test(Index::class)->assertForbidden();
 });
 
 test('approuver une demande la fait passer à approved et provisionne un accès établissement', function () {
-    $admin = createUserWithRole($this->establishment, 'admin');
+    $admin = createUserWithRole($this->establishment, 'directeur');
     $this->actingAs($admin);
 
     $guardian = pendingLink($this->establishment, $this->student);
@@ -53,7 +53,7 @@ test('approuver une demande la fait passer à approved et provisionne un accès 
 });
 
 test('approuver deux fois ne duplique pas l’accès établissement', function () {
-    $admin = createUserWithRole($this->establishment, 'admin');
+    $admin = createUserWithRole($this->establishment, 'directeur');
     $this->actingAs($admin);
 
     $guardian = pendingLink($this->establishment, $this->student);
@@ -66,7 +66,7 @@ test('approuver deux fois ne duplique pas l’accès établissement', function (
 });
 
 test('approuver un rôle déjà pourvu rejette l’ancien titulaire', function () {
-    $admin = createUserWithRole($this->establishment, 'admin');
+    $admin = createUserWithRole($this->establishment, 'directeur');
     $this->actingAs($admin);
 
     $existingGuardian = pendingLink($this->establishment, $this->student, 'mere');
@@ -86,7 +86,7 @@ test('approuver un rôle déjà pourvu rejette l’ancien titulaire', function (
 });
 
 test('la référence école correspondant au rôle demandé est affichée', function () {
-    $admin = createUserWithRole($this->establishment, 'admin');
+    $admin = createUserWithRole($this->establishment, 'directeur');
     $this->actingAs($admin);
 
     $this->student->update(['mother_name' => 'Aya Kouassi', 'mother_phone' => '+2250700000099']);
@@ -99,7 +99,7 @@ test('la référence école correspondant au rôle demandé est affichée', func
 });
 
 test('rejeter une demande ne provisionne aucun accès', function () {
-    $admin = createUserWithRole($this->establishment, 'admin');
+    $admin = createUserWithRole($this->establishment, 'directeur');
     $this->actingAs($admin);
 
     $guardian = pendingLink($this->establishment, $this->student);

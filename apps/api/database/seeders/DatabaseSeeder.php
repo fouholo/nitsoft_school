@@ -150,9 +150,9 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $accounts = [
-            ['name' => 'Directeur Etablissement', 'email' => 'admin@nitsoft.test', 'role' => 'admin'],
-            ['name' => 'Enseignant Demo', 'email' => 'teacher@nitsoft.test', 'role' => 'teacher'],
-            ['name' => 'Comptable Demo', 'email' => 'accountant@nitsoft.test', 'role' => 'accountant'],
+            ['name' => 'Directeur Etablissement', 'email' => 'admin@nitsoft.test', 'role' => 'directeur', 'is_local_admin' => true],
+            ['name' => 'Enseignant Demo', 'email' => 'teacher@nitsoft.test', 'role' => 'enseignant', 'is_local_admin' => null],
+            ['name' => 'Comptable Demo', 'email' => 'accountant@nitsoft.test', 'role' => 'comptable', 'is_local_admin' => null],
         ];
 
         foreach ($accounts as $account) {
@@ -164,6 +164,7 @@ class DatabaseSeeder extends Seeder
             $establishment->users()->attach($user->id, [
                 'role' => $account['role'],
                 'is_active' => true,
+                'is_local_admin' => $account['is_local_admin'],
             ]);
         }
 
@@ -173,8 +174,9 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $foundation->users()->attach($founder->id, [
-            'role' => 'founder',
+            'role' => 'fondateur',
             'is_active' => true,
+            'is_general_admin' => true,
         ]);
     }
 }

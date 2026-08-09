@@ -36,7 +36,7 @@ trait ChecksEstablishmentMembership
 
         $establishmentId = (int) app('currentEstablishmentId');
 
-        return in_array($user->roleFor($establishmentId), ['admin', 'accountant'], true)
+        return in_array($user->roleFor($establishmentId), ['directeur', 'gestionnaire', 'comptable'], true)
             || $user->isFounderOfEstablishment($establishmentId);
     }
 

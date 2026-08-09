@@ -12,7 +12,7 @@ use Livewire\Livewire;
 
 beforeEach(function () {
     $this->establishment = Establishment::factory()->create();
-    $this->admin = createUserWithRole($this->establishment, 'admin');
+    $this->admin = createUserWithRole($this->establishment, 'directeur');
 
     actingInEstablishment($this->establishment);
     $this->actingAs($this->admin);
@@ -155,7 +155,7 @@ test('remplacer la photo d’un élève supprime l’ancienne du stockage', func
 });
 
 test('un enseignant ne peut pas créer d’élève', function () {
-    $teacher = createUserWithRole($this->establishment, 'teacher');
+    $teacher = createUserWithRole($this->establishment, 'enseignant');
     $this->actingAs($teacher);
 
     Livewire::test(Index::class)

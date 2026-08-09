@@ -26,7 +26,7 @@ dataset('policy_models', [
 
 test('un admin peut consulter, créer, modifier et supprimer', function (string $modelClass) {
     $establishment = Establishment::factory()->create();
-    $admin = createUserWithRole($establishment, 'admin');
+    $admin = createUserWithRole($establishment, 'directeur');
 
     actingInEstablishment($establishment);
 
@@ -41,7 +41,7 @@ test('un admin peut consulter, créer, modifier et supprimer', function (string 
 
 test('un enseignant peut seulement consulter', function (string $modelClass) {
     $establishment = Establishment::factory()->create();
-    $teacher = createUserWithRole($establishment, 'teacher');
+    $teacher = createUserWithRole($establishment, 'enseignant');
 
     actingInEstablishment($establishment);
 
@@ -57,7 +57,7 @@ test('un enseignant peut seulement consulter', function (string $modelClass) {
 test('un admin d’un autre établissement ne peut ni voir ni modifier', function (string $modelClass) {
     $establishmentA = Establishment::factory()->create();
     $establishmentB = Establishment::factory()->create();
-    $adminB = createUserWithRole($establishmentB, 'admin');
+    $adminB = createUserWithRole($establishmentB, 'directeur');
 
     actingInEstablishment($establishmentA);
     $recordA = $modelClass::factory()->create(['establishment_id' => $establishmentA->id]);

@@ -82,7 +82,7 @@ class Index extends Component
                 ->get(),
             'teachers' => Establishment::find($establishmentId)
                 ->users()
-                ->wherePivot('role', 'teacher')
+                ->wherePivot('role', 'enseignant')
                 ->wherePivot('is_active', true)
                 ->get(),
             'classrooms' => Classroom::orderBy('name')->get(),

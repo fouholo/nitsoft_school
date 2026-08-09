@@ -14,7 +14,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('foundation_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('role'); // founder (seule valeur pour l'instant, ouvert pour évoluer)
+            $table->string('role'); // fondateur (FK vers roles.code, ajoutée par une migration ultérieure)
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 

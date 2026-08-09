@@ -35,7 +35,7 @@ class GradeSheetPolicy
             return true;
         }
 
-        return $user->currentRole() === 'teacher'
+        return $user->currentRole() === 'enseignant'
             && TeacherAssignment::query()->where('user_id', $user->id)->exists();
     }
 

@@ -14,9 +14,9 @@ dataset('billing_models', [
 
 test('admin et comptable peuvent gérer la facturation, l’enseignant non', function (string $modelClass) {
     $establishment = Establishment::factory()->create();
-    $admin = createUserWithRole($establishment, 'admin');
-    $accountant = createUserWithRole($establishment, 'accountant');
-    $teacher = createUserWithRole($establishment, 'teacher');
+    $admin = createUserWithRole($establishment, 'directeur');
+    $accountant = createUserWithRole($establishment, 'comptable');
+    $teacher = createUserWithRole($establishment, 'enseignant');
 
     actingInEstablishment($establishment);
 
@@ -32,8 +32,8 @@ test('admin et comptable peuvent gérer la facturation, l’enseignant non', fun
 
 test('seul un admin peut supprimer un paiement, pas le comptable', function () {
     $establishment = Establishment::factory()->create();
-    $admin = createUserWithRole($establishment, 'admin');
-    $accountant = createUserWithRole($establishment, 'accountant');
+    $admin = createUserWithRole($establishment, 'directeur');
+    $accountant = createUserWithRole($establishment, 'comptable');
 
     actingInEstablishment($establishment);
 
