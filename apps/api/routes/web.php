@@ -7,6 +7,7 @@ use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Dashboard;
 use App\Livewire\SaasAdmins\Register as SaasAdminsRegister;
+use App\Livewire\Staff\Register as StaffRegister;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -29,6 +30,7 @@ Route::middleware('guest')->group(function (): void {
     Route::get('/login', Login::class)->name('login');
     Route::get('/register', Register::class)->name('register');
     Route::get('/saas-admin/register', SaasAdminsRegister::class)->name('saas-admins.register');
+    Route::get('/staff/register', StaffRegister::class)->name('staff.register');
 });
 
 Route::middleware('auth')->group(function (): void {
@@ -45,4 +47,5 @@ Route::middleware('auth')->group(function (): void {
     require __DIR__.'/guardian-portal.php';
     require __DIR__.'/foundations.php';
     require __DIR__.'/saas-admins.php';
+    require __DIR__.'/staff.php';
 });

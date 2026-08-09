@@ -65,6 +65,18 @@
                 $navItems[] = ['type' => 'link', 'label' => 'Administrateurs SaaS', 'route' => 'saas-admins.index', 'active' => 'saas-admins.*', 'icon' => 'users'];
             }
 
+            if (app()->bound('currentEstablishmentId')) {
+                $currentEstablishment = \App\Domain\Establishments\Models\Establishment::find(app('currentEstablishmentId'));
+
+                if ($currentEstablishment !== null && auth()->user()->isLocalAdminOf($currentEstablishment)) {
+                    $navItems[] = ['type' => 'link', 'label' => 'Mon établissement', 'route' => 'staff.index', 'active' => 'staff.index', 'icon' => 'users', 'params' => ['establishment' => $currentEstablishment->id]];
+                }
+            }
+
+            if (auth()->user()->isFondateurSomewhere()) {
+                $navItems[] = ['type' => 'link', 'label' => 'Mon organisation', 'route' => 'staff.organization', 'active' => 'staff.organization', 'icon' => 'building'];
+            }
+
             $initials = collect(explode(' ', auth()->user()->name))
                 ->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))
                 ->take(2)
@@ -83,7 +95,7 @@
                         @if ($item['type'] === 'link')
                             @php $isActive = request()->routeIs($item['active']); @endphp
                             <a
-                                href="{{ route($item['route']) }}"
+                                href="{{ route($item['route'], $item['params'] ?? []) }}"
                                 wire:navigate
                                 class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium {{ $isActive ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}"
                             >

@@ -1,0 +1,110 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Domain\Establishments\Models\Establishment;
+use App\Domain\Establishments\Models\EstablishmentUserPivot;
+use App\Domain\Establishments\Models\Foundation;
+use App\Domain\Establishments\Models\FoundationUserPivot;
+use App\Livewire\Staff\ManageOrganization;
+use App\Models\User;
+use Livewire\Livewire;
+
+test('un GENERAL_ADMIN d’une école indépendante peut créer, supprimer et nommer un LOCAL_ADMIN', function () {
+    $establishment = Establishment::factory()->create(['foundation_id' => null]);
+    $generalAdmin = createGeneralAdmin($establishment);
+    test()->actingAs($generalAdmin);
+
+    Livewire::test(ManageOrganization::class)
+        ->set('staff_establishment_id', $establishment->id)
+        ->set('staff_name', 'Comptable Test')
+        ->set('staff_email', 'comptable.test@nitsoft.test')
+        ->set('staff_role', 'comptable')
+        ->call('create')
+        ->assertHasNoErrors()
+        ->assertSet('generatedPasswordFor', 'comptable.test@nitsoft.test');
+
+    $comptable = User::where('email', 'comptable.test@nitsoft.test')->sole();
+    $comptablePivot = EstablishmentUserPivot::where('user_id', $comptable->id)->sole();
+
+    $directeur = User::factory()->create();
+    $establishment->users()->attach($directeur->id, ['role' => 'directeur', 'is_active' => true]);
+    $directeurPivot = EstablishmentUserPivot::where('user_id', $directeur->id)->sole();
+
+    Livewire::test(ManageOrganization::class)->call('nominateLocalAdmin', $directeurPivot->id);
+    expect($directeurPivot->fresh()->is_local_admin)->toBeTrue();
+
+    Livewire::test(ManageOrganization::class)->call('dismissLocalAdmin', $establishment->id);
+    expect($directeurPivot->fresh()->is_local_admin)->toBeNull();
+
+    Livewire::test(ManageOrganization::class)->call('delete', $comptablePivot->id);
+    expect(EstablishmentUserPivot::find($comptablePivot->id))->toBeNull();
+});
+
+test('un GENERAL_ADMIN ne peut pas se désactiver ni se supprimer lui-même', function () {
+    $establishment = Establishment::factory()->create(['foundation_id' => null]);
+    $generalAdmin = createGeneralAdmin($establishment);
+    test()->actingAs($generalAdmin);
+
+    $ownPivot = EstablishmentUserPivot::where('user_id', $generalAdmin->id)->sole();
+
+    Livewire::test(ManageOrganization::class)
+        ->call('deactivate', $ownPivot->id)
+        ->assertStatus(422);
+
+    Livewire::test(ManageOrganization::class)
+        ->call('delete', $ownPivot->id)
+        ->assertStatus(422);
+});
+
+test('un GENERAL_ADMIN peut céder son pouvoir à un autre fondateur du même établissement indépendant', function () {
+    $establishment = Establishment::factory()->create(['foundation_id' => null]);
+    $generalAdmin = createGeneralAdmin($establishment);
+    test()->actingAs($generalAdmin);
+
+    $otherFounder = User::factory()->create();
+    $establishment->users()->attach($otherFounder->id, ['role' => 'fondateur', 'is_active' => true]);
+    $otherPivot = EstablishmentUserPivot::where('user_id', $otherFounder->id)->sole();
+
+    Livewire::test(ManageOrganization::class)->call('cedeGeneralAdmin', $otherPivot->id);
+
+    expect($otherPivot->fresh()->is_general_admin)->toBeTrue()
+        ->and(EstablishmentUserPivot::where('user_id', $generalAdmin->id)->sole()->is_general_admin)->toBeNull();
+});
+
+test('un fondateur sans pouvoir actuel peut réclamer le GENERAL_ADMIN', function () {
+    $establishment = Establishment::factory()->create(['foundation_id' => null]);
+    $generalAdmin = createGeneralAdmin($establishment);
+
+    $challenger = User::factory()->create();
+    $establishment->users()->attach($challenger->id, ['role' => 'fondateur', 'is_active' => true]);
+    test()->actingAs($challenger);
+
+    Livewire::test(ManageOrganization::class)->call('reclaim');
+
+    expect(EstablishmentUserPivot::where('user_id', $challenger->id)->sole()->is_general_admin)->toBeTrue()
+        ->and(EstablishmentUserPivot::where('user_id', $generalAdmin->id)->sole()->is_general_admin)->toBeNull();
+});
+
+test('un GENERAL_ADMIN de fondation peut activer un fondateur en attente', function () {
+    $foundation = Foundation::factory()->create();
+    $generalAdmin = createGeneralAdmin($foundation);
+    test()->actingAs($generalAdmin);
+
+    $pendingFounder = User::factory()->create();
+    $foundation->users()->attach($pendingFounder->id, ['role' => 'fondateur', 'is_active' => false]);
+    $pendingPivot = FoundationUserPivot::where('user_id', $pendingFounder->id)->sole();
+
+    Livewire::test(ManageOrganization::class)->call('activateFondateur', $pendingPivot->id);
+
+    expect($pendingPivot->fresh()->is_active)->toBeTrue();
+});
+
+test('un utilisateur sans rôle fondateur ne peut pas accéder à l’écran', function () {
+    $establishment = Establishment::factory()->create();
+    $teacher = User::factory()->create();
+    $establishment->users()->attach($teacher->id, ['role' => 'enseignant', 'is_active' => true]);
+    test()->actingAs($teacher);
+
+    Livewire::test(ManageOrganization::class)->assertForbidden();
+});
