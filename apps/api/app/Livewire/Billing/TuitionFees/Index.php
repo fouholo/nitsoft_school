@@ -6,6 +6,7 @@ namespace App\Livewire\Billing\TuitionFees;
 
 use App\Domain\Academics\Models\Level;
 use App\Domain\Academics\Models\SchoolYear;
+use App\Domain\Billing\Models\Discount;
 use App\Domain\Billing\Models\Installment;
 use App\Domain\Billing\Models\Invoice;
 use App\Domain\Billing\Models\LevelFee;
@@ -237,6 +238,10 @@ class Index extends Component
             }
         }
 
+        $totalTuition = (float) $levelFee->installmentAmounts->whereNotNull('amount')->sum('amount');
+
+        $discountsByStudent = Discount::where('school_year_id', $this->school_year_id)->get()->keyBy('student_id');
+
         foreach ($levelFee->installmentAmounts->whereNotNull('amount') as $installmentAmount) {
             $installment = $installmentAmount->installment;
 
@@ -253,13 +258,36 @@ class Index extends Component
                     'school_year_id' => $this->school_year_id,
                     'installment_id' => $installment->id,
                     'label' => $installment->label,
-                    'amount_due' => $installmentAmount->amount,
+                    'amount_due' => $this->applyDiscount(
+                        (float) $installmentAmount->amount,
+                        $totalTuition,
+                        $discountsByStudent->get($enrollment->student_id),
+                    ),
                     'due_date' => $installment->due_date,
                     'status' => 'pending',
                     'created_by' => Auth::id(),
                 ]);
             }
         }
+    }
+
+    private function applyDiscount(float $amount, float $totalTuition, ?Discount $discount): float
+    {
+        if (! $discount) {
+            return $amount;
+        }
+
+        if ($discount->type === 'percentage') {
+            return round($amount * (1 - ((float) $discount->value / 100)), 2);
+        }
+
+        if ($totalTuition <= 0) {
+            return $amount;
+        }
+
+        $reduction = (float) $discount->value * $amount / $totalTuition;
+
+        return round(max(0.0, $amount - $reduction), 2);
     }
 
     protected function resetInstallmentForm(): void

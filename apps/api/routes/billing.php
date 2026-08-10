@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Billing\PaymentReceiptPdfController;
+use App\Livewire\Billing\Discounts\Index as DiscountsIndex;
 use App\Livewire\Billing\Expenses\Index as ExpensesIndex;
 use App\Livewire\Billing\Invoices\Index as InvoicesIndex;
 use App\Livewire\Billing\Invoices\Show as InvoicesShow;
@@ -17,4 +18,5 @@ Route::prefix('billing')->name('billing.')->group(function (): void {
     Route::get('/payments/{payment}/receipt', PaymentReceiptPdfController::class)->name('payments.receipt');
     Route::get('/expenses', ExpensesIndex::class)->name('expenses.index');
     Route::get('/payment-tracking', PaymentTrackingIndex::class)->name('payment-tracking.index');
+    Route::get('/discounts', DiscountsIndex::class)->name('discounts.index');
 });

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domain\Billing\Models\Discount;
 use App\Domain\Billing\Models\Expense;
 use App\Domain\Billing\Models\Installment;
 use App\Domain\Billing\Models\Invoice;
@@ -13,6 +14,7 @@ dataset('billing_models', [
     'installments' => [Installment::class],
     'level_fees' => [LevelFee::class],
     'invoices' => [Invoice::class],
+    'discounts' => [Discount::class],
 ]);
 
 test('admin et caissier peuvent gérer la facturation, l’enseignant non', function (string $modelClass) {

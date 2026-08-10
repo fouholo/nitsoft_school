@@ -52,6 +52,7 @@
                     ['label' => 'Factures', 'route' => 'billing.invoices.index'],
                     ['label' => 'Dépenses', 'route' => 'billing.expenses.index'],
                     ['label' => 'Suivi des paiements', 'route' => 'billing.payment-tracking.index'],
+                    ['label' => 'Réductions', 'route' => 'billing.discounts.index'],
                 ]],
                 ['type' => 'group', 'label' => 'SMS', 'icon' => 'chat', 'active' => 'notifications.*', 'children' => [
                     ['label' => 'Modèles', 'route' => 'notifications.sms-templates.index'],
