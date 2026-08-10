@@ -31,36 +31,48 @@
             $navItems = [
                 ['type' => 'link', 'label' => 'Tableau de bord', 'route' => 'dashboard', 'active' => 'dashboard', 'icon' => 'home'],
                 ['type' => 'group', 'label' => 'Académique', 'icon' => 'book', 'active' => 'academics.*', 'children' => [
-                    ['label' => 'Années scolaires', 'route' => 'academics.school-years.index'],
-                    ['label' => 'Périodes', 'route' => 'academics.terms.index'],
-                    ['label' => 'Classes', 'route' => 'academics.classrooms.index'],
-                    ['label' => 'Matières', 'route' => 'academics.subjects.index'],
-                    ['label' => 'Coefficients par matière', 'route' => 'academics.subject-coefficients.index'],
-                    ['label' => 'Affectations', 'route' => 'academics.teacher-assignments.index'],
+                    ['label' => 'Années scolaires', 'route' => 'academics.school-years.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\SchoolYear::class],
+                    ['label' => 'Périodes', 'route' => 'academics.terms.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\Term::class],
+                    ['label' => 'Classes', 'route' => 'academics.classrooms.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\Classroom::class],
+                    ['label' => 'Matières', 'route' => 'academics.subjects.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\Subject::class],
+                    ['label' => 'Coefficients par matière', 'route' => 'academics.subject-coefficients.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\SubjectCoefficient::class],
+                    ['label' => 'Affectations', 'route' => 'academics.teacher-assignments.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\TeacherAssignment::class],
                 ]],
-                ['type' => 'link', 'label' => 'Élèves', 'route' => 'students.index', 'active' => 'students.*', 'icon' => 'users'],
-                ['type' => 'link', 'label' => 'Tuteurs', 'route' => 'guardians.index', 'active' => 'guardians.*', 'icon' => 'identification'],
-                ...(auth()->user()->hasAdminRightsOnCurrentEstablishment() ? [
-                    ['type' => 'link', 'label' => 'Demandes de liaison', 'route' => 'guardian-link-requests.index', 'active' => 'guardian-link-requests.*', 'icon' => 'identification'],
-                ] : []),
+                ['type' => 'link', 'label' => 'Élèves', 'route' => 'students.index', 'active' => 'students.*', 'icon' => 'users', 'ability' => 'viewAny', 'model' => \App\Domain\Enrollment\Models\Student::class],
+                ['type' => 'link', 'label' => 'Tuteurs', 'route' => 'guardians.index', 'active' => 'guardians.*', 'icon' => 'identification', 'ability' => 'viewAny', 'model' => \App\Domain\Enrollment\Models\Guardian::class],
+                ['type' => 'link', 'label' => 'Demandes de liaison', 'route' => 'guardian-link-requests.index', 'active' => 'guardian-link-requests.*', 'icon' => 'identification', 'ability' => 'viewAny', 'model' => \App\Domain\Enrollment\Models\GuardianStudentPivot::class],
                 ['type' => 'group', 'label' => 'Notes', 'icon' => 'document-text', 'active' => 'grading.*', 'children' => [
-                    ['label' => 'Évaluations', 'route' => 'grading.grade-sheets.index'],
-                    ['label' => 'Bulletins', 'route' => 'grading.report-cards.index'],
+                    ['label' => 'Évaluations', 'route' => 'grading.grade-sheets.index', 'ability' => 'viewAny', 'model' => \App\Domain\Grading\Models\GradeSheet::class],
+                    ['label' => 'Bulletins', 'route' => 'grading.report-cards.index', 'ability' => 'viewAny', 'model' => \App\Domain\Grading\Models\ReportCard::class],
                 ]],
-                ['type' => 'link', 'label' => 'Présences', 'route' => 'attendance.sessions.index', 'active' => 'attendance.*', 'icon' => 'calendar-check'],
+                ['type' => 'link', 'label' => 'Présences', 'route' => 'attendance.sessions.index', 'active' => 'attendance.*', 'icon' => 'calendar-check', 'ability' => 'viewAny', 'model' => \App\Domain\Attendance\Models\AttendanceSession::class],
                 ['type' => 'group', 'label' => 'Facturation', 'icon' => 'banknote', 'active' => 'billing.*', 'children' => [
-                    ['label' => 'Tarifs', 'route' => 'billing.tuition-fees.index'],
-                    ['label' => 'Factures', 'route' => 'billing.invoices.index'],
-                    ['label' => 'Dépenses', 'route' => 'billing.expenses.index'],
-                    ['label' => 'Suivi des paiements', 'route' => 'billing.payment-tracking.index'],
-                    ['label' => 'Réductions', 'route' => 'billing.discounts.index'],
+                    ['label' => 'Tarifs', 'route' => 'billing.tuition-fees.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Installment::class],
+                    ['label' => 'Factures', 'route' => 'billing.invoices.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Invoice::class],
+                    ['label' => 'Dépenses', 'route' => 'billing.expenses.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Expense::class],
+                    ['label' => 'Suivi des paiements', 'route' => 'billing.payment-tracking.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Invoice::class],
+                    ['label' => 'Réductions', 'route' => 'billing.discounts.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Discount::class],
                 ]],
                 ['type' => 'group', 'label' => 'SMS', 'icon' => 'chat', 'active' => 'notifications.*', 'children' => [
-                    ['label' => 'Modèles', 'route' => 'notifications.sms-templates.index'],
-                    ['label' => 'Journal', 'route' => 'notifications.sms-messages.index'],
-                    ['label' => 'Envoyer un SMS', 'route' => 'notifications.sms-messages.create'],
+                    ['label' => 'Modèles', 'route' => 'notifications.sms-templates.index', 'ability' => 'viewAny', 'model' => \App\Domain\Notifications\Models\SmsTemplate::class],
+                    ['label' => 'Journal', 'route' => 'notifications.sms-messages.index', 'ability' => 'viewAny', 'model' => \App\Domain\Notifications\Models\SmsMessage::class],
+                    ['label' => 'Envoyer un SMS', 'route' => 'notifications.sms-messages.create', 'ability' => 'create', 'model' => \App\Domain\Notifications\Models\SmsMessage::class],
                 ]],
             ];
+
+            $canAccessNavItem = fn (array $item): bool => ! isset($item['ability']) || auth()->user()->can($item['ability'], $item['model']);
+
+            $navItems = collect($navItems)
+                ->map(function (array $item) use ($canAccessNavItem) {
+                    if ($item['type'] === 'group') {
+                        $item['children'] = array_values(array_filter($item['children'], $canAccessNavItem));
+                    }
+
+                    return $item;
+                })
+                ->filter(fn (array $item) => $item['type'] === 'group' ? count($item['children']) > 0 : $canAccessNavItem($item))
+                ->values()
+                ->all();
 
             if (auth()->user()->isSaasAdmin()) {
                 $navItems[] = ['type' => 'link', 'label' => 'Groupes scolaires', 'route' => 'foundations.index', 'active' => 'foundations.*', 'icon' => 'building'];
