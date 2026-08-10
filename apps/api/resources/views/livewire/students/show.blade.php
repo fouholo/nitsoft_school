@@ -145,6 +145,38 @@
         </table>
     </div>
 
+    @can('viewAny', \App\Domain\Billing\Models\Invoice::class)
+        @if ($financialSummary)
+            <h2 class="mt-8 text-sm font-semibold uppercase tracking-wide text-slate-500">Situation financière</h2>
+            <div class="mt-2 grid grid-cols-1 gap-4 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-3">
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Dû à ce jour</p>
+                    <p class="text-sm text-slate-900">{{ number_format($financialSummary['due_so_far'], 2) }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Payé</p>
+                    <p class="text-sm text-slate-900">{{ number_format($financialSummary['total_paid'], 2) }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Solde</p>
+                    @if ($financialSummary['balance'] > 0)
+                        <span class="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+                            Retard de {{ number_format($financialSummary['balance'], 2) }}
+                        </span>
+                    @elseif ($financialSummary['balance'] < 0)
+                        <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                            Avance de {{ number_format(abs($financialSummary['balance']), 2) }}
+                        </span>
+                    @else
+                        <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+                            À jour
+                        </span>
+                    @endif
+                </div>
+            </div>
+        @endif
+    @endcan
+
     @if ($student->father_name || $student->father_phone || $student->mother_name || $student->mother_phone || $student->tutor_name || $student->tutor_phone)
         <h2 class="mt-8 text-sm font-semibold uppercase tracking-wide text-slate-500">Contacts familiaux (référence école)</h2>
         <div class="mt-2 grid grid-cols-1 gap-4 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-3">

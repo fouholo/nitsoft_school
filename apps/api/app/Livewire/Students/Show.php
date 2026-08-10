@@ -6,11 +6,15 @@ namespace App\Livewire\Students;
 
 use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\SchoolYear;
+use App\Domain\Billing\Services\PaymentTrackingService;
 use App\Domain\Enrollment\Enums\GuardianLinkStatus;
 use App\Domain\Enrollment\Enums\GuardianRelationship;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Guardian;
 use App\Domain\Enrollment\Models\Student;
+use App\Domain\Establishments\Support\RolePermissions;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
@@ -142,10 +146,23 @@ class Show extends Component
 
     public function render()
     {
+        /** @var User $user */
+        $user = Auth::user();
+
+        $ownerId = RolePermissions::can($user->currentRole(), 'finance.scope_own_only') ? $user->id : null;
+
+        $schoolYearId = $this->student->enrollments()->where('status', 'active')->latest('enrolled_on')->value('school_year_id')
+            ?? SchoolYear::where('is_current', true)->value('id');
+
+        $financialSummary = $schoolYearId
+            ? app(PaymentTrackingService::class)->balanceForStudent($this->student->id, $schoolYearId, $ownerId)
+            : null;
+
         return view('livewire.students.show', [
             'enrollments' => $this->student->enrollments()->with(['classroom', 'schoolYear'])->latest('enrolled_on')->get(),
             'classrooms' => Classroom::orderBy('name')->get(),
             'schoolYears' => SchoolYear::orderByDesc('starts_on')->get(),
+            'financialSummary' => $financialSummary,
             'guardians' => $this->student->guardians()->wherePivot('status', GuardianLinkStatus::Approved)->get(),
             'availableGuardians' => Guardian::query()
                 ->when($this->guardianSearch !== '', fn ($query) => $query
