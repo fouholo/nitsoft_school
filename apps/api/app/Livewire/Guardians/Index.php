@@ -159,8 +159,13 @@ class Index extends Component
     {
         $guardians = Guardian::query()
             ->whereHas('students', fn ($query) => $query
-                ->wherePivot('establishment_id', app('currentEstablishmentId'))
-                ->wherePivot('status', GuardianLinkStatus::Approved))
+                // wherePivot() n'existe pas sur le Builder reçu par la closure
+                // whereHas() (contrairement à un vrai objet de relation
+                // BelongsToMany) — Eloquent le retombe silencieusement sur
+                // dynamicWhere() et génère `where('pivot', ...)`, une colonne
+                // inexistante. Référencer directement la table pivot jointe.
+                ->where('guardian_student.establishment_id', app('currentEstablishmentId'))
+                ->where('guardian_student.status', GuardianLinkStatus::Approved))
             ->when($this->search !== '', function ($query): void {
                 $query->where(function ($query): void {
                     $query->where('first_name', 'like', "%{$this->search}%")
