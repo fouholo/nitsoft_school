@@ -35,6 +35,7 @@
                     ['label' => 'Périodes', 'route' => 'academics.terms.index'],
                     ['label' => 'Classes', 'route' => 'academics.classrooms.index'],
                     ['label' => 'Matières', 'route' => 'academics.subjects.index'],
+                    ['label' => 'Coefficients par matière', 'route' => 'academics.subject-coefficients.index'],
                     ['label' => 'Affectations', 'route' => 'academics.teacher-assignments.index'],
                 ]],
                 ['type' => 'link', 'label' => 'Élèves', 'route' => 'students.index', 'active' => 'students.*', 'icon' => 'users'],

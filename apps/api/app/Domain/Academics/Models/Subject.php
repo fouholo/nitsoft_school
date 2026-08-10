@@ -20,14 +20,12 @@ class Subject extends Model
     protected $fillable = [
         'establishment_id',
         'name',
-        'coefficient_default',
         'uid',
         'device_id',
         'client_updated_at',
     ];
 
     protected $casts = [
-        'coefficient_default' => 'decimal:2',
         'client_updated_at' => 'datetime',
     ];
 }

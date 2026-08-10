@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\SchoolYear;
+use App\Domain\Academics\Models\Subject;
+use App\Domain\Academics\Models\SubjectCoefficient;
 use App\Domain\Academics\Models\Term;
+use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Models\Establishment;
+use App\Domain\Grading\Models\Grade;
+use App\Domain\Grading\Models\GradeSheet;
 use App\Domain\Grading\Models\ReportCard;
 use App\Livewire\Grading\ReportCards\Index;
 use Livewire\Livewire;
@@ -38,4 +43,100 @@ test('la génération de bulletin pour une classe préscolaire est refusée', fu
         ->assertHasErrors(['classroom_id']);
 
     expect(ReportCard::count())->toBe(0);
+});
+
+test('la génération est bloquée si le coefficient d’une matière notée n’est pas configuré', function () {
+    $classroom = Classroom::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'school_year_id' => $this->term->school_year_id,
+    ]);
+    $subject = Subject::factory()->create(['establishment_id' => $this->establishment->id]);
+    $student = Student::factory()->create(['establishment_id' => $this->establishment->id]);
+
+    $gradeSheet = GradeSheet::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'classroom_id' => $classroom->id,
+        'subject_id' => $subject->id,
+        'term_id' => $this->term->id,
+    ]);
+    Grade::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'grade_sheet_id' => $gradeSheet->id,
+        'student_id' => $student->id,
+        'score' => 12,
+    ]);
+
+    Livewire::test(Index::class)
+        ->set('classroom_id', $classroom->id)
+        ->set('term_id', $this->term->id)
+        ->call('generate')
+        ->assertHasErrors(['classroom_id']);
+
+    expect(ReportCard::count())->toBe(0);
+});
+
+test('la moyenne générale pondère chaque matière par son coefficient', function () {
+    $classroom = Classroom::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'school_year_id' => $this->term->school_year_id,
+    ]);
+    $subjectA = Subject::factory()->create(['establishment_id' => $this->establishment->id]);
+    $subjectB = Subject::factory()->create(['establishment_id' => $this->establishment->id]);
+    $student = Student::factory()->create(['establishment_id' => $this->establishment->id]);
+
+    SubjectCoefficient::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'level_id' => $classroom->level_id,
+        'serie_id' => null,
+        'subject_id' => $subjectA->id,
+        'coefficient' => 4,
+    ]);
+    SubjectCoefficient::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'level_id' => $classroom->level_id,
+        'serie_id' => null,
+        'subject_id' => $subjectB->id,
+        'coefficient' => 1,
+    ]);
+
+    $gradeSheetA = GradeSheet::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'classroom_id' => $classroom->id,
+        'subject_id' => $subjectA->id,
+        'term_id' => $this->term->id,
+        'weight' => 1,
+        'max_score' => 20,
+    ]);
+    $gradeSheetB = GradeSheet::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'classroom_id' => $classroom->id,
+        'subject_id' => $subjectB->id,
+        'term_id' => $this->term->id,
+        'weight' => 1,
+        'max_score' => 20,
+    ]);
+    Grade::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'grade_sheet_id' => $gradeSheetA->id,
+        'student_id' => $student->id,
+        'score' => 10,
+    ]);
+    Grade::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'grade_sheet_id' => $gradeSheetB->id,
+        'student_id' => $student->id,
+        'score' => 16,
+    ]);
+
+    Livewire::test(Index::class)
+        ->set('classroom_id', $classroom->id)
+        ->set('term_id', $this->term->id)
+        ->call('generate')
+        ->assertHasNoErrors();
+
+    $reportCard = ReportCard::sole();
+
+    // (10×4 + 16×1) / (4+1) = 11.2
+    expect((float) $reportCard->average)->toBe(11.2)
+        ->and($reportCard->rank)->toBe(1);
 });

@@ -20,7 +20,6 @@ class SubjectFactory extends Factory
         return [
             'establishment_id' => Establishment::factory(),
             'name' => fake()->randomElement(['Mathématiques', 'Français', 'Histoire', 'Sciences']),
-            'coefficient_default' => 1,
         ];
     }
 }

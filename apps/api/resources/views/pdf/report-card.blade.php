@@ -45,6 +45,7 @@
         <thead>
             <tr>
                 <th>Matière</th>
+                <th>Coef.</th>
                 <th>Moyenne / 20</th>
             </tr>
         </thead>
@@ -52,11 +53,12 @@
             @forelse ($breakdown as $row)
                 <tr>
                     <td>{{ $row->subject->name }}</td>
+                    <td>{{ $row->coefficient !== null ? number_format($row->coefficient, 1) : '—' }}</td>
                     <td>{{ $row->average !== null ? number_format($row->average, 2) : '—' }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="2">Aucune note disponible pour cette période.</td>
+                    <td colspan="3">Aucune note disponible pour cette période.</td>
                 </tr>
             @endforelse
         </tbody>

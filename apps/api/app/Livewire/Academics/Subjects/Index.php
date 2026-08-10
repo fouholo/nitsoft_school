@@ -19,8 +19,6 @@ class Index extends Component
 
     public string $name = '';
 
-    public float $coefficient_default = 1.0;
-
     public function mount(): void
     {
         $this->authorize('viewAny', Subject::class);
@@ -42,7 +40,6 @@ class Index extends Component
 
         $this->editingId = $subject->id;
         $this->name = $subject->name;
-        $this->coefficient_default = (float) $subject->coefficient_default;
         $this->showForm = true;
     }
 
@@ -50,7 +47,6 @@ class Index extends Component
     {
         $data = $this->validate([
             'name' => ['required', 'string', 'max:255'],
-            'coefficient_default' => ['required', 'numeric', 'min:0.5', 'max:20'],
         ]);
 
         if ($this->editingId) {
@@ -86,7 +82,6 @@ class Index extends Component
     protected function resetForm(): void
     {
         $this->reset(['editingId', 'name']);
-        $this->coefficient_default = 1.0;
     }
 
     public function render()

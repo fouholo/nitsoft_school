@@ -30,6 +30,7 @@ class GradeSheet extends Model
         'term_id',
         'teacher_id',
         'title',
+        'type',
         'max_score',
         'weight',
         'graded_on',

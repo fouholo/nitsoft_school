@@ -11,5 +11,6 @@ final class SubjectAverage
     public function __construct(
         public readonly Subject $subject,
         public readonly ?float $average,
+        public readonly ?float $coefficient = null,
     ) {}
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Academics\Models\Subject;
+use App\Domain\Academics\Models\SubjectCoefficient;
 use App\Domain\Academics\Models\Term;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
@@ -61,6 +62,9 @@ test('la moyenne pondérée et le rang sont calculés correctement', function ()
         'weight' => 1,
     ]);
 
+    SubjectCoefficient::factory()->create(['establishment_id' => $establishment->id, 'level_id' => $classroom->level_id, 'serie_id' => null, 'subject_id' => $subjectA->id, 'coefficient' => 2]);
+    SubjectCoefficient::factory()->create(['establishment_id' => $establishment->id, 'level_id' => $classroom->level_id, 'serie_id' => null, 'subject_id' => $subjectB->id, 'coefficient' => 1]);
+
     $best = makeGradedStudent($establishment, $classroom, $term, [[$sheetA, 16], [$sheetB, 10]]);
     $worst = makeGradedStudent($establishment, $classroom, $term, [[$sheetA, 8], [$sheetB, 20]]);
 
@@ -92,6 +96,8 @@ test('les élèves ex-aequo partagent le même rang', function () {
         'max_score' => 20,
         'weight' => 1,
     ]);
+
+    SubjectCoefficient::factory()->create(['establishment_id' => $establishment->id, 'level_id' => $classroom->level_id, 'serie_id' => null, 'subject_id' => $subject->id, 'coefficient' => 1]);
 
     $first = makeGradedStudent($establishment, $classroom, $term, [[$sheet, 15]]);
     $second = makeGradedStudent($establishment, $classroom, $term, [[$sheet, 15]]);
@@ -130,6 +136,9 @@ test('le détail par matière du bulletin liste chaque matière notée avec sa m
         'max_score' => 20,
         'weight' => 1,
     ]);
+
+    SubjectCoefficient::factory()->create(['establishment_id' => $establishment->id, 'level_id' => $classroom->level_id, 'serie_id' => null, 'subject_id' => $maths->id, 'coefficient' => 1]);
+    SubjectCoefficient::factory()->create(['establishment_id' => $establishment->id, 'level_id' => $classroom->level_id, 'serie_id' => null, 'subject_id' => $francais->id, 'coefficient' => 1]);
 
     $student = makeGradedStudent($establishment, $classroom, $term, [[$sheetMaths, 18], [$sheetFrancais, 12]]);
 

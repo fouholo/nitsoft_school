@@ -17,12 +17,6 @@
                 @error('name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-slate-700">Coefficient par défaut</label>
-                <input type="number" step="0.5" wire:model="coefficient_default" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
-                @error('coefficient_default') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-            </div>
-
             <div class="flex gap-2 sm:col-span-3">
                 <button type="submit" class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700">
                     Enregistrer
@@ -39,7 +33,6 @@
             <thead class="bg-slate-50">
                 <tr>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Nom</th>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">Coefficient</th>
                     <th class="px-4 py-2"></th>
                 </tr>
             </thead>
@@ -47,7 +40,6 @@
                 @forelse ($subjects as $subject)
                     <tr wire:key="subject-{{ $subject->id }}">
                         <td class="px-4 py-2 text-slate-900">{{ $subject->name }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ $subject->coefficient_default }}</td>
                         <td class="px-4 py-2 text-right">
                             @can('update', $subject)
                                 <button wire:click="edit({{ $subject->id }})" class="text-slate-500 hover:text-slate-900">Modifier</button>
@@ -65,7 +57,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="3" class="px-4 py-6 text-center text-slate-500">Aucune matière.</td>
+                        <td colspan="2" class="px-4 py-6 text-center text-slate-500">Aucune matière.</td>
                     </tr>
                 @endforelse
             </tbody>

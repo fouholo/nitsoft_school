@@ -28,6 +28,7 @@ class GradeSheetFactory extends Factory
             'term_id' => Term::factory(),
             'teacher_id' => User::factory(),
             'title' => 'Devoir '.fake()->numberBetween(1, 5),
+            'type' => 'devoir',
             'max_score' => 20,
             'weight' => 1,
             'graded_on' => now()->toDateString(),

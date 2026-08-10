@@ -32,6 +32,8 @@ class Index extends Component
 
     public string $title = '';
 
+    public string $type = 'devoir';
+
     public float $max_score = 20.0;
 
     public float $weight = 1.0;
@@ -47,11 +49,32 @@ class Index extends Component
     {
         $this->authorize('create', GradeSheet::class);
 
-        $this->reset(['classroom_id', 'subject_id', 'term_id', 'title']);
+        $this->reset(['classroom_id', 'subject_id', 'term_id', 'title', 'type']);
         $this->max_score = 20.0;
-        $this->weight = 1.0;
+        $this->weight = 2.0;
         $this->graded_on = now()->toDateString();
         $this->showForm = true;
+    }
+
+    public function updatedClassroomId(): void
+    {
+        if ($this->selectedClassroomCycle() === Cycle::Primaire) {
+            $this->type = 'composition';
+            $this->weight = 1.0;
+        } else {
+            $this->type = 'devoir';
+            $this->weight = 2.0;
+        }
+    }
+
+    public function updatedType(): void
+    {
+        $this->weight = match ($this->type) {
+            'devoir' => 2.0,
+            'interrogation' => 1.0,
+            'composition' => 1.0,
+            default => 1.0,
+        };
     }
 
     public function save(): void
@@ -63,6 +86,7 @@ class Index extends Component
             'subject_id' => ['required', 'exists:subjects,id'],
             'term_id' => ['required', 'exists:terms,id'],
             'title' => ['required', 'string', 'max:255'],
+            'type' => ['required', 'in:devoir,interrogation,composition'],
             'max_score' => ['required', 'numeric', 'min:1', 'max:1000'],
             'weight' => ['required', 'numeric', 'min:0.5', 'max:20'],
             'graded_on' => ['required', 'date'],
@@ -83,6 +107,14 @@ class Index extends Component
             ]);
         }
 
+        $allowedTypes = $classroom->level->cycle === Cycle::Primaire ? ['composition'] : ['devoir', 'interrogation'];
+
+        if (! in_array($data['type'], $allowedTypes, true)) {
+            throw ValidationException::withMessages([
+                'type' => "Type d'évaluation invalide pour ce cycle.",
+            ]);
+        }
+
         GradeSheet::create([...$data, 'teacher_id' => $user->id]);
 
         $this->showForm = false;
@@ -91,6 +123,11 @@ class Index extends Component
     public function cancel(): void
     {
         $this->showForm = false;
+    }
+
+    public function selectedClassroomCycle(): ?Cycle
+    {
+        return $this->classroom_id ? Classroom::find($this->classroom_id)?->level?->cycle : null;
     }
 
     /**

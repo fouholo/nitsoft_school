@@ -28,6 +28,10 @@ beforeEach(function () {
         'establishment_id' => $this->establishment->id,
         'school_year_id' => $schoolYear->id,
     ]);
+    $this->secondaireClassroom = Classroom::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'school_year_id' => $schoolYear->id,
+    ]);
     $this->subject = Subject::factory()->create(['establishment_id' => $this->establishment->id]);
     $this->term = Term::factory()->create(['establishment_id' => $this->establishment->id, 'school_year_id' => $schoolYear->id]);
 });
@@ -62,5 +66,41 @@ test('la création d’une feuille de notes pour une classe primaire fonctionne'
         ->call('save')
         ->assertHasNoErrors();
 
-    expect(GradeSheet::count())->toBe(1);
+    expect(GradeSheet::count())->toBe(1)
+        ->and(GradeSheet::sole()->type)->toBe('composition');
+});
+
+test('sélectionner une classe primaire impose le type composition et le poids 1', function () {
+    Livewire::test(Index::class)
+        ->set('classroom_id', $this->primaireClassroom->id)
+        ->assertSet('type', 'composition')
+        ->assertSet('weight', 1.0);
+});
+
+test('sélectionner une classe secondaire pré-remplit le type devoir et le poids 2', function () {
+    Livewire::test(Index::class)
+        ->set('classroom_id', $this->secondaireClassroom->id)
+        ->assertSet('type', 'devoir')
+        ->assertSet('weight', 2.0);
+});
+
+test('changer le type en interrogation ajuste le poids par défaut à 1', function () {
+    Livewire::test(Index::class)
+        ->set('classroom_id', $this->secondaireClassroom->id)
+        ->set('type', 'interrogation')
+        ->assertSet('weight', 1.0);
+});
+
+test('un type incompatible avec le cycle de la classe est rejeté côté serveur', function () {
+    Livewire::test(Index::class)
+        ->set('classroom_id', $this->primaireClassroom->id)
+        ->set('subject_id', $this->subject->id)
+        ->set('term_id', $this->term->id)
+        ->set('title', 'Devoir 1')
+        ->set('type', 'devoir')
+        ->set('graded_on', now()->toDateString())
+        ->call('save')
+        ->assertHasErrors(['type']);
+
+    expect(GradeSheet::count())->toBe(0);
 });
