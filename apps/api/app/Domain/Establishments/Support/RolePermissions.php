@@ -27,7 +27,7 @@ final class RolePermissions
 
         'finance.access' => ['fondateur', 'directeur', 'gestionnaire', 'caissier', 'educateur'],
         'finance.scope_own_only' => ['educateur'],
-        'fee_schedules.write' => ['fondateur', 'directeur', 'gestionnaire', 'caissier', 'educateur'],
+        'tuition_fees.write' => ['fondateur', 'directeur', 'gestionnaire', 'caissier', 'educateur'],
         'billing.manage' => ['directeur', 'caissier', 'educateur'],
         'payments.delete' => ['fondateur', 'directeur'],
         'expenses.create' => ['fondateur', 'directeur', 'gestionnaire', 'caissier', 'educateur'],

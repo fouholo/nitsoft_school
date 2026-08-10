@@ -5,25 +5,25 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Domain\Academics\Models\SchoolYear;
-use App\Domain\Billing\Models\FeeSchedule;
+use App\Domain\Billing\Models\Installment;
 use App\Domain\Establishments\Models\Establishment;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<FeeSchedule>
+ * @extends Factory<Installment>
  */
-class FeeScheduleFactory extends Factory
+class InstallmentFactory extends Factory
 {
-    protected $model = FeeSchedule::class;
+    protected $model = Installment::class;
 
     public function definition(): array
     {
         return [
             'establishment_id' => Establishment::factory(),
             'school_year_id' => SchoolYear::factory(),
-            'label' => 'Frais de scolarité',
-            'amount' => 50000,
+            'label' => 'Octobre',
             'due_date' => now()->addMonth()->toDateString(),
+            'position' => 1,
         ];
     }
 }

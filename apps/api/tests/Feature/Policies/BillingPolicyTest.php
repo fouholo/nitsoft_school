@@ -3,13 +3,15 @@
 declare(strict_types=1);
 
 use App\Domain\Billing\Models\Expense;
-use App\Domain\Billing\Models\FeeSchedule;
+use App\Domain\Billing\Models\Installment;
 use App\Domain\Billing\Models\Invoice;
+use App\Domain\Billing\Models\LevelFee;
 use App\Domain\Billing\Models\Payment;
 use App\Domain\Establishments\Models\Establishment;
 
 dataset('billing_models', [
-    'fee_schedules' => [FeeSchedule::class],
+    'installments' => [Installment::class],
+    'level_fees' => [LevelFee::class],
     'invoices' => [Invoice::class],
 ]);
 
@@ -54,10 +56,12 @@ test('fondateur et gestionnaire voient les factures/paiements mais ne les gèren
 
     expect($manager->can('viewAny', Invoice::class))->toBeTrue()
         ->and($manager->can('create', Invoice::class))->toBeFalse()
-        ->and($manager->can('create', FeeSchedule::class))->toBeTrue()
+        ->and($manager->can('create', Installment::class))->toBeTrue()
+        ->and($manager->can('create', LevelFee::class))->toBeTrue()
         ->and($founder->can('viewAny', Invoice::class))->toBeTrue()
         ->and($founder->can('create', Invoice::class))->toBeFalse()
-        ->and($founder->can('create', FeeSchedule::class))->toBeTrue();
+        ->and($founder->can('create', Installment::class))->toBeTrue()
+        ->and($founder->can('create', LevelFee::class))->toBeTrue();
 });
 
 test('un éducateur ne voit que les factures/paiements/dépenses qu’il a lui-même saisis', function () {

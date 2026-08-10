@@ -48,7 +48,7 @@
                 ]],
                 ['type' => 'link', 'label' => 'Présences', 'route' => 'attendance.sessions.index', 'active' => 'attendance.*', 'icon' => 'calendar-check'],
                 ['type' => 'group', 'label' => 'Facturation', 'icon' => 'banknote', 'active' => 'billing.*', 'children' => [
-                    ['label' => 'Grilles tarifaires', 'route' => 'billing.fee-schedules.index'],
+                    ['label' => 'Tarifs', 'route' => 'billing.tuition-fees.index'],
                     ['label' => 'Factures', 'route' => 'billing.invoices.index'],
                     ['label' => 'Dépenses', 'route' => 'billing.expenses.index'],
                 ]],

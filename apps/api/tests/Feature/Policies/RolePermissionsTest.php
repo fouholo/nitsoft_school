@@ -13,7 +13,7 @@ dataset('role_permissions_matrix', [
     'staff.assign' => ['staff.assign', ['fondateur' => true, 'directeur' => true, 'gestionnaire' => false, 'caissier' => false, 'educateur' => true]],
     'finance.access' => ['finance.access', ['fondateur' => true, 'directeur' => true, 'gestionnaire' => true, 'caissier' => true, 'educateur' => true]],
     'finance.scope_own_only' => ['finance.scope_own_only', ['fondateur' => false, 'directeur' => false, 'gestionnaire' => false, 'caissier' => false, 'educateur' => true]],
-    'fee_schedules.write' => ['fee_schedules.write', ['fondateur' => true, 'directeur' => true, 'gestionnaire' => true, 'caissier' => true, 'educateur' => true]],
+    'tuition_fees.write' => ['tuition_fees.write', ['fondateur' => true, 'directeur' => true, 'gestionnaire' => true, 'caissier' => true, 'educateur' => true]],
     'billing.manage' => ['billing.manage', ['fondateur' => false, 'directeur' => true, 'gestionnaire' => false, 'caissier' => true, 'educateur' => true]],
     'payments.delete' => ['payments.delete', ['fondateur' => true, 'directeur' => true, 'gestionnaire' => false, 'caissier' => false, 'educateur' => false]],
     'expenses.create' => ['expenses.create', ['fondateur' => true, 'directeur' => true, 'gestionnaire' => true, 'caissier' => true, 'educateur' => true]],
