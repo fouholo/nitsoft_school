@@ -9,6 +9,7 @@ use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Billing\Models\FeeSchedule;
 use App\Domain\Billing\Models\Invoice;
 use App\Domain\Enrollment\Models\Enrollment;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -135,6 +136,7 @@ class Index extends Component
                 'amount_due' => $feeSchedule->amount,
                 'due_date' => $feeSchedule->due_date,
                 'status' => 'pending',
+                'created_by' => Auth::id(),
             ]);
         }
     }

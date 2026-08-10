@@ -6,17 +6,15 @@ namespace App\Domain\Billing\Models;
 
 use App\Domain\Billing\Concerns\HasOwnerScope;
 use App\Domain\Billing\Contracts\HasOwnerColumn;
-use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Concerns\TenantScoped;
 use App\Domain\Sync\Concerns\Syncable;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Payment extends Model implements HasOwnerColumn
+class Expense extends Model implements HasOwnerColumn
 {
     use HasFactory;
     use HasOwnerScope;
@@ -26,13 +24,10 @@ class Payment extends Model implements HasOwnerColumn
 
     protected $fillable = [
         'establishment_id',
-        'invoice_id',
-        'student_id',
+        'label',
         'amount',
-        'method',
-        'paid_at',
-        'received_by',
-        'reference',
+        'spent_at',
+        'recorded_by',
         'uid',
         'device_id',
         'client_updated_at',
@@ -40,44 +35,20 @@ class Payment extends Model implements HasOwnerColumn
 
     protected $casts = [
         'amount' => 'decimal:2',
-        'paid_at' => 'datetime',
+        'spent_at' => 'date',
         'client_updated_at' => 'datetime',
     ];
 
     /**
-     * @return BelongsTo<Invoice, $this>
-     */
-    public function invoice(): BelongsTo
-    {
-        return $this->belongsTo(Invoice::class);
-    }
-
-    /**
-     * @return BelongsTo<Student, $this>
-     */
-    public function student(): BelongsTo
-    {
-        return $this->belongsTo(Student::class);
-    }
-
-    /**
      * @return BelongsTo<User, $this>
      */
-    public function receivedBy(): BelongsTo
+    public function recordedBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'received_by');
-    }
-
-    /**
-     * @return HasOne<Receipt, $this>
-     */
-    public function receipt(): HasOne
-    {
-        return $this->hasOne(Receipt::class);
+        return $this->belongsTo(User::class, 'recorded_by');
     }
 
     public function ownerColumn(): string
     {
-        return 'received_by';
+        return 'recorded_by';
     }
 }

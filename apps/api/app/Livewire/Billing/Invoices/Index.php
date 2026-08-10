@@ -7,6 +7,9 @@ namespace App\Livewire\Billing\Invoices;
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Billing\Models\Invoice;
 use App\Domain\Enrollment\Models\Student;
+use App\Domain\Establishments\Support\RolePermissions;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -66,7 +69,7 @@ class Index extends Component
             'school_year_id' => ['required', 'exists:school_years,id'],
         ]);
 
-        Invoice::create([...$data, 'status' => 'pending']);
+        Invoice::create([...$data, 'status' => 'pending', 'created_by' => Auth::id()]);
 
         $this->showForm = false;
     }
@@ -78,6 +81,9 @@ class Index extends Component
 
     public function render()
     {
+        /** @var User $user */
+        $user = Auth::user();
+
         $invoices = Invoice::query()
             ->with('student')
             ->when($this->statusFilter !== '', fn ($query) => $query->where('status', $this->statusFilter))
@@ -88,6 +94,10 @@ class Index extends Component
                         ->orWhere('student_number', 'like', "%{$this->search}%");
                 });
             })
+            ->when(
+                RolePermissions::can($user->currentRole(), 'finance.scope_own_only'),
+                fn ($query) => $query->ownedBy($user),
+            )
             ->orderByDesc('due_date')
             ->paginate(15);
 

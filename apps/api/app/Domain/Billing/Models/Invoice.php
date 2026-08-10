@@ -5,18 +5,22 @@ declare(strict_types=1);
 namespace App\Domain\Billing\Models;
 
 use App\Domain\Academics\Models\SchoolYear;
+use App\Domain\Billing\Concerns\HasOwnerScope;
+use App\Domain\Billing\Contracts\HasOwnerColumn;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Concerns\TenantScoped;
 use App\Domain\Sync\Concerns\Syncable;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Invoice extends Model
+class Invoice extends Model implements HasOwnerColumn
 {
     use HasFactory;
+    use HasOwnerScope;
     use SoftDeletes;
     use Syncable;
     use TenantScoped;
@@ -26,6 +30,7 @@ class Invoice extends Model
         'student_id',
         'school_year_id',
         'fee_schedule_id',
+        'created_by',
         'label',
         'amount_due',
         'amount_paid',
@@ -59,10 +64,23 @@ class Invoice extends Model
     }
 
     /**
+     * @return BelongsTo<User, $this>
+     */
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
      * @return HasMany<Payment, $this>
      */
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function ownerColumn(): string
+    {
+        return 'created_by';
     }
 }
