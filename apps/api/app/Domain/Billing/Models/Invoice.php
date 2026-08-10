@@ -29,6 +29,7 @@ class Invoice extends Model implements HasOwnerColumn
         'establishment_id',
         'student_id',
         'school_year_id',
+        'installment_id',
         'created_by',
         'label',
         'amount_due',
@@ -55,6 +56,14 @@ class Invoice extends Model implements HasOwnerColumn
     public function schoolYear(): BelongsTo
     {
         return $this->belongsTo(SchoolYear::class);
+    }
+
+    /**
+     * @return BelongsTo<Installment, $this>
+     */
+    public function installment(): BelongsTo
+    {
+        return $this->belongsTo(Installment::class);
     }
 
     /**

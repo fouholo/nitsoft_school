@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\Level;
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Billing\Models\Installment;
+use App\Domain\Billing\Models\Invoice;
 use App\Domain\Billing\Models\LevelFee;
+use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Establishments\Models\Establishment;
 use App\Livewire\Billing\TuitionFees\Index;
 use Livewire\Livewire;
@@ -94,4 +97,180 @@ test('un enseignant n’a aucun accès à l’écran des tarifs', function () {
     test()->actingAs($teacher);
 
     Livewire::test(Index::class)->assertForbidden();
+});
+
+test('un directeur génère les factures manquantes pour un niveau, inscription et tranches configurées, la tranche vide est ignorée', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $level = Level::factory()->create();
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'level_id' => $level->id]);
+
+    $installment1 = Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 1]);
+    $installment2 = Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 2]);
+    $installment3 = Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 3]);
+
+    $levelFee = LevelFee::factory()->create([
+        'establishment_id' => $establishment->id,
+        'school_year_id' => $schoolYear->id,
+        'level_id' => $level->id,
+        'registration_amount' => 5000,
+    ]);
+    $levelFee->installmentAmounts()->create(['installment_id' => $installment1->id, 'amount' => 10000]);
+    $levelFee->installmentAmounts()->create(['installment_id' => $installment2->id, 'amount' => 12000]);
+    // $installment3 volontairement laissée sans montant : non due pour ce niveau.
+
+    $enrollment = Enrollment::factory()->create([
+        'establishment_id' => $establishment->id,
+        'classroom_id' => $classroom->id,
+        'school_year_id' => $schoolYear->id,
+        'status' => 'active',
+        'enrolled_on' => '2026-09-15',
+    ]);
+
+    Livewire::test(Index::class)
+        ->set('school_year_id', $schoolYear->id)
+        ->call('generateInvoices', $level->id);
+
+    $invoices = Invoice::where('student_id', $enrollment->student_id)->get();
+
+    expect($invoices)->toHaveCount(3);
+
+    $registrationInvoice = $invoices->firstWhere('installment_id', null);
+    expect($registrationInvoice)->not->toBeNull()
+        ->and((float) $registrationInvoice->amount_due)->toBe(5000.0)
+        ->and($registrationInvoice->due_date->toDateString())->toBe('2026-09-15');
+
+    $invoice1 = $invoices->firstWhere('installment_id', $installment1->id);
+    expect($invoice1)->not->toBeNull()->and((float) $invoice1->amount_due)->toBe(10000.0);
+
+    $invoice2 = $invoices->firstWhere('installment_id', $installment2->id);
+    expect($invoice2)->not->toBeNull()->and((float) $invoice2->amount_due)->toBe(12000.0);
+
+    expect($invoices->firstWhere('installment_id', $installment3->id))->toBeNull();
+});
+
+test('générer les factures une seconde fois ne crée aucun doublon', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $level = Level::factory()->create();
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'level_id' => $level->id]);
+    $installment = Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 1]);
+
+    $levelFee = LevelFee::factory()->create([
+        'establishment_id' => $establishment->id,
+        'school_year_id' => $schoolYear->id,
+        'level_id' => $level->id,
+        'registration_amount' => 5000,
+    ]);
+    $levelFee->installmentAmounts()->create(['installment_id' => $installment->id, 'amount' => 10000]);
+
+    Enrollment::factory()->create([
+        'establishment_id' => $establishment->id,
+        'classroom_id' => $classroom->id,
+        'school_year_id' => $schoolYear->id,
+        'status' => 'active',
+    ]);
+
+    $component = Livewire::test(Index::class)->set('school_year_id', $schoolYear->id);
+
+    $component->call('generateInvoices', $level->id);
+    $countAfterFirstCall = Invoice::count();
+
+    $component->call('generateInvoices', $level->id);
+
+    expect(Invoice::count())->toBe($countAfterFirstCall);
+});
+
+test('modifier le tarif après génération ne change pas les factures déjà émises', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $level = Level::factory()->create();
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'level_id' => $level->id]);
+    $installment = Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 1]);
+
+    $levelFee = LevelFee::factory()->create([
+        'establishment_id' => $establishment->id,
+        'school_year_id' => $schoolYear->id,
+        'level_id' => $level->id,
+        'registration_amount' => 5000,
+    ]);
+    $levelFee->installmentAmounts()->create(['installment_id' => $installment->id, 'amount' => 10000]);
+
+    $enrollment = Enrollment::factory()->create([
+        'establishment_id' => $establishment->id,
+        'classroom_id' => $classroom->id,
+        'school_year_id' => $schoolYear->id,
+        'status' => 'active',
+    ]);
+
+    $component = Livewire::test(Index::class)->set('school_year_id', $schoolYear->id);
+    $component->call('generateInvoices', $level->id);
+
+    $invoice = Invoice::where('student_id', $enrollment->student_id)->where('installment_id', $installment->id)->sole();
+
+    $levelFee->installmentAmounts()->where('installment_id', $installment->id)->update(['amount' => 99999]);
+
+    $component->call('generateInvoices', $level->id);
+
+    expect((float) $invoice->refresh()->amount_due)->toBe(10000.0);
+});
+
+test('un élève inscrit dans un autre niveau n’est pas concerné par la génération', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $level = Level::factory()->create();
+    $otherLevel = Level::factory()->create();
+    $otherClassroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'level_id' => $otherLevel->id]);
+
+    LevelFee::factory()->create([
+        'establishment_id' => $establishment->id,
+        'school_year_id' => $schoolYear->id,
+        'level_id' => $level->id,
+        'registration_amount' => 5000,
+    ]);
+
+    $enrollment = Enrollment::factory()->create([
+        'establishment_id' => $establishment->id,
+        'classroom_id' => $otherClassroom->id,
+        'school_year_id' => $schoolYear->id,
+        'status' => 'active',
+    ]);
+
+    Livewire::test(Index::class)
+        ->set('school_year_id', $schoolYear->id)
+        ->call('generateInvoices', $level->id);
+
+    expect(Invoice::where('student_id', $enrollment->student_id)->exists())->toBeFalse();
+});
+
+test('un gestionnaire ne peut pas générer les factures', function () {
+    // finance.access mais pas billing.manage (RolePermissions).
+    $establishment = Establishment::factory()->create();
+    $gestionnaire = createUserWithRole($establishment, 'gestionnaire');
+    actingInEstablishment($establishment);
+    test()->actingAs($gestionnaire);
+
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $level = Level::factory()->create();
+
+    Livewire::test(Index::class)
+        ->set('school_year_id', $schoolYear->id)
+        ->call('generateInvoices', $level->id)
+        ->assertForbidden();
 });

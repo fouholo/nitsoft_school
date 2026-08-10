@@ -7,7 +7,10 @@ namespace App\Livewire\Billing\TuitionFees;
 use App\Domain\Academics\Models\Level;
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Billing\Models\Installment;
+use App\Domain\Billing\Models\Invoice;
 use App\Domain\Billing\Models\LevelFee;
+use App\Domain\Enrollment\Models\Enrollment;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -191,6 +194,72 @@ class Index extends Component
         $this->configuringLevelId = null;
         $this->registration_amount = null;
         $this->installment_amounts = [];
+    }
+
+    public function generateInvoices(int $levelId): void
+    {
+        $this->authorize('create', Invoice::class);
+
+        $levelFee = LevelFee::where('school_year_id', $this->school_year_id)
+            ->where('level_id', $levelId)
+            ->with('installmentAmounts.installment')
+            ->first();
+
+        if (! $levelFee) {
+            return;
+        }
+
+        $enrollments = Enrollment::where('school_year_id', $this->school_year_id)
+            ->where('status', 'active')
+            ->whereHas('classroom', fn ($query) => $query->where('level_id', $levelId))
+            ->get();
+
+        if ((float) $levelFee->registration_amount > 0) {
+            $studentsWithRegistrationInvoice = Invoice::where('school_year_id', $this->school_year_id)
+                ->whereNull('installment_id')
+                ->pluck('student_id');
+
+            foreach ($enrollments as $enrollment) {
+                if ($studentsWithRegistrationInvoice->contains($enrollment->student_id)) {
+                    continue;
+                }
+
+                Invoice::create([
+                    'student_id' => $enrollment->student_id,
+                    'school_year_id' => $this->school_year_id,
+                    'installment_id' => null,
+                    'label' => "Frais d'inscription",
+                    'amount_due' => $levelFee->registration_amount,
+                    'due_date' => $enrollment->enrolled_on,
+                    'status' => 'pending',
+                    'created_by' => Auth::id(),
+                ]);
+            }
+        }
+
+        foreach ($levelFee->installmentAmounts->whereNotNull('amount') as $installmentAmount) {
+            $installment = $installmentAmount->installment;
+
+            $studentsWithInstallmentInvoice = Invoice::where('installment_id', $installment->id)
+                ->pluck('student_id');
+
+            foreach ($enrollments as $enrollment) {
+                if ($studentsWithInstallmentInvoice->contains($enrollment->student_id)) {
+                    continue;
+                }
+
+                Invoice::create([
+                    'student_id' => $enrollment->student_id,
+                    'school_year_id' => $this->school_year_id,
+                    'installment_id' => $installment->id,
+                    'label' => $installment->label,
+                    'amount_due' => $installmentAmount->amount,
+                    'due_date' => $installment->due_date,
+                    'status' => 'pending',
+                    'created_by' => Auth::id(),
+                ]);
+            }
+        }
     }
 
     protected function resetInstallmentForm(): void
