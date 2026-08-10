@@ -10,6 +10,7 @@ use App\Domain\Academics\Models\Level;
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Academics\Models\Serie;
 use App\Domain\Enrollment\Models\Nationalite;
+use App\Domain\Establishments\Enums\EstablishmentType;
 use App\Domain\Establishments\Enums\SaasAdminType;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\Foundation;
@@ -81,7 +82,7 @@ class DatabaseSeeder extends Seeder
             'foundation_id' => $foundation->id,
             'name' => 'Groupe Scolaire Excellence',
             'slug' => 'groupe-scolaire-excellence',
-            'type' => 'college',
+            'type' => EstablishmentType::Secondaire,
             'address' => 'Abidjan, Côte d\'Ivoire',
             'phone' => '+225 07 00 00 00 00',
             'timezone' => 'Africa/Abidjan',
@@ -92,7 +93,7 @@ class DatabaseSeeder extends Seeder
             'foundation_id' => $foundation->id,
             'name' => 'Institut Nitsoft Nord',
             'slug' => 'institut-nitsoft-nord',
-            'type' => 'lycee',
+            'type' => EstablishmentType::Secondaire,
             'address' => 'Bouaké, Côte d\'Ivoire',
             'phone' => '+225 07 00 00 00 01',
             'timezone' => 'Africa/Abidjan',
@@ -103,7 +104,7 @@ class DatabaseSeeder extends Seeder
             'foundation_id' => $foundation->id,
             'name' => 'École La Pouponnière',
             'slug' => 'ecole-la-pouponniere',
-            'type' => 'préscolaire-primaire',
+            'type' => EstablishmentType::PrescolairePrimaire,
             'address' => 'Yamoussoukro, Côte d\'Ivoire',
             'phone' => '+225 07 00 00 00 02',
             'timezone' => 'Africa/Abidjan',

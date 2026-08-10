@@ -76,6 +76,7 @@
 
             if (auth()->user()->isSaasAdmin()) {
                 $navItems[] = ['type' => 'link', 'label' => 'Groupes scolaires', 'route' => 'foundations.index', 'active' => 'foundations.*', 'icon' => 'building'];
+                $navItems[] = ['type' => 'link', 'label' => 'Établissements', 'route' => 'establishments.index', 'active' => 'establishments.*', 'icon' => 'building'];
             }
 
             if (auth()->user()->isMainSaasAdmin()) {

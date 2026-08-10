@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Domain\Establishments\Enums\EstablishmentType;
 use App\Domain\Establishments\Models\Establishment;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -19,7 +20,7 @@ class EstablishmentFactory extends Factory
         return [
             'name' => fake()->company(),
             'slug' => fake()->unique()->slug(),
-            'type' => fake()->randomElement(['primaire', 'college', 'lycee']),
+            'type' => fake()->randomElement(EstablishmentType::cases()),
             'address' => fake()->address(),
             'phone' => fake()->phoneNumber(),
             'timezone' => 'UTC',

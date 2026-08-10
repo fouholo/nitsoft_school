@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Staff;
 
+use App\Domain\Establishments\Enums\EstablishmentType;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\EstablishmentUserPivot;
 use App\Domain\Establishments\Models\Foundation;
@@ -35,6 +36,16 @@ class ManageOrganization extends Component
     public ?string $generatedPassword = null;
 
     public ?string $generatedPasswordFor = null;
+
+    public string $new_establishment_name = '';
+
+    public string $new_establishment_type = '';
+
+    public string $new_establishment_address = '';
+
+    public string $new_establishment_phone = '';
+
+    public string $new_establishment_timezone = 'UTC';
 
     public function mount(): void
     {
@@ -86,6 +97,48 @@ class ManageOrganization extends Component
         $this->generatedPassword = $password;
         $this->generatedPasswordFor = $user->email;
         $this->reset(['staff_name', 'staff_email', 'staff_establishment_id']);
+    }
+
+    public function createEstablishment(): void
+    {
+        abort_unless($this->organization instanceof Foundation, 404);
+
+        $this->authorize('manageOrganization', $this->organization);
+
+        $data = $this->validate([
+            'new_establishment_name' => ['required', 'string', 'max:255'],
+            'new_establishment_type' => ['required', Rule::enum(EstablishmentType::class)],
+            'new_establishment_address' => ['nullable', 'string', 'max:255'],
+            'new_establishment_phone' => ['nullable', 'string', 'max:50'],
+            'new_establishment_timezone' => ['required', 'string', 'max:64'],
+        ]);
+
+        Establishment::create([
+            'foundation_id' => $this->organization->id,
+            'name' => $data['new_establishment_name'],
+            'slug' => $this->uniqueSlugFor($data['new_establishment_name']),
+            'type' => $data['new_establishment_type'],
+            'address' => $data['new_establishment_address'],
+            'phone' => $data['new_establishment_phone'],
+            'timezone' => $data['new_establishment_timezone'],
+        ]);
+
+        $this->reset(['new_establishment_name', 'new_establishment_type', 'new_establishment_address', 'new_establishment_phone']);
+        $this->new_establishment_timezone = 'UTC';
+    }
+
+    private function uniqueSlugFor(string $name): string
+    {
+        $base = Str::slug($name);
+        $slug = $base;
+        $suffix = 1;
+
+        while (Establishment::where('slug', $slug)->exists()) {
+            $slug = "{$base}-{$suffix}";
+            $suffix++;
+        }
+
+        return $slug;
     }
 
     public function activate(int $pivotId): void
@@ -236,6 +289,7 @@ class ManageOrganization extends Component
                 ? FoundationUserPivot::where('foundation_id', $this->organization->id)->with('user')->get()
                 : collect(),
             'eligibleGeneralAdminTargets' => $isGeneralAdmin ? $this->eligibleGeneralAdminTargets() : collect(),
+            'establishmentTypes' => EstablishmentType::cases(),
         ]);
     }
 

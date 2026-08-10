@@ -23,6 +23,61 @@
 
         @if ($organization instanceof \App\Domain\Establishments\Models\Foundation)
             <section class="mt-6">
+                <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Établissements du groupe</h2>
+                <div class="mt-2 overflow-hidden rounded-md border border-slate-200 bg-white">
+                    <table class="min-w-full divide-y divide-slate-200 text-sm">
+                        <tbody class="divide-y divide-slate-100">
+                            @forelse ($establishments as $groupEstablishment)
+                                <tr wire:key="group-establishment-{{ $groupEstablishment->id }}">
+                                    <td class="px-4 py-2 text-slate-900">{{ $groupEstablishment->name }}</td>
+                                    <td class="px-4 py-2 text-slate-600">{{ $groupEstablishment->type?->label() ?? '—' }}</td>
+                                </tr>
+                            @empty
+                                <tr><td class="px-4 py-6 text-center text-slate-500">Aucun établissement.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <form wire:submit="createEstablishment" class="mt-3 space-y-2 rounded-md border border-slate-200 bg-white p-3">
+                    <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500">Créer un établissement</h3>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700">Nom</label>
+                        <input type="text" wire:model="new_establishment_name" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                        @error('new_establishment_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700">Type</label>
+                        <select wire:model="new_establishment_type" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                            <option value="">—</option>
+                            @foreach ($establishmentTypes as $type)
+                                <option value="{{ $type->value }}">{{ $type->label() }}</option>
+                            @endforeach
+                        </select>
+                        @error('new_establishment_type') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700">Adresse</label>
+                        <input type="text" wire:model="new_establishment_address" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                        @error('new_establishment_address') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700">Téléphone</label>
+                        <input type="text" wire:model="new_establishment_phone" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                        @error('new_establishment_phone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700">Fuseau horaire</label>
+                        <input type="text" wire:model="new_establishment_timezone" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                        @error('new_establishment_timezone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                    <button type="submit" class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700">
+                        Créer l'établissement
+                    </button>
+                </form>
+            </section>
+
+            <section class="mt-6">
                 <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Fondateurs</h2>
                 <div class="mt-2 overflow-hidden rounded-md border border-slate-200 bg-white">
                     <table class="min-w-full divide-y divide-slate-200 text-sm">

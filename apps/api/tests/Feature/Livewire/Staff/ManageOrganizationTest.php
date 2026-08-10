@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domain\Establishments\Enums\EstablishmentType;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\EstablishmentUserPivot;
 use App\Domain\Establishments\Models\Foundation;
@@ -98,6 +99,51 @@ test('un GENERAL_ADMIN de fondation peut activer un fondateur en attente', funct
     Livewire::test(ManageOrganization::class)->call('activateFondateur', $pendingPivot->id);
 
     expect($pendingPivot->fresh()->is_active)->toBeTrue();
+});
+
+test('un GENERAL_ADMIN de fondation peut créer un établissement', function () {
+    $foundation = Foundation::factory()->create();
+    $generalAdmin = createGeneralAdmin($foundation);
+    test()->actingAs($generalAdmin);
+
+    Livewire::test(ManageOrganization::class)
+        ->set('new_establishment_name', 'École Test')
+        ->set('new_establishment_type', EstablishmentType::Secondaire->value)
+        ->call('createEstablishment')
+        ->assertHasNoErrors();
+
+    $establishment = Establishment::where('name', 'École Test')->sole();
+
+    expect($establishment->foundation_id)->toBe($foundation->id)
+        ->and($establishment->type)->toBe(EstablishmentType::Secondaire)
+        ->and($establishment->slug)->toBe('ecole-test');
+});
+
+test('un fondateur simple (non GENERAL_ADMIN) ne peut pas créer d’établissement', function () {
+    $foundation = Foundation::factory()->create();
+    createGeneralAdmin($foundation);
+    $plainFounder = createFounder($foundation);
+    test()->actingAs($plainFounder);
+
+    Livewire::test(ManageOrganization::class)
+        ->set('new_establishment_name', 'École Refusée')
+        ->set('new_establishment_type', EstablishmentType::Secondaire->value)
+        ->call('createEstablishment')
+        ->assertForbidden();
+
+    expect(Establishment::where('name', 'École Refusée')->exists())->toBeFalse();
+});
+
+test('créer un établissement depuis une organisation qui est elle-même un établissement indépendant échoue', function () {
+    $establishment = Establishment::factory()->create(['foundation_id' => null]);
+    $generalAdmin = createGeneralAdmin($establishment);
+    test()->actingAs($generalAdmin);
+
+    Livewire::test(ManageOrganization::class)
+        ->set('new_establishment_name', 'École Impossible')
+        ->set('new_establishment_type', EstablishmentType::Secondaire->value)
+        ->call('createEstablishment')
+        ->assertStatus(404);
 });
 
 test('un utilisateur sans rôle fondateur ne peut pas accéder à l’écran', function () {

@@ -46,6 +46,7 @@ Route::middleware('auth')->group(function (): void {
     require __DIR__.'/notifications.php';
     require __DIR__.'/guardian-portal.php';
     require __DIR__.'/foundations.php';
+    require __DIR__.'/establishments.php';
     require __DIR__.'/saas-admins.php';
     require __DIR__.'/staff.php';
 });

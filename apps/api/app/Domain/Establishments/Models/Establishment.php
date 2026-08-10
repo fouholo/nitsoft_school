@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Establishments\Models;
 
+use App\Domain\Establishments\Enums\EstablishmentType;
 use App\Domain\Sync\Concerns\Syncable;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -34,6 +35,7 @@ class Establishment extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'type' => EstablishmentType::class,
         'client_updated_at' => 'datetime',
     ];
 
