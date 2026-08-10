@@ -21,7 +21,10 @@ test('un fondateur a accès admin à un établissement de son groupe sans ligne 
         ->and($founder->roleFor($establishment->id))->toBe('fondateur');
 });
 
-test('un fondateur peut consulter et créer des élèves et des factures sur un établissement de son groupe', function () {
+test('un fondateur peut consulter et créer des élèves, et consulter (sans gérer) les factures de son groupe', function () {
+    // Depuis le chantier "privilèges par rôle", le fondateur a une vue
+    // d'ensemble des finances mais ne gère pas les factures/paiements au
+    // quotidien (RolePermissions::MATRIX['billing.manage'] exclut fondateur).
     $foundation = Foundation::factory()->create();
     $establishment = Establishment::factory()->create(['foundation_id' => $foundation->id]);
     $founder = createFounder($foundation);
@@ -32,7 +35,7 @@ test('un fondateur peut consulter et créer des élèves et des factures sur un 
     expect(Gate::forUser($founder)->allows('view', $student))->toBeTrue()
         ->and(Gate::forUser($founder)->allows('create', Student::class))->toBeTrue()
         ->and(Gate::forUser($founder)->allows('viewAny', Invoice::class))->toBeTrue()
-        ->and(Gate::forUser($founder)->allows('create', Invoice::class))->toBeTrue();
+        ->and(Gate::forUser($founder)->allows('create', Invoice::class))->toBeFalse();
 });
 
 test('un fondateur n’a aucun accès sur un établissement hors de son groupe', function () {

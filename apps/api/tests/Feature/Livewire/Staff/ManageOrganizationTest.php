@@ -17,15 +17,15 @@ test('un GENERAL_ADMIN d’une école indépendante peut créer, supprimer et no
 
     Livewire::test(ManageOrganization::class)
         ->set('staff_establishment_id', $establishment->id)
-        ->set('staff_name', 'Comptable Test')
-        ->set('staff_email', 'comptable.test@nitsoft.test')
-        ->set('staff_role', 'comptable')
+        ->set('staff_name', 'Caissier Test')
+        ->set('staff_email', 'caissier.test@nitsoft.test')
+        ->set('staff_role', 'caissier')
         ->call('create')
         ->assertHasNoErrors()
-        ->assertSet('generatedPasswordFor', 'comptable.test@nitsoft.test');
+        ->assertSet('generatedPasswordFor', 'caissier.test@nitsoft.test');
 
-    $comptable = User::where('email', 'comptable.test@nitsoft.test')->sole();
-    $comptablePivot = EstablishmentUserPivot::where('user_id', $comptable->id)->sole();
+    $cashier = User::where('email', 'caissier.test@nitsoft.test')->sole();
+    $cashierPivot = EstablishmentUserPivot::where('user_id', $cashier->id)->sole();
 
     $directeur = User::factory()->create();
     $establishment->users()->attach($directeur->id, ['role' => 'directeur', 'is_active' => true]);
@@ -37,8 +37,8 @@ test('un GENERAL_ADMIN d’une école indépendante peut créer, supprimer et no
     Livewire::test(ManageOrganization::class)->call('dismissLocalAdmin', $establishment->id);
     expect($directeurPivot->fresh()->is_local_admin)->toBeNull();
 
-    Livewire::test(ManageOrganization::class)->call('delete', $comptablePivot->id);
-    expect(EstablishmentUserPivot::find($comptablePivot->id))->toBeNull();
+    Livewire::test(ManageOrganization::class)->call('delete', $cashierPivot->id);
+    expect(EstablishmentUserPivot::find($cashierPivot->id))->toBeNull();
 });
 
 test('un GENERAL_ADMIN ne peut pas se désactiver ni se supprimer lui-même', function () {

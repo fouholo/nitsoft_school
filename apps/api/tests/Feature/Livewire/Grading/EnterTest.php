@@ -14,7 +14,9 @@ use Livewire\Livewire;
 
 beforeEach(function () {
     $this->establishment = Establishment::factory()->create();
-    $this->admin = createUserWithRole($this->establishment, 'directeur');
+    // educateur : seul rôle admin-tier habilité à saisir des notes depuis le
+    // chantier "privilèges par rôle" (RolePermissions::MATRIX['grades.enter']).
+    $this->admin = createUserWithRole($this->establishment, 'educateur');
     actingInEstablishment($this->establishment);
     $this->actingAs($this->admin);
 

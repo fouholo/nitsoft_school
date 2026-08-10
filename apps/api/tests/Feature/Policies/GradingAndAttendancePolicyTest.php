@@ -10,16 +10,29 @@ use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Grading\Models\GradeSheet;
 use App\Domain\Grading\Models\ReportCard;
 
-test('un admin peut créer, modifier et supprimer une évaluation sans être affecté', function () {
+test('un éducateur peut créer, modifier et supprimer une évaluation sans être affecté', function () {
+    // Depuis le chantier "privilèges par rôle", seul educateur (parmi les
+    // rôles admin-tier) saisit des notes — RolePermissions::MATRIX['grades.enter'].
+    $establishment = Establishment::factory()->create();
+    $educator = createUserWithRole($establishment, 'educateur');
+
+    actingInEstablishment($establishment);
+    $gradeSheet = GradeSheet::factory()->create(['establishment_id' => $establishment->id]);
+
+    expect($educator->can('create', GradeSheet::class))->toBeTrue()
+        ->and($educator->can('update', $gradeSheet))->toBeTrue()
+        ->and($educator->can('delete', $gradeSheet))->toBeTrue();
+});
+
+test('un directeur simple ne peut plus saisir de notes (réservé à educateur)', function () {
     $establishment = Establishment::factory()->create();
     $admin = createUserWithRole($establishment, 'directeur');
 
     actingInEstablishment($establishment);
     $gradeSheet = GradeSheet::factory()->create(['establishment_id' => $establishment->id]);
 
-    expect($admin->can('create', GradeSheet::class))->toBeTrue()
-        ->and($admin->can('update', $gradeSheet))->toBeTrue()
-        ->and($admin->can('delete', $gradeSheet))->toBeTrue();
+    expect($admin->can('create', GradeSheet::class))->toBeFalse()
+        ->and($admin->can('update', $gradeSheet))->toBeFalse();
 });
 
 test('un enseignant sans aucune affectation ne peut pas créer d’évaluation', function () {
@@ -110,17 +123,43 @@ test('un enseignant affecté à une classe peut créer un appel de présence san
         ->and($teacher->can('update', $session))->toBeTrue();
 });
 
-test('seul un admin gère les affectations enseignants', function () {
+test('seul le titulaire LOCAL_ADMIN/GENERAL_ADMIN gère les affectations enseignants', function () {
+    // Depuis le chantier "privilèges par rôle", créer une affectation exige
+    // d'être le titulaire du pouvoir (isLocalAdminOf), pas seulement d'avoir
+    // un rôle admin — voir TeacherAssignmentPolicy::create().
     $establishment = Establishment::factory()->create();
-    $admin = createUserWithRole($establishment, 'directeur');
+    $localAdmin = createLocalAdmin($establishment, 'directeur');
+    $plainAdmin = createUserWithRole($establishment, 'directeur');
     $teacher = createUserWithRole($establishment, 'enseignant');
 
     actingInEstablishment($establishment);
 
-    expect($admin->can('viewAny', TeacherAssignment::class))->toBeTrue()
-        ->and($admin->can('create', TeacherAssignment::class))->toBeTrue()
+    expect($localAdmin->can('viewAny', TeacherAssignment::class))->toBeTrue()
+        ->and($localAdmin->can('create', TeacherAssignment::class))->toBeTrue()
+        ->and($plainAdmin->can('viewAny', TeacherAssignment::class))->toBeTrue()
+        ->and($plainAdmin->can('create', TeacherAssignment::class))->toBeFalse()
         ->and($teacher->can('viewAny', TeacherAssignment::class))->toBeFalse()
         ->and($teacher->can('create', TeacherAssignment::class))->toBeFalse();
+});
+
+test('un titulaire gestionnaire ne peut pas affecter d’enseignant (staff.assign exclut gestionnaire)', function () {
+    $establishment = Establishment::factory()->create();
+    $localAdmin = createLocalAdmin($establishment, 'gestionnaire');
+
+    actingInEstablishment($establishment);
+
+    expect($localAdmin->can('create', TeacherAssignment::class))->toBeFalse();
+});
+
+test('un caissier n’a aucun accès aux évaluations', function () {
+    $establishment = Establishment::factory()->create();
+    $cashier = createUserWithRole($establishment, 'caissier');
+
+    actingInEstablishment($establishment);
+    $gradeSheet = GradeSheet::factory()->create(['establishment_id' => $establishment->id]);
+
+    expect($cashier->can('viewAny', GradeSheet::class))->toBeFalse()
+        ->and($cashier->can('view', $gradeSheet))->toBeFalse();
 });
 
 test('seul un admin peut générer les bulletins, tout le monde peut les consulter', function () {

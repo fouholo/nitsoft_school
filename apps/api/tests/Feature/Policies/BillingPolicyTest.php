@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domain\Billing\Models\Expense;
 use App\Domain\Billing\Models\FeeSchedule;
 use App\Domain\Billing\Models\Invoice;
 use App\Domain\Billing\Models\Payment;
@@ -12,10 +13,10 @@ dataset('billing_models', [
     'invoices' => [Invoice::class],
 ]);
 
-test('admin et comptable peuvent gérer la facturation, l’enseignant non', function (string $modelClass) {
+test('admin et caissier peuvent gérer la facturation, l’enseignant non', function (string $modelClass) {
     $establishment = Establishment::factory()->create();
     $admin = createUserWithRole($establishment, 'directeur');
-    $accountant = createUserWithRole($establishment, 'comptable');
+    $accountant = createUserWithRole($establishment, 'caissier');
     $teacher = createUserWithRole($establishment, 'enseignant');
 
     actingInEstablishment($establishment);
@@ -30,10 +31,10 @@ test('admin et comptable peuvent gérer la facturation, l’enseignant non', fun
         ->and($teacher->can('create', $modelClass))->toBeFalse();
 })->with('billing_models');
 
-test('seul un admin peut supprimer un paiement, pas le comptable', function () {
+test('seul un admin peut supprimer un paiement, pas le caissier', function () {
     $establishment = Establishment::factory()->create();
     $admin = createUserWithRole($establishment, 'directeur');
-    $accountant = createUserWithRole($establishment, 'comptable');
+    $accountant = createUserWithRole($establishment, 'caissier');
 
     actingInEstablishment($establishment);
 
@@ -42,4 +43,50 @@ test('seul un admin peut supprimer un paiement, pas le comptable', function () {
     expect($accountant->can('create', Payment::class))->toBeTrue()
         ->and($accountant->can('delete', $payment))->toBeFalse()
         ->and($admin->can('delete', $payment))->toBeTrue();
+});
+
+test('fondateur et gestionnaire voient les factures/paiements mais ne les gèrent pas au quotidien', function () {
+    $establishment = Establishment::factory()->create();
+    $manager = createUserWithRole($establishment, 'gestionnaire');
+    $founder = createUserWithRole($establishment, 'fondateur');
+
+    actingInEstablishment($establishment);
+
+    expect($manager->can('viewAny', Invoice::class))->toBeTrue()
+        ->and($manager->can('create', Invoice::class))->toBeFalse()
+        ->and($manager->can('create', FeeSchedule::class))->toBeTrue()
+        ->and($founder->can('viewAny', Invoice::class))->toBeTrue()
+        ->and($founder->can('create', Invoice::class))->toBeFalse()
+        ->and($founder->can('create', FeeSchedule::class))->toBeTrue();
+});
+
+test('un éducateur ne voit que les factures/paiements/dépenses qu’il a lui-même saisis', function () {
+    $establishment = Establishment::factory()->create();
+    $educator = createUserWithRole($establishment, 'educateur');
+    $otherEducator = createUserWithRole($establishment, 'educateur');
+
+    actingInEstablishment($establishment);
+
+    $ownInvoice = Invoice::factory()->create(['establishment_id' => $establishment->id, 'created_by' => $educator->id]);
+    $otherInvoice = Invoice::factory()->create(['establishment_id' => $establishment->id, 'created_by' => $otherEducator->id]);
+
+    $ownExpense = Expense::factory()->create(['establishment_id' => $establishment->id, 'recorded_by' => $educator->id]);
+    $otherExpense = Expense::factory()->create(['establishment_id' => $establishment->id, 'recorded_by' => $otherEducator->id]);
+
+    expect($educator->can('view', $ownInvoice))->toBeTrue()
+        ->and($educator->can('view', $otherInvoice))->toBeFalse()
+        ->and($educator->can('view', $ownExpense))->toBeTrue()
+        ->and($educator->can('view', $otherExpense))->toBeFalse();
+});
+
+test('un éducateur peut saisir des dépenses mais ne peut pas les supprimer', function () {
+    $establishment = Establishment::factory()->create();
+    $educator = createUserWithRole($establishment, 'educateur');
+
+    actingInEstablishment($establishment);
+
+    $expense = Expense::factory()->create(['establishment_id' => $establishment->id, 'recorded_by' => $educator->id]);
+
+    expect($educator->can('create', Expense::class))->toBeTrue()
+        ->and($educator->can('delete', $expense))->toBeFalse();
 });

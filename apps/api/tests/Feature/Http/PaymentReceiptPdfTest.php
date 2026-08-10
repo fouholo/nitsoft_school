@@ -12,7 +12,7 @@ function makePaymentIn(Establishment $establishment): Payment
 {
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
     $invoice = Invoice::factory()->create(['establishment_id' => $establishment->id, 'student_id' => $student->id]);
-    $accountant = createUserWithRole($establishment, 'comptable');
+    $accountant = createUserWithRole($establishment, 'caissier');
 
     return (new PaymentService)->recordPayment($invoice, [
         'amount' => 25,
@@ -22,9 +22,9 @@ function makePaymentIn(Establishment $establishment): Payment
     ], $accountant);
 }
 
-test('un comptable peut consulter le reçu PDF d’un paiement en ligne', function () {
+test('un caissier peut consulter le reçu PDF d’un paiement en ligne', function () {
     $establishment = Establishment::factory()->create();
-    $accountant = createUserWithRole($establishment, 'comptable');
+    $accountant = createUserWithRole($establishment, 'caissier');
 
     actingInEstablishment($establishment);
     $payment = makePaymentIn($establishment);
@@ -38,7 +38,7 @@ test('un comptable peut consulter le reçu PDF d’un paiement en ligne', functi
 
 test('le paramètre download force le téléchargement du reçu', function () {
     $establishment = Establishment::factory()->create();
-    $accountant = createUserWithRole($establishment, 'comptable');
+    $accountant = createUserWithRole($establishment, 'caissier');
 
     actingInEstablishment($establishment);
     $payment = makePaymentIn($establishment);
