@@ -75,7 +75,8 @@
             <label class="block text-xs font-medium text-slate-700">Rôle</label>
             <select wire:model="staff_role" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
                 <option value="enseignant">Enseignant</option>
-                <option value="comptable">Comptable</option>
+                <option value="caissier">Caissier</option>
+                <option value="educateur">Éducateur</option>
             </select>
         </div>
         <button type="submit" class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700">

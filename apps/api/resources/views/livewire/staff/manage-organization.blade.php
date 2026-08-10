@@ -102,12 +102,10 @@
                                             <button wire:click="activate({{ $member->id }})" class="text-indigo-600 hover:text-indigo-800">Activer</button>
                                         @endif
 
-                                        @if (in_array($member->role, ['directeur', 'gestionnaire'], true))
-                                            @if ($member->is_local_admin)
-                                                <button wire:click="dismissLocalAdmin({{ $member->establishment_id }})" wire:confirm="Démettre cet administrateur local ?" class="text-slate-500 hover:text-slate-700">Démettre admin local</button>
-                                            @else
-                                                <button wire:click="nominateLocalAdmin({{ $member->id }})" class="text-indigo-600 hover:text-indigo-800">Nommer admin local</button>
-                                            @endif
+                                        @if ($member->is_local_admin)
+                                            <button wire:click="dismissLocalAdmin({{ $member->establishment_id }})" wire:confirm="Démettre cet administrateur local ?" class="text-slate-500 hover:text-slate-700">Démettre admin local</button>
+                                        @else
+                                            <button wire:click="nominateLocalAdmin({{ $member->id }})" class="text-indigo-600 hover:text-indigo-800">Nommer admin local</button>
                                         @endif
 
                                         <button wire:click="delete({{ $member->id }})" wire:confirm="Supprimer ce compte ? Cette action est irréversible." class="text-red-500 hover:text-red-700">Supprimer</button>
@@ -154,7 +152,8 @@
                 <label class="block text-xs font-medium text-slate-700">Rôle</label>
                 <select wire:model="staff_role" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
                     <option value="enseignant">Enseignant</option>
-                    <option value="comptable">Comptable</option>
+                    <option value="caissier">Caissier</option>
+                    <option value="educateur">Éducateur</option>
                 </select>
             </div>
             <button type="submit" class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700">

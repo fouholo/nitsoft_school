@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Domain\Enrollment\Models\Student;
+use App\Domain\Establishments\Support\RolePermissions;
 use App\Models\User;
 use App\Policies\Concerns\ChecksEstablishmentMembership;
 
@@ -24,17 +25,18 @@ class StudentPolicy
 
     public function create(User $user): bool
     {
-        return $this->isAdminOfCurrentEstablishment($user);
+        return RolePermissions::can($user->currentRole(), 'students.create');
     }
 
     public function update(User $user, Student $student): bool
     {
         return $this->belongsToSameEstablishment($user, $student->establishment_id)
-            && $this->isAdminOfCurrentEstablishment($user);
+            && RolePermissions::can($user->currentRole(), 'students.update');
     }
 
     public function delete(User $user, Student $student): bool
     {
-        return $this->update($user, $student);
+        return $this->belongsToSameEstablishment($user, $student->establishment_id)
+            && RolePermissions::can($user->currentRole(), 'students.delete');
     }
 }

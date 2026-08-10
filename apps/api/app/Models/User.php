@@ -184,7 +184,8 @@ class User extends Authenticatable
             'directeur' => 'Directeur',
             'gestionnaire' => 'Gestionnaire',
             'enseignant' => 'Enseignant',
-            'comptable' => 'Comptable',
+            'caissier' => 'Caissier',
+            'educateur' => 'Éducateur',
             'parent' => 'Parent',
             'fondateur' => 'Fondateur',
             default => 'Aucun rôle',
@@ -241,6 +242,17 @@ class User extends Authenticatable
             ->where('is_local_admin', true)
             ->exists()
             || $this->isGeneralAdminOf($establishment);
+    }
+
+    public function isLocalAdminOfCurrentEstablishment(): bool
+    {
+        if (! app()->bound('currentEstablishmentId')) {
+            return false;
+        }
+
+        $establishment = Establishment::find((int) app('currentEstablishmentId'));
+
+        return $establishment !== null && $this->isLocalAdminOf($establishment);
     }
 
     public function saasAdmin(): HasOne

@@ -15,12 +15,14 @@ class GuardianPolicy
 
     public function viewAny(User $user): bool
     {
-        return $this->isMemberOfCurrentEstablishment($user);
+        return $this->isMemberOfCurrentEstablishment($user) && $user->currentRole() !== 'caissier';
     }
 
     public function view(User $user, Guardian $guardian): bool
     {
-        return $this->isMemberOfCurrentEstablishment($user) && $this->hasApprovedLinkInCurrentEstablishment($guardian);
+        return $this->isMemberOfCurrentEstablishment($user)
+            && $user->currentRole() !== 'caissier'
+            && $this->hasApprovedLinkInCurrentEstablishment($guardian);
     }
 
     public function create(User $user): bool

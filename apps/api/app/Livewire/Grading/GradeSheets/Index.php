@@ -9,6 +9,7 @@ use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\Subject;
 use App\Domain\Academics\Models\TeacherAssignment;
 use App\Domain\Academics\Models\Term;
+use App\Domain\Establishments\Support\RolePermissions;
 use App\Domain\Grading\Models\GradeSheet;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -70,7 +71,7 @@ class Index extends Component
         /** @var User $user */
         $user = Auth::user();
 
-        if (! $user->hasAdminRightsOnCurrentEstablishment() && ! $user->isAssignedToClassroom((int) $data['classroom_id'], (int) $data['subject_id'])) {
+        if (! $this->hasBroadGradeAccess($user) && ! $user->isAssignedToClassroom((int) $data['classroom_id'], (int) $data['subject_id'])) {
             abort(403, "Vous n'êtes pas affecté à cette classe pour cette matière.");
         }
 
@@ -92,11 +93,23 @@ class Index extends Component
         $this->showForm = false;
     }
 
+    /**
+     * Accès large aux évaluations (toutes classes/matières, pas seulement
+     * ses propres affectations) : admin classique (vue seule depuis ce
+     * chantier) ou educateur (vue + saisie) — voir
+     * RolePermissions::MATRIX['grades.enter'].
+     */
+    private function hasBroadGradeAccess(User $user): bool
+    {
+        return $user->hasAdminRightsOnCurrentEstablishment()
+            || RolePermissions::can($user->currentRole(), 'grades.enter');
+    }
+
     public function render()
     {
         /** @var User $user */
         $user = Auth::user();
-        $isAdmin = $user->hasAdminRightsOnCurrentEstablishment();
+        $isAdmin = $this->hasBroadGradeAccess($user);
 
         $gradeSheets = GradeSheet::query()
             ->with(['classroom', 'subject', 'term'])

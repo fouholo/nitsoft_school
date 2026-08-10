@@ -95,7 +95,7 @@ Schema::create('expenses', function (Blueprint $table): void {
     $table->date('spent_at');
     $table->foreignId('recorded_by')->constrained('users')->cascadeOnDelete();
 
-    $table->uuid('uuid')->unique();
+    $table->char('uid', 12)->nullable()->unique();
     $table->uuid('device_id')->nullable();
     $table->timestamp('client_updated_at')->nullable();
 
@@ -112,13 +112,13 @@ Schema::create('expenses', function (Blueprint $table): void {
 
 ## 7. Domaine "parents/Guardians"
 
-- `guardians.view` (via `RolePermissions`) : `fondateur`/`directeur`/`gestionnaire`/`educateur` — remplace le `isAdminOfCurrentEstablishment()` actuel de `GuardianPolicy::viewAny`/`view`.
-- `caissier` : **pas** d'accès à `GuardianPolicy` (ne voit pas les fiches parents). Reçoit uniquement le droit d'utiliser `SmsMessagePolicy::create` (envoi de notifications/SMS), déjà un modèle existant (`App\Domain\Notifications\Models\SmsMessage`) — pas de nouvel écran, juste l'ouverture de la Policy existante à `caissier`.
+- `GuardianPolicy::viewAny`/`view` sont aujourd'hui à accès **large** (`isMemberOfCurrentEstablishment`, ouvert à tout membre de l'établissement — `enseignant`/`parent` compris, pas seulement les rôles admin-tier). Ce chantier applique une **exclusion minimale** (`$user->currentRole() !== 'caissier'`) plutôt qu'un remplacement complet par une liste `RolePermissions` — un remplacement retirerait aussi l'accès à `enseignant`/`parent`, régression hors périmètre. `educateur` conserve donc l'accès qu'il a déjà par ce check large (aucun ajout de matrice n'était nécessaire pour lui).
+- `caissier` : exclu de `GuardianPolicy` (ne voit pas les fiches parents). Compensation : un **nouvel écran** `Notifications\SmsMessages\Send` (route `notifications.sms-messages.create`), qui permet de composer et d'envoyer un SMS aux tuteurs approuvés d'un élève choisi (réutilise le job d'envoi existant `SendSmsJob`, aucune nouvelle infrastructure) — gardé par `SmsMessagePolicy::create`, nouvelle ability `RolePermissions::MATRIX['guardians.notify']` = `caissier` uniquement. Décision prise après revue critique du plan : aucun écran d'envoi interactif n'existait avant ce chantier (seul un envoi automatique sur absence), donc "ouvrir la Policy existante" n'aurait débloqué aucune fonctionnalité réelle.
 - Création/modification/suppression d'une fiche `Guardian` : **inchangé**, reste réservé à `fondateur`/`directeur`/`gestionnaire` (`hasAdminRightsOn()`) — ni `caissier` ni `educateur` ne peuvent créer/modifier/supprimer une fiche parent, seulement la consulter (ou envoyer un SMS pour `caissier`).
 
 ## 8. Domaine "notes"
 
-- `grades.view` : `fondateur`/`directeur`/`gestionnaire`/`educateur` — vue sur les notes/moyennes/statistiques (pas de nouvel écran de stats dédié, réutilise les vues existantes de `GradeSheets`/`ReportCards` en lecture).
+- Vue sur les notes/moyennes (`GradeSheetPolicy::viewAny`/`view`) : même logique d'exclusion minimale que pour les tuteurs (section 7) — le check large existant (`isMemberOfCurrentEstablishment`) perd uniquement `caissier`, pas de nouvelle entrée `grades.view` dans la matrice (pas de nouvel écran de stats dédié, réutilise les vues existantes de `GradeSheets`/`ReportCards` en lecture).
 - `grades.enter` : `educateur` uniquement, parmi les 5 rôles de ce chantier. `enseignant` garde son droit de saisie existant (scopé à ses classes assignées via `TeacherAssignment`), inchangé et hors périmètre.
 - `caissier` : aucun accès aux notes (ni vue ni saisie).
 

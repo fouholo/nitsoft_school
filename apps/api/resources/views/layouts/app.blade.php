@@ -50,10 +50,12 @@
                 ['type' => 'group', 'label' => 'Facturation', 'icon' => 'banknote', 'active' => 'billing.*', 'children' => [
                     ['label' => 'Grilles tarifaires', 'route' => 'billing.fee-schedules.index'],
                     ['label' => 'Factures', 'route' => 'billing.invoices.index'],
+                    ['label' => 'Dépenses', 'route' => 'billing.expenses.index'],
                 ]],
                 ['type' => 'group', 'label' => 'SMS', 'icon' => 'chat', 'active' => 'notifications.*', 'children' => [
                     ['label' => 'Modèles', 'route' => 'notifications.sms-templates.index'],
                     ['label' => 'Journal', 'route' => 'notifications.sms-messages.index'],
+                    ['label' => 'Envoyer un SMS', 'route' => 'notifications.sms-messages.create'],
                 ]],
             ];
 

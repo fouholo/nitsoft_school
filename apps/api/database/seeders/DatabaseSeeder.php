@@ -152,7 +152,8 @@ class DatabaseSeeder extends Seeder
         $accounts = [
             ['name' => 'Directeur Etablissement', 'email' => 'admin@nitsoft.test', 'role' => 'directeur', 'is_local_admin' => true],
             ['name' => 'Enseignant Demo', 'email' => 'teacher@nitsoft.test', 'role' => 'enseignant', 'is_local_admin' => null],
-            ['name' => 'Comptable Demo', 'email' => 'accountant@nitsoft.test', 'role' => 'comptable', 'is_local_admin' => null],
+            ['name' => 'Caissier Demo', 'email' => 'accountant@nitsoft.test', 'role' => 'caissier', 'is_local_admin' => null],
+            ['name' => 'Éducateur Demo', 'email' => 'educateur@nitsoft.test', 'role' => 'educateur', 'is_local_admin' => null],
         ];
 
         foreach ($accounts as $account) {

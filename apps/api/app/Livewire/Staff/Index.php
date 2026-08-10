@@ -47,7 +47,7 @@ class Index extends Component
         $data = $this->validate([
             'staff_name' => ['required', 'string', 'max:255'],
             'staff_email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'staff_role' => ['required', Rule::in(['enseignant', 'comptable'])],
+            'staff_role' => ['required', Rule::in(['enseignant', 'caissier', 'educateur'])],
         ]);
 
         $password = Str::password(12);

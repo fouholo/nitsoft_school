@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Policies\Concerns;
 
+use App\Domain\Billing\Contracts\HasOwnerColumn;
 use App\Models\User;
 
 /**
@@ -28,16 +29,9 @@ trait ChecksEstablishmentMembership
         return $user->hasAdminRightsOnCurrentEstablishment();
     }
 
-    protected function isBillingManagerOfCurrentEstablishment(User $user): bool
+    protected function isLocalAdminOfCurrentEstablishment(User $user): bool
     {
-        if (! app()->bound('currentEstablishmentId')) {
-            return false;
-        }
-
-        $establishmentId = (int) app('currentEstablishmentId');
-
-        return in_array($user->roleFor($establishmentId), ['directeur', 'gestionnaire', 'comptable'], true)
-            || $user->isFounderOfEstablishment($establishmentId);
+        return $user->isLocalAdminOfCurrentEstablishment();
     }
 
     protected function belongsToSameEstablishment(User $user, int $modelEstablishmentId): bool
@@ -45,5 +39,17 @@ trait ChecksEstablishmentMembership
         return app()->bound('currentEstablishmentId')
             && (int) app('currentEstablishmentId') === $modelEstablishmentId
             && $user->hasAccessTo($modelEstablishmentId);
+    }
+
+    /**
+     * Portée "propres saisies uniquement" (éducateur sur les finances) — voir
+     * App\Domain\Billing\Concerns\HasOwnerScope, appliqué en double avec le
+     * filtrage de requête côté Livewire (défense en profondeur).
+     */
+    protected function ownedByCurrentUser(User $user, HasOwnerColumn $model): bool
+    {
+        $column = $model->ownerColumn();
+
+        return (int) $model->{$column} === $user->id;
     }
 }
