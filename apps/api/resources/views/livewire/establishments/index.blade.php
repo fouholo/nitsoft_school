@@ -55,9 +55,64 @@
                 @error('phone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
+            <div>
+                <label class="block text-sm font-medium text-slate-700">E-mail</label>
+                <input type="email" wire:model="email" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                @error('email') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Inspection</label>
+                <select wire:model="inspection_code" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                    <option value="">—</option>
+                    @foreach ($inspections as $inspection)
+                        <option value="{{ $inspection->code }}">{{ $inspection->libelle }}</option>
+                    @endforeach
+                </select>
+                @error('inspection_code') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Code d'ouverture</label>
+                <input type="text" wire:model="opening_code" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                @error('opening_code') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Code DSPS</label>
+                <input type="text" wire:model="dsps_code" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                @error('dsps_code') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Latitude</label>
+                <input type="text" wire:model="latitude" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                @error('latitude') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Longitude</label>
+                <input type="text" wire:model="longitude" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                @error('longitude') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div class="sm:col-span-2">
+                <label class="block text-sm font-medium text-slate-700">Logo</label>
+                @if ($existingLogoPath)
+                    <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($existingLogoPath) }}" alt="Logo actuel" class="mt-1 mb-2 h-12 w-12 rounded-md object-cover">
+                @endif
+                <input type="file" wire:model="logo" class="mt-1 block w-full text-sm">
+                @error('logo') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
             <label class="flex items-center gap-2 text-sm text-slate-600">
                 <input type="checkbox" wire:model="is_active" class="rounded border-slate-300">
                 Actif
+            </label>
+
+            <label class="flex items-center gap-2 text-sm text-slate-600">
+                <input type="checkbox" wire:model="is_arabe" class="rounded border-slate-300">
+                École arabe
             </label>
 
             <div class="flex gap-2 sm:col-span-4">

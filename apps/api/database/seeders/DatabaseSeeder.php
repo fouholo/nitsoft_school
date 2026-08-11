@@ -14,6 +14,7 @@ use App\Domain\Establishments\Enums\EstablishmentType;
 use App\Domain\Establishments\Enums\SaasAdminType;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\Foundation;
+use App\Domain\Establishments\Models\Inspection;
 use App\Domain\Establishments\Models\SaasAdmin;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -70,6 +71,16 @@ class DatabaseSeeder extends Seeder
 
         foreach ($series as $serie) {
             Serie::create($serie);
+        }
+
+        $inspections = [
+            ['code' => 'IEP-ABJ1', 'libelle' => 'Inspection Abidjan 1'],
+            ['code' => 'IEP-ABJ2', 'libelle' => 'Inspection Abidjan 2'],
+            ['code' => 'IEP-BKE', 'libelle' => 'Inspection Bouaké'],
+        ];
+
+        foreach ($inspections as $inspection) {
+            Inspection::create($inspection);
         }
 
         $foundation = Foundation::create([

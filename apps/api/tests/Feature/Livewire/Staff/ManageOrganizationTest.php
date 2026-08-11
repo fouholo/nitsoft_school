@@ -7,8 +7,11 @@ use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\EstablishmentUserPivot;
 use App\Domain\Establishments\Models\Foundation;
 use App\Domain\Establishments\Models\FoundationUserPivot;
+use App\Domain\Establishments\Models\Inspection;
 use App\Livewire\Staff\ManageOrganization;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 test('un GENERAL_ADMIN d’une école indépendante peut créer, supprimer et nommer un LOCAL_ADMIN', function () {
@@ -101,18 +104,39 @@ test('un GENERAL_ADMIN de fondation peut activer un fondateur en attente', funct
     expect($pendingPivot->fresh()->is_active)->toBeTrue();
 });
 
-test('un GENERAL_ADMIN de fondation peut créer un établissement', function () {
+test('un GENERAL_ADMIN de fondation peut créer un établissement avec les champs complémentaires', function () {
     $foundation = Foundation::factory()->create();
     $generalAdmin = createGeneralAdmin($foundation);
     test()->actingAs($generalAdmin);
+    Storage::fake('public');
+
+    $inspection = Inspection::create(['code' => 'IEP-TEST', 'libelle' => 'Inspection Test']);
 
     Livewire::test(ManageOrganization::class)
         ->set('new_establishment_name', 'École Test')
         ->set('new_establishment_type', EstablishmentType::Secondaire->value)
+        ->set('new_establishment_inspection_code', $inspection->code)
+        ->set('new_establishment_opening_code', 'OUV-001')
+        ->set('new_establishment_dsps_code', 'DSPS-001')
+        ->set('new_establishment_latitude', '5.336400')
+        ->set('new_establishment_longitude', '-4.026400')
+        ->set('new_establishment_email', 'contact@ecole-test.ci')
+        ->set('new_establishment_is_arabe', true)
+        ->set('new_establishment_logo', UploadedFile::fake()->image('logo.jpg')->size(50))
         ->call('createEstablishment')
         ->assertHasNoErrors();
 
     $establishment = Establishment::where('name', 'École Test')->sole();
+
+    expect($establishment->inspection_code)->toBe('IEP-TEST')
+        ->and($establishment->opening_code)->toBe('OUV-001')
+        ->and($establishment->dsps_code)->toBe('DSPS-001')
+        ->and((float) $establishment->latitude)->toBe(5.3364)
+        ->and($establishment->email)->toBe('contact@ecole-test.ci')
+        ->and($establishment->is_arabe)->toBeTrue()
+        ->and($establishment->logo_path)->not->toBeNull();
+
+    Storage::disk('public')->assertExists($establishment->logo_path);
 
     expect($establishment->foundation_id)->toBe($foundation->id)
         ->and($establishment->type)->toBe(EstablishmentType::Secondaire)

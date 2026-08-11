@@ -21,6 +21,9 @@
 </head>
 <body>
     <div class="header">
+        @if ($payment->establishment->logo_path)
+            <img src="{{ public_path('storage/'.$payment->establishment->logo_path) }}" style="height: 60px; margin-bottom: 8px;">
+        @endif
         <h1>{{ $payment->establishment->name }}</h1>
         <p>Reçu de paiement</p>
     </div>

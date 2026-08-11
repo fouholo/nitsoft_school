@@ -9,6 +9,7 @@ use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\EstablishmentUserPivot;
 use App\Domain\Establishments\Models\Foundation;
 use App\Domain\Establishments\Models\FoundationUserPivot;
+use App\Domain\Establishments\Models\Inspection;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -18,11 +19,15 @@ use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\WithFileUploads;
 
 #[Layout('layouts.app')]
 #[Title('Mon organisation')]
 class ManageOrganization extends Component
 {
+    use WithFileUploads;
+
     public Foundation|Establishment $organization;
 
     public string $staff_name = '';
@@ -44,6 +49,22 @@ class ManageOrganization extends Component
     public string $new_establishment_address = '';
 
     public string $new_establishment_phone = '';
+
+    public string $new_establishment_inspection_code = '';
+
+    public string $new_establishment_opening_code = '';
+
+    public string $new_establishment_dsps_code = '';
+
+    public string $new_establishment_latitude = '';
+
+    public string $new_establishment_longitude = '';
+
+    public string $new_establishment_email = '';
+
+    public bool $new_establishment_is_arabe = false;
+
+    public ?TemporaryUploadedFile $new_establishment_logo = null;
 
     public function mount(): void
     {
@@ -108,7 +129,21 @@ class ManageOrganization extends Component
             'new_establishment_type' => ['required', Rule::enum(EstablishmentType::class)],
             'new_establishment_address' => ['nullable', 'string', 'max:255'],
             'new_establishment_phone' => ['nullable', 'string', 'max:50'],
+            'new_establishment_inspection_code' => ['nullable', 'string', 'exists:inspections,code'],
+            'new_establishment_opening_code' => ['nullable', 'string', 'max:100'],
+            'new_establishment_dsps_code' => ['nullable', 'string', 'max:100'],
+            'new_establishment_latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'new_establishment_longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'new_establishment_email' => ['nullable', 'email', 'max:255'],
+            'new_establishment_is_arabe' => ['boolean'],
+            'new_establishment_logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:1024'],
         ]);
+
+        foreach (['new_establishment_inspection_code', 'new_establishment_opening_code', 'new_establishment_dsps_code', 'new_establishment_latitude', 'new_establishment_longitude', 'new_establishment_email'] as $field) {
+            $data[$field] = $data[$field] !== '' ? $data[$field] : null;
+        }
+
+        $logoPath = $this->new_establishment_logo?->store('establishments-logos', 'public');
 
         Establishment::create([
             'foundation_id' => $this->organization->id,
@@ -117,9 +152,22 @@ class ManageOrganization extends Component
             'type' => $data['new_establishment_type'],
             'address' => $data['new_establishment_address'],
             'phone' => $data['new_establishment_phone'],
+            'inspection_code' => $data['new_establishment_inspection_code'],
+            'opening_code' => $data['new_establishment_opening_code'],
+            'dsps_code' => $data['new_establishment_dsps_code'],
+            'latitude' => $data['new_establishment_latitude'],
+            'longitude' => $data['new_establishment_longitude'],
+            'email' => $data['new_establishment_email'],
+            'is_arabe' => $data['new_establishment_is_arabe'],
+            'logo_path' => $logoPath,
         ]);
 
-        $this->reset(['new_establishment_name', 'new_establishment_type', 'new_establishment_address', 'new_establishment_phone']);
+        $this->reset([
+            'new_establishment_name', 'new_establishment_type', 'new_establishment_address', 'new_establishment_phone',
+            'new_establishment_inspection_code', 'new_establishment_opening_code', 'new_establishment_dsps_code',
+            'new_establishment_latitude', 'new_establishment_longitude', 'new_establishment_email',
+            'new_establishment_is_arabe', 'new_establishment_logo',
+        ]);
     }
 
     private function uniqueSlugFor(string $name): string
@@ -285,6 +333,7 @@ class ManageOrganization extends Component
                 : collect(),
             'eligibleGeneralAdminTargets' => $isGeneralAdmin ? $this->eligibleGeneralAdminTargets() : collect(),
             'establishmentTypes' => EstablishmentType::cases(),
+            'inspections' => Inspection::orderBy('libelle')->get(),
         ]);
     }
 

@@ -66,6 +66,50 @@
                         <input type="text" wire:model="new_establishment_phone" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
                         @error('new_establishment_phone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700">E-mail</label>
+                        <input type="email" wire:model="new_establishment_email" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                        @error('new_establishment_email') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700">Inspection</label>
+                        <select wire:model="new_establishment_inspection_code" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                            <option value="">—</option>
+                            @foreach ($inspections as $inspection)
+                                <option value="{{ $inspection->code }}">{{ $inspection->libelle }}</option>
+                            @endforeach
+                        </select>
+                        @error('new_establishment_inspection_code') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700">Code d'ouverture</label>
+                        <input type="text" wire:model="new_establishment_opening_code" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                        @error('new_establishment_opening_code') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700">Code DSPS</label>
+                        <input type="text" wire:model="new_establishment_dsps_code" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                        @error('new_establishment_dsps_code') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700">Latitude</label>
+                        <input type="text" wire:model="new_establishment_latitude" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                        @error('new_establishment_latitude') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700">Longitude</label>
+                        <input type="text" wire:model="new_establishment_longitude" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                        @error('new_establishment_longitude') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700">Logo</label>
+                        <input type="file" wire:model="new_establishment_logo" class="mt-1 block w-full text-sm">
+                        @error('new_establishment_logo') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                    <label class="flex items-center gap-2 text-sm text-slate-600">
+                        <input type="checkbox" wire:model="new_establishment_is_arabe" class="rounded border-slate-300">
+                        École arabe
+                    </label>
                     <button type="submit" class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700">
                         Créer l'établissement
                     </button>

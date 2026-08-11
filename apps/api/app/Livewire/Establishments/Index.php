@@ -7,16 +7,22 @@ namespace App\Livewire\Establishments;
 use App\Domain\Establishments\Enums\EstablishmentType;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\Foundation;
+use App\Domain\Establishments\Models\Inspection;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\WithFileUploads;
 
 #[Layout('layouts.app')]
 #[Title('Établissements')]
 class Index extends Component
 {
+    use WithFileUploads;
+
     public bool $showForm = false;
 
     public ?int $editingId = null;
@@ -32,6 +38,24 @@ class Index extends Component
     public string $phone = '';
 
     public bool $is_active = true;
+
+    public string $inspection_code = '';
+
+    public string $opening_code = '';
+
+    public string $dsps_code = '';
+
+    public string $latitude = '';
+
+    public string $longitude = '';
+
+    public string $email = '';
+
+    public bool $is_arabe = false;
+
+    public ?TemporaryUploadedFile $logo = null;
+
+    public string $existingLogoPath = '';
 
     public function mount(): void
     {
@@ -59,6 +83,14 @@ class Index extends Component
         $this->address = (string) $establishment->address;
         $this->phone = (string) $establishment->phone;
         $this->is_active = $establishment->is_active;
+        $this->inspection_code = (string) $establishment->inspection_code;
+        $this->opening_code = (string) $establishment->opening_code;
+        $this->dsps_code = (string) $establishment->dsps_code;
+        $this->latitude = (string) $establishment->latitude;
+        $this->longitude = (string) $establishment->longitude;
+        $this->email = (string) $establishment->email;
+        $this->is_arabe = $establishment->is_arabe;
+        $this->existingLogoPath = (string) $establishment->logo_path;
         $this->showForm = true;
     }
 
@@ -71,7 +103,21 @@ class Index extends Component
             'address' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
             'is_active' => ['boolean'],
+            'inspection_code' => ['nullable', 'string', 'exists:inspections,code'],
+            'opening_code' => ['nullable', 'string', 'max:100'],
+            'dsps_code' => ['nullable', 'string', 'max:100'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'is_arabe' => ['boolean'],
+            'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:1024'],
         ]);
+
+        foreach (['inspection_code', 'opening_code', 'dsps_code', 'latitude', 'longitude', 'email'] as $field) {
+            $data[$field] = $data[$field] !== '' ? $data[$field] : null;
+        }
+
+        unset($data['logo']);
 
         if ($this->editingId) {
             $establishment = Establishment::findOrFail($this->editingId);
@@ -80,6 +126,14 @@ class Index extends Component
             $this->authorize('create', Establishment::class);
             $establishment = new Establishment;
             $data['slug'] = $this->uniqueSlugFor($data['name']);
+        }
+
+        if ($this->logo) {
+            if ($establishment->logo_path) {
+                Storage::disk('public')->delete($establishment->logo_path);
+            }
+
+            $data['logo_path'] = $this->logo->store('establishments-logos', 'public');
         }
 
         $establishment->fill($data);
@@ -120,7 +174,11 @@ class Index extends Component
 
     protected function resetForm(): void
     {
-        $this->reset(['editingId', 'name', 'foundation_id', 'type', 'address', 'phone', 'is_active']);
+        $this->reset([
+            'editingId', 'name', 'foundation_id', 'type', 'address', 'phone', 'is_active',
+            'inspection_code', 'opening_code', 'dsps_code', 'latitude', 'longitude', 'email',
+            'is_arabe', 'logo', 'existingLogoPath',
+        ]);
         $this->is_active = true;
     }
 
@@ -130,6 +188,7 @@ class Index extends Component
             'establishments' => Establishment::with('foundation')->orderBy('name')->get(),
             'foundations' => Foundation::orderBy('name')->get(),
             'types' => EstablishmentType::cases(),
+            'inspections' => Inspection::orderBy('libelle')->get(),
         ]);
     }
 }

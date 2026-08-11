@@ -8,6 +8,7 @@ use App\Domain\Academics\Models\Term;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Grading\Models\ReportCard;
+use App\Domain\Grading\Services\ReportCardService;
 
 function makeReportCardIn(Establishment $establishment): ReportCard
 {
@@ -67,4 +68,32 @@ test('un membre d’un autre établissement ne peut même pas résoudre le bulle
     $response = $this->actingAs($adminB)->get(route('grading.report-cards.pdf', $reportCard));
 
     $response->assertNotFound();
+});
+
+test('le logo de l’établissement s’affiche en en-tête du bulletin quand renseigné', function () {
+    $establishment = Establishment::factory()->create(['logo_path' => 'establishments-logos/logo.png']);
+    actingInEstablishment($establishment);
+    $reportCard = makeReportCardIn($establishment);
+    $reportCard->loadMissing(['student', 'classroom', 'term.schoolYear', 'establishment']);
+
+    $html = view('pdf.report-card', [
+        'reportCard' => $reportCard,
+        'breakdown' => app(ReportCardService::class)->subjectBreakdown($reportCard),
+    ])->render();
+
+    expect($html)->toContain('<img');
+});
+
+test('aucun logo affiché en en-tête du bulletin quand l’établissement n’en a pas', function () {
+    $establishment = Establishment::factory()->create(['logo_path' => null]);
+    actingInEstablishment($establishment);
+    $reportCard = makeReportCardIn($establishment);
+    $reportCard->loadMissing(['student', 'classroom', 'term.schoolYear', 'establishment']);
+
+    $html = view('pdf.report-card', [
+        'reportCard' => $reportCard,
+        'breakdown' => app(ReportCardService::class)->subjectBreakdown($reportCard),
+    ])->render();
+
+    expect($html)->not->toContain('<img');
 });

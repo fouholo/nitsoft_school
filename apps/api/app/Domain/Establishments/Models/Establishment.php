@@ -27,6 +27,14 @@ class Establishment extends Model
         'address',
         'phone',
         'is_active',
+        'inspection_code',
+        'opening_code',
+        'dsps_code',
+        'latitude',
+        'longitude',
+        'email',
+        'is_arabe',
+        'logo_path',
         'uid_local',
         'uid_serveur',
         'device_id',
@@ -36,6 +44,7 @@ class Establishment extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'type' => EstablishmentType::class,
+        'is_arabe' => 'boolean',
         'client_updated_at' => 'datetime',
     ];
 
@@ -50,6 +59,14 @@ class Establishment extends Model
     public function foundation(): BelongsTo
     {
         return $this->belongsTo(Foundation::class);
+    }
+
+    /**
+     * @return BelongsTo<Inspection, $this>
+     */
+    public function inspection(): BelongsTo
+    {
+        return $this->belongsTo(Inspection::class, 'inspection_code', 'code');
     }
 
     public function users(): BelongsToMany
