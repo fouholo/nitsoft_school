@@ -25,7 +25,8 @@ class Grade extends Model
         'student_id',
         'score',
         'comment',
-        'uid',
+        'uid_local',
+        'uid_serveur',
         'device_id',
         'client_updated_at',
     ];
@@ -34,6 +35,11 @@ class Grade extends Model
         'score' => 'decimal:2',
         'client_updated_at' => 'datetime',
     ];
+
+    protected static function uidPrefix(): string
+    {
+        return '232';
+    }
 
     /**
      * @return BelongsTo<GradeSheet, $this>

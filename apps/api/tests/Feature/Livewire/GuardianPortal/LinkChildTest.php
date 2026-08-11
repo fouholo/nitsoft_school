@@ -21,7 +21,7 @@ test('une demande de liaison est créée pour un uid valide', function () {
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
 
     Livewire::test(LinkChild::class)
-        ->set('uid', $student->uid)
+        ->set('uid', $student->uid_serveur)
         ->call('search')
         ->assertHasNoErrors()
         ->set('relationship', 'mere')
@@ -55,7 +55,7 @@ test('redemander après un rejet réutilise le même lien plutôt que d’en cr�
     ]);
 
     Livewire::test(LinkChild::class)
-        ->set('uid', $student->uid)
+        ->set('uid', $student->uid_serveur)
         ->call('search')
         ->set('relationship', 'mere')
         ->call('requestLink')

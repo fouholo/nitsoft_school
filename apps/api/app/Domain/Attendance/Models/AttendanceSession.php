@@ -29,7 +29,8 @@ class AttendanceSession extends Model
         'teacher_id',
         'session_date',
         'started_at',
-        'uid',
+        'uid_local',
+        'uid_serveur',
         'device_id',
         'client_updated_at',
     ];
@@ -38,6 +39,11 @@ class AttendanceSession extends Model
         'session_date' => 'date',
         'client_updated_at' => 'datetime',
     ];
+
+    protected static function uidPrefix(): string
+    {
+        return '233';
+    }
 
     public function classroom(): BelongsTo
     {

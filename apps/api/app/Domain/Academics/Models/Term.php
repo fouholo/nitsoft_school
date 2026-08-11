@@ -25,7 +25,8 @@ class Term extends Model
         'starts_on',
         'ends_on',
         'sequence',
-        'uid',
+        'uid_local',
+        'uid_serveur',
         'device_id',
         'client_updated_at',
     ];
@@ -35,6 +36,11 @@ class Term extends Model
         'ends_on' => 'date',
         'client_updated_at' => 'datetime',
     ];
+
+    protected static function uidPrefix(): string
+    {
+        return '214';
+    }
 
     public function schoolYear(): BelongsTo
     {

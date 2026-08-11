@@ -20,7 +20,8 @@ class SmsTemplate extends Model
         'code',
         'body',
         'is_active',
-        'uid',
+        'uid_local',
+        'uid_serveur',
         'device_id',
         'client_updated_at',
     ];
@@ -29,4 +30,9 @@ class SmsTemplate extends Model
         'is_active' => 'boolean',
         'client_updated_at' => 'datetime',
     ];
+
+    protected static function uidPrefix(): string
+    {
+        return '250';
+    }
 }

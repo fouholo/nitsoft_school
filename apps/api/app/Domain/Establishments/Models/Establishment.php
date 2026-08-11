@@ -28,7 +28,8 @@ class Establishment extends Model
         'phone',
         'timezone',
         'is_active',
-        'uid',
+        'uid_local',
+        'uid_serveur',
         'device_id',
         'client_updated_at',
     ];
@@ -38,6 +39,11 @@ class Establishment extends Model
         'type' => EstablishmentType::class,
         'client_updated_at' => 'datetime',
     ];
+
+    protected static function uidPrefix(): string
+    {
+        return '211';
+    }
 
     /**
      * @return BelongsTo<Foundation, $this>

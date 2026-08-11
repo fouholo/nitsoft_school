@@ -24,7 +24,8 @@ class SchoolYear extends Model
         'starts_on',
         'ends_on',
         'is_current',
-        'uid',
+        'uid_local',
+        'uid_serveur',
         'device_id',
         'client_updated_at',
     ];
@@ -35,6 +36,11 @@ class SchoolYear extends Model
         'is_current' => 'boolean',
         'client_updated_at' => 'datetime',
     ];
+
+    protected static function uidPrefix(): string
+    {
+        return '213';
+    }
 
     public function terms(): HasMany
     {

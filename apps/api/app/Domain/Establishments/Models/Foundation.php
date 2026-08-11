@@ -29,7 +29,8 @@ class Foundation extends Model
         'name',
         'slug',
         'is_active',
-        'uid',
+        'uid_local',
+        'uid_serveur',
         'device_id',
         'client_updated_at',
     ];
@@ -38,6 +39,11 @@ class Foundation extends Model
         'is_active' => 'boolean',
         'client_updated_at' => 'datetime',
     ];
+
+    protected static function uidPrefix(): string
+    {
+        return '210';
+    }
 
     /**
      * @return HasMany<Establishment, $this>

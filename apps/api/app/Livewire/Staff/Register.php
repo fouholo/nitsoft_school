@@ -43,7 +43,7 @@ class Register extends Component
             'role' => ['required', Rule::in(['fondateur', 'directeur', 'gestionnaire'])],
         ]);
 
-        $establishment = Establishment::where('uid', $data['uid'])->first();
+        $establishment = Establishment::where('uid_serveur', $data['uid'])->first();
 
         if ($establishment === null) {
             $this->addError('uid', "Aucun établissement ne correspond à cet identifiant.");

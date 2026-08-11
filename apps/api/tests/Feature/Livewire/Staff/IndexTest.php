@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Domain\Academics\Models\Teacher;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\EstablishmentUserPivot;
 use App\Livewire\Staff\Index;
 use App\Models\User;
 use Livewire\Livewire;
 
-test('un LOCAL_ADMIN peut créer un enseignant avec mot de passe généré', function () {
+test('un LOCAL_ADMIN peut créer un enseignant avec mot de passe généré, et une fiche Teacher est créée', function () {
     $establishment = Establishment::factory()->create();
     $localAdmin = createLocalAdmin($establishment);
     test()->actingAs($localAdmin);
@@ -26,6 +27,29 @@ test('un LOCAL_ADMIN peut créer un enseignant avec mot de passe généré', fun
 
     expect($pivot->role)->toBe('enseignant')
         ->and($pivot->is_active)->toBeTrue();
+
+    $teacher = Teacher::where('user_id', $user->id)->sole();
+
+    expect($teacher->establishment_id)->toBe($establishment->id)
+        ->and($teacher->name)->toBe('Enseignant Test')
+        ->and($teacher->uid_serveur)->toMatch('/^222\d{9}$/');
+});
+
+test('un LOCAL_ADMIN qui crée un caissier ne crée aucune fiche Teacher', function () {
+    $establishment = Establishment::factory()->create();
+    $localAdmin = createLocalAdmin($establishment);
+    test()->actingAs($localAdmin);
+
+    Livewire::test(Index::class, ['establishment' => $establishment])
+        ->set('staff_name', 'Caissier Test')
+        ->set('staff_email', 'caissier.test@nitsoft.test')
+        ->set('staff_role', 'caissier')
+        ->call('create')
+        ->assertHasNoErrors();
+
+    $user = User::where('email', 'caissier.test@nitsoft.test')->sole();
+
+    expect(Teacher::where('user_id', $user->id)->exists())->toBeFalse();
 });
 
 test('un LOCAL_ADMIN peut activer et désactiver un compte', function () {

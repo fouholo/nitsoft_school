@@ -25,7 +25,8 @@ class AttendanceRecord extends Model
         'student_id',
         'status',
         'note',
-        'uid',
+        'uid_local',
+        'uid_serveur',
         'device_id',
         'client_updated_at',
     ];
@@ -33,6 +34,11 @@ class AttendanceRecord extends Model
     protected $casts = [
         'client_updated_at' => 'datetime',
     ];
+
+    protected static function uidPrefix(): string
+    {
+        return '234';
+    }
 
     /**
      * @return BelongsTo<AttendanceSession, $this>

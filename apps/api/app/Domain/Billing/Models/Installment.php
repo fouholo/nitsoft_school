@@ -26,7 +26,8 @@ class Installment extends Model
         'label',
         'due_date',
         'position',
-        'uid',
+        'uid_local',
+        'uid_serveur',
         'device_id',
         'client_updated_at',
     ];
@@ -35,6 +36,11 @@ class Installment extends Model
         'due_date' => 'date',
         'client_updated_at' => 'datetime',
     ];
+
+    protected static function uidPrefix(): string
+    {
+        return '243';
+    }
 
     protected static function booted(): void
     {

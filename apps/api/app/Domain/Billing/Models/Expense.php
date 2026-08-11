@@ -28,7 +28,8 @@ class Expense extends Model implements HasOwnerColumn
         'amount',
         'spent_at',
         'recorded_by',
-        'uid',
+        'uid_local',
+        'uid_serveur',
         'device_id',
         'client_updated_at',
     ];
@@ -38,6 +39,11 @@ class Expense extends Model implements HasOwnerColumn
         'spent_at' => 'date',
         'client_updated_at' => 'datetime',
     ];
+
+    protected static function uidPrefix(): string
+    {
+        return '245';
+    }
 
     /**
      * @return BelongsTo<User, $this>

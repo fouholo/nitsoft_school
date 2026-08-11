@@ -30,7 +30,8 @@ class Classroom extends Model
         'serie_id',
         'numero',
         'capacity',
-        'uid',
+        'uid_local',
+        'uid_serveur',
         'device_id',
         'client_updated_at',
     ];
@@ -38,6 +39,11 @@ class Classroom extends Model
     protected $casts = [
         'client_updated_at' => 'datetime',
     ];
+
+    protected static function uidPrefix(): string
+    {
+        return '212';
+    }
 
     protected static function booted(): void
     {

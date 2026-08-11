@@ -33,7 +33,8 @@ class Payment extends Model implements HasOwnerColumn
         'paid_at',
         'received_by',
         'reference',
-        'uid',
+        'uid_local',
+        'uid_serveur',
         'device_id',
         'client_updated_at',
     ];
@@ -43,6 +44,11 @@ class Payment extends Model implements HasOwnerColumn
         'paid_at' => 'datetime',
         'client_updated_at' => 'datetime',
     ];
+
+    protected static function uidPrefix(): string
+    {
+        return '241';
+    }
 
     /**
      * @return BelongsTo<Invoice, $this>

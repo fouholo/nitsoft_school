@@ -34,7 +34,8 @@ class GradeSheet extends Model
         'max_score',
         'weight',
         'graded_on',
-        'uid',
+        'uid_local',
+        'uid_serveur',
         'device_id',
         'client_updated_at',
     ];
@@ -45,6 +46,11 @@ class GradeSheet extends Model
         'graded_on' => 'date',
         'client_updated_at' => 'datetime',
     ];
+
+    protected static function uidPrefix(): string
+    {
+        return '231';
+    }
 
     /**
      * @return BelongsTo<Classroom, $this>

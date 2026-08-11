@@ -27,7 +27,8 @@ class Enrollment extends Model
         'school_year_id',
         'enrolled_on',
         'status',
-        'uid',
+        'uid_local',
+        'uid_serveur',
         'device_id',
         'client_updated_at',
     ];
@@ -36,6 +37,11 @@ class Enrollment extends Model
         'enrolled_on' => 'date',
         'client_updated_at' => 'datetime',
     ];
+
+    protected static function uidPrefix(): string
+    {
+        return '230';
+    }
 
     public function student(): BelongsTo
     {

@@ -24,7 +24,8 @@ class Guardian extends Model
         'last_name',
         'phone',
         'email',
-        'uid',
+        'uid_local',
+        'uid_serveur',
         'device_id',
         'client_updated_at',
     ];
@@ -32,6 +33,11 @@ class Guardian extends Model
     protected $casts = [
         'client_updated_at' => 'datetime',
     ];
+
+    protected static function uidPrefix(): string
+    {
+        return '223';
+    }
 
     public function user(): BelongsTo
     {

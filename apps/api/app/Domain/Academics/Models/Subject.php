@@ -20,7 +20,8 @@ class Subject extends Model
     protected $fillable = [
         'establishment_id',
         'name',
-        'uid',
+        'uid_local',
+        'uid_serveur',
         'device_id',
         'client_updated_at',
     ];
@@ -28,4 +29,9 @@ class Subject extends Model
     protected $casts = [
         'client_updated_at' => 'datetime',
     ];
+
+    protected static function uidPrefix(): string
+    {
+        return '215';
+    }
 }

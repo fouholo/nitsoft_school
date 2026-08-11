@@ -38,7 +38,7 @@ class LinkChild extends Component
 
         $this->validate(['uid' => ['required', 'digits:12']]);
 
-        $this->foundStudent = Student::withoutTenant()->where('uid', $this->uid)->first();
+        $this->foundStudent = Student::withoutTenant()->where('uid_serveur', $this->uid)->first();
 
         if (! $this->foundStudent) {
             throw ValidationException::withMessages([

@@ -26,7 +26,8 @@ class LevelFee extends Model
         'school_year_id',
         'level_id',
         'registration_amount',
-        'uid',
+        'uid_local',
+        'uid_serveur',
         'device_id',
         'client_updated_at',
     ];
@@ -35,6 +36,11 @@ class LevelFee extends Model
         'registration_amount' => 'decimal:2',
         'client_updated_at' => 'datetime',
     ];
+
+    protected static function uidPrefix(): string
+    {
+        return '244';
+    }
 
     protected static function booted(): void
     {

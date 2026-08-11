@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Livewire\Staff;
 
+use App\Domain\Academics\Models\Teacher;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\EstablishmentUserPivot;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
@@ -52,18 +54,30 @@ class Index extends Component
 
         $password = Str::password(12);
 
-        $user = User::create([
-            'name' => $data['staff_name'],
-            'email' => $data['staff_email'],
-            'password' => $password,
-        ]);
+        $user = DB::transaction(function () use ($data, $password): User {
+            $user = User::create([
+                'name' => $data['staff_name'],
+                'email' => $data['staff_email'],
+                'password' => $password,
+            ]);
 
-        EstablishmentUserPivot::create([
-            'establishment_id' => $this->establishment->id,
-            'user_id' => $user->id,
-            'role' => $data['staff_role'],
-            'is_active' => true,
-        ]);
+            EstablishmentUserPivot::create([
+                'establishment_id' => $this->establishment->id,
+                'user_id' => $user->id,
+                'role' => $data['staff_role'],
+                'is_active' => true,
+            ]);
+
+            if ($data['staff_role'] === 'enseignant') {
+                Teacher::create([
+                    'establishment_id' => $this->establishment->id,
+                    'user_id' => $user->id,
+                    'name' => $data['staff_name'],
+                ]);
+            }
+
+            return $user;
+        });
 
         $this->generatedPassword = $password;
         $this->generatedPasswordFor = $user->email;

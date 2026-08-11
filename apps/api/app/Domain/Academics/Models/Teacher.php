@@ -6,24 +6,30 @@ namespace App\Domain\Academics\Models;
 
 use App\Domain\Establishments\Concerns\TenantScoped;
 use App\Domain\Sync\Concerns\Syncable;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
-class SubjectCoefficient extends Model
+/**
+ * Fiche compagnon du User (rôle enseignant sur establishment_user), sur le
+ * même principe que Guardian — ne remplace aucune référence existante
+ * (teacher_classroom_subject.user_id continue de pointer users.id, RBAC
+ * inchangé). Sert uniquement de support d'identité/uid pour l'usage
+ * offline et code-barres. Voir
+ * docs/superpowers/specs/2026-08-10-uid-local-serveur-prefixe-design.md.
+ */
+class Teacher extends Model
 {
     use HasFactory;
-    use SoftDeletes;
     use Syncable;
     use TenantScoped;
 
     protected $fillable = [
         'establishment_id',
-        'level_id',
-        'serie_id',
-        'subject_id',
-        'coefficient',
+        'user_id',
+        'name',
+        'phone',
         'uid_local',
         'uid_serveur',
         'device_id',
@@ -31,36 +37,19 @@ class SubjectCoefficient extends Model
     ];
 
     protected $casts = [
-        'coefficient' => 'decimal:2',
         'client_updated_at' => 'datetime',
     ];
 
     protected static function uidPrefix(): string
     {
-        return '216';
+        return '222';
     }
 
     /**
-     * @return BelongsTo<Level, $this>
+     * @return BelongsTo<User, $this>
      */
-    public function level(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(Level::class);
-    }
-
-    /**
-     * @return BelongsTo<Serie, $this>
-     */
-    public function serie(): BelongsTo
-    {
-        return $this->belongsTo(Serie::class);
-    }
-
-    /**
-     * @return BelongsTo<Subject, $this>
-     */
-    public function subject(): BelongsTo
-    {
-        return $this->belongsTo(Subject::class);
+        return $this->belongsTo(User::class);
     }
 }

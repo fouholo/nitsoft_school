@@ -41,7 +41,8 @@ class Student extends Model
         'birth_certificate_date',
         'birth_certificate_place',
         'residence',
-        'uid',
+        'uid_local',
+        'uid_serveur',
         'device_id',
         'client_updated_at',
     ];
@@ -52,6 +53,11 @@ class Student extends Model
         'is_active' => 'boolean',
         'client_updated_at' => 'datetime',
     ];
+
+    protected static function uidPrefix(): string
+    {
+        return '221';
+    }
 
     /**
      * @return BelongsToMany<Guardian, $this, GuardianStudentPivot, 'pivot'>

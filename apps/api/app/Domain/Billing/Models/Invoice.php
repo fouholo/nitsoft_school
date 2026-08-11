@@ -36,7 +36,8 @@ class Invoice extends Model implements HasOwnerColumn
         'amount_paid',
         'status',
         'due_date',
-        'uid',
+        'uid_local',
+        'uid_serveur',
         'device_id',
         'client_updated_at',
     ];
@@ -47,6 +48,11 @@ class Invoice extends Model implements HasOwnerColumn
         'due_date' => 'date',
         'client_updated_at' => 'datetime',
     ];
+
+    protected static function uidPrefix(): string
+    {
+        return '240';
+    }
 
     public function student(): BelongsTo
     {

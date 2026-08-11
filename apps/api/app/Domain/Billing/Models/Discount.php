@@ -29,7 +29,8 @@ class Discount extends Model
         'value',
         'reason',
         'created_by',
-        'uid',
+        'uid_local',
+        'uid_serveur',
         'device_id',
         'client_updated_at',
     ];
@@ -38,6 +39,11 @@ class Discount extends Model
         'value' => 'decimal:2',
         'client_updated_at' => 'datetime',
     ];
+
+    protected static function uidPrefix(): string
+    {
+        return '242';
+    }
 
     /**
      * @return BelongsTo<Student, $this>

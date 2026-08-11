@@ -38,7 +38,8 @@ class User extends Authenticatable
         'email',
         'phone',
         'password',
-        'uid',
+        'uid_local',
+        'uid_serveur',
         'device_id',
         'client_updated_at',
     ];
@@ -65,6 +66,11 @@ class User extends Authenticatable
             'password' => 'hashed',
             'client_updated_at' => 'datetime',
         ];
+    }
+
+    protected static function uidPrefix(): string
+    {
+        return '220';
     }
 
     public function establishments(): BelongsToMany
