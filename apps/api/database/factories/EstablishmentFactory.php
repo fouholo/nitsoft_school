@@ -23,7 +23,6 @@ class EstablishmentFactory extends Factory
             'type' => fake()->randomElement(EstablishmentType::cases()),
             'address' => fake()->address(),
             'phone' => fake()->phoneNumber(),
-            'timezone' => 'UTC',
             'is_active' => true,
         ];
     }

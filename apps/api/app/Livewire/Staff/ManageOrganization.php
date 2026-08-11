@@ -45,8 +45,6 @@ class ManageOrganization extends Component
 
     public string $new_establishment_phone = '';
 
-    public string $new_establishment_timezone = 'UTC';
-
     public function mount(): void
     {
         /** @var User $user */
@@ -110,7 +108,6 @@ class ManageOrganization extends Component
             'new_establishment_type' => ['required', Rule::enum(EstablishmentType::class)],
             'new_establishment_address' => ['nullable', 'string', 'max:255'],
             'new_establishment_phone' => ['nullable', 'string', 'max:50'],
-            'new_establishment_timezone' => ['required', 'string', 'max:64'],
         ]);
 
         Establishment::create([
@@ -120,11 +117,9 @@ class ManageOrganization extends Component
             'type' => $data['new_establishment_type'],
             'address' => $data['new_establishment_address'],
             'phone' => $data['new_establishment_phone'],
-            'timezone' => $data['new_establishment_timezone'],
         ]);
 
         $this->reset(['new_establishment_name', 'new_establishment_type', 'new_establishment_address', 'new_establishment_phone']);
-        $this->new_establishment_timezone = 'UTC';
     }
 
     private function uniqueSlugFor(string $name): string

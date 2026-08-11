@@ -66,11 +66,6 @@
                         <input type="text" wire:model="new_establishment_phone" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
                         @error('new_establishment_phone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-700">Fuseau horaire</label>
-                        <input type="text" wire:model="new_establishment_timezone" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
-                        @error('new_establishment_timezone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-                    </div>
                     <button type="submit" class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700">
                         Créer l'établissement
                     </button>

@@ -26,7 +26,6 @@ class Establishment extends Model
         'type',
         'address',
         'phone',
-        'timezone',
         'is_active',
         'uid_local',
         'uid_serveur',

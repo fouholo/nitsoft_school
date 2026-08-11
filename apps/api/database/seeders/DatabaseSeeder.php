@@ -85,7 +85,6 @@ class DatabaseSeeder extends Seeder
             'type' => EstablishmentType::Secondaire,
             'address' => 'Abidjan, Côte d\'Ivoire',
             'phone' => '+225 07 00 00 00 00',
-            'timezone' => 'Africa/Abidjan',
             'is_active' => true,
         ]);
 
@@ -96,7 +95,6 @@ class DatabaseSeeder extends Seeder
             'type' => EstablishmentType::Secondaire,
             'address' => 'Bouaké, Côte d\'Ivoire',
             'phone' => '+225 07 00 00 00 01',
-            'timezone' => 'Africa/Abidjan',
             'is_active' => true,
         ]);
 
@@ -107,7 +105,6 @@ class DatabaseSeeder extends Seeder
             'type' => EstablishmentType::PrescolairePrimaire,
             'address' => 'Yamoussoukro, Côte d\'Ivoire',
             'phone' => '+225 07 00 00 00 02',
-            'timezone' => 'Africa/Abidjan',
             'is_active' => true,
         ]);
 

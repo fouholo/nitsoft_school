@@ -55,12 +55,6 @@
                 @error('phone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-slate-700">Fuseau horaire</label>
-                <input type="text" wire:model="timezone" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
-                @error('timezone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-            </div>
-
             <label class="flex items-center gap-2 text-sm text-slate-600">
                 <input type="checkbox" wire:model="is_active" class="rounded border-slate-300">
                 Actif

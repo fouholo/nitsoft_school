@@ -31,8 +31,6 @@ class Index extends Component
 
     public string $phone = '';
 
-    public string $timezone = 'UTC';
-
     public bool $is_active = true;
 
     public function mount(): void
@@ -60,7 +58,6 @@ class Index extends Component
         $this->type = $establishment->type instanceof EstablishmentType ? $establishment->type->value : '';
         $this->address = (string) $establishment->address;
         $this->phone = (string) $establishment->phone;
-        $this->timezone = $establishment->timezone;
         $this->is_active = $establishment->is_active;
         $this->showForm = true;
     }
@@ -73,7 +70,6 @@ class Index extends Component
             'type' => ['required', Rule::enum(EstablishmentType::class)],
             'address' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
-            'timezone' => ['required', 'string', 'max:64'],
             'is_active' => ['boolean'],
         ]);
 
@@ -125,7 +121,6 @@ class Index extends Component
     protected function resetForm(): void
     {
         $this->reset(['editingId', 'name', 'foundation_id', 'type', 'address', 'phone', 'is_active']);
-        $this->timezone = 'UTC';
         $this->is_active = true;
     }
 
