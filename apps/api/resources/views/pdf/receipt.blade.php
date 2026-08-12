@@ -17,7 +17,10 @@
         table.amount td { padding: 8px; border: 1px solid #cbd5e1; }
         table.amount td.label { background-color: #f1f5f9; font-weight: bold; width: 150px; }
         table.amount td.value { font-size: 16px; font-weight: bold; }
-        .footer { margin-top: 40px; font-size: 10px; color: #94a3b8; text-align: center; }
+        table.codes { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        table.codes td { width: 50%; text-align: center; vertical-align: top; }
+        table.codes .code-label { margin: 4px 0 0; font-size: 9px; color: #94a3b8; }
+        .footer { margin-top: 20px; font-size: 10px; color: #94a3b8; text-align: center; }
     </style>
 </head>
 <body>
@@ -64,6 +67,21 @@
         <tr>
             <td class="label">Montant reçu</td>
             <td class="value">{{ money((float) $payment->amount) }}</td>
+        </tr>
+    </table>
+
+    <table class="codes">
+        <tr>
+            <td>
+                <img src="{{ qr_code_data_uri($payment->uid_local) }}" style="width: 80px; height: 80px;">
+                <p class="code-label">{{ $payment->uid_local }}</p>
+            </td>
+            <td>
+                @if ($payment->uid_serveur)
+                    <img src="{{ barcode_data_uri($payment->uid_serveur) }}" style="height: 50px; margin-top: 15px;">
+                    <p class="code-label">{{ $payment->uid_serveur }}</p>
+                @endif
+            </td>
         </tr>
     </table>
 

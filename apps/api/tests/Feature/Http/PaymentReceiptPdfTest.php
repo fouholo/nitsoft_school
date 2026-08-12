@@ -75,3 +75,29 @@ test('un membre d’un autre établissement ne peut même pas résoudre le paiem
 
     $response->assertNotFound();
 });
+
+test('le reçu contient un QR code (uid_local) et un code-barres (uid_serveur) une fois synchronisé', function () {
+    $establishment = Establishment::factory()->create();
+    actingInEstablishment($establishment);
+    $payment = makePaymentIn($establishment);
+
+    expect($payment->uid_serveur)->not->toBeNull();
+
+    $html = view('pdf.receipt', ['payment' => $payment])->render();
+
+    expect(substr_count($html, '<img'))->toBe(2)
+        ->and($html)->toContain($payment->uid_local)
+        ->and($html)->toContain($payment->uid_serveur);
+});
+
+test('le code-barres est absent tant que le paiement n’est pas synchronisé (uid_serveur absent)', function () {
+    $establishment = Establishment::factory()->create();
+    actingInEstablishment($establishment);
+    $payment = makePaymentIn($establishment);
+    $payment->uid_serveur = null;
+
+    $html = view('pdf.receipt', ['payment' => $payment])->render();
+
+    expect(substr_count($html, '<img'))->toBe(1)
+        ->and($html)->toContain($payment->uid_local);
+});
