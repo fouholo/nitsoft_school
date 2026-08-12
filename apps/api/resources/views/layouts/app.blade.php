@@ -46,6 +46,7 @@
                     ['label' => 'Bulletins', 'route' => 'grading.report-cards.index', 'ability' => 'viewAny', 'model' => \App\Domain\Grading\Models\ReportCard::class],
                 ]],
                 ['type' => 'link', 'label' => 'Présences', 'route' => 'attendance.sessions.index', 'active' => 'attendance.*', 'icon' => 'calendar-check', 'ability' => 'viewAny', 'model' => \App\Domain\Attendance\Models\AttendanceSession::class],
+                ['type' => 'link', 'label' => 'Listes/Rapports', 'route' => 'reports.index', 'active' => 'reports.*', 'icon' => 'document-text', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\Classroom::class],
                 ['type' => 'group', 'label' => 'Facturation', 'icon' => 'banknote', 'active' => 'billing.*', 'children' => [
                     ['label' => 'Tarifs', 'route' => 'billing.tuition-fees.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Installment::class],
                     ['label' => 'Factures', 'route' => 'billing.invoices.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Invoice::class],
