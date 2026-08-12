@@ -8,6 +8,7 @@
         .header { text-align: center; margin-bottom: 20px; }
         .header h1 { font-size: 16px; margin: 0 0 4px; }
         .header p { margin: 0; color: #64748b; }
+        .divider { border: none; border-top: 3px solid #94a3b8; margin: 0 0 20px; }
         .receipt-number { text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 20px; }
         table.meta { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
         table.meta td { padding: 4px 0; }
@@ -28,24 +29,32 @@
         <p>Reçu de paiement</p>
     </div>
 
+    <hr class="divider">
+
     <p class="receipt-number">N&deg; {{ $payment->receipt?->receipt_number }}</p>
 
     <table class="meta">
         <tr>
             <td class="label">Élève</td>
             <td>{{ $payment->student->last_name }} {{ $payment->student->first_name }}</td>
+        </tr>
+        <tr>
             <td class="label">Date de paiement</td>
             <td>{{ $payment->paid_at->format('d/m/Y') }}</td>
         </tr>
         <tr>
             <td class="label">Facture</td>
             <td>{{ $payment->invoice->label }}</td>
+        </tr>
+        <tr>
             <td class="label">Moyen de paiement</td>
             <td>{{ $payment->method }}</td>
         </tr>
         <tr>
             <td class="label">Référence</td>
             <td>{{ $payment->reference ?? '—' }}</td>
+        </tr>
+        <tr>
             <td class="label">Encaissé par</td>
             <td>{{ $payment->receivedBy?->name }}</td>
         </tr>
