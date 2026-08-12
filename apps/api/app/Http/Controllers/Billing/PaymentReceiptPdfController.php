@@ -26,17 +26,25 @@ class PaymentReceiptPdfController extends Controller
 
         $payment->loadMissing(['invoice', 'student', 'establishment', 'receivedBy']);
 
-        $nextPaymentDueDate = Invoice::where('student_id', $payment->student_id)
+        $tuitionInvoices = Invoice::where('student_id', $payment->student_id)
             ->where('school_year_id', $payment->invoice->school_year_id)
+            ->whereNotNull('installment_id')
+            ->where('status', '!=', 'cancelled');
+
+        $totalTuition = (float) (clone $tuitionInvoices)->sum('amount_due');
+        $totalPayments = (float) (clone $tuitionInvoices)->sum('amount_paid');
+
+        $nextPaymentDueDate = (clone $tuitionInvoices)
             ->where('id', '!=', $payment->invoice_id)
             ->where('status', '!=', 'paid')
-            ->where('status', '!=', 'cancelled')
             ->orderBy('due_date')
             ->first()
             ?->due_date;
 
         $pdf = Pdf::loadView('pdf.receipt', [
             'payment' => $payment,
+            'totalTuition' => $totalTuition,
+            'totalPayments' => $totalPayments,
             'nextPaymentDueDate' => $nextPaymentDueDate,
         ])->setPaper('a5');
 

@@ -79,15 +79,15 @@
     <table class="summary">
         <tr>
             <td class="label">Total scolarité</td>
-            <td>{{ money((float) $payment->invoice->amount_due) }}</td>
+            <td>{{ money($totalTuition) }}</td>
         </tr>
         <tr>
             <td class="label">Total versement</td>
-            <td>{{ money((float) $payment->invoice->amount_paid) }}</td>
+            <td>{{ money($totalPayments) }}</td>
         </tr>
         <tr>
             <td class="label">Reste scolarité</td>
-            <td>{{ money((float) $payment->invoice->amount_due - (float) $payment->invoice->amount_paid) }}</td>
+            <td>{{ money($totalTuition - $totalPayments) }}</td>
         </tr>
         @if ($nextPaymentDueDate)
             <tr>
