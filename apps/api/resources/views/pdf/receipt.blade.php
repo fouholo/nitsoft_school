@@ -7,7 +7,6 @@
         body { font-family: "DejaVu Sans", sans-serif; font-size: 12px; color: #1e293b; }
         .header { text-align: center; margin-bottom: 12px; }
         .header h1 { font-size: 16px; margin: 0 0 4px; }
-        .header p { margin: 0; color: #64748b; }
         .divider { border: none; border-top: 3px solid #94a3b8; margin: 0 0 12px; }
         .receipt-number { text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 12px; }
         table.meta { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
@@ -35,12 +34,11 @@
             <img src="{{ public_path('storage/'.$payment->establishment->logo_path) }}" style="height: 60px; margin-bottom: 8px;">
         @endif
         <h1>{{ $payment->establishment->name }}</h1>
-        <p>Reçu de paiement</p>
     </div>
 
     <hr class="divider">
 
-    <p class="receipt-number">N&deg; {{ $payment->receiptNumber() }}</p>
+    <p class="receipt-number">Reçu de paiement N&deg; {{ $payment->receiptNumber() }}</p>
 
     <table class="meta">
         <tr>
