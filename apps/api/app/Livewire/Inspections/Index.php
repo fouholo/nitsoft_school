@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Inspections;
 
+use App\Domain\Establishments\Models\Direction;
 use App\Domain\Establishments\Models\Inspection;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
@@ -16,11 +17,21 @@ class Index extends Component
 {
     public bool $showForm = false;
 
-    public ?string $editingCode = null;
+    public ?int $editingId = null;
 
-    public string $code = '';
+    public string $codeiep = '';
 
-    public string $libelle = '';
+    public string $inspection_name = '';
+
+    public string $address = '';
+
+    public string $phone_number = '';
+
+    public string $email = '';
+
+    public string $location = '';
+
+    public string $uid_direction = '';
 
     public function mount(): void
     {
@@ -35,29 +46,43 @@ class Index extends Component
         $this->showForm = true;
     }
 
-    public function edit(string $code): void
+    public function edit(int $id): void
     {
-        $inspection = Inspection::findOrFail($code);
+        $inspection = Inspection::findOrFail($id);
 
         $this->authorize('update', $inspection);
 
-        $this->editingCode = $inspection->code;
-        $this->code = $inspection->code;
-        $this->libelle = $inspection->libelle;
+        $this->editingId = $inspection->id;
+        $this->codeiep = $inspection->codeiep;
+        $this->inspection_name = $inspection->inspection_name;
+        $this->address = (string) $inspection->address;
+        $this->phone_number = (string) $inspection->phone_number;
+        $this->email = (string) $inspection->email;
+        $this->location = (string) $inspection->location;
+        $this->uid_direction = (string) $inspection->uid_direction;
         $this->showForm = true;
     }
 
     public function save(): void
     {
         $data = $this->validate([
-            'code' => ['required', 'string', 'max:10', Rule::unique('inspections', 'code')->ignore($this->editingCode, 'code')],
-            'libelle' => ['required', 'string', 'max:100'],
+            'codeiep' => ['required', 'string', 'max:6', Rule::unique('inspections', 'codeiep')->ignore($this->editingId)],
+            'inspection_name' => ['required', 'string', 'max:50'],
+            'address' => ['nullable', 'string', 'max:50'],
+            'phone_number' => ['nullable', 'string', 'max:20'],
+            'email' => ['nullable', 'email', 'max:50'],
+            'location' => ['nullable', 'string', 'max:50'],
+            'uid_direction' => ['nullable', 'string', 'exists:directions,uid_serveur'],
         ]);
 
-        if ($this->editingCode !== null) {
-            $inspection = Inspection::findOrFail($this->editingCode);
+        foreach (['address', 'phone_number', 'email', 'location', 'uid_direction'] as $field) {
+            $data[$field] = $data[$field] !== '' ? $data[$field] : null;
+        }
+
+        if ($this->editingId !== null) {
+            $inspection = Inspection::findOrFail($this->editingId);
             $this->authorize('update', $inspection);
-            $inspection->update(['libelle' => $data['libelle']]);
+            $inspection->update($data);
         } else {
             $this->authorize('create', Inspection::class);
             Inspection::create($data);
@@ -67,9 +92,9 @@ class Index extends Component
         $this->showForm = false;
     }
 
-    public function delete(string $code): void
+    public function delete(int $id): void
     {
-        $inspection = Inspection::findOrFail($code);
+        $inspection = Inspection::findOrFail($id);
 
         $this->authorize('delete', $inspection);
 
@@ -84,13 +109,14 @@ class Index extends Component
 
     protected function resetForm(): void
     {
-        $this->reset(['editingCode', 'code', 'libelle']);
+        $this->reset(['editingId', 'codeiep', 'inspection_name', 'address', 'phone_number', 'email', 'location', 'uid_direction']);
     }
 
     public function render()
     {
         return view('livewire.inspections.index', [
-            'inspections' => Inspection::orderBy('libelle')->get(),
+            'inspections' => Inspection::orderBy('inspection_name')->get(),
+            'directions' => Direction::orderBy('direction_name')->get(),
         ]);
     }
 }

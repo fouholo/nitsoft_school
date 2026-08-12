@@ -110,12 +110,12 @@ test('un GENERAL_ADMIN de fondation peut créer un établissement avec les champ
     test()->actingAs($generalAdmin);
     Storage::fake('public');
 
-    $inspection = Inspection::create(['code' => 'IEP-TEST', 'libelle' => 'Inspection Test']);
+    $inspection = Inspection::create(['codeiep' => 'IEP-TEST', 'inspection_name' => 'Inspection Test']);
 
     Livewire::test(ManageOrganization::class)
         ->set('new_establishment_name', 'École Test')
         ->set('new_establishment_type', EstablishmentType::Secondaire->value)
-        ->set('new_establishment_inspection_code', $inspection->code)
+        ->set('new_establishment_inspection_id', (string) $inspection->id)
         ->set('new_establishment_opening_code', 'OUV-001')
         ->set('new_establishment_dsps_code', 'DSPS-001')
         ->set('new_establishment_latitude', '5.336400')
@@ -128,7 +128,7 @@ test('un GENERAL_ADMIN de fondation peut créer un établissement avec les champ
 
     $establishment = Establishment::where('name', 'École Test')->sole();
 
-    expect($establishment->inspection_code)->toBe('IEP-TEST')
+    expect($establishment->inspection_id)->toBe($inspection->id)
         ->and($establishment->opening_code)->toBe('OUV-001')
         ->and($establishment->dsps_code)->toBe('DSPS-001')
         ->and((float) $establishment->latitude)->toBe(5.3364)

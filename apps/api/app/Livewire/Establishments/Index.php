@@ -39,7 +39,7 @@ class Index extends Component
 
     public bool $is_active = true;
 
-    public string $inspection_code = '';
+    public string $inspection_id = '';
 
     public string $opening_code = '';
 
@@ -83,7 +83,7 @@ class Index extends Component
         $this->address = (string) $establishment->address;
         $this->phone = (string) $establishment->phone;
         $this->is_active = $establishment->is_active;
-        $this->inspection_code = (string) $establishment->inspection_code;
+        $this->inspection_id = (string) $establishment->inspection_id;
         $this->opening_code = (string) $establishment->opening_code;
         $this->dsps_code = (string) $establishment->dsps_code;
         $this->latitude = (string) $establishment->latitude;
@@ -103,7 +103,7 @@ class Index extends Component
             'address' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
             'is_active' => ['boolean'],
-            'inspection_code' => ['nullable', 'string', 'exists:inspections,code'],
+            'inspection_id' => ['nullable', 'integer', 'exists:inspections,id'],
             'opening_code' => ['nullable', 'string', 'max:100'],
             'dsps_code' => ['nullable', 'string', 'max:100'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
@@ -113,7 +113,7 @@ class Index extends Component
             'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:1024'],
         ]);
 
-        foreach (['inspection_code', 'opening_code', 'dsps_code', 'latitude', 'longitude', 'email'] as $field) {
+        foreach (['inspection_id', 'opening_code', 'dsps_code', 'latitude', 'longitude', 'email'] as $field) {
             $data[$field] = $data[$field] !== '' ? $data[$field] : null;
         }
 
@@ -176,7 +176,7 @@ class Index extends Component
     {
         $this->reset([
             'editingId', 'name', 'foundation_id', 'type', 'address', 'phone', 'is_active',
-            'inspection_code', 'opening_code', 'dsps_code', 'latitude', 'longitude', 'email',
+            'inspection_id', 'opening_code', 'dsps_code', 'latitude', 'longitude', 'email',
             'is_arabe', 'logo', 'existingLogoPath',
         ]);
         $this->is_active = true;
@@ -188,7 +188,7 @@ class Index extends Component
             'establishments' => Establishment::with('foundation')->orderBy('name')->get(),
             'foundations' => Foundation::orderBy('name')->get(),
             'types' => EstablishmentType::cases(),
-            'inspections' => Inspection::orderBy('libelle')->get(),
+            'inspections' => Inspection::orderBy('inspection_name')->get(),
         ]);
     }
 }

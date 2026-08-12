@@ -50,7 +50,7 @@ class ManageOrganization extends Component
 
     public string $new_establishment_phone = '';
 
-    public string $new_establishment_inspection_code = '';
+    public string $new_establishment_inspection_id = '';
 
     public string $new_establishment_opening_code = '';
 
@@ -129,7 +129,7 @@ class ManageOrganization extends Component
             'new_establishment_type' => ['required', Rule::enum(EstablishmentType::class)],
             'new_establishment_address' => ['nullable', 'string', 'max:255'],
             'new_establishment_phone' => ['nullable', 'string', 'max:50'],
-            'new_establishment_inspection_code' => ['nullable', 'string', 'exists:inspections,code'],
+            'new_establishment_inspection_id' => ['nullable', 'integer', 'exists:inspections,id'],
             'new_establishment_opening_code' => ['nullable', 'string', 'max:100'],
             'new_establishment_dsps_code' => ['nullable', 'string', 'max:100'],
             'new_establishment_latitude' => ['nullable', 'numeric', 'between:-90,90'],
@@ -139,7 +139,7 @@ class ManageOrganization extends Component
             'new_establishment_logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:1024'],
         ]);
 
-        foreach (['new_establishment_inspection_code', 'new_establishment_opening_code', 'new_establishment_dsps_code', 'new_establishment_latitude', 'new_establishment_longitude', 'new_establishment_email'] as $field) {
+        foreach (['new_establishment_inspection_id', 'new_establishment_opening_code', 'new_establishment_dsps_code', 'new_establishment_latitude', 'new_establishment_longitude', 'new_establishment_email'] as $field) {
             $data[$field] = $data[$field] !== '' ? $data[$field] : null;
         }
 
@@ -152,7 +152,7 @@ class ManageOrganization extends Component
             'type' => $data['new_establishment_type'],
             'address' => $data['new_establishment_address'],
             'phone' => $data['new_establishment_phone'],
-            'inspection_code' => $data['new_establishment_inspection_code'],
+            'inspection_id' => $data['new_establishment_inspection_id'],
             'opening_code' => $data['new_establishment_opening_code'],
             'dsps_code' => $data['new_establishment_dsps_code'],
             'latitude' => $data['new_establishment_latitude'],
@@ -164,7 +164,7 @@ class ManageOrganization extends Component
 
         $this->reset([
             'new_establishment_name', 'new_establishment_type', 'new_establishment_address', 'new_establishment_phone',
-            'new_establishment_inspection_code', 'new_establishment_opening_code', 'new_establishment_dsps_code',
+            'new_establishment_inspection_id', 'new_establishment_opening_code', 'new_establishment_dsps_code',
             'new_establishment_latitude', 'new_establishment_longitude', 'new_establishment_email',
             'new_establishment_is_arabe', 'new_establishment_logo',
         ]);
@@ -333,7 +333,7 @@ class ManageOrganization extends Component
                 : collect(),
             'eligibleGeneralAdminTargets' => $isGeneralAdmin ? $this->eligibleGeneralAdminTargets() : collect(),
             'establishmentTypes' => EstablishmentType::cases(),
-            'inspections' => Inspection::orderBy('libelle')->get(),
+            'inspections' => Inspection::orderBy('inspection_name')->get(),
         ]);
     }
 

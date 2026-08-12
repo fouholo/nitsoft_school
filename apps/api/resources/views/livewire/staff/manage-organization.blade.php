@@ -73,13 +73,13 @@
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-700">Inspection</label>
-                        <select wire:model="new_establishment_inspection_code" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                        <select wire:model="new_establishment_inspection_id" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
                             <option value="">—</option>
                             @foreach ($inspections as $inspection)
-                                <option value="{{ $inspection->code }}">{{ $inspection->libelle }}</option>
+                                <option value="{{ $inspection->id }}">{{ $inspection->codeiep }} — {{ $inspection->inspection_name }}</option>
                             @endforeach
                         </select>
-                        @error('new_establishment_inspection_code') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        @error('new_establishment_inspection_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-700">Code d'ouverture</label>

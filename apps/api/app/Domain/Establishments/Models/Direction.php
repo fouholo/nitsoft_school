@@ -6,9 +6,8 @@ namespace App\Domain\Establishments\Models;
 
 use App\Domain\Sync\Concerns\Syncable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Inspection extends Model
+class Direction extends Model
 {
     use Syncable;
 
@@ -17,13 +16,12 @@ class Inspection extends Model
         'uid_serveur',
         'device_id',
         'client_updated_at',
-        'codeiep',
-        'inspection_name',
+        'code',
+        'direction_name',
         'address',
         'phone_number',
         'email',
         'location',
-        'uid_direction',
     ];
 
     protected $casts = [
@@ -32,14 +30,6 @@ class Inspection extends Model
 
     protected static function uidPrefix(): string
     {
-        return '217';
-    }
-
-    /**
-     * @return BelongsTo<Direction, $this>
-     */
-    public function direction(): BelongsTo
-    {
-        return $this->belongsTo(Direction::class, 'uid_direction', 'uid_serveur');
+        return '218';
     }
 }

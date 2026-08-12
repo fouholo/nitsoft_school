@@ -27,7 +27,7 @@ class Establishment extends Model
         'address',
         'phone',
         'is_active',
-        'inspection_code',
+        'inspection_id',
         'opening_code',
         'dsps_code',
         'latitude',
@@ -66,7 +66,7 @@ class Establishment extends Model
      */
     public function inspection(): BelongsTo
     {
-        return $this->belongsTo(Inspection::class, 'inspection_code', 'code');
+        return $this->belongsTo(Inspection::class);
     }
 
     public function users(): BelongsToMany

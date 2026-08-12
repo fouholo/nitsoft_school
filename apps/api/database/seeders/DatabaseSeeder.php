@@ -12,6 +12,7 @@ use App\Domain\Academics\Models\Serie;
 use App\Domain\Enrollment\Models\Nationalite;
 use App\Domain\Establishments\Enums\EstablishmentType;
 use App\Domain\Establishments\Enums\SaasAdminType;
+use App\Domain\Establishments\Models\Direction;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\Foundation;
 use App\Domain\Establishments\Models\Inspection;
@@ -73,10 +74,21 @@ class DatabaseSeeder extends Seeder
             Serie::create($serie);
         }
 
+        $directions = [
+            ['code' => 'DR-ABJ', 'direction_name' => 'Direction Régionale Abidjan', 'address' => 'Abidjan', 'phone_number' => '2722000001', 'email' => 'dr-abidjan@education.ci', 'location' => 'Abidjan'],
+            ['code' => 'DR-BKE', 'direction_name' => 'Direction Régionale Bouaké', 'address' => 'Bouaké', 'phone_number' => '2731000001', 'email' => 'dr-bouake@education.ci', 'location' => 'Bouaké'],
+        ];
+
+        $createdDirections = [];
+
+        foreach ($directions as $direction) {
+            $createdDirections[$direction['code']] = Direction::create($direction);
+        }
+
         $inspections = [
-            ['code' => 'IEP-ABJ1', 'libelle' => 'Inspection Abidjan 1'],
-            ['code' => 'IEP-ABJ2', 'libelle' => 'Inspection Abidjan 2'],
-            ['code' => 'IEP-BKE', 'libelle' => 'Inspection Bouaké'],
+            ['codeiep' => 'IEP001', 'inspection_name' => 'Inspection Abidjan 1', 'address' => 'Abidjan', 'phone_number' => '2722000010', 'email' => 'iep-abj1@education.ci', 'location' => 'Abidjan', 'uid_direction' => $createdDirections['DR-ABJ']->uid_serveur],
+            ['codeiep' => 'IEP002', 'inspection_name' => 'Inspection Abidjan 2', 'address' => 'Abidjan', 'phone_number' => '2722000011', 'email' => 'iep-abj2@education.ci', 'location' => 'Abidjan', 'uid_direction' => $createdDirections['DR-ABJ']->uid_serveur],
+            ['codeiep' => 'IEP003', 'inspection_name' => 'Inspection Bouaké', 'address' => 'Bouaké', 'phone_number' => '2731000010', 'email' => 'iep-bke@education.ci', 'location' => 'Bouaké', 'uid_direction' => $createdDirections['DR-BKE']->uid_serveur],
         ];
 
         foreach ($inspections as $inspection) {

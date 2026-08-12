@@ -105,13 +105,13 @@ test('remplacer le logo d’un établissement supprime l’ancien du stockage', 
 });
 
 test('un super admin peut renseigner les champs administratifs d’un établissement', function () {
-    $inspection = Inspection::create(['code' => 'IEP-TEST', 'libelle' => 'Inspection Test']);
+    $inspection = Inspection::create(['codeiep' => 'IEP-TEST', 'inspection_name' => 'Inspection Test']);
 
     Livewire::test(Index::class)
         ->call('create')
         ->set('name', 'École Administrative')
         ->set('type', EstablishmentType::Secondaire->value)
-        ->set('inspection_code', $inspection->code)
+        ->set('inspection_id', (string) $inspection->id)
         ->set('opening_code', 'OUV-042')
         ->set('dsps_code', 'DSPS-042')
         ->set('latitude', '5.336400')
@@ -123,7 +123,7 @@ test('un super admin peut renseigner les champs administratifs d’un établisse
 
     $establishment = Establishment::where('name', 'École Administrative')->sole();
 
-    expect($establishment->inspection_code)->toBe('IEP-TEST')
+    expect($establishment->inspection_id)->toBe($inspection->id)
         ->and($establishment->opening_code)->toBe('OUV-042')
         ->and($establishment->dsps_code)->toBe('DSPS-042')
         ->and($establishment->email)->toBe('contact@ecole-administrative.ci')
