@@ -55,7 +55,7 @@
                 @forelse ($expenses as $expense)
                     <tr wire:key="expense-{{ $expense->id }}">
                         <td class="px-4 py-2 text-slate-900">{{ $expense->label }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ number_format((float) $expense->amount, 2) }}</td>
+                        <td class="px-4 py-2 text-slate-600">{{ money((float) $expense->amount) }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $expense->spent_at->format('d/m/Y') }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $expense->recordedBy->name }}</td>
                         <td class="px-4 py-2 text-right">

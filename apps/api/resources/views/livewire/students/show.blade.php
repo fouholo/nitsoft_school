@@ -151,21 +151,21 @@
             <div class="mt-2 grid grid-cols-1 gap-4 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-3">
                 <div>
                     <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Dû à ce jour</p>
-                    <p class="text-sm text-slate-900">{{ number_format($financialSummary['due_so_far'], 2) }}</p>
+                    <p class="text-sm text-slate-900">{{ money($financialSummary['due_so_far']) }}</p>
                 </div>
                 <div>
                     <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Payé</p>
-                    <p class="text-sm text-slate-900">{{ number_format($financialSummary['total_paid'], 2) }}</p>
+                    <p class="text-sm text-slate-900">{{ money($financialSummary['total_paid']) }}</p>
                 </div>
                 <div>
                     <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Solde</p>
                     @if ($financialSummary['balance'] > 0)
                         <span class="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
-                            Retard de {{ number_format($financialSummary['balance'], 2) }}
+                            Retard de {{ money($financialSummary['balance']) }}
                         </span>
                     @elseif ($financialSummary['balance'] < 0)
                         <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">
-                            Avance de {{ number_format(abs($financialSummary['balance']), 2) }}
+                            Avance de {{ money(abs($financialSummary['balance'])) }}
                         </span>
                     @else
                         <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">

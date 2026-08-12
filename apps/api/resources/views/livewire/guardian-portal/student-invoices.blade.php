@@ -19,8 +19,8 @@
                     <tr wire:key="guardian-invoice-{{ $invoice->id }}">
                         <td class="px-4 py-2 text-slate-900">{{ $invoice->label }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $invoice->due_date->format('d/m/Y') }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ number_format((float) $invoice->amount_due, 2) }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ number_format((float) $invoice->amount_paid, 2) }}</td>
+                        <td class="px-4 py-2 text-slate-600">{{ money((float) $invoice->amount_due) }}</td>
+                        <td class="px-4 py-2 text-slate-600">{{ money((float) $invoice->amount_paid) }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $invoice->status }}</td>
                     </tr>
                 @empty

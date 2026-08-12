@@ -6,8 +6,8 @@
             <h1 class="text-2xl font-semibold text-slate-900">{{ $invoice->label }}</h1>
             <p class="text-sm text-slate-500">
                 {{ $invoice->student?->last_name }} {{ $invoice->student?->first_name }} —
-                Dû {{ number_format((float) $invoice->amount_due, 2) }} —
-                Payé {{ number_format((float) $invoice->amount_paid, 2) }} —
+                Dû {{ money((float) $invoice->amount_due) }} —
+                Payé {{ money((float) $invoice->amount_paid) }} —
                 Statut {{ $invoice->status }}
             </p>
         </div>
@@ -79,7 +79,7 @@
                 @forelse ($payments as $payment)
                     <tr wire:key="payment-{{ $payment->id }}">
                         <td class="px-4 py-2 text-slate-900">{{ $payment->paid_at->format('d/m/Y') }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ number_format((float) $payment->amount, 2) }}</td>
+                        <td class="px-4 py-2 text-slate-600">{{ money((float) $payment->amount) }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $payment->method }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $payment->receipt?->receipt_number }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $payment->receivedBy?->name }}</td>

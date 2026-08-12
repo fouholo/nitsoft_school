@@ -63,7 +63,7 @@
     <table class="amount">
         <tr>
             <td class="label">Montant reçu</td>
-            <td class="value">{{ number_format((float) $payment->amount, 2) }}</td>
+            <td class="value">{{ money((float) $payment->amount) }}</td>
         </tr>
     </table>
 

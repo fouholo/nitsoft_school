@@ -29,7 +29,7 @@ test('un directeur voit le bloc situation financière sur la fiche élève', fun
 
     Livewire::test(Show::class, ['student' => $student])
         ->assertSee('Situation financière')
-        ->assertSee('Retard de 500.00');
+        ->assertSee('Retard de 500 F CFA');
 });
 
 test('un enseignant ne voit pas le bloc situation financière sur la fiche élève', function () {

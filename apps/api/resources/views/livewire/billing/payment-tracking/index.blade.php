@@ -41,16 +41,16 @@
                     <tr wire:key="student-{{ $row['student_id'] }}">
                         <td class="px-4 py-2 text-slate-900">{{ $row['student']->last_name }} {{ $row['student']->first_name }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $row['classroom']?->name ?? '—' }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ number_format($row['due_so_far'], 2) }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ number_format($row['total_paid'], 2) }}</td>
+                        <td class="px-4 py-2 text-slate-600">{{ money($row['due_so_far']) }}</td>
+                        <td class="px-4 py-2 text-slate-600">{{ money($row['total_paid']) }}</td>
                         <td class="px-4 py-2">
                             @if ($row['balance'] > 0)
                                 <span class="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
-                                    Retard de {{ number_format($row['balance'], 2) }}
+                                    Retard de {{ money($row['balance']) }}
                                 </span>
                             @elseif ($row['balance'] < 0)
                                 <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">
-                                    Avance de {{ number_format(abs($row['balance']), 2) }}
+                                    Avance de {{ money(abs($row['balance'])) }}
                                 </span>
                             @else
                                 <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">

@@ -126,8 +126,8 @@
                             @endphp
                             <tr wire:key="level-{{ $level->id }}">
                                 <td class="px-4 py-2 text-slate-900">{{ $level->level_wording }}</td>
-                                <td class="px-4 py-2 text-slate-600">{{ number_format((float) ($levelFee->registration_amount ?? 0), 2) }}</td>
-                                <td class="px-4 py-2 text-slate-600">{{ number_format((float) $total, 2) }}</td>
+                                <td class="px-4 py-2 text-slate-600">{{ money((float) ($levelFee->registration_amount ?? 0)) }}</td>
+                                <td class="px-4 py-2 text-slate-600">{{ money((float) $total) }}</td>
                                 <td class="px-4 py-2 text-right">
                                     @can('create', \App\Domain\Billing\Models\LevelFee::class)
                                         <button wire:click="configureLevel({{ $level->id }})" class="text-slate-500 hover:text-slate-900">Configurer</button>

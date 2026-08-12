@@ -44,7 +44,7 @@
                     <div>
                         <p class="text-2xl font-semibold text-slate-900">{{ $pendingInvoicesCount }}</p>
                         <p class="text-sm text-slate-500">Factures en attente</p>
-                        <p class="text-xs text-slate-400">{{ number_format($pendingInvoicesBalance, 2) }} restant à percevoir</p>
+                        <p class="text-xs text-slate-400">{{ money($pendingInvoicesBalance) }} restant à percevoir</p>
                     </div>
                 </div>
             </div>

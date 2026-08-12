@@ -96,8 +96,8 @@
                     <tr wire:key="invoice-{{ $invoice->id }}">
                         <td class="px-4 py-2 text-slate-900">{{ $invoice->student?->last_name }} {{ $invoice->student?->first_name }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $invoice->label }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ number_format((float) $invoice->amount_due, 2) }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ number_format((float) $invoice->amount_paid, 2) }}</td>
+                        <td class="px-4 py-2 text-slate-600">{{ money((float) $invoice->amount_due) }}</td>
+                        <td class="px-4 py-2 text-slate-600">{{ money((float) $invoice->amount_paid) }}</td>
                         <td class="px-4 py-2">
                             <span @class([
                                 'rounded-full px-2 py-0.5 text-xs font-medium',

@@ -89,7 +89,7 @@
                     <tr wire:key="discount-{{ $discount->id }}">
                         <td class="px-4 py-2 text-slate-900">{{ $discount->student->last_name }} {{ $discount->student->first_name }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $discount->type === 'percentage' ? 'Pourcentage' : 'Montant fixe' }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ $discount->type === 'percentage' ? number_format((float) $discount->value, 2) . ' %' : number_format((float) $discount->value, 2) }}</td>
+                        <td class="px-4 py-2 text-slate-600">{{ $discount->type === 'percentage' ? number_format((float) $discount->value, 2) . ' %' : money((float) $discount->value) }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $discount->reason ?: '—' }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $discount->createdBy?->name }}</td>
                         <td class="px-4 py-2 text-right">
