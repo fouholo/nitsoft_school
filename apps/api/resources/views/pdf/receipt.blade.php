@@ -5,9 +5,6 @@
     <title>Reçu</title>
     <style>
         body { font-family: "DejaVu Sans", sans-serif; font-size: 12px; color: #1e293b; }
-        .header { text-align: center; margin-bottom: 20px; }
-        .header h1 { font-size: 16px; margin: 0 0 4px; }
-        .header p { margin: 0; color: #64748b; }
         .receipt-number { text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 20px; }
         table.meta { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
         table.meta td { padding: 4px 0; }
@@ -20,13 +17,9 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        @if ($payment->establishment->logo_path)
-            <img src="{{ public_path('storage/'.$payment->establishment->logo_path) }}" style="height: 60px; margin-bottom: 8px;">
-        @endif
-        <h1>{{ $payment->establishment->name }}</h1>
-        <p>Reçu de paiement</p>
-    </div>
+    @include('pdf.partials.reports-header', ['establishment' => $payment->establishment, 'generalInformation' => $generalInformation])
+
+    <p style="text-align:center; font-weight:bold; margin:0 0 20px;">Reçu de paiement</p>
 
     <p class="receipt-number">N&deg; {{ $payment->receipt?->receipt_number }}</p>
 
