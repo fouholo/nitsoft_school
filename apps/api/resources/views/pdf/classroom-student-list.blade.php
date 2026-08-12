@@ -5,7 +5,7 @@
     <title>Liste des élèves</title>
     <style>
         body { font-family: "DejaVu Sans", sans-serif; font-size: 12px; color: #1e293b; }
-        .subtitle { text-align: center; margin-bottom: 20px; font-weight: bold; }
+        .subtitle { text-align: center; margin-bottom: 20px; font-weight: bold; font-size: 18px; border: 1px solid #1e293b; padding: 8px; }
         table.students { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
         table.students th, table.students td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; }
         table.students th { background-color: #f1f5f9; }
@@ -15,7 +15,7 @@
 <body>
     @include('pdf.partials.reports-header', ['establishment' => $classroom->establishment, 'generalInformation' => $generalInformation])
 
-    <p class="subtitle">Liste des élèves — {{ $classroom->name }}</p>
+    <p class="subtitle">{{ \Illuminate\Support\Str::upper('Liste des élèves — '.$classroom->name) }}</p>
 
     <table class="students">
         <thead>
