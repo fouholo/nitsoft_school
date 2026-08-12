@@ -22,7 +22,7 @@
         table.summary td.label { color: #64748b; width: 150px; font-weight: normal; }
         table.stamp { width: 100%; border-collapse: collapse; margin-top: 12px; }
         table.stamp td.box { width: 45%; text-align: center; }
-        .stamp-box { border: 1px dashed #cbd5e1; height: 70px; padding-top: 26px; font-size: 10px; color: #94a3b8; }
+        .stamp-box { border: 1px dashed #cbd5e1; height: 70px; padding-top: 6px; font-size: 10px; color: #94a3b8; }
         table.codes { width: 100%; border-collapse: collapse; margin-top: 12px; }
         table.codes td { width: 50%; text-align: center; vertical-align: bottom; }
         table.codes .code-label { margin: 4px 0 0; font-size: 9px; color: #94a3b8; }
