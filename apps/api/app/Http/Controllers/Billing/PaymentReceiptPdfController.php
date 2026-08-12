@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Billing;
 
 use App\Domain\Billing\Models\Payment;
-use App\Domain\Establishments\Models\GeneralInformation;
 use App\Http\Controllers\Controller;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -24,11 +23,10 @@ class PaymentReceiptPdfController extends Controller
     {
         Gate::authorize('view', $payment);
 
-        $payment->loadMissing(['invoice', 'student', 'establishment.inspection.direction', 'receivedBy', 'receipt']);
+        $payment->loadMissing(['invoice', 'student', 'establishment', 'receivedBy', 'receipt']);
 
         $pdf = Pdf::loadView('pdf.receipt', [
             'payment' => $payment,
-            'generalInformation' => GeneralInformation::current(),
         ])->setPaper('a5');
 
         $filename = Str::slug("recu-{$payment->receipt?->receipt_number}-{$payment->student->last_name}").'.pdf';
