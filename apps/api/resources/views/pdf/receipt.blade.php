@@ -19,7 +19,7 @@
         table.amount td.value { font-size: 16px; font-weight: bold; }
         table.summary { width: 100%; border-collapse: collapse; margin-top: 12px; }
         table.summary td { padding: 3px 0; font-weight: bold; }
-        table.summary td.label { color: #64748b; width: 150px; font-weight: normal; }
+        table.summary td.label { color: #64748b; width: 230px; font-weight: normal; }
         table.stamp { width: 100%; border-collapse: collapse; margin-top: 12px; }
         table.stamp td.box { width: 45%; text-align: center; }
         .stamp-box { border: 1px dashed #cbd5e1; height: 85px; padding-top: 6px; font-size: 10px; color: #94a3b8; }
