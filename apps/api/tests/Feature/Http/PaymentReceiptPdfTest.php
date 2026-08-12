@@ -83,7 +83,7 @@ test('le reçu contient un QR code (uid_local) et un code-barres (uid_serveur) u
 
     expect($payment->uid_serveur)->not->toBeNull();
 
-    $html = view('pdf.receipt', ['payment' => $payment])->render();
+    $html = view('pdf.receipt', ['payment' => $payment, 'nextPaymentDueDate' => null])->render();
 
     expect(substr_count($html, '<img'))->toBe(2)
         ->and($html)->toContain($payment->uid_serveur);
@@ -95,7 +95,33 @@ test('le code-barres est absent tant que le paiement n’est pas synchronisé (u
     $payment = makePaymentIn($establishment);
     $payment->uid_serveur = null;
 
-    $html = view('pdf.receipt', ['payment' => $payment])->render();
+    $html = view('pdf.receipt', ['payment' => $payment, 'nextPaymentDueDate' => null])->render();
 
     expect(substr_count($html, '<img'))->toBe(1);
+});
+
+test('le reçu affiche le total scolarité, le total versement, le reste scolarité et le cachet de l’établissement', function () {
+    $establishment = Establishment::factory()->create();
+    actingInEstablishment($establishment);
+    $payment = makePaymentIn($establishment);
+    $payment->invoice->update(['amount_due' => 100, 'amount_paid' => 25]);
+
+    $html = view('pdf.receipt', ['payment' => $payment, 'nextPaymentDueDate' => null])->render();
+
+    expect($html)->toContain('Total scolarité')
+        ->and($html)->toContain('Total versement')
+        ->and($html)->toContain('Reste scolarité')
+        ->and($html)->toContain("Cachet de l'établissement")
+        ->and($html)->not->toContain('Date du prochain paiement');
+});
+
+test('la date du prochain paiement s’affiche quand elle est fournie', function () {
+    $establishment = Establishment::factory()->create();
+    actingInEstablishment($establishment);
+    $payment = makePaymentIn($establishment);
+
+    $html = view('pdf.receipt', ['payment' => $payment, 'nextPaymentDueDate' => \Carbon\Carbon::parse('2026-12-01')])->render();
+
+    expect($html)->toContain('Date du prochain paiement')
+        ->and($html)->toContain('01/12/2026');
 });

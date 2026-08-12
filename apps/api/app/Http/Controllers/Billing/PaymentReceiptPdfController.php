@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Billing;
 
+use App\Domain\Billing\Models\Invoice;
 use App\Domain\Billing\Models\Payment;
 use App\Http\Controllers\Controller;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -25,8 +26,18 @@ class PaymentReceiptPdfController extends Controller
 
         $payment->loadMissing(['invoice', 'student', 'establishment', 'receivedBy']);
 
+        $nextPaymentDueDate = Invoice::where('student_id', $payment->student_id)
+            ->where('school_year_id', $payment->invoice->school_year_id)
+            ->where('id', '!=', $payment->invoice_id)
+            ->where('status', '!=', 'paid')
+            ->where('status', '!=', 'cancelled')
+            ->orderBy('due_date')
+            ->first()
+            ?->due_date;
+
         $pdf = Pdf::loadView('pdf.receipt', [
             'payment' => $payment,
+            'nextPaymentDueDate' => $nextPaymentDueDate,
         ])->setPaper('a5');
 
         $filename = Str::slug("recu-{$payment->receiptNumber()}-{$payment->student->last_name}").'.pdf';

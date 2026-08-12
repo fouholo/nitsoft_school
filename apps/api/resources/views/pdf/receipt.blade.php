@@ -5,22 +5,28 @@
     <title>Reçu</title>
     <style>
         body { font-family: "DejaVu Sans", sans-serif; font-size: 12px; color: #1e293b; }
-        .header { text-align: center; margin-bottom: 20px; }
+        .header { text-align: center; margin-bottom: 12px; }
         .header h1 { font-size: 16px; margin: 0 0 4px; }
         .header p { margin: 0; color: #64748b; }
-        .divider { border: none; border-top: 3px solid #94a3b8; margin: 0 0 20px; }
-        .receipt-number { text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 20px; }
-        table.meta { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        table.meta td { padding: 4px 0; font-weight: bold; }
+        .divider { border: none; border-top: 3px solid #94a3b8; margin: 0 0 12px; }
+        .receipt-number { text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 12px; }
+        table.meta { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+        table.meta td { padding: 3px 0; font-weight: bold; }
         table.meta td.label { color: #64748b; width: 150px; font-weight: normal; }
         table.amount { width: 100%; border-collapse: collapse; }
-        table.amount td { padding: 8px; border: 1px solid #cbd5e1; }
+        table.amount td { padding: 6px 8px; border: 1px solid #cbd5e1; }
         table.amount td.label { background-color: #f1f5f9; font-weight: bold; width: 150px; }
         table.amount td.value { font-size: 16px; font-weight: bold; }
-        table.codes { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        table.summary { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        table.summary td { padding: 3px 0; font-weight: bold; }
+        table.summary td.label { color: #64748b; width: 150px; font-weight: normal; }
+        table.stamp { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        table.stamp td.box { width: 45%; text-align: center; }
+        .stamp-box { border: 1px dashed #cbd5e1; height: 40px; padding-top: 12px; font-size: 10px; color: #94a3b8; }
+        table.codes { width: 100%; border-collapse: collapse; margin-top: 12px; }
         table.codes td { width: 50%; text-align: center; vertical-align: bottom; }
         table.codes .code-label { margin: 4px 0 0; font-size: 9px; color: #94a3b8; }
-        .footer { margin-top: 20px; font-size: 10px; color: #94a3b8; text-align: center; }
+        .footer { margin-top: 12px; font-size: 10px; color: #94a3b8; text-align: center; }
     </style>
 </head>
 <body>
@@ -67,6 +73,36 @@
         <tr>
             <td class="label">Montant reçu</td>
             <td class="value">{{ money((float) $payment->amount) }}</td>
+        </tr>
+    </table>
+
+    <table class="summary">
+        <tr>
+            <td class="label">Total scolarité</td>
+            <td>{{ money((float) $payment->invoice->amount_due) }}</td>
+        </tr>
+        <tr>
+            <td class="label">Total versement</td>
+            <td>{{ money((float) $payment->invoice->amount_paid) }}</td>
+        </tr>
+        <tr>
+            <td class="label">Reste scolarité</td>
+            <td>{{ money((float) $payment->invoice->amount_due - (float) $payment->invoice->amount_paid) }}</td>
+        </tr>
+        @if ($nextPaymentDueDate)
+            <tr>
+                <td class="label">Date du prochain paiement</td>
+                <td>{{ $nextPaymentDueDate->format('d/m/Y') }}</td>
+            </tr>
+        @endif
+    </table>
+
+    <table class="stamp">
+        <tr>
+            <td class="box" style="width: 55%;"></td>
+            <td class="box">
+                <div class="stamp-box">Cachet de l'établissement</div>
+            </td>
         </tr>
     </table>
 
