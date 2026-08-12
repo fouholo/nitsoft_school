@@ -131,6 +131,6 @@
         </tr>
     </table>
 
-    <p class="footer">Document généré automatiquement — {{ config('app.name') }}</p>
+    <p class="footer">Généré le {{ now()->locale('fr')->translatedFormat('j F Y à H:i:s') }}</p>
 </body>
 </html>
