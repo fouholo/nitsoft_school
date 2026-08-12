@@ -36,7 +36,7 @@
             <p style="margin:0; font-weight:bold;">REPUBLIQUE DE CÔTE D'IVOIRE</p>
             <p style="margin:0;">Union-Discipline-Travail</p>
             @if ($generalInformation->armoirie_path)
-                <img src="{{ public_path('storage/'.$generalInformation->armoirie_path) }}" style="height: 50px; margin-top: 4px;">
+                <img src="{{ public_path('storage/'.$generalInformation->armoirie_path) }}" style="height: 75px; margin-top: 4px;">
             @endif
             @if ($generalInformation->annee_scolaire_courante)
                 <p style="margin:4px 0 0;">Année scolaire : {{ $generalInformation->annee_scolaire_courante }}</p>
