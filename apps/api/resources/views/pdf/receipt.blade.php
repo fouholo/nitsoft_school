@@ -73,14 +73,13 @@
     <table class="codes">
         <tr>
             <td>
-                <img src="{{ qr_code_data_uri($payment->uid_local) }}" style="width: 80px; height: 80px;">
-                <p class="code-label">{{ $payment->uid_local }}</p>
-            </td>
-            <td>
                 @if ($payment->uid_serveur)
-                    <img src="{{ barcode_data_uri($payment->uid_serveur) }}" style="height: 50px; margin-top: 15px;">
+                    <img src="{{ barcode_data_uri($payment->uid_serveur) }}" style="margin-top: 15px;">
                     <p class="code-label">{{ $payment->uid_serveur }}</p>
                 @endif
+            </td>
+            <td>
+                <img src="{{ qr_code_data_uri($payment->uid_local) }}" style="width: 80px; height: 80px;">
             </td>
         </tr>
     </table>

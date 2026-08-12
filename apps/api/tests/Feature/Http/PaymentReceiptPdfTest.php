@@ -86,7 +86,6 @@ test('le reçu contient un QR code (uid_local) et un code-barres (uid_serveur) u
     $html = view('pdf.receipt', ['payment' => $payment])->render();
 
     expect(substr_count($html, '<img'))->toBe(2)
-        ->and($html)->toContain($payment->uid_local)
         ->and($html)->toContain($payment->uid_serveur);
 });
 
@@ -98,6 +97,5 @@ test('le code-barres est absent tant que le paiement n’est pas synchronisé (u
 
     $html = view('pdf.receipt', ['payment' => $payment])->render();
 
-    expect(substr_count($html, '<img'))->toBe(1)
-        ->and($html)->toContain($payment->uid_local);
+    expect(substr_count($html, '<img'))->toBe(1);
 });

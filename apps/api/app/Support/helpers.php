@@ -19,10 +19,10 @@ if (! function_exists('qr_code_data_uri')) {
 }
 
 if (! function_exists('barcode_data_uri')) {
-    function barcode_data_uri(string $data): string
+    function barcode_data_uri(string $data, int $widthFactor = 1, int $height = 20): string
     {
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG;
-        $png = $generator->getBarcode($data, \Picqer\Barcode\BarcodeGeneratorPNG::TYPE_CODE_128);
+        $png = $generator->getBarcode($data, \Picqer\Barcode\BarcodeGeneratorPNG::TYPE_CODE_128, $widthFactor, $height);
 
         return 'data:image/png;base64,'.base64_encode($png);
     }
