@@ -31,7 +31,7 @@
 
     <hr class="divider">
 
-    <p class="receipt-number">N&deg; {{ $payment->receipt?->receipt_number }}</p>
+    <p class="receipt-number">N&deg; {{ $payment->receiptNumber() }}</p>
 
     <table class="meta">
         <tr>

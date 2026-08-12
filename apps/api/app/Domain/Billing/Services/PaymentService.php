@@ -6,14 +6,14 @@ namespace App\Domain\Billing\Services;
 
 use App\Domain\Billing\Models\Invoice;
 use App\Domain\Billing\Models\Payment;
-use App\Domain\Billing\Models\Receipt;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Enregistre un paiement, met à jour le statut de la facture et génère le
- * reçu correspondant dans une seule transaction — voir plan d'architecture,
- * section 9 (idempotence/cohérence de la facturation).
+ * Enregistre un paiement et met à jour le statut de la facture dans une
+ * seule transaction — voir plan d'architecture, section 9
+ * (idempotence/cohérence de la facturation). Le paiement fait lui-même
+ * office de reçu numéroté (uid_local/uid_serveur via Syncable).
  */
 class PaymentService
 {
@@ -37,13 +37,6 @@ class PaymentService
             $invoice->status = $this->statusFor($invoice);
             $invoice->save();
 
-            Receipt::create([
-                'establishment_id' => $invoice->establishment_id,
-                'payment_id' => $payment->id,
-                'receipt_number' => $this->nextReceiptNumber($invoice->establishment_id),
-                'issued_at' => now(),
-            ]);
-
             return $payment;
         });
     }
@@ -55,14 +48,5 @@ class PaymentService
         }
 
         return $invoice->amount_paid > 0 ? 'partially_paid' : 'pending';
-    }
-
-    private function nextReceiptNumber(int $establishmentId): string
-    {
-        $sequence = Receipt::withoutTenant()
-            ->where('establishment_id', $establishmentId)
-            ->count() + 1;
-
-        return sprintf('REC-%06d', $sequence);
     }
 }

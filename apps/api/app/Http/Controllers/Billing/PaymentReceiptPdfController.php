@@ -23,13 +23,13 @@ class PaymentReceiptPdfController extends Controller
     {
         Gate::authorize('view', $payment);
 
-        $payment->loadMissing(['invoice', 'student', 'establishment', 'receivedBy', 'receipt']);
+        $payment->loadMissing(['invoice', 'student', 'establishment', 'receivedBy']);
 
         $pdf = Pdf::loadView('pdf.receipt', [
             'payment' => $payment,
         ])->setPaper('a5');
 
-        $filename = Str::slug("recu-{$payment->receipt?->receipt_number}-{$payment->student->last_name}").'.pdf';
+        $filename = Str::slug("recu-{$payment->receiptNumber()}-{$payment->student->last_name}").'.pdf';
 
         return $request->boolean('download')
             ? $pdf->download($filename)

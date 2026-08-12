@@ -80,7 +80,7 @@ class Show extends Component
     public function render()
     {
         return view('livewire.billing.invoices.show', [
-            'payments' => $this->invoice->payments()->with(['receipt', 'receivedBy'])->latest('paid_at')->get(),
+            'payments' => $this->invoice->payments()->with(['receivedBy'])->latest('paid_at')->get(),
         ]);
     }
 }

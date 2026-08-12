@@ -13,9 +13,12 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property string $uid_local
+ * @property string|null $uid_serveur
+ */
 class Payment extends Model implements HasOwnerColumn
 {
     use HasFactory;
@@ -74,16 +77,17 @@ class Payment extends Model implements HasOwnerColumn
         return $this->belongsTo(User::class, 'received_by');
     }
 
-    /**
-     * @return HasOne<Receipt, $this>
-     */
-    public function receipt(): HasOne
-    {
-        return $this->hasOne(Receipt::class);
-    }
-
     public function ownerColumn(): string
     {
         return 'received_by';
+    }
+
+    /**
+     * Numéro de reçu affiché : uid_serveur une fois synchronisé, sinon
+     * uid_local (généré hors-ligne, en attente de synchronisation).
+     */
+    public function receiptNumber(): string
+    {
+        return $this->uid_serveur ?? $this->uid_local;
     }
 }

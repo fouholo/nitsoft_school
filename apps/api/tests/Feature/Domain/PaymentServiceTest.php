@@ -28,8 +28,9 @@ test('un paiement partiel passe la facture en partially_paid et génère un reç
 
     expect((float) $invoice->amount_paid)->toBe(40.0)
         ->and($invoice->status)->toBe('partially_paid')
-        ->and($payment->receipt)->not->toBeNull()
-        ->and($payment->receipt->receipt_number)->toBe('REC-000001');
+        ->and($payment->uid_local)->not->toBeNull()
+        ->and($payment->uid_serveur)->not->toBeNull()
+        ->and($payment->receiptNumber())->toBe($payment->uid_serveur);
 });
 
 test('un paiement qui couvre le solde restant passe la facture à paid', function () {
@@ -56,7 +57,7 @@ test('un paiement qui couvre le solde restant passe la facture à paid', functio
         ->and($invoice->status)->toBe('paid');
 });
 
-test('les numéros de reçus sont séquentiels par établissement', function () {
+test('le numéro de reçu (uid_serveur) est attribué de façon séquentielle', function () {
     $establishment = Establishment::factory()->create();
     $accountant = createUserWithRole($establishment, 'caissier');
     $service = new PaymentService;
@@ -67,6 +68,9 @@ test('les numéros de reçus sont séquentiels par établissement', function () 
     $paymentA = $service->recordPayment($invoiceA, ['amount' => 10, 'method' => 'cash', 'paid_at' => now()->toDateString(), 'reference' => null], $accountant);
     $paymentB = $service->recordPayment($invoiceB, ['amount' => 10, 'method' => 'cash', 'paid_at' => now()->toDateString(), 'reference' => null], $accountant);
 
-    expect($paymentA->receipt->receipt_number)->toBe('REC-000001')
-        ->and($paymentB->receipt->receipt_number)->toBe('REC-000002');
+    $sequenceA = (int) substr($paymentA->uid_serveur, 3);
+    $sequenceB = (int) substr($paymentB->uid_serveur, 3);
+
+    expect($paymentA->uid_serveur)->toStartWith('241')
+        ->and($sequenceB)->toBe($sequenceA + 1);
 });

@@ -16,6 +16,5 @@ test('un modèle Syncable reçoit automatiquement un uid_local et un uid_serveur
 
 test('les tables calculées côté serveur n’ont pas de colonne uid_local/uid_serveur', function () {
     expect(Schema::hasColumn('report_cards', 'uid_local'))->toBeFalse()
-        ->and(Schema::hasColumn('receipts', 'uid_local'))->toBeFalse()
         ->and(Schema::hasColumn('sms_messages', 'uid_local'))->toBeFalse();
 });

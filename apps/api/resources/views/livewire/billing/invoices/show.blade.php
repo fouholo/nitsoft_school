@@ -81,7 +81,7 @@
                         <td class="px-4 py-2 text-slate-900">{{ $payment->paid_at->format('d/m/Y') }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ money((float) $payment->amount) }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $payment->method }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ $payment->receipt?->receipt_number }}</td>
+                        <td class="px-4 py-2 text-slate-600">{{ $payment->receiptNumber() }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $payment->receivedBy?->name }}</td>
                         <td class="px-4 py-2 text-slate-600">
                             @can('view', $payment)
