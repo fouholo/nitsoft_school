@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Domain\Establishments\Models\Direction;
 use App\Domain\Establishments\Models\Establishment;
 use App\Livewire\Directions\Index;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -60,6 +62,45 @@ test('un super admin peut supprimer une direction', function () {
     Livewire::test(Index::class)->call('delete', $direction->id);
 
     expect(Direction::where('code', 'DR-DEL')->exists())->toBeFalse();
+});
+
+test('un super admin peut téléverser un logo pour une direction', function () {
+    Storage::fake('public');
+
+    Livewire::test(Index::class)
+        ->call('create')
+        ->set('code', 'DR-LOG')
+        ->set('direction_name', 'Direction Logo')
+        ->set('logo', UploadedFile::fake()->image('logo.jpg')->size(50))
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $direction = Direction::where('code', 'DR-LOG')->sole();
+
+    expect($direction->logo_path)->not->toBeNull();
+    Storage::disk('public')->assertExists($direction->logo_path);
+});
+
+test('remplacer le logo d’une direction supprime l’ancien du stockage', function () {
+    Storage::fake('public');
+    Storage::disk('public')->put('directions-logos/old.jpg', 'contenu-factice');
+
+    $direction = Direction::create([
+        'code' => 'DR-OLD',
+        'direction_name' => 'Direction Ancien Logo',
+        'logo_path' => 'directions-logos/old.jpg',
+    ]);
+
+    Livewire::test(Index::class)
+        ->call('edit', $direction->id)
+        ->set('logo', UploadedFile::fake()->image('new.jpg')->size(50))
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $direction->refresh();
+
+    Storage::disk('public')->assertMissing('directions-logos/old.jpg');
+    Storage::disk('public')->assertExists($direction->logo_path);
 });
 
 test('un directeur d’établissement ne peut pas accéder à l’écran', function () {

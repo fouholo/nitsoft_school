@@ -51,6 +51,15 @@
                 @error('location') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
+            <div class="sm:col-span-2">
+                <label class="block text-sm font-medium text-slate-700">Logo</label>
+                @if ($existingLogoPath)
+                    <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($existingLogoPath) }}" alt="Logo actuel" class="mt-1 mb-2 h-12 w-12 rounded-md object-cover">
+                @endif
+                <input type="file" wire:model="logo" class="mt-1 block w-full text-sm">
+                @error('logo') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
             <div class="flex gap-2 sm:col-span-4">
                 <button type="submit" class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700">
                     Enregistrer

@@ -22,6 +22,7 @@ class Direction extends Model
         'phone_number',
         'email',
         'location',
+        'logo_path',
     ];
 
     protected $casts = [

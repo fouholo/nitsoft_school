@@ -5,15 +5,20 @@ declare(strict_types=1);
 namespace App\Livewire\Directions;
 
 use App\Domain\Establishments\Models\Direction;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\WithFileUploads;
 
 #[Layout('layouts.app')]
 #[Title('Directions')]
 class Index extends Component
 {
+    use WithFileUploads;
+
     public bool $showForm = false;
 
     public ?int $editingId = null;
@@ -29,6 +34,10 @@ class Index extends Component
     public string $email = '';
 
     public string $location = '';
+
+    public ?TemporaryUploadedFile $logo = null;
+
+    public string $existingLogoPath = '';
 
     public function mount(): void
     {
@@ -56,6 +65,7 @@ class Index extends Component
         $this->phone_number = (string) $direction->phone_number;
         $this->email = (string) $direction->email;
         $this->location = (string) $direction->location;
+        $this->existingLogoPath = (string) $direction->logo_path;
         $this->showForm = true;
     }
 
@@ -68,20 +78,33 @@ class Index extends Component
             'phone_number' => ['nullable', 'string', 'max:20'],
             'email' => ['nullable', 'email', 'max:50'],
             'location' => ['nullable', 'string', 'max:50'],
+            'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:1024'],
         ]);
 
         foreach (['address', 'phone_number', 'email', 'location'] as $field) {
             $data[$field] = $data[$field] !== '' ? $data[$field] : null;
         }
 
+        unset($data['logo']);
+
         if ($this->editingId !== null) {
             $direction = Direction::findOrFail($this->editingId);
             $this->authorize('update', $direction);
-            $direction->update($data);
         } else {
             $this->authorize('create', Direction::class);
-            Direction::create($data);
+            $direction = new Direction;
         }
+
+        if ($this->logo) {
+            if ($direction->logo_path) {
+                Storage::disk('public')->delete($direction->logo_path);
+            }
+
+            $data['logo_path'] = $this->logo->store('directions-logos', 'public');
+        }
+
+        $direction->fill($data);
+        $direction->save();
 
         $this->resetForm();
         $this->showForm = false;
@@ -104,7 +127,7 @@ class Index extends Component
 
     protected function resetForm(): void
     {
-        $this->reset(['editingId', 'code', 'direction_name', 'address', 'phone_number', 'email', 'location']);
+        $this->reset(['editingId', 'code', 'direction_name', 'address', 'phone_number', 'email', 'location', 'logo', 'existingLogoPath']);
     }
 
     public function render()
