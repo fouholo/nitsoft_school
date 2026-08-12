@@ -1,21 +1,37 @@
 <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
     <tr>
-        <td style="width:60%; vertical-align:top; text-align:left;">
+        <td style="width:60%; vertical-align:top; text-align:center;">
+            @php $leftLinePrinted = false; @endphp
             @if ($generalInformation->nom_ministere)
+                @if ($leftLinePrinted)
+                    <p style="margin:0;">----------------------</p>
+                @endif
                 <p style="margin:0; font-weight:bold;">{{ \Illuminate\Support\Str::upper($generalInformation->nom_ministere) }}</p>
+                @php $leftLinePrinted = true; @endphp
             @endif
             @if ($establishment->inspection?->direction)
+                @if ($leftLinePrinted)
+                    <p style="margin:0;">----------------------</p>
+                @endif
                 <p style="margin:0;">DIRECTION REGIONALE {{ \Illuminate\Support\Str::upper($establishment->inspection->direction->direction_name) }}</p>
+                @php $leftLinePrinted = true; @endphp
             @endif
             @if ($establishment->type === \App\Domain\Establishments\Enums\EstablishmentType::PrescolairePrimaire && $establishment->inspection)
+                @if ($leftLinePrinted)
+                    <p style="margin:0;">----------------------</p>
+                @endif
                 <p style="margin:0;">INSPECTION DE L'ENSEIGNEMENT PRESCOLAIRE ET PRIMAIRE {{ \Illuminate\Support\Str::upper($establishment->inspection->inspection_name) }}</p>
+                @php $leftLinePrinted = true; @endphp
+            @endif
+            @if ($leftLinePrinted)
+                <p style="margin:0;">----------------------</p>
             @endif
             <p style="margin:4px 0 0; font-weight:bold;">{{ $establishment->name }}</p>
             @if ($establishment->logo_path)
                 <img src="{{ public_path('storage/'.$establishment->logo_path) }}" style="height: 50px; margin-top: 4px;">
             @endif
         </td>
-        <td style="width:40%; vertical-align:top; text-align:right;">
+        <td style="width:40%; vertical-align:top; text-align:center;">
             <p style="margin:0; font-weight:bold;">REPUBLIQUE DE CÔTE D'IVOIRE</p>
             <p style="margin:0;">Union-Discipline-Travail</p>
             @if ($generalInformation->armoirie_path)
