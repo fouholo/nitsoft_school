@@ -79,7 +79,7 @@ class Index extends Component
         $data = $this->validate([
             'level_id' => ['required', 'exists:levels,id'],
             'serie_id' => [Rule::requiredIf(fn () => $this->selectedLevelRequiresSeries()), 'nullable', 'exists:series,id'],
-            'numero' => ['required', 'string', 'max:2'],
+            'numero' => ['nullable', 'string', 'max:2'],
             'capacity' => ['nullable', 'integer', 'min:1'],
             'school_year_id' => ['required', 'exists:school_years,id'],
         ]);

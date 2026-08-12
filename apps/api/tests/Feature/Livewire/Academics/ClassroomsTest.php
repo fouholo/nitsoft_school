@@ -37,6 +37,40 @@ test('une classe peut être créée avec un cycle préscolaire', function () {
         ->and($classroom->name)->toBe('Grande Section A');
 });
 
+test('le numéro n’est pas exigé et le nom de la classe se compose sans lui', function () {
+    $level = Level::factory()->prescolaire()->create(['level_wording' => 'Grande Section']);
+
+    Livewire::test(Index::class)
+        ->set('cycle', Cycle::Prescolaire->value)
+        ->set('level_id', $level->id)
+        ->set('numero', '')
+        ->set('school_year_id', $this->schoolYear->id)
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $classroom = Classroom::sole();
+
+    expect($classroom->name)->toBe('Grande Section');
+});
+
+test('le numéro absent n’empêche pas la série de s’afficher dans le nom', function () {
+    $terminale = Level::factory()->terminale()->create();
+    $serie = Serie::factory()->create(['serie' => 'C']);
+
+    Livewire::test(Index::class)
+        ->set('cycle', Cycle::Secondaire->value)
+        ->set('level_id', $terminale->id)
+        ->set('serie_id', $serie->id)
+        ->set('numero', '')
+        ->set('school_year_id', $this->schoolYear->id)
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $classroom = Classroom::sole();
+
+    expect($classroom->name)->toBe('Terminale C');
+});
+
 test('le niveau est requis', function () {
     Livewire::test(Index::class)
         ->set('level_id', null)
