@@ -34,12 +34,7 @@ class PaymentReceiptPdfController extends Controller
         $totalTuition = (float) (clone $tuitionInvoices)->sum('amount_due');
         $totalPayments = (float) (clone $tuitionInvoices)->sum('amount_paid');
 
-        $nextPaymentDueDate = (clone $tuitionInvoices)
-            ->where('id', '!=', $payment->invoice_id)
-            ->where('status', '!=', 'paid')
-            ->orderBy('due_date')
-            ->first()
-            ?->due_date;
+        $nextPaymentDueDate = Invoice::nextDueDateAfterCumulativePayments($tuitionInvoices, $totalPayments);
 
         $pdf = Pdf::loadView('pdf.receipt', [
             'payment' => $payment,

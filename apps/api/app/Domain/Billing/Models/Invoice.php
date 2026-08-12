@@ -11,6 +11,7 @@ use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Concerns\TenantScoped;
 use App\Domain\Sync\Concerns\Syncable;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -91,5 +92,26 @@ class Invoice extends Model implements HasOwnerColumn
     public function ownerColumn(): string
     {
         return 'created_by';
+    }
+
+    /**
+     * Date d'échéance de la première tranche dont la somme cumulée des
+     * montants dus (triés par échéance) dépasse le total déjà versé.
+     *
+     * @param  Builder<Invoice>  $tuitionInvoices
+     */
+    public static function nextDueDateAfterCumulativePayments(Builder $tuitionInvoices, float $totalPayments): ?\Carbon\Carbon
+    {
+        $cumulativeDue = 0.0;
+
+        foreach ((clone $tuitionInvoices)->orderBy('due_date')->get() as $invoice) {
+            $cumulativeDue += (float) $invoice->amount_due;
+
+            if ($cumulativeDue > $totalPayments) {
+                return $invoice->due_date;
+            }
+        }
+
+        return null;
     }
 }

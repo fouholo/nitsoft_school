@@ -185,3 +185,99 @@ test('le total scolarité et le total versement excluent la facture d’inscript
         ->and($html)->toContain(money(100.0))
         ->and($html)->not->toContain(money(250.0));
 });
+
+test('la date du prochain paiement est celle de la première tranche dont la somme cumulée des factures dépasse le total déjà versé', function () {
+    $establishment = Establishment::factory()->create();
+    actingInEstablishment($establishment);
+
+    $student = Student::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = \App\Domain\Academics\Models\SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+
+    $installment1 = \App\Domain\Billing\Models\Installment::create([
+        'establishment_id' => $establishment->id,
+        'school_year_id' => $schoolYear->id,
+        'label' => 'Tranche 1',
+        'due_date' => now()->addDays(10),
+        'position' => 1,
+    ]);
+    $installment2 = \App\Domain\Billing\Models\Installment::create([
+        'establishment_id' => $establishment->id,
+        'school_year_id' => $schoolYear->id,
+        'label' => 'Tranche 2',
+        'due_date' => now()->addDays(40),
+        'position' => 2,
+    ]);
+    $installment3 = \App\Domain\Billing\Models\Installment::create([
+        'establishment_id' => $establishment->id,
+        'school_year_id' => $schoolYear->id,
+        'label' => 'Tranche 3',
+        'due_date' => now()->addDays(70),
+        'position' => 3,
+    ]);
+
+    Invoice::factory()->create([
+        'establishment_id' => $establishment->id,
+        'student_id' => $student->id,
+        'school_year_id' => $schoolYear->id,
+        'installment_id' => null,
+        'label' => "Frais d'inscription",
+        'amount_due' => 50,
+        'amount_paid' => 50,
+        'due_date' => now()->addDay(),
+    ]);
+
+    $invoice1 = Invoice::factory()->create([
+        'establishment_id' => $establishment->id,
+        'student_id' => $student->id,
+        'school_year_id' => $schoolYear->id,
+        'installment_id' => $installment1->id,
+        'label' => 'Tranche 1',
+        'amount_due' => 100,
+        'amount_paid' => 100,
+        'due_date' => $installment1->due_date,
+        'status' => 'paid',
+    ]);
+    $invoice2 = Invoice::factory()->create([
+        'establishment_id' => $establishment->id,
+        'student_id' => $student->id,
+        'school_year_id' => $schoolYear->id,
+        'installment_id' => $installment2->id,
+        'label' => 'Tranche 2',
+        'amount_due' => 150,
+        'amount_paid' => 0,
+        'due_date' => $installment2->due_date,
+    ]);
+    Invoice::factory()->create([
+        'establishment_id' => $establishment->id,
+        'student_id' => $student->id,
+        'school_year_id' => $schoolYear->id,
+        'installment_id' => $installment3->id,
+        'label' => 'Tranche 3',
+        'amount_due' => 200,
+        'amount_paid' => 0,
+        'due_date' => $installment3->due_date,
+    ]);
+
+    $accountant = createUserWithRole($establishment, 'caissier');
+    $payment = (new PaymentService)->recordPayment($invoice1, [
+        'amount' => 100,
+        'method' => 'cash',
+        'paid_at' => now()->toDateString(),
+        'reference' => null,
+    ], $accountant);
+
+    $response = $this->actingAs($accountant)->get(route('billing.payments.receipt', $payment));
+
+    $response->assertOk();
+
+    $tuitionInvoices = Invoice::where('student_id', $student->id)
+        ->where('school_year_id', $schoolYear->id)
+        ->whereNotNull('installment_id')
+        ->where('status', '!=', 'cancelled');
+
+    $totalPayments = (float) (clone $tuitionInvoices)->sum('amount_paid');
+
+    $nextPaymentDueDate = Invoice::nextDueDateAfterCumulativePayments($tuitionInvoices, $totalPayments);
+
+    expect($nextPaymentDueDate?->isSameDay($invoice2->due_date))->toBeTrue();
+});
