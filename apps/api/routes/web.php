@@ -49,6 +49,7 @@ Route::middleware('auth')->group(function (): void {
     require __DIR__.'/establishments.php';
     require __DIR__.'/inspections.php';
     require __DIR__.'/directions.php';
+    require __DIR__.'/general-information.php';
     require __DIR__.'/saas-admins.php';
     require __DIR__.'/staff.php';
 });

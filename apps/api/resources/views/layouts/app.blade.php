@@ -79,6 +79,7 @@
                 $navItems[] = ['type' => 'link', 'label' => 'Établissements', 'route' => 'establishments.index', 'active' => 'establishments.*', 'icon' => 'building'];
                 $navItems[] = ['type' => 'link', 'label' => 'Inspections', 'route' => 'inspections.index', 'active' => 'inspections.*', 'icon' => 'building'];
                 $navItems[] = ['type' => 'link', 'label' => 'Directions', 'route' => 'directions.index', 'active' => 'directions.*', 'icon' => 'building'];
+                $navItems[] = ['type' => 'link', 'label' => 'Informations générales', 'route' => 'general-information.edit', 'active' => 'general-information.*', 'icon' => 'building'];
             }
 
             if (auth()->user()->isMainSaasAdmin()) {
