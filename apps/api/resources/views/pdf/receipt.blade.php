@@ -18,7 +18,7 @@
         table.amount td.label { background-color: #f1f5f9; font-weight: bold; width: 150px; }
         table.amount td.value { font-size: 16px; font-weight: bold; }
         table.codes { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        table.codes td { width: 50%; text-align: center; vertical-align: top; }
+        table.codes td { width: 50%; text-align: center; vertical-align: bottom; }
         table.codes .code-label { margin: 4px 0 0; font-size: 9px; color: #94a3b8; }
         .footer { margin-top: 20px; font-size: 10px; color: #94a3b8; text-align: center; }
     </style>
@@ -74,13 +74,20 @@
         <tr>
             <td>
                 @if ($payment->uid_serveur)
-                    <img src="{{ barcode_data_uri($payment->uid_serveur) }}" style="margin-top: 15px;">
-                    <p class="code-label">{{ $payment->uid_serveur }}</p>
+                    <img src="{{ barcode_data_uri($payment->uid_serveur) }}">
                 @endif
             </td>
             <td>
-                <img src="{{ qr_code_data_uri($payment->uid_local) }}" style="width: 80px; height: 80px;">
+                <img src="{{ qr_code_data_uri($payment->uid_local) }}" style="width: 53px; height: 53px;">
             </td>
+        </tr>
+        <tr>
+            <td>
+                @if ($payment->uid_serveur)
+                    <p class="code-label">{{ $payment->uid_serveur }}</p>
+                @endif
+            </td>
+            <td></td>
         </tr>
     </table>
 
