@@ -83,7 +83,7 @@ test('le reçu contient un QR code (uid_local) et un code-barres (uid_serveur) u
 
     expect($payment->uid_serveur)->not->toBeNull();
 
-    $html = view('pdf.receipt', ['payment' => $payment, 'totalTuition' => 0.0, 'totalPayments' => 0.0, 'nextPaymentDueDate' => null])->render();
+    $html = view('pdf.receipt', ['payment' => $payment, 'totalTuition' => 0.0, 'totalPayments' => 0.0, 'nextPaymentDueDate' => null, 'nextInstallmentAmount' => null])->render();
 
     expect(substr_count($html, '<img'))->toBe(2)
         ->and($html)->toContain($payment->uid_serveur);
@@ -95,7 +95,7 @@ test('le code-barres est absent tant que le paiement n’est pas synchronisé (u
     $payment = makePaymentIn($establishment);
     $payment->uid_serveur = null;
 
-    $html = view('pdf.receipt', ['payment' => $payment, 'totalTuition' => 0.0, 'totalPayments' => 0.0, 'nextPaymentDueDate' => null])->render();
+    $html = view('pdf.receipt', ['payment' => $payment, 'totalTuition' => 0.0, 'totalPayments' => 0.0, 'nextPaymentDueDate' => null, 'nextInstallmentAmount' => null])->render();
 
     expect(substr_count($html, '<img'))->toBe(1);
 });
@@ -105,25 +105,28 @@ test('le reçu affiche le total scolarité, le total versement, le reste scolari
     actingInEstablishment($establishment);
     $payment = makePaymentIn($establishment);
 
-    $html = view('pdf.receipt', ['payment' => $payment, 'totalTuition' => 100.0, 'totalPayments' => 25.0, 'nextPaymentDueDate' => null])->render();
+    $html = view('pdf.receipt', ['payment' => $payment, 'totalTuition' => 100.0, 'totalPayments' => 25.0, 'nextPaymentDueDate' => null, 'nextInstallmentAmount' => null])->render();
 
     expect($html)->toContain('Total scolarité')
         ->and($html)->toContain('Total versement')
         ->and($html)->toContain('Reste scolarité')
         ->and($html)->toContain(money(75.0))
         ->and($html)->toContain("Cachet de l'établissement")
-        ->and($html)->not->toContain('Date du prochain paiement');
+        ->and($html)->not->toContain('Date du prochain paiement')
+        ->and($html)->not->toContain('Somme prochain versement');
 });
 
-test('la date du prochain paiement s’affiche quand elle est fournie', function () {
+test('la date et la somme du prochain versement s’affichent quand elles sont fournies', function () {
     $establishment = Establishment::factory()->create();
     actingInEstablishment($establishment);
     $payment = makePaymentIn($establishment);
 
-    $html = view('pdf.receipt', ['payment' => $payment, 'totalTuition' => 0.0, 'totalPayments' => 0.0, 'nextPaymentDueDate' => \Carbon\Carbon::parse('2026-12-01')])->render();
+    $html = view('pdf.receipt', ['payment' => $payment, 'totalTuition' => 0.0, 'totalPayments' => 0.0, 'nextPaymentDueDate' => \Carbon\Carbon::parse('2026-12-01'), 'nextInstallmentAmount' => 150.0])->render();
 
     expect($html)->toContain('Date du prochain paiement')
-        ->and($html)->toContain('01/12/2026');
+        ->and($html)->toContain('01/12/2026')
+        ->and($html)->toContain('Somme prochain versement')
+        ->and($html)->toContain(money(150.0));
 });
 
 test('le total scolarité et le total versement excluent la facture d’inscription (installment_id null)', function () {
@@ -179,14 +182,14 @@ test('le total scolarité et le total versement excluent la facture d’inscript
     expect($totalTuition)->toBe(200.0)
         ->and($totalPayments)->toBe(100.0);
 
-    $html = view('pdf.receipt', ['payment' => $payment, 'totalTuition' => $totalTuition, 'totalPayments' => $totalPayments, 'nextPaymentDueDate' => null])->render();
+    $html = view('pdf.receipt', ['payment' => $payment, 'totalTuition' => $totalTuition, 'totalPayments' => $totalPayments, 'nextPaymentDueDate' => null, 'nextInstallmentAmount' => null])->render();
 
     expect($html)->toContain(money(200.0))
         ->and($html)->toContain(money(100.0))
         ->and($html)->not->toContain(money(250.0));
 });
 
-test('la date du prochain paiement est celle de la première tranche dont la somme cumulée des factures dépasse le total déjà versé', function () {
+test('la date et la somme du prochain versement correspondent au cumul des tranches dont la somme dépasse le total déjà versé', function () {
     $establishment = Establishment::factory()->create();
     actingInEstablishment($establishment);
 
@@ -233,9 +236,8 @@ test('la date du prochain paiement est celle de la première tranche dont la som
         'installment_id' => $installment1->id,
         'label' => 'Tranche 1',
         'amount_due' => 100,
-        'amount_paid' => 100,
+        'amount_paid' => 0,
         'due_date' => $installment1->due_date,
-        'status' => 'paid',
     ]);
     $invoice2 = Invoice::factory()->create([
         'establishment_id' => $establishment->id,
@@ -280,4 +282,9 @@ test('la date du prochain paiement est celle de la première tranche dont la som
     $nextPaymentDueDate = Invoice::nextDueDateAfterCumulativePayments($tuitionInvoices, $totalPayments);
 
     expect($nextPaymentDueDate?->isSameDay($invoice2->due_date))->toBeTrue();
+
+    $sumUpToNextDueDate = (float) (clone $tuitionInvoices)->where('due_date', '<=', $nextPaymentDueDate)->sum('amount_due');
+    $nextInstallmentAmount = $sumUpToNextDueDate - $totalPayments;
+
+    expect($nextInstallmentAmount)->toBe(150.0);
 });

@@ -96,6 +96,10 @@
                 <td class="label">Date du prochain paiement</td>
                 <td>{{ $nextPaymentDueDate->format('d/m/Y') }}</td>
             </tr>
+            <tr>
+                <td class="label">Somme prochain versement</td>
+                <td>{{ money($nextInstallmentAmount) }}</td>
+            </tr>
         @endif
     </table>
 

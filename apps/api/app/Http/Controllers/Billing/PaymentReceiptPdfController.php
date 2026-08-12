@@ -36,11 +36,16 @@ class PaymentReceiptPdfController extends Controller
 
         $nextPaymentDueDate = Invoice::nextDueDateAfterCumulativePayments($tuitionInvoices, $totalPayments);
 
+        $nextInstallmentAmount = $nextPaymentDueDate
+            ? (float) (clone $tuitionInvoices)->where('due_date', '<=', $nextPaymentDueDate)->sum('amount_due') - $totalPayments
+            : null;
+
         $pdf = Pdf::loadView('pdf.receipt', [
             'payment' => $payment,
             'totalTuition' => $totalTuition,
             'totalPayments' => $totalPayments,
             'nextPaymentDueDate' => $nextPaymentDueDate,
+            'nextInstallmentAmount' => $nextInstallmentAmount,
         ])->setPaper('a5');
 
         $filename = Str::slug("recu-{$payment->receiptNumber()}-{$payment->student->last_name}").'.pdf';
