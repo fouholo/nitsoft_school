@@ -11,8 +11,8 @@
         .divider { border: none; border-top: 3px solid #94a3b8; margin: 0 0 20px; }
         .receipt-number { text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 20px; }
         table.meta { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        table.meta td { padding: 4px 0; }
-        table.meta td.label { color: #64748b; width: 150px; }
+        table.meta td { padding: 4px 0; font-weight: bold; }
+        table.meta td.label { color: #64748b; width: 150px; font-weight: normal; }
         table.amount { width: 100%; border-collapse: collapse; }
         table.amount td { padding: 8px; border: 1px solid #cbd5e1; }
         table.amount td.label { background-color: #f1f5f9; font-weight: bold; width: 150px; }
