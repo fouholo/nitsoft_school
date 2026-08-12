@@ -9,6 +9,7 @@
         table.students { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
         table.students th, table.students td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; }
         table.students th { background-color: #f1f5f9; }
+        table.students .col-center { text-align: center; }
         .footer { margin-top: 40px; font-size: 10px; color: #94a3b8; text-align: center; }
     </style>
 </head>
@@ -20,11 +21,11 @@
     <table class="students">
         <thead>
             <tr>
-                <th>N°</th>
+                <th class="col-center">N°</th>
                 <th>Matricule</th>
                 <th>Nom</th>
                 <th>Prénom</th>
-                <th>Sexe</th>
+                <th class="col-center">Sexe</th>
                 <th>Date de naissance</th>
                 <th>Lieu de naissance</th>
             </tr>
@@ -32,11 +33,11 @@
         <tbody>
             @forelse ($students as $student)
                 <tr>
-                    <td>{{ $loop->iteration }}</td>
+                    <td class="col-center">{{ $loop->iteration }}</td>
                     <td>{{ $student->student_number }}</td>
                     <td>{{ $student->last_name }}</td>
                     <td>{{ $student->first_name }}</td>
-                    <td>{{ $student->gender }}</td>
+                    <td class="col-center">{{ \Illuminate\Support\Str::upper($student->gender) }}</td>
                     <td>{{ $student->birth_date?->format('d/m/Y') }}</td>
                     <td>{{ $student->birth_place }}</td>
                 </tr>
