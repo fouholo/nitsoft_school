@@ -5,9 +5,7 @@
     <title>Liste des élèves</title>
     <style>
         body { font-family: "DejaVu Sans", sans-serif; font-size: 12px; color: #1e293b; }
-        .header { text-align: center; margin-bottom: 20px; }
-        .header h1 { font-size: 16px; margin: 0 0 4px; }
-        .header p { margin: 0; color: #64748b; }
+        .subtitle { text-align: center; margin-bottom: 20px; font-weight: bold; }
         table.students { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
         table.students th, table.students td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; }
         table.students th { background-color: #f1f5f9; }
@@ -15,13 +13,9 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        @if ($classroom->establishment->logo_path)
-            <img src="{{ public_path('storage/'.$classroom->establishment->logo_path) }}" style="height: 60px; margin-bottom: 8px;">
-        @endif
-        <h1>{{ $classroom->establishment->name }}</h1>
-        <p>Liste des élèves — {{ $classroom->name }} ({{ $classroom->schoolYear?->label }})</p>
-    </div>
+    @include('pdf.partials.reports-header', ['establishment' => $classroom->establishment, 'generalInformation' => $generalInformation])
+
+    <p class="subtitle">Liste des élèves — {{ $classroom->name }}</p>
 
     <table class="students">
         <thead>

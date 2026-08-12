@@ -11,6 +11,7 @@ class GeneralInformation extends Model
     protected $fillable = [
         'nom_ministere',
         'annee_scolaire_courante',
+        'armoirie_path',
     ];
 
     public static function current(): self

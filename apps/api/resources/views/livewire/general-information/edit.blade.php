@@ -15,6 +15,15 @@
         </div>
 
         <div class="sm:col-span-2">
+            <label class="block text-sm font-medium text-slate-700">Armoirie</label>
+            @if ($existingArmoiriePath)
+                <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($existingArmoiriePath) }}" alt="Armoirie actuelle" class="mt-1 mb-2 h-12 w-12 rounded-md object-cover">
+            @endif
+            <input type="file" wire:model="armoirie" class="mt-1 block w-full text-sm">
+            @error('armoirie') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+        </div>
+
+        <div class="sm:col-span-2">
             <button type="submit" class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700">
                 Enregistrer
             </button>

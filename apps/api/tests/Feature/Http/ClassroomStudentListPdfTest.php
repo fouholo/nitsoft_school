@@ -6,7 +6,11 @@ use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
+use App\Domain\Establishments\Enums\EstablishmentType;
+use App\Domain\Establishments\Models\Direction;
 use App\Domain\Establishments\Models\Establishment;
+use App\Domain\Establishments\Models\GeneralInformation;
+use App\Domain\Establishments\Models\Inspection;
 
 test('un membre de l’établissement peut consulter le PDF de la liste des élèves en ligne', function () {
     $establishment = Establishment::factory()->create();
@@ -87,7 +91,7 @@ test('la liste contient les élèves de la classe triés par nom, avec les bonne
     Enrollment::factory()->create(['establishment_id' => $establishment->id, 'classroom_id' => $classroom->id, 'school_year_id' => $schoolYear->id, 'student_id' => $ade->id]);
     Enrollment::factory()->create(['establishment_id' => $establishment->id, 'classroom_id' => $otherClassroom->id, 'school_year_id' => $schoolYear->id, 'student_id' => $outsider->id]);
 
-    $classroom->loadMissing(['level', 'serie', 'schoolYear', 'establishment']);
+    $classroom->loadMissing(['level', 'serie', 'schoolYear', 'establishment.inspection.direction']);
 
     $students = $classroom->enrollments()
         ->where('status', 'active')
@@ -100,6 +104,7 @@ test('la liste contient les élèves de la classe triés par nom, avec les bonne
     $html = view('pdf.classroom-student-list', [
         'classroom' => $classroom,
         'students' => $students,
+        'generalInformation' => GeneralInformation::current(),
     ])->render();
 
     expect($html)->toContain('MAT-AAAA')
@@ -109,4 +114,84 @@ test('la liste contient les élèves de la classe triés par nom, avec les bonne
         ->and($html)->not->toContain('Horsclasse');
 
     expect(strpos($html, 'MAT-AAAA'))->toBeLessThan(strpos($html, 'MAT-ZZZZ'));
+});
+
+function renderClassroomStudentListHtml(Classroom $classroom): string
+{
+    $classroom->loadMissing(['level', 'serie', 'schoolYear', 'establishment.inspection.direction']);
+
+    return view('pdf.classroom-student-list', [
+        'classroom' => $classroom,
+        'students' => collect(),
+        'generalInformation' => GeneralInformation::current(),
+    ])->render();
+}
+
+test('l’en-tête complet s’affiche pour un établissement préscolaire/primaire avec ministère, direction, inspection et armoirie renseignés', function () {
+    GeneralInformation::current()->update([
+        'nom_ministere' => 'Ministère de l’Éducation Nationale',
+        'annee_scolaire_courante' => '2025-2026',
+        'armoirie_path' => 'general-information/armoirie.png',
+    ]);
+
+    $direction = Direction::create(['code' => 'DR-TST', 'direction_name' => 'Test Direction']);
+    $inspection = Inspection::create(['codeiep' => 'IEPTST', 'inspection_name' => 'Test Inspection', 'uid_direction' => $direction->uid_serveur]);
+
+    $establishment = Establishment::factory()->create(['type' => EstablishmentType::PrescolairePrimaire, 'inspection_id' => $inspection->id, 'logo_path' => 'establishments-logos/logo.png']);
+    actingInEstablishment($establishment);
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id]);
+
+    $html = renderClassroomStudentListHtml($classroom);
+
+    expect($html)->toContain('MINISTÈRE DE L’ÉDUCATION NATIONALE')
+        ->and($html)->toContain('DIRECTION REGIONALE TEST DIRECTION')
+        ->and($html)->toContain('INSPECTION DE L\'ENSEIGNEMENT PRESCOLAIRE ET PRIMAIRE TEST INSPECTION')
+        ->and($html)->toContain('REPUBLIQUE DE CÔTE D\'IVOIRE')
+        ->and($html)->toContain('Union-Discipline-Travail')
+        ->and($html)->toContain('Année scolaire : 2025-2026')
+        ->and(substr_count($html, '<img'))->toBe(2);
+});
+
+test('la ligne direction régionale est absente si l’inspection n’a pas de direction rattachée', function () {
+    $inspection = Inspection::create(['codeiep' => 'IEPNOD', 'inspection_name' => 'Sans Direction']);
+    $establishment = Establishment::factory()->create(['type' => EstablishmentType::PrescolairePrimaire, 'inspection_id' => $inspection->id]);
+    actingInEstablishment($establishment);
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id]);
+
+    $html = renderClassroomStudentListHtml($classroom);
+
+    expect($html)->not->toContain('DIRECTION REGIONALE');
+});
+
+test('la ligne inspection est absente si l’établissement n’a pas d’inspection renseignée', function () {
+    $establishment = Establishment::factory()->create(['type' => EstablishmentType::PrescolairePrimaire, 'inspection_id' => null]);
+    actingInEstablishment($establishment);
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id]);
+
+    $html = renderClassroomStudentListHtml($classroom);
+
+    expect($html)->not->toContain('INSPECTION DE');
+});
+
+test('la ligne inspection est absente pour un établissement secondaire même avec une inspection renseignée', function () {
+    $inspection = Inspection::create(['codeiep' => 'IEPSEC', 'inspection_name' => 'Inspection Secondaire']);
+    $establishment = Establishment::factory()->create(['type' => EstablishmentType::Secondaire, 'inspection_id' => $inspection->id]);
+    actingInEstablishment($establishment);
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id]);
+
+    $html = renderClassroomStudentListHtml($classroom);
+
+    expect($html)->not->toContain('INSPECTION DE');
+});
+
+test('l’armoirie est absente si elle n’est pas renseignée dans les informations générales', function () {
+    GeneralInformation::current()->update(['armoirie_path' => null]);
+
+    $establishment = Establishment::factory()->create();
+    actingInEstablishment($establishment);
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id]);
+
+    $html = renderClassroomStudentListHtml($classroom);
+
+    expect(substr_count($html, '<img'))->toBe(0);
 });

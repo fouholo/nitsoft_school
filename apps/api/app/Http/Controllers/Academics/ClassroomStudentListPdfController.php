@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Academics;
 
 use App\Domain\Academics\Models\Classroom;
+use App\Domain\Establishments\Models\GeneralInformation;
 use App\Http\Controllers\Controller;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -22,7 +23,7 @@ class ClassroomStudentListPdfController extends Controller
     {
         Gate::authorize('view', $classroom);
 
-        $classroom->loadMissing(['level', 'serie', 'schoolYear', 'establishment']);
+        $classroom->loadMissing(['level', 'serie', 'schoolYear', 'establishment.inspection.direction']);
 
         $students = $classroom->enrollments()
             ->where('status', 'active')
@@ -35,6 +36,7 @@ class ClassroomStudentListPdfController extends Controller
         $pdf = Pdf::loadView('pdf.classroom-student-list', [
             'classroom' => $classroom,
             'students' => $students,
+            'generalInformation' => GeneralInformation::current(),
         ])->setPaper('a4');
 
         $filename = Str::slug("liste-eleves-{$classroom->name}").'.pdf';

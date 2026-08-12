@@ -75,8 +75,8 @@ class DatabaseSeeder extends Seeder
         }
 
         $directions = [
-            ['code' => 'DR-ABJ', 'direction_name' => 'Direction Régionale Abidjan', 'address' => 'Abidjan', 'phone_number' => '2722000001', 'email' => 'dr-abidjan@education.ci', 'location' => 'Abidjan'],
-            ['code' => 'DR-BKE', 'direction_name' => 'Direction Régionale Bouaké', 'address' => 'Bouaké', 'phone_number' => '2731000001', 'email' => 'dr-bouake@education.ci', 'location' => 'Bouaké'],
+            ['code' => 'DR-ABJ', 'direction_name' => 'Abidjan', 'address' => 'Abidjan', 'phone_number' => '2722000001', 'email' => 'dr-abidjan@education.ci', 'location' => 'Abidjan'],
+            ['code' => 'DR-BKE', 'direction_name' => 'Bouaké', 'address' => 'Bouaké', 'phone_number' => '2731000001', 'email' => 'dr-bouake@education.ci', 'location' => 'Bouaké'],
         ];
 
         $createdDirections = [];
@@ -86,9 +86,9 @@ class DatabaseSeeder extends Seeder
         }
 
         $inspections = [
-            ['codeiep' => 'IEP001', 'inspection_name' => 'Inspection Abidjan 1', 'address' => 'Abidjan', 'phone_number' => '2722000010', 'email' => 'iep-abj1@education.ci', 'location' => 'Abidjan', 'uid_direction' => $createdDirections['DR-ABJ']->uid_serveur],
-            ['codeiep' => 'IEP002', 'inspection_name' => 'Inspection Abidjan 2', 'address' => 'Abidjan', 'phone_number' => '2722000011', 'email' => 'iep-abj2@education.ci', 'location' => 'Abidjan', 'uid_direction' => $createdDirections['DR-ABJ']->uid_serveur],
-            ['codeiep' => 'IEP003', 'inspection_name' => 'Inspection Bouaké', 'address' => 'Bouaké', 'phone_number' => '2731000010', 'email' => 'iep-bke@education.ci', 'location' => 'Bouaké', 'uid_direction' => $createdDirections['DR-BKE']->uid_serveur],
+            ['codeiep' => 'IEP001', 'inspection_name' => 'Abidjan 1', 'address' => 'Abidjan', 'phone_number' => '2722000010', 'email' => 'iep-abj1@education.ci', 'location' => 'Abidjan', 'uid_direction' => $createdDirections['DR-ABJ']->uid_serveur],
+            ['codeiep' => 'IEP002', 'inspection_name' => 'Abidjan 2', 'address' => 'Abidjan', 'phone_number' => '2722000011', 'email' => 'iep-abj2@education.ci', 'location' => 'Abidjan', 'uid_direction' => $createdDirections['DR-ABJ']->uid_serveur],
+            ['codeiep' => 'IEP003', 'inspection_name' => 'Bouaké', 'address' => 'Bouaké', 'phone_number' => '2731000010', 'email' => 'iep-bke@education.ci', 'location' => 'Bouaké', 'uid_direction' => $createdDirections['DR-BKE']->uid_serveur],
         ];
 
         foreach ($inspections as $inspection) {
