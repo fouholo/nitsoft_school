@@ -26,8 +26,7 @@
                 <th>Nom</th>
                 <th>Prénom</th>
                 <th class="col-center">Sexe</th>
-                <th>Date de naissance</th>
-                <th>Lieu de naissance</th>
+                <th>Date et lieu de naissance</th>
             </tr>
         </thead>
         <tbody>
@@ -38,12 +37,11 @@
                     <td>{{ $student->last_name }}</td>
                     <td>{{ $student->first_name }}</td>
                     <td class="col-center">{{ \Illuminate\Support\Str::upper($student->gender) }}</td>
-                    <td>{{ $student->birth_date?->format('d/m/Y') }}</td>
-                    <td>{{ $student->birth_place }}</td>
+                    <td>{{ $student->birth_date?->format('d/m/Y') }}{{ $student->birth_date && $student->birth_place ? ' à ' : '' }}{{ $student->birth_place }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7">Aucun élève inscrit dans cette classe.</td>
+                    <td colspan="6">Aucun élève inscrit dans cette classe.</td>
                 </tr>
             @endforelse
         </tbody>
