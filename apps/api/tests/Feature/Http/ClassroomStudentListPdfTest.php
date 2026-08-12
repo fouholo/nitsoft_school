@@ -148,7 +148,7 @@ test('l’en-tête complet s’affiche pour un établissement préscolaire/prima
         ->and($html)->toContain('INSPECTION DE L\'ENSEIGNEMENT PRESCOLAIRE ET PRIMAIRE TEST INSPECTION')
         ->and($html)->toContain('REPUBLIQUE DE CÔTE D\'IVOIRE')
         ->and($html)->toContain('Union-Discipline-Travail')
-        ->and($html)->toContain('Année scolaire : 2025-2026')
+        ->and($html)->toContain('Année scolaire : <span style="font-weight:bold;">2025-2026</span>')
         ->and(substr_count($html, '<img'))->toBe(2);
 });
 
