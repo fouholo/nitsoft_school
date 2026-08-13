@@ -74,32 +74,34 @@
         </tr>
     </table>
 
-    <hr class="divider" style="margin-top: 12px;">
+    @if ($payment->tuition_paid_total !== null)
+        <hr class="divider" style="margin-top: 12px;">
 
-    <table class="summary">
-        <tr>
-            <td class="label">Total scolarité</td>
-            <td>{{ money($totalTuition) }}</td>
-        </tr>
-        <tr>
-            <td class="label">Total versement</td>
-            <td>{{ money($totalPayments) }}</td>
-        </tr>
-        <tr>
-            <td class="label">Reste scolarité</td>
-            <td>{{ money($totalTuition - $totalPayments) }}</td>
-        </tr>
-        @if ($nextPaymentDueDate)
+        <table class="summary">
             <tr>
-                <td class="label">Date du prochain paiement</td>
-                <td>{{ $nextPaymentDueDate->format('d/m/Y') }}</td>
+                <td class="label">Total scolarité</td>
+                <td>{{ money((float) $payment->tuition_paid_total + (float) $payment->tuition_remaining) }}</td>
             </tr>
             <tr>
-                <td class="label">Somme prochain versement</td>
-                <td>{{ money($nextInstallmentAmount) }}</td>
+                <td class="label">Total versement</td>
+                <td>{{ money((float) $payment->tuition_paid_total) }}</td>
             </tr>
-        @endif
-    </table>
+            <tr>
+                <td class="label">Reste scolarité</td>
+                <td>{{ money((float) $payment->tuition_remaining) }}</td>
+            </tr>
+            @if ($payment->next_installment_due_date)
+                <tr>
+                    <td class="label">Date du prochain paiement</td>
+                    <td>{{ $payment->next_installment_due_date->format('d/m/Y') }}</td>
+                </tr>
+                <tr>
+                    <td class="label">Somme prochain versement</td>
+                    <td>{{ money((float) $payment->next_installment_amount) }}</td>
+                </tr>
+            @endif
+        </table>
+    @endif
 
     <hr class="divider" style="margin-top: 12px;">
 

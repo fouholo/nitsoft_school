@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Domain\Academics\Models\SchoolYear;
+use App\Domain\Billing\Models\Installment;
 use App\Domain\Billing\Models\Invoice;
 use App\Domain\Billing\Models\Payment;
 use App\Domain\Billing\Services\PaymentService;
@@ -83,7 +85,7 @@ test('le reçu contient un QR code (uid_local) et un code-barres (uid_serveur) u
 
     expect($payment->uid_serveur)->not->toBeNull();
 
-    $html = view('pdf.receipt', ['payment' => $payment, 'totalTuition' => 0.0, 'totalPayments' => 0.0, 'nextPaymentDueDate' => null, 'nextInstallmentAmount' => null])->render();
+    $html = view('pdf.receipt', ['payment' => $payment])->render();
 
     expect(substr_count($html, '<img'))->toBe(2)
         ->and($html)->toContain($payment->uid_serveur);
@@ -95,7 +97,7 @@ test('le code-barres est absent tant que le paiement n’est pas synchronisé (u
     $payment = makePaymentIn($establishment);
     $payment->uid_serveur = null;
 
-    $html = view('pdf.receipt', ['payment' => $payment, 'totalTuition' => 0.0, 'totalPayments' => 0.0, 'nextPaymentDueDate' => null, 'nextInstallmentAmount' => null])->render();
+    $html = view('pdf.receipt', ['payment' => $payment])->render();
 
     expect(substr_count($html, '<img'))->toBe(1);
 });
@@ -104,8 +106,10 @@ test('le reçu affiche le total scolarité, le total versement, le reste scolari
     $establishment = Establishment::factory()->create();
     actingInEstablishment($establishment);
     $payment = makePaymentIn($establishment);
+    $payment->tuition_paid_total = 25.0;
+    $payment->tuition_remaining = 75.0;
 
-    $html = view('pdf.receipt', ['payment' => $payment, 'totalTuition' => 100.0, 'totalPayments' => 25.0, 'nextPaymentDueDate' => null, 'nextInstallmentAmount' => null])->render();
+    $html = view('pdf.receipt', ['payment' => $payment])->render();
 
     expect($html)->toContain('Total scolarité')
         ->and($html)->toContain('Total versement')
@@ -116,12 +120,33 @@ test('le reçu affiche le total scolarité, le total versement, le reste scolari
         ->and($html)->not->toContain('Somme prochain versement');
 });
 
+test('le bloc situation financière est absent quand le paiement n’a pas d’instantané (ancien paiement)', function () {
+    $establishment = Establishment::factory()->create();
+    actingInEstablishment($establishment);
+    $payment = makePaymentIn($establishment);
+    $payment->tuition_paid_total = null;
+    $payment->tuition_remaining = null;
+
+    $html = view('pdf.receipt', ['payment' => $payment])->render();
+
+    expect($html)->not->toContain('Total scolarité')
+        ->and($html)->not->toContain('Total versement')
+        ->and($html)->not->toContain('Reste scolarité')
+        ->and($html)->not->toContain('Date du prochain paiement')
+        ->and($html)->not->toContain('Somme prochain versement')
+        ->and($html)->toContain("Cachet de l'établissement");
+});
+
 test('la date et la somme du prochain versement s’affichent quand elles sont fournies', function () {
     $establishment = Establishment::factory()->create();
     actingInEstablishment($establishment);
     $payment = makePaymentIn($establishment);
+    $payment->tuition_paid_total = 0.0;
+    $payment->tuition_remaining = 0.0;
+    $payment->next_installment_due_date = \Carbon\Carbon::parse('2026-12-01');
+    $payment->next_installment_amount = 150.0;
 
-    $html = view('pdf.receipt', ['payment' => $payment, 'totalTuition' => 0.0, 'totalPayments' => 0.0, 'nextPaymentDueDate' => \Carbon\Carbon::parse('2026-12-01'), 'nextInstallmentAmount' => 150.0])->render();
+    $html = view('pdf.receipt', ['payment' => $payment])->render();
 
     expect($html)->toContain('Date du prochain paiement')
         ->and($html)->toContain('01/12/2026')
@@ -129,13 +154,13 @@ test('la date et la somme du prochain versement s’affichent quand elles sont f
         ->and($html)->toContain(money(150.0));
 });
 
-test('le total scolarité et le total versement excluent la facture d’inscription (installment_id null)', function () {
+test('l’instantané du paiement exclut la facture d’inscription (installment_id null)', function () {
     $establishment = Establishment::factory()->create();
     actingInEstablishment($establishment);
 
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
-    $schoolYear = \App\Domain\Academics\Models\SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
-    $installment = \App\Domain\Billing\Models\Installment::create([
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $installment = Installment::create([
         'establishment_id' => $establishment->id,
         'school_year_id' => $schoolYear->id,
         'label' => 'Tranche 1',
@@ -171,62 +196,36 @@ test('le total scolarité et le total versement excluent la facture d’inscript
         'reference' => null,
     ], $accountant);
 
-    $tuitionInvoices = Invoice::where('student_id', $student->id)
-        ->where('school_year_id', $schoolYear->id)
-        ->whereNotNull('installment_id')
-        ->where('status', '!=', 'cancelled');
+    expect((float) $payment->tuition_paid_total)->toBe(100.0)
+        ->and((float) $payment->tuition_remaining)->toBe(100.0);
 
-    $totalTuition = (float) (clone $tuitionInvoices)->sum('amount_due');
-    $totalPayments = (float) (clone $tuitionInvoices)->sum('amount_paid');
-
-    expect($totalTuition)->toBe(200.0)
-        ->and($totalPayments)->toBe(100.0);
-
-    $html = view('pdf.receipt', ['payment' => $payment, 'totalTuition' => $totalTuition, 'totalPayments' => $totalPayments, 'nextPaymentDueDate' => null, 'nextInstallmentAmount' => null])->render();
+    $html = view('pdf.receipt', ['payment' => $payment])->render();
 
     expect($html)->toContain(money(200.0))
         ->and($html)->toContain(money(100.0))
         ->and($html)->not->toContain(money(250.0));
 });
 
-test('la date et la somme du prochain versement correspondent au cumul des tranches dont la somme dépasse le total déjà versé', function () {
+test('la date et la somme du prochain versement affichées sur le reçu correspondent au cumul des tranches dont la somme dépasse le total déjà versé', function () {
     $establishment = Establishment::factory()->create();
     actingInEstablishment($establishment);
 
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
-    $schoolYear = \App\Domain\Academics\Models\SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
 
-    $installment1 = \App\Domain\Billing\Models\Installment::create([
+    $installment1 = Installment::create([
         'establishment_id' => $establishment->id,
         'school_year_id' => $schoolYear->id,
         'label' => 'Tranche 1',
         'due_date' => now()->addDays(10),
         'position' => 1,
     ]);
-    $installment2 = \App\Domain\Billing\Models\Installment::create([
+    $installment2 = Installment::create([
         'establishment_id' => $establishment->id,
         'school_year_id' => $schoolYear->id,
         'label' => 'Tranche 2',
         'due_date' => now()->addDays(40),
         'position' => 2,
-    ]);
-    $installment3 = \App\Domain\Billing\Models\Installment::create([
-        'establishment_id' => $establishment->id,
-        'school_year_id' => $schoolYear->id,
-        'label' => 'Tranche 3',
-        'due_date' => now()->addDays(70),
-        'position' => 3,
-    ]);
-
-    Invoice::factory()->create([
-        'establishment_id' => $establishment->id,
-        'student_id' => $student->id,
-        'school_year_id' => $schoolYear->id,
-        'installment_id' => null,
-        'label' => "Frais d'inscription",
-        'amount_due' => 50,
-        'amount_paid' => 50,
-        'due_date' => now()->addDay(),
     ]);
 
     $invoice1 = Invoice::factory()->create([
@@ -239,7 +238,7 @@ test('la date et la somme du prochain versement correspondent au cumul des tranc
         'amount_paid' => 0,
         'due_date' => $installment1->due_date,
     ]);
-    $invoice2 = Invoice::factory()->create([
+    Invoice::factory()->create([
         'establishment_id' => $establishment->id,
         'student_id' => $student->id,
         'school_year_id' => $schoolYear->id,
@@ -248,16 +247,6 @@ test('la date et la somme du prochain versement correspondent au cumul des tranc
         'amount_due' => 150,
         'amount_paid' => 0,
         'due_date' => $installment2->due_date,
-    ]);
-    Invoice::factory()->create([
-        'establishment_id' => $establishment->id,
-        'student_id' => $student->id,
-        'school_year_id' => $schoolYear->id,
-        'installment_id' => $installment3->id,
-        'label' => 'Tranche 3',
-        'amount_due' => 200,
-        'amount_paid' => 0,
-        'due_date' => $installment3->due_date,
     ]);
 
     $accountant = createUserWithRole($establishment, 'caissier');
@@ -272,19 +261,8 @@ test('la date et la somme du prochain versement correspondent au cumul des tranc
 
     $response->assertOk();
 
-    $tuitionInvoices = Invoice::where('student_id', $student->id)
-        ->where('school_year_id', $schoolYear->id)
-        ->whereNotNull('installment_id')
-        ->where('status', '!=', 'cancelled');
+    $html = view('pdf.receipt', ['payment' => $payment])->render();
 
-    $totalPayments = (float) (clone $tuitionInvoices)->sum('amount_paid');
-
-    $nextPaymentDueDate = Invoice::nextDueDateAfterCumulativePayments($tuitionInvoices, $totalPayments);
-
-    expect($nextPaymentDueDate?->isSameDay($invoice2->due_date))->toBeTrue();
-
-    $sumUpToNextDueDate = (float) (clone $tuitionInvoices)->where('due_date', '<=', $nextPaymentDueDate)->sum('amount_due');
-    $nextInstallmentAmount = $sumUpToNextDueDate - $totalPayments;
-
-    expect($nextInstallmentAmount)->toBe(150.0);
+    expect($html)->toContain($installment2->due_date->format('d/m/Y'))
+        ->and($html)->toContain(money(150.0));
 });

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Billing;
 
-use App\Domain\Billing\Models\Invoice;
 use App\Domain\Billing\Models\Payment;
 use App\Http\Controllers\Controller;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -16,7 +15,9 @@ use Illuminate\Support\Str;
 /**
  * Le reçu PDF n'est jamais pré-généré ni stocké : il est rendu à la volée à
  * chaque consultation (affichage inline par défaut, téléchargement sur
- * demande via ?download=1) — même principe que les bulletins.
+ * demande via ?download=1) — même principe que les bulletins. La situation
+ * financière affichée est l'instantané figé sur le paiement lui-même (voir
+ * PaymentService::recordPayment()), pas un calcul en direct.
  */
 class PaymentReceiptPdfController extends Controller
 {
@@ -26,26 +27,8 @@ class PaymentReceiptPdfController extends Controller
 
         $payment->loadMissing(['invoice', 'student', 'establishment', 'receivedBy']);
 
-        $tuitionInvoices = Invoice::where('student_id', $payment->student_id)
-            ->where('school_year_id', $payment->invoice->school_year_id)
-            ->whereNotNull('installment_id')
-            ->where('status', '!=', 'cancelled');
-
-        $totalTuition = (float) (clone $tuitionInvoices)->sum('amount_due');
-        $totalPayments = (float) (clone $tuitionInvoices)->sum('amount_paid');
-
-        $nextPaymentDueDate = Invoice::nextDueDateAfterCumulativePayments($tuitionInvoices, $totalPayments);
-
-        $nextInstallmentAmount = $nextPaymentDueDate
-            ? (float) (clone $tuitionInvoices)->where('due_date', '<=', $nextPaymentDueDate)->sum('amount_due') - $totalPayments
-            : null;
-
         $pdf = Pdf::loadView('pdf.receipt', [
             'payment' => $payment,
-            'totalTuition' => $totalTuition,
-            'totalPayments' => $totalPayments,
-            'nextPaymentDueDate' => $nextPaymentDueDate,
-            'nextInstallmentAmount' => $nextInstallmentAmount,
         ])->setPaper('a5');
 
         $filename = Str::slug("recu-{$payment->receiptNumber()}-{$payment->student->last_name}").'.pdf';
