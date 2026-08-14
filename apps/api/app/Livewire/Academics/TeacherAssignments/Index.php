@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Academics\TeacherAssignments;
 
+use App\Domain\Academics\Enums\Cycle;
 use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Academics\Models\Subject;
@@ -41,21 +42,37 @@ class Index extends Component
         $this->showForm = true;
     }
 
+    public function updatedClassroomId(): void
+    {
+        $this->subject_id = null;
+    }
+
     public function save(): void
     {
         $this->authorize('create', TeacherAssignment::class);
 
+        $isSecondaire = $this->selectedClassroomCycle() === Cycle::Secondaire;
+
         $data = $this->validate([
             'user_id' => ['required', 'exists:users,id'],
             'classroom_id' => ['required', 'exists:classrooms,id'],
-            'subject_id' => ['required', 'exists:subjects,id'],
+            'subject_id' => $isSecondaire ? ['required', 'exists:subjects,id'] : ['nullable'],
             'school_year_id' => ['required', 'exists:school_years,id'],
         ]);
+
+        if (! $isSecondaire) {
+            $data['subject_id'] = null;
+        }
 
         TeacherAssignment::firstOrCreate($data);
 
         $this->reset(['user_id', 'classroom_id', 'subject_id']);
         $this->showForm = false;
+    }
+
+    public function selectedClassroomCycle(): ?Cycle
+    {
+        return $this->classroom_id ? Classroom::find($this->classroom_id)?->level?->cycle : null;
     }
 
     public function delete(int $assignmentId): void

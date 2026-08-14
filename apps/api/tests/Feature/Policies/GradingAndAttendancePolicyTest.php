@@ -100,6 +100,33 @@ test('un enseignant ne peut pas modifier l’évaluation d’un collègue', func
         ->and($teacherB->can('delete', $gradeSheetOfA))->toBeFalse();
 });
 
+test('un enseignant avec une affectation classe entière (primaire) peut gérer une évaluation pour n’importe quelle matière de cette classe', function () {
+    $establishment = Establishment::factory()->create();
+    $teacher = createUserWithRole($establishment, 'enseignant');
+    $classroom = Classroom::factory()->primaire()->create(['establishment_id' => $establishment->id]);
+    $subject = Subject::factory()->create();
+
+    TeacherAssignment::factory()->create([
+        'establishment_id' => $establishment->id,
+        'user_id' => $teacher->id,
+        'classroom_id' => $classroom->id,
+        'subject_id' => null,
+    ]);
+
+    actingInEstablishment($establishment);
+
+    $gradeSheet = GradeSheet::factory()->create([
+        'establishment_id' => $establishment->id,
+        'classroom_id' => $classroom->id,
+        'subject_id' => $subject->id,
+        'teacher_id' => $teacher->id,
+        'type' => 'composition',
+    ]);
+
+    expect($teacher->can('update', $gradeSheet))->toBeTrue()
+        ->and($teacher->can('delete', $gradeSheet))->toBeTrue();
+});
+
 test('un enseignant affecté à une classe peut créer un appel de présence sans matière', function () {
     $establishment = Establishment::factory()->create();
     $teacher = createUserWithRole($establishment, 'enseignant');

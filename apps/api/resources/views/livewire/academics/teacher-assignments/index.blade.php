@@ -33,16 +33,18 @@
                 @error('classroom_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-slate-700">Matière</label>
-                <select wire:model="subject_id" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
-                    <option value="">—</option>
-                    @foreach ($subjects as $subject)
-                        <option value="{{ $subject->id }}">{{ $subject->name }}</option>
-                    @endforeach
-                </select>
-                @error('subject_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-            </div>
+            @if ($this->selectedClassroomCycle() === \App\Domain\Academics\Enums\Cycle::Secondaire)
+                <div>
+                    <label class="block text-sm font-medium text-slate-700">Matière</label>
+                    <select wire:model="subject_id" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                        <option value="">—</option>
+                        @foreach ($subjects as $subject)
+                            <option value="{{ $subject->id }}">{{ $subject->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('subject_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                </div>
+            @endif
 
             <div>
                 <label class="block text-sm font-medium text-slate-700">Année scolaire</label>
@@ -82,7 +84,7 @@
                     <tr wire:key="assignment-{{ $assignment->id }}">
                         <td class="px-4 py-2 text-slate-900">{{ $assignment->teacher?->name }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $assignment->classroom?->name }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ $assignment->subject?->name }}</td>
+                        <td class="px-4 py-2 text-slate-600">{{ $assignment->subject?->name ?? '—' }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $assignment->schoolYear?->label }}</td>
                         <td class="px-4 py-2 text-right">
                             @can('delete', $assignment)

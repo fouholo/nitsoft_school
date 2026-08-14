@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use App\Domain\Academics\Enums\Cycle;
 use App\Domain\Academics\Models\TeacherAssignment;
 use App\Domain\Establishments\Support\RolePermissions;
 use App\Domain\Grading\Models\GradeSheet;
@@ -52,8 +53,13 @@ class GradeSheetPolicy
             return true;
         }
 
-        return $user->id === $gradeSheet->teacher_id
-            && $user->isAssignedToClassroom($gradeSheet->classroom_id, $gradeSheet->subject_id);
+        if ($user->id !== $gradeSheet->teacher_id) {
+            return false;
+        }
+
+        return $gradeSheet->classroom->level->cycle === Cycle::Secondaire
+            ? $user->isAssignedToClassroom($gradeSheet->classroom_id, $gradeSheet->subject_id)
+            : $user->isAssignedToClassroom($gradeSheet->classroom_id);
     }
 
     public function delete(User $user, GradeSheet $gradeSheet): bool

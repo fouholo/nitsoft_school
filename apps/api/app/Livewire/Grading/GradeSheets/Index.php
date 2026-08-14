@@ -97,11 +97,15 @@ class Index extends Component
         /** @var User $user */
         $user = Auth::user();
 
-        if (! $this->hasBroadGradeAccess($user) && ! $user->isAssignedToClassroom((int) $data['classroom_id'], (int) $data['subject_id'])) {
+        $classroom = Classroom::findOrFail($data['classroom_id']);
+
+        $isAssigned = $classroom->level->cycle === Cycle::Secondaire
+            ? $user->isAssignedToClassroom($classroom->id, (int) $data['subject_id'])
+            : $user->isAssignedToClassroom($classroom->id);
+
+        if (! $this->hasBroadGradeAccess($user) && ! $isAssigned) {
             abort(403, "Vous n'êtes pas affecté à cette classe pour cette matière.");
         }
-
-        $classroom = Classroom::findOrFail($data['classroom_id']);
 
         if (! $classroom->isGradable()) {
             throw ValidationException::withMessages([
@@ -175,7 +179,18 @@ class Index extends Component
             ->with(['classroom', 'subject'])
             ->get();
 
-        $subjects = $isAdmin ? Subject::orderBy('name')->get() : $assignments->pluck('subject')->unique('id');
+        if ($isAdmin) {
+            $subjects = Subject::orderBy('name')->get();
+        } else {
+            $assignedSubjects = $assignments->pluck('subject')->filter();
+
+            // Une affectation "classe entière" (préscolaire/primaire, sans matière)
+            // autorise l'enseignant à noter n'importe quelle matière de ce cycle.
+            $subjects = $assignments->contains(fn (TeacherAssignment $assignment) => $assignment->subject_id === null)
+                ? $assignedSubjects->merge(Subject::where('is_prescolaire_primaire', true)->get())->unique('id')->values()
+                : $assignedSubjects->unique('id')->values();
+        }
+
         $cycle = $this->selectedClassroomCycle();
 
         if ($cycle !== null) {

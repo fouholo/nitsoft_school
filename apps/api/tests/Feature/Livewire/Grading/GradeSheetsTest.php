@@ -6,6 +6,7 @@ use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Academics\Models\Subject;
 use App\Domain\Academics\Models\Term;
+use App\Domain\Academics\Models\TeacherAssignment;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Grading\Models\GradeSheet;
 use App\Livewire\Grading\GradeSheets\Index;
@@ -130,4 +131,36 @@ test('un type incompatible avec le cycle de la classe est rejeté côté serveur
         ->assertHasErrors(['type']);
 
     expect(GradeSheet::count())->toBe(0);
+});
+
+test('un enseignant avec une affectation classe entière (primaire) voit toutes les matières compatibles et peut créer une évaluation', function () {
+    $teacher = createUserWithRole($this->establishment, 'enseignant');
+    TeacherAssignment::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'user_id' => $teacher->id,
+        'classroom_id' => $this->primaireClassroom->id,
+        'subject_id' => null,
+    ]);
+    $otherPrimaireSubject = Subject::factory()->create();
+
+    $this->actingAs($teacher);
+
+    $subjects = Livewire::test(Index::class)
+        ->set('classroom_id', $this->primaireClassroom->id)
+        ->viewData('subjects');
+
+    expect($subjects->pluck('id'))
+        ->toContain($this->subject->id)
+        ->toContain($otherPrimaireSubject->id);
+
+    Livewire::test(Index::class)
+        ->set('classroom_id', $this->primaireClassroom->id)
+        ->set('subject_id', $otherPrimaireSubject->id)
+        ->set('term_id', $this->term->id)
+        ->set('title', 'Composition 1')
+        ->set('graded_on', now()->toDateString())
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect(GradeSheet::count())->toBe(1);
 });
