@@ -69,6 +69,9 @@ class Establishment extends Model
         return $this->belongsTo(Inspection::class);
     }
 
+    /**
+     * @return BelongsToMany<User, $this, EstablishmentUserPivot>
+     */
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'establishment_user')

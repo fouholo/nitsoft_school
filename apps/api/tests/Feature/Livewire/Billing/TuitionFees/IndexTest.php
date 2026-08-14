@@ -37,6 +37,35 @@ test('un directeur crée une tranche', function () {
         ->and($installment->school_year_id)->toBe($schoolYear->id);
 });
 
+test('un directeur peut recréer une tranche à la même position après suppression de l’ancienne', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $installment = Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 1]);
+
+    Livewire::test(Index::class)
+        ->set('school_year_id', $schoolYear->id)
+        ->call('deleteInstallment', $installment->id);
+
+    expect(Installment::withTrashed()->find($installment->id)->trashed())->toBeTrue();
+
+    Livewire::test(Index::class)
+        ->set('school_year_id', $schoolYear->id)
+        ->call('createInstallment')
+        ->set('label', 'Octobre (bis)')
+        ->set('due_date', now()->addMonth()->toDateString())
+        ->set('position', 1)
+        ->call('saveInstallment')
+        ->assertHasNoErrors();
+
+    $newInstallment = Installment::where('label', 'Octobre (bis)')->sole();
+
+    expect($newInstallment->position)->toBe(1);
+});
+
 test('un directeur configure les tarifs d’un niveau en laissant une tranche vide', function () {
     $establishment = Establishment::factory()->create();
     $directeur = createUserWithRole($establishment, 'directeur');
