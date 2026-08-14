@@ -18,6 +18,7 @@ class Subject extends Model
 
     protected $fillable = [
         'name',
+        'abbreviation',
         'is_prescolaire_primaire',
         'is_secondaire',
         'domain_id',

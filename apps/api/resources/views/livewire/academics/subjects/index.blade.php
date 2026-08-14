@@ -17,7 +17,13 @@
                 @error('name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
-            <div class="sm:col-span-2">
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Abréviation</label>
+                <input type="text" wire:model="abbreviation" placeholder="MATHS" maxlength="10" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                @error('abbreviation') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
                 <label class="block text-sm font-medium text-slate-700">Domaine</label>
                 <select wire:model="domain_id" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
                     <option value="">—</option>
@@ -59,6 +65,7 @@
             <thead class="bg-slate-50">
                 <tr>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Nom</th>
+                    <th class="px-4 py-2 text-left font-medium text-slate-500">Abréviation</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Cycle</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Domaine</th>
                     <th class="px-4 py-2"></th>
@@ -68,6 +75,7 @@
                 @forelse ($subjects as $subject)
                     <tr wire:key="subject-{{ $subject->id }}">
                         <td class="px-4 py-2 text-slate-900">{{ $subject->name }}</td>
+                        <td class="px-4 py-2 text-slate-600">{{ $subject->abbreviation }}</td>
                         <td class="px-4 py-2 text-slate-600">
                             @if ($subject->is_prescolaire_primaire && $subject->is_secondaire)
                                 Préscolaire/Primaire, Secondaire
@@ -95,7 +103,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="px-4 py-6 text-center text-slate-500">Aucune matière.</td>
+                        <td colspan="5" class="px-4 py-6 text-center text-slate-500">Aucune matière.</td>
                     </tr>
                 @endforelse
             </tbody>

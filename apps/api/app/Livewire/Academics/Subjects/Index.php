@@ -21,6 +21,8 @@ class Index extends Component
 
     public string $name = '';
 
+    public string $abbreviation = '';
+
     public bool $is_prescolaire_primaire = true;
 
     public bool $is_secondaire = true;
@@ -48,6 +50,7 @@ class Index extends Component
 
         $this->editingId = $subject->id;
         $this->name = $subject->name;
+        $this->abbreviation = $subject->abbreviation;
         $this->is_prescolaire_primaire = $subject->is_prescolaire_primaire;
         $this->is_secondaire = $subject->is_secondaire;
         $this->domain_id = $subject->domain_id;
@@ -58,6 +61,7 @@ class Index extends Component
     {
         $data = $this->validate([
             'name' => ['required', 'string', 'max:255'],
+            'abbreviation' => ['required', 'string', 'max:10'],
             'is_prescolaire_primaire' => ['boolean'],
             'is_secondaire' => ['boolean'],
             'domain_id' => ['nullable', 'exists:domains,id'],
@@ -101,7 +105,7 @@ class Index extends Component
 
     protected function resetForm(): void
     {
-        $this->reset(['editingId', 'name', 'domain_id']);
+        $this->reset(['editingId', 'name', 'abbreviation', 'domain_id']);
         $this->is_prescolaire_primaire = true;
         $this->is_secondaire = true;
     }

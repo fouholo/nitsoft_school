@@ -22,6 +22,7 @@ test('un super admin peut créer une matière rattachée à un domaine', functio
     Livewire::test(Index::class)
         ->call('create')
         ->set('name', 'Physique-Chimie')
+        ->set('abbreviation', 'PC')
         ->set('is_prescolaire_primaire', false)
         ->set('is_secondaire', true)
         ->set('domain_id', $domain->id)
@@ -30,16 +31,29 @@ test('un super admin peut créer une matière rattachée à un domaine', functio
 
     $subject = Subject::where('name', 'Physique-Chimie')->sole();
 
-    expect($subject->is_prescolaire_primaire)->toBeFalse()
+    expect($subject->abbreviation)->toBe('PC')
+        ->and($subject->is_prescolaire_primaire)->toBeFalse()
         ->and($subject->is_secondaire)->toBeTrue()
         ->and($subject->domain_id)->toBe($domain->id)
         ->and($subject->uid_serveur)->toMatch('/^215\d{9}$/');
+});
+
+test('l’abréviation est obligatoire', function () {
+    Livewire::test(Index::class)
+        ->call('create')
+        ->set('name', 'Matière sans abréviation')
+        ->set('abbreviation', '')
+        ->call('save')
+        ->assertHasErrors(['abbreviation']);
+
+    expect(Subject::where('name', 'Matière sans abréviation')->exists())->toBeFalse();
 });
 
 test('une matière doit être rattachée à au moins un cycle', function () {
     Livewire::test(Index::class)
         ->call('create')
         ->set('name', 'Matière orpheline')
+        ->set('abbreviation', 'ORPH')
         ->set('is_prescolaire_primaire', false)
         ->set('is_secondaire', false)
         ->call('save')

@@ -16,8 +16,20 @@ class SubjectFactory extends Factory
 
     public function definition(): array
     {
+        $names = [
+            'Mathématiques' => 'MATHS',
+            'Français' => 'FR',
+            'Histoire' => 'HIST',
+            'Sciences' => 'SCI',
+            'Anglais' => 'ANGL',
+            'Philosophie' => 'PHILO',
+        ];
+
+        $name = fake()->unique()->randomElement(array_keys($names));
+
         return [
-            'name' => fake()->unique()->randomElement(['Mathématiques', 'Français', 'Histoire', 'Sciences', 'Anglais', 'Philosophie']),
+            'name' => $name,
+            'abbreviation' => $names[$name],
             'is_prescolaire_primaire' => true,
             'is_secondaire' => true,
         ];
