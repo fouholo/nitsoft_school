@@ -42,8 +42,8 @@ test('la moyenne pondérée et le rang sont calculés correctement', function ()
     $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
     $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $term = Term::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
-    $subjectA = Subject::factory()->create(['establishment_id' => $establishment->id]);
-    $subjectB = Subject::factory()->create(['establishment_id' => $establishment->id]);
+    $subjectA = Subject::factory()->create();
+    $subjectB = Subject::factory()->create();
 
     $sheetA = GradeSheet::factory()->create([
         'establishment_id' => $establishment->id,
@@ -86,7 +86,7 @@ test('les élèves ex-aequo partagent le même rang', function () {
     $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
     $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $term = Term::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
-    $subject = Subject::factory()->create(['establishment_id' => $establishment->id]);
+    $subject = Subject::factory()->create();
 
     $sheet = GradeSheet::factory()->create([
         'establishment_id' => $establishment->id,
@@ -117,8 +117,8 @@ test('le détail par matière du bulletin liste chaque matière notée avec sa m
     $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
     $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $term = Term::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
-    $maths = Subject::factory()->create(['establishment_id' => $establishment->id, 'name' => 'Mathématiques']);
-    $francais = Subject::factory()->create(['establishment_id' => $establishment->id, 'name' => 'Français']);
+    $maths = Subject::factory()->create(['name' => 'Mathématiques']);
+    $francais = Subject::factory()->create(['name' => 'Français']);
 
     $sheetMaths = GradeSheet::factory()->create([
         'establishment_id' => $establishment->id,

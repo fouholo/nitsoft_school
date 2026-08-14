@@ -65,6 +65,8 @@ class Index extends Component
             $this->type = 'devoir';
             $this->weight = 2.0;
         }
+
+        $this->subject_id = null;
     }
 
     public function updatedType(): void
@@ -115,6 +117,14 @@ class Index extends Component
             ]);
         }
 
+        $subject = Subject::findOrFail($data['subject_id']);
+
+        if (! $this->subjectAllowedForCycle($subject, $classroom->level->cycle)) {
+            throw ValidationException::withMessages([
+                'subject_id' => "Cette matière n'est pas disponible pour ce cycle.",
+            ]);
+        }
+
         GradeSheet::create([...$data, 'teacher_id' => $user->id]);
 
         $this->showForm = false;
@@ -128,6 +138,11 @@ class Index extends Component
     public function selectedClassroomCycle(): ?Cycle
     {
         return $this->classroom_id ? Classroom::find($this->classroom_id)?->level?->cycle : null;
+    }
+
+    private function subjectAllowedForCycle(Subject $subject, Cycle $cycle): bool
+    {
+        return $cycle === Cycle::Primaire ? $subject->is_prescolaire_primaire : $subject->is_secondaire;
     }
 
     /**
@@ -160,10 +175,17 @@ class Index extends Component
             ->with(['classroom', 'subject'])
             ->get();
 
+        $subjects = $isAdmin ? Subject::orderBy('name')->get() : $assignments->pluck('subject')->unique('id');
+        $cycle = $this->selectedClassroomCycle();
+
+        if ($cycle !== null) {
+            $subjects = $subjects->filter(fn (Subject $subject) => $this->subjectAllowedForCycle($subject, $cycle))->values();
+        }
+
         return view('livewire.grading.grade-sheets.index', [
             'gradeSheets' => $gradeSheets,
             'classrooms' => $isAdmin ? Classroom::gradable()->orderBy('name')->get() : $assignments->pluck('classroom')->unique('id'),
-            'subjects' => $isAdmin ? Subject::orderBy('name')->get() : $assignments->pluck('subject')->unique('id'),
+            'subjects' => $subjects,
             'terms' => Term::orderBy('sequence')->get(),
         ]);
     }

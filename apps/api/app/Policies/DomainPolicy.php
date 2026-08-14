@@ -4,22 +4,22 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use App\Domain\Academics\Models\Subject;
+use App\Domain\Academics\Models\Domain;
 use App\Models\User;
 
 /**
- * Table de référence globale (comme Inspection/Direction/Domain) : provisionnée
+ * Table de référence globale (comme Inspection/Direction) : provisionnée
  * uniquement par le Super Admin SaaS via le bypass Gate::before
  * (AppServiceProvider) — tout le monde d'autre est refusé explicitement.
  */
-class SubjectPolicy
+class DomainPolicy
 {
     public function viewAny(User $user): bool
     {
         return false;
     }
 
-    public function view(User $user, Subject $subject): bool
+    public function view(User $user, Domain $domain): bool
     {
         return false;
     }
@@ -29,12 +29,12 @@ class SubjectPolicy
         return false;
     }
 
-    public function update(User $user, Subject $subject): bool
+    public function update(User $user, Domain $domain): bool
     {
         return false;
     }
 
-    public function delete(User $user, Subject $subject): bool
+    public function delete(User $user, Domain $domain): bool
     {
         return false;
     }

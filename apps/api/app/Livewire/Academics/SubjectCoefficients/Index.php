@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Livewire\Academics\SubjectCoefficients;
 
+use App\Domain\Academics\Enums\Cycle;
 use App\Domain\Academics\Models\Level;
 use App\Domain\Academics\Models\Serie;
 use App\Domain\Academics\Models\Subject;
 use App\Domain\Academics\Models\SubjectCoefficient;
+use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -56,10 +58,23 @@ class Index extends Component
             ->get()
             ->keyBy('subject_id');
 
-        foreach (Subject::orderBy('name')->get() as $subject) {
+        foreach ($this->subjectsForSelectedLevel() as $subject) {
             $coefficient = $existing->get($subject->id)?->coefficient;
             $this->coefficients[$subject->id] = $coefficient !== null ? (string) $coefficient : '';
         }
+    }
+
+    /**
+     * @return Collection<int, Subject>
+     */
+    private function subjectsForSelectedLevel(): Collection
+    {
+        $cycle = $this->level_id ? Level::whereKey($this->level_id)->value('cycle') : null;
+
+        return Subject::when($cycle === Cycle::Primaire, fn ($query) => $query->where('is_prescolaire_primaire', true))
+            ->when($cycle === Cycle::Secondaire, fn ($query) => $query->where('is_secondaire', true))
+            ->orderBy('name')
+            ->get();
     }
 
     public function save(): void
@@ -102,7 +117,7 @@ class Index extends Component
         return view('livewire.academics.subject-coefficients.index', [
             'levels' => Level::orderBy('level_wording')->get(),
             'series' => Serie::orderBy('serie')->get(),
-            'subjects' => Subject::orderBy('name')->get(),
+            'subjects' => $this->subjectsForSelectedLevel(),
         ]);
     }
 }

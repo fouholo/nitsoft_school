@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Academics\Subjects;
 
+use App\Domain\Academics\Models\Domain;
 use App\Domain\Academics\Models\Subject;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -18,6 +20,12 @@ class Index extends Component
     public ?int $editingId = null;
 
     public string $name = '';
+
+    public bool $is_prescolaire_primaire = true;
+
+    public bool $is_secondaire = true;
+
+    public ?int $domain_id = null;
 
     public function mount(): void
     {
@@ -40,6 +48,9 @@ class Index extends Component
 
         $this->editingId = $subject->id;
         $this->name = $subject->name;
+        $this->is_prescolaire_primaire = $subject->is_prescolaire_primaire;
+        $this->is_secondaire = $subject->is_secondaire;
+        $this->domain_id = $subject->domain_id;
         $this->showForm = true;
     }
 
@@ -47,7 +58,16 @@ class Index extends Component
     {
         $data = $this->validate([
             'name' => ['required', 'string', 'max:255'],
+            'is_prescolaire_primaire' => ['boolean'],
+            'is_secondaire' => ['boolean'],
+            'domain_id' => ['nullable', 'exists:domains,id'],
         ]);
+
+        if (! $data['is_prescolaire_primaire'] && ! $data['is_secondaire']) {
+            throw ValidationException::withMessages([
+                'is_prescolaire_primaire' => "Sélectionnez au moins un cycle pour cette matière.",
+            ]);
+        }
 
         if ($this->editingId) {
             $subject = Subject::findOrFail($this->editingId);
@@ -81,13 +101,16 @@ class Index extends Component
 
     protected function resetForm(): void
     {
-        $this->reset(['editingId', 'name']);
+        $this->reset(['editingId', 'name', 'domain_id']);
+        $this->is_prescolaire_primaire = true;
+        $this->is_secondaire = true;
     }
 
     public function render()
     {
         return view('livewire.academics.subjects.index', [
-            'subjects' => Subject::orderBy('name')->get(),
+            'subjects' => Subject::with('domain')->orderBy('name')->get(),
+            'domains' => Domain::orderBy('name')->get(),
         ]);
     }
 }

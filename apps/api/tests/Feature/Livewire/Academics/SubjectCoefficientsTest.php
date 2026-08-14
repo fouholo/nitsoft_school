@@ -15,7 +15,7 @@ beforeEach(function () {
     $this->directeur = createUserWithRole($this->establishment, 'directeur');
     actingInEstablishment($this->establishment);
 
-    $this->subject = Subject::factory()->create(['establishment_id' => $this->establishment->id]);
+    $this->subject = Subject::factory()->create();
 });
 
 test('un directeur configure un coefficient pour un niveau sans série', function () {
@@ -84,6 +84,21 @@ test('re-enregistrer un coefficient pour le même niveau/matière le remplace', 
 
     expect(SubjectCoefficient::count())->toBe(1)
         ->and((float) SubjectCoefficient::sole()->coefficient)->toBe(4.0);
+});
+
+test('seules les matières compatibles avec le cycle du niveau sont proposées dans la grille', function () {
+    $this->actingAs($this->directeur);
+
+    $secondaireOnly = Subject::factory()->create(['is_prescolaire_primaire' => false, 'is_secondaire' => true]);
+    $primaireOnly = Subject::factory()->create(['is_prescolaire_primaire' => true, 'is_secondaire' => false]);
+
+    $primaire = Level::factory()->primaire()->create();
+
+    $component = Livewire::test(Index::class)->set('level_id', $primaire->id);
+
+    expect($component->get('coefficients'))
+        ->toHaveKey($primaireOnly->id)
+        ->not->toHaveKey($secondaireOnly->id);
 });
 
 test('un enseignant peut consulter la grille mais ne peut pas l’enregistrer', function () {

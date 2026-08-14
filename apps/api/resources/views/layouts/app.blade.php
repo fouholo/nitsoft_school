@@ -34,7 +34,6 @@
                     ['label' => 'Années scolaires', 'route' => 'academics.school-years.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\SchoolYear::class],
                     ['label' => 'Périodes', 'route' => 'academics.terms.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\Term::class],
                     ['label' => 'Classes', 'route' => 'academics.classrooms.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\Classroom::class],
-                    ['label' => 'Matières', 'route' => 'academics.subjects.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\Subject::class],
                     ['label' => 'Coefficients par matière', 'route' => 'academics.subject-coefficients.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\SubjectCoefficient::class],
                     ['label' => 'Affectations', 'route' => 'academics.teacher-assignments.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\TeacherAssignment::class],
                 ]],
@@ -80,6 +79,8 @@
                 $navItems[] = ['type' => 'link', 'label' => 'Établissements', 'route' => 'establishments.index', 'active' => 'establishments.*', 'icon' => 'building'];
                 $navItems[] = ['type' => 'link', 'label' => 'Inspections', 'route' => 'inspections.index', 'active' => 'inspections.*', 'icon' => 'building'];
                 $navItems[] = ['type' => 'link', 'label' => 'Directions', 'route' => 'directions.index', 'active' => 'directions.*', 'icon' => 'building'];
+                $navItems[] = ['type' => 'link', 'label' => 'Matières', 'route' => 'academics.subjects.index', 'active' => 'academics.subjects.*', 'icon' => 'book'];
+                $navItems[] = ['type' => 'link', 'label' => 'Domaines', 'route' => 'domains.index', 'active' => 'domains.*', 'icon' => 'book'];
                 $navItems[] = ['type' => 'link', 'label' => 'Informations générales', 'route' => 'general-information.edit', 'active' => 'general-information.*', 'icon' => 'building'];
             }
 

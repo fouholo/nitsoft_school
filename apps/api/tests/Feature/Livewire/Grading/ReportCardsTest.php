@@ -50,7 +50,7 @@ test('la génération est bloquée si le coefficient d’une matière notée n�
         'establishment_id' => $this->establishment->id,
         'school_year_id' => $this->term->school_year_id,
     ]);
-    $subject = Subject::factory()->create(['establishment_id' => $this->establishment->id]);
+    $subject = Subject::factory()->create();
     $student = Student::factory()->create(['establishment_id' => $this->establishment->id]);
 
     $gradeSheet = GradeSheet::factory()->create([
@@ -80,8 +80,8 @@ test('la moyenne générale pondère chaque matière par son coefficient', funct
         'establishment_id' => $this->establishment->id,
         'school_year_id' => $this->term->school_year_id,
     ]);
-    $subjectA = Subject::factory()->create(['establishment_id' => $this->establishment->id]);
-    $subjectB = Subject::factory()->create(['establishment_id' => $this->establishment->id]);
+    $subjectA = Subject::factory()->create();
+    $subjectB = Subject::factory()->create();
     $student = Student::factory()->create(['establishment_id' => $this->establishment->id]);
 
     SubjectCoefficient::factory()->create([

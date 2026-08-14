@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\SchoolYear;
-use App\Domain\Academics\Models\Subject;
 use App\Domain\Academics\Models\Term;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
@@ -14,12 +13,13 @@ use App\Domain\Establishments\Models\Establishment;
  * RBAC : Admin établissement peut tout faire sur ces domaines, Enseignant
  * peut seulement consulter, aucun rôle ne peut agir en dehors de son
  * établissement — voir plan d'architecture, section 2.2 et Policies.
+ * Subject n'est plus une ressource d'établissement (catalogue global SaaS
+ * admin, voir SubjectsTest) — retiré de ce dataset.
  */
 dataset('policy_models', [
     'school_years' => [SchoolYear::class],
     'terms' => [Term::class],
     'classrooms' => [Classroom::class],
-    'subjects' => [Subject::class],
     'students' => [Student::class],
     'enrollments' => [Enrollment::class],
 ]);

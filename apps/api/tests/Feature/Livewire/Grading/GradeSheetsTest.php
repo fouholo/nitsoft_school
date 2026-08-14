@@ -32,7 +32,7 @@ beforeEach(function () {
         'establishment_id' => $this->establishment->id,
         'school_year_id' => $schoolYear->id,
     ]);
-    $this->subject = Subject::factory()->create(['establishment_id' => $this->establishment->id]);
+    $this->subject = Subject::factory()->create();
     $this->term = Term::factory()->create(['establishment_id' => $this->establishment->id, 'school_year_id' => $schoolYear->id]);
 });
 
@@ -89,6 +89,33 @@ test('changer le type en interrogation ajuste le poids par défaut à 1', functi
         ->set('classroom_id', $this->secondaireClassroom->id)
         ->set('type', 'interrogation')
         ->assertSet('weight', 1.0);
+});
+
+test('la liste des matières se filtre selon le cycle de la classe sélectionnée', function () {
+    $secondaireOnly = Subject::factory()->create(['is_prescolaire_primaire' => false, 'is_secondaire' => true]);
+    $primaireOnly = Subject::factory()->create(['is_prescolaire_primaire' => true, 'is_secondaire' => false]);
+
+    $subjects = Livewire::test(Index::class)
+        ->set('classroom_id', $this->primaireClassroom->id)
+        ->viewData('subjects');
+
+    expect($subjects->pluck('id'))->toContain($primaireOnly->id)
+        ->not->toContain($secondaireOnly->id);
+});
+
+test('une matière incompatible avec le cycle de la classe est rejetée côté serveur', function () {
+    $secondaireOnly = Subject::factory()->create(['is_prescolaire_primaire' => false, 'is_secondaire' => true]);
+
+    Livewire::test(Index::class)
+        ->set('classroom_id', $this->primaireClassroom->id)
+        ->set('subject_id', $secondaireOnly->id)
+        ->set('term_id', $this->term->id)
+        ->set('title', 'Composition 1')
+        ->set('graded_on', now()->toDateString())
+        ->call('save')
+        ->assertHasErrors(['subject_id']);
+
+    expect(GradeSheet::count())->toBe(0);
 });
 
 test('un type incompatible avec le cycle de la classe est rejeté côté serveur', function () {

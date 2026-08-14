@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Domain\Academics\Models\SchoolYear;
-use App\Domain\Academics\Models\Subject;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Notifications\Models\SmsTemplate;
@@ -16,10 +15,11 @@ use App\Domain\Notifications\Models\SmsTemplate;
  * depuis l'auto-inscription des parents (un parent peut avoir des enfants
  * dans des établissements différents) — voir
  * docs/superpowers/specs/2026-08-06-parents-autoinscription-design.md.
+ * `Subject` n'est plus tenant-aware depuis le catalogue global de matières
+ * géré par le SaaS admin — retiré de ce dataset.
  */
 dataset('tenant_aware_models', [
     'students' => [Student::class],
-    'subjects' => [Subject::class],
     'sms_templates' => [SmsTemplate::class],
     'school_years' => [SchoolYear::class],
 ]);

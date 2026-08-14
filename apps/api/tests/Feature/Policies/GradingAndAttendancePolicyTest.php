@@ -48,7 +48,7 @@ test('un enseignant affecté peut créer une évaluation et gérer la sienne', f
     $establishment = Establishment::factory()->create();
     $teacher = createUserWithRole($establishment, 'enseignant');
     $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id]);
-    $subject = Subject::factory()->create(['establishment_id' => $establishment->id]);
+    $subject = Subject::factory()->create();
 
     TeacherAssignment::factory()->create([
         'establishment_id' => $establishment->id,
@@ -76,7 +76,7 @@ test('un enseignant ne peut pas modifier l’évaluation d’un collègue', func
     $teacherA = createUserWithRole($establishment, 'enseignant');
     $teacherB = createUserWithRole($establishment, 'enseignant');
     $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id]);
-    $subject = Subject::factory()->create(['establishment_id' => $establishment->id]);
+    $subject = Subject::factory()->create();
 
     foreach ([$teacherA, $teacherB] as $teacher) {
         TeacherAssignment::factory()->create([
