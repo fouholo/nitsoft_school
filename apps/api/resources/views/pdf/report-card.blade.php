@@ -78,6 +78,8 @@
         </tr>
     </table>
 
+    @include('pdf.partials.director-stamp', ['establishment' => $reportCard->establishment])
+
     <p class="footer">Généré le {{ now()->locale('fr')->translatedFormat('j F Y à H:i:s') }}</p>
 </body>
 </html>

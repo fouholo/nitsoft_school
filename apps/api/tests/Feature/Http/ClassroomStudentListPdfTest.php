@@ -195,3 +195,15 @@ test('l’armoirie est absente si elle n’est pas renseignée dans les informat
 
     expect(substr_count($html, '<img'))->toBe(0);
 });
+
+test('le cadre signature affiche "Le directeur" et le nom du directeur de l’établissement', function () {
+    $establishment = Establishment::factory()->create();
+    $director = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id]);
+
+    $html = renderClassroomStudentListHtml($classroom);
+
+    expect($html)->toContain('Le directeur')
+        ->and($html)->toContain($director->name);
+});

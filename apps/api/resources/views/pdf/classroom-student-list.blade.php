@@ -47,6 +47,8 @@
         </tbody>
     </table>
 
+    @include('pdf.partials.director-stamp', ['establishment' => $classroom->establishment])
+
     <p class="footer">Généré le {{ now()->locale('fr')->translatedFormat('j F Y à H:i:s') }}</p>
 </body>
 </html>

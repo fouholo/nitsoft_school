@@ -76,4 +76,12 @@ class Establishment extends Model
             ->withPivot(['role', 'is_active'])
             ->withTimestamps();
     }
+
+    public function director(): ?User
+    {
+        return $this->users()
+            ->wherePivot('role', 'directeur')
+            ->wherePivot('is_active', true)
+            ->first();
+    }
 }

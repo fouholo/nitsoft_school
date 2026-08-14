@@ -97,3 +97,19 @@ test('aucun logo affiché en en-tête du bulletin quand l’établissement n’e
 
     expect($html)->not->toContain('<img');
 });
+
+test('le cadre signature affiche "Le directeur" et le nom du directeur de l’établissement', function () {
+    $establishment = Establishment::factory()->create();
+    $director = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    $reportCard = makeReportCardIn($establishment);
+    $reportCard->loadMissing(['student', 'classroom', 'term.schoolYear', 'establishment']);
+
+    $html = view('pdf.report-card', [
+        'reportCard' => $reportCard,
+        'breakdown' => app(ReportCardService::class)->subjectBreakdown($reportCard),
+    ])->render();
+
+    expect($html)->toContain('Le directeur')
+        ->and($html)->toContain($director->name);
+});
