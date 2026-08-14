@@ -205,5 +205,5 @@ test('le cadre signature affiche "Le directeur" et le nom du directeur de l’é
     $html = renderClassroomStudentListHtml($classroom);
 
     expect($html)->toContain('Le directeur')
-        ->and($html)->toContain($director->name);
+        ->and($html)->toContain(e($director->name));
 });
