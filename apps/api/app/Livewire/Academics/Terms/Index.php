@@ -6,6 +6,8 @@ namespace App\Livewire\Academics\Terms;
 
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Academics\Models\Term;
+use App\Domain\Establishments\Enums\EstablishmentType;
+use App\Domain\Establishments\Models\Establishment;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -107,6 +109,14 @@ class Index extends Component
         return view('livewire.academics.terms.index', [
             'terms' => Term::with('schoolYear')->orderBy('sequence')->get(),
             'schoolYears' => SchoolYear::orderByDesc('starts_on')->get(),
+            'labelPlaceholder' => $this->labelPlaceholder(),
         ]);
+    }
+
+    private function labelPlaceholder(): string
+    {
+        $establishment = Establishment::findOrFail((int) app('currentEstablishmentId'));
+
+        return $establishment->type === EstablishmentType::PrescolairePrimaire ? 'Composition 1' : 'Trimestre 1';
     }
 }

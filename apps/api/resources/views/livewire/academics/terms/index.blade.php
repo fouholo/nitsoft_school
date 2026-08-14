@@ -13,7 +13,7 @@
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-5">
             <div>
                 <label class="block text-sm font-medium text-slate-700">Libellé</label>
-                <input type="text" wire:model="label" placeholder="Trimestre 1" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                <input type="text" wire:model="label" placeholder="{{ $labelPlaceholder }}" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
                 @error('label') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
