@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\Academics\Classrooms\Index as ClassroomsIndex;
+use App\Livewire\Academics\PrimarySubjects\Index as PrimarySubjectsIndex;
 use App\Livewire\Academics\SchoolYears\Index as SchoolYearsIndex;
 use App\Livewire\Academics\SubjectCoefficients\Index as SubjectCoefficientsIndex;
 use App\Livewire\Academics\Subjects\Index as SubjectsIndex;
@@ -15,6 +16,7 @@ Route::prefix('academics')->name('academics.')->group(function (): void {
     Route::get('/terms', TermsIndex::class)->name('terms.index');
     Route::get('/classrooms', ClassroomsIndex::class)->name('classrooms.index');
     Route::get('/subjects', SubjectsIndex::class)->name('subjects.index');
+    Route::get('/primary-subjects', PrimarySubjectsIndex::class)->name('primary-subjects.index');
     Route::get('/subject-coefficients', SubjectCoefficientsIndex::class)->name('subject-coefficients.index');
     Route::get('/teacher-assignments', TeacherAssignmentsIndex::class)->name('teacher-assignments.index');
 });

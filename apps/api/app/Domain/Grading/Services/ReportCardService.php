@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Domain\Grading\Services;
 
+use App\Domain\Academics\Enums\Cycle;
 use App\Domain\Academics\Models\Classroom;
+use App\Domain\Academics\Models\PrimarySubject;
 use App\Domain\Academics\Models\Subject;
 use App\Domain\Academics\Models\SubjectCoefficient;
 use App\Domain\Academics\Models\Term;
 use App\Domain\Grading\Models\Grade;
+use App\Domain\Grading\Models\GradeSheet;
 use App\Domain\Grading\Models\ReportCard;
 use App\Domain\Grading\ValueObjects\SubjectAverage;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -19,8 +22,11 @@ use Illuminate\Validation\ValidationException;
  * Calcul de la moyenne générale et du rang par classe/période. La moyenne de
  * matière reste un pool pondéré par le poids de chaque évaluation (weightedAverage,
  * inchangé depuis l'origine). La moyenne générale, elle, pondère chaque
- * moyenne de matière par son coefficient (grille SubjectCoefficient par
- * niveau/série — cf. docs/superpowers/specs/2026-08-10-evaluations-primaire-secondaire-design.md).
+ * moyenne de matière par son coefficient : grille SubjectCoefficient par
+ * niveau/série au secondaire, colonnes de PrimarySubject par niveau au
+ * primaire — cf.
+ * docs/superpowers/specs/2026-08-10-evaluations-primaire-secondaire-design.md
+ * et docs/superpowers/specs/2026-08-15-matieres-primaire-catalogue-coefficients-design.md.
  */
 class ReportCardService
 {
@@ -66,7 +72,7 @@ class ReportCardService
             ->whereHas('gradeSheet', function ($query) use ($classroom, $scopeGradeSheets): void {
                 $scopeGradeSheets($query->where('classroom_id', $classroom->id));
             })
-            ->with('gradeSheet.subject')
+            ->with(['gradeSheet.subject', 'gradeSheet.primarySubject'])
             ->get()
             ->groupBy('student_id');
 
@@ -129,18 +135,18 @@ class ReportCardService
                     ? $query->where('term_id', $reportCard->term_id)
                     : $query->where('composition_number', $reportCard->composition_number);
             })
-            ->with(['gradeSheet.subject'])
+            ->with(['gradeSheet.subject', 'gradeSheet.primarySubject'])
             ->get();
 
         $coefficients = $reportCard->classroom ? $this->coefficientsFor($reportCard->classroom) : collect();
 
         $rows = [];
 
-        foreach ($grades->groupBy(fn (Grade $grade) => $grade->gradeSheet->subject_id) as $subjectId => $subjectGrades) {
+        foreach ($grades->groupBy(fn (Grade $grade) => $this->subjectKeyFor($grade->gradeSheet)) as $subjectId => $subjectGrades) {
             $rows[] = new SubjectAverage(
                 $this->subjectFor($subjectGrades),
                 $this->weightedAverage($subjectGrades),
-                $coefficients->get($subjectId)?->coefficient !== null ? (float) $coefficients->get($subjectId)->coefficient : null,
+                $coefficients->get($subjectId),
             );
         }
 
@@ -150,30 +156,72 @@ class ReportCardService
     }
 
     /**
-     * @return Collection<int, SubjectCoefficient>
+     * @return Collection<int, float>
      */
     private function coefficientsFor(Classroom $classroom): Collection
     {
-        return SubjectCoefficient::query()
-            ->where('level_id', $classroom->level_id)
-            ->where('serie_id', $classroom->serie_id)
-            ->get()
-            ->keyBy('subject_id');
+        return $classroom->level->cycle === Cycle::Primaire
+            ? $this->primaryCoefficientsFor($classroom)
+            : $this->secondaryCoefficientsFor($classroom);
     }
 
     /**
-     * @param  Collection<int, SubjectCoefficient>  $coefficients
+     * @return Collection<int, float>
+     */
+    private function primaryCoefficientsFor(Classroom $classroom): Collection
+    {
+        $column = PrimarySubject::coefficientColumn($classroom->level);
+
+        return PrimarySubject::query()
+            ->whereNotNull($column)
+            ->get()
+            ->mapWithKeys(fn (PrimarySubject $primarySubject) => [$primarySubject->id => (float) $primarySubject->{$column}]);
+    }
+
+    /**
+     * @return Collection<int, float>
+     */
+    private function secondaryCoefficientsFor(Classroom $classroom): Collection
+    {
+        $rows = SubjectCoefficient::query()
+            ->where('level_id', $classroom->level_id)
+            ->where('serie_id', $classroom->serie_id)
+            ->get();
+
+        $coefficients = [];
+
+        foreach ($rows as $row) {
+            $coefficients[(int) $row->subject_id] = (float) $row->coefficient;
+        }
+
+        return collect($coefficients);
+    }
+
+    /**
+     * Clé de matière unifiée, valable pour les deux cycles : subject_id
+     * (secondaire) ou primary_subject_id (préscolaire/primaire) — les deux
+     * sont mutuellement exclusifs sur GradeSheet.
+     */
+    private function subjectKeyFor(GradeSheet $gradeSheet): int
+    {
+        return (int) ($gradeSheet->subject_id ?? $gradeSheet->primary_subject_id);
+    }
+
+    /**
+     * @param  Collection<int, float>  $coefficients
      */
     private function assertCoefficientsConfigured(Classroom $classroom, EloquentCollection $gradesByStudent, Collection $coefficients): void
     {
-        $subjectIdsGraded = $gradesByStudent->flatten()->pluck('gradeSheet.subject_id')->unique();
+        $subjectIdsGraded = $gradesByStudent->flatten()->map(fn (Grade $grade) => $this->subjectKeyFor($grade->gradeSheet))->unique();
         $missing = $subjectIdsGraded->diff($coefficients->keys());
 
         if ($missing->isEmpty()) {
             return;
         }
 
-        $names = Subject::whereIn('id', $missing)->pluck('name')->implode(', ');
+        $names = $classroom->level->cycle === Cycle::Primaire
+            ? PrimarySubject::whereIn('id', $missing)->pluck('name')->implode(', ')
+            : Subject::whereIn('id', $missing)->pluck('name')->implode(', ');
         $serieSuffix = $classroom->serie ? ", série {$classroom->serie->serie_wording}" : '';
 
         throw ValidationException::withMessages([
@@ -183,21 +231,21 @@ class ReportCardService
 
     /**
      * @param  Collection<int, Grade>  $grades
-     * @param  Collection<int, SubjectCoefficient>  $coefficients
+     * @param  Collection<int, float>  $coefficients
      */
     private function generalAverage(Collection $grades, Collection $coefficients): ?float
     {
         $weightedSum = 0.0;
         $totalCoefficient = 0.0;
 
-        foreach ($grades->groupBy(fn (Grade $grade) => $grade->gradeSheet->subject_id) as $subjectId => $subjectGrades) {
+        foreach ($grades->groupBy(fn (Grade $grade) => $this->subjectKeyFor($grade->gradeSheet)) as $subjectId => $subjectGrades) {
             $subjectAverage = $this->weightedAverage($subjectGrades);
 
             if ($subjectAverage === null) {
                 continue;
             }
 
-            $coefficient = (float) $coefficients->get($subjectId)->coefficient;
+            $coefficient = (float) $coefficients->get($subjectId);
             $weightedSum += $subjectAverage * $coefficient;
             $totalCoefficient += $coefficient;
         }
@@ -208,9 +256,9 @@ class ReportCardService
     /**
      * @param  Collection<int, Grade>  $grades
      */
-    private function subjectFor(Collection $grades): Subject
+    private function subjectFor(Collection $grades): Subject|PrimarySubject
     {
-        return $grades->first()->gradeSheet->subject;
+        return $grades->first()->gradeSheet->subject ?? $grades->first()->gradeSheet->primarySubject;
     }
 
     /**

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Domain\Academics\Models\Classroom;
+use App\Domain\Academics\Models\PrimarySubject;
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Academics\Models\Subject;
 use App\Domain\Academics\Models\SubjectCoefficient;
@@ -160,13 +161,15 @@ test('la moyenne pondérée et le rang sont calculés correctement par compositi
     $establishment = Establishment::factory()->create();
     $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
     $classroom = Classroom::factory()->primaire()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
-    $subjectA = Subject::factory()->create();
-    $subjectB = Subject::factory()->create();
+    $column = PrimarySubject::coefficientColumn($classroom->level);
+    $subjectA = PrimarySubject::factory()->create([$column => 1]);
+    $subjectB = PrimarySubject::factory()->create([$column => 1]);
 
     $sheetA = GradeSheet::factory()->create([
         'establishment_id' => $establishment->id,
         'classroom_id' => $classroom->id,
-        'subject_id' => $subjectA->id,
+        'subject_id' => null,
+        'primary_subject_id' => $subjectA->id,
         'term_id' => null,
         'composition_number' => 1,
         'max_score' => 20,
@@ -175,7 +178,8 @@ test('la moyenne pondérée et le rang sont calculés correctement par compositi
     $sheetB = GradeSheet::factory()->create([
         'establishment_id' => $establishment->id,
         'classroom_id' => $classroom->id,
-        'subject_id' => $subjectB->id,
+        'subject_id' => null,
+        'primary_subject_id' => $subjectB->id,
         'term_id' => null,
         'composition_number' => 1,
         'max_score' => 20,
@@ -186,15 +190,13 @@ test('la moyenne pondérée et le rang sont calculés correctement par compositi
     $otherSheet = GradeSheet::factory()->create([
         'establishment_id' => $establishment->id,
         'classroom_id' => $classroom->id,
-        'subject_id' => $subjectA->id,
+        'subject_id' => null,
+        'primary_subject_id' => $subjectA->id,
         'term_id' => null,
         'composition_number' => 2,
         'max_score' => 20,
         'weight' => 1,
     ]);
-
-    SubjectCoefficient::factory()->create(['establishment_id' => $establishment->id, 'level_id' => $classroom->level_id, 'serie_id' => null, 'subject_id' => $subjectA->id, 'coefficient' => 1]);
-    SubjectCoefficient::factory()->create(['establishment_id' => $establishment->id, 'level_id' => $classroom->level_id, 'serie_id' => null, 'subject_id' => $subjectB->id, 'coefficient' => 1]);
 
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
     Enrollment::factory()->create(['establishment_id' => $establishment->id, 'student_id' => $student->id, 'classroom_id' => $classroom->id, 'status' => 'active']);
@@ -213,6 +215,39 @@ test('la moyenne pondérée et le rang sont calculés correctement par compositi
         ->and($card->term_id)->toBeNull()
         ->and($card->composition_number)->toBe(1)
         ->and($card->school_year_id)->toBe($schoolYear->id);
+});
+
+test('le détail par matière (primaire) affiche le nom de la matière du catalogue primaire', function () {
+    $establishment = Establishment::factory()->create();
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $classroom = Classroom::factory()->primaire()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+    $column = PrimarySubject::coefficientColumn($classroom->level);
+    $subject = PrimarySubject::factory()->create(['name' => 'Éveil scientifique', $column => 1]);
+
+    $sheet = GradeSheet::factory()->create([
+        'establishment_id' => $establishment->id,
+        'classroom_id' => $classroom->id,
+        'subject_id' => null,
+        'primary_subject_id' => $subject->id,
+        'term_id' => null,
+        'composition_number' => 1,
+        'max_score' => 20,
+        'weight' => 1,
+    ]);
+
+    $student = Student::factory()->create(['establishment_id' => $establishment->id]);
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'student_id' => $student->id, 'classroom_id' => $classroom->id, 'status' => 'active']);
+    Grade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $sheet->id, 'student_id' => $student->id, 'score' => 15]);
+
+    $service = new ReportCardService;
+    $reportCard = $service->generateForClassroomAndComposition($classroom, 1)->first();
+
+    $breakdown = $service->subjectBreakdown($reportCard);
+
+    expect($breakdown)->toHaveCount(1)
+        ->and($breakdown->first()->subject->name)->toBe('Éveil scientifique')
+        ->and($breakdown->first()->average)->toBe(15.0)
+        ->and($breakdown->first()->coefficient)->toBe(1.0);
 });
 
 test('la génération de bulletin est refusée pour une classe préscolaire', function () {

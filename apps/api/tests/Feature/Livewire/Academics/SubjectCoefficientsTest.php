@@ -6,16 +6,17 @@ use App\Domain\Academics\Models\Level;
 use App\Domain\Academics\Models\Serie;
 use App\Domain\Academics\Models\Subject;
 use App\Domain\Academics\Models\SubjectCoefficient;
+use App\Domain\Establishments\Enums\EstablishmentType;
 use App\Domain\Establishments\Models\Establishment;
 use App\Livewire\Academics\SubjectCoefficients\Index;
 use Livewire\Livewire;
 
 beforeEach(function () {
-    $this->establishment = Establishment::factory()->create();
+    $this->establishment = Establishment::factory()->create(['type' => EstablishmentType::Secondaire]);
     $this->directeur = createUserWithRole($this->establishment, 'directeur');
     actingInEstablishment($this->establishment);
 
-    $this->subject = Subject::factory()->create();
+    $this->subject = Subject::factory()->create(['is_secondaire' => true]);
 });
 
 test('un directeur configure un coefficient pour un niveau sans série', function () {
@@ -86,19 +87,31 @@ test('re-enregistrer un coefficient pour le même niveau/matière le remplace', 
         ->and((float) SubjectCoefficient::sole()->coefficient)->toBe(4.0);
 });
 
-test('seules les matières compatibles avec le cycle du niveau sont proposées dans la grille', function () {
+test('seules les matières secondaire sont proposées dans la grille', function () {
     $this->actingAs($this->directeur);
 
-    $secondaireOnly = Subject::factory()->create(['is_prescolaire_primaire' => false, 'is_secondaire' => true]);
     $primaireOnly = Subject::factory()->create(['is_prescolaire_primaire' => true, 'is_secondaire' => false]);
 
-    $primaire = Level::factory()->primaire()->create();
+    $level = Level::factory()->create(['requires_series' => false]);
 
-    $component = Livewire::test(Index::class)->set('level_id', $primaire->id);
+    $subjects = Livewire::test(Index::class)
+        ->set('level_id', $level->id)
+        ->viewData('subjects');
 
-    expect($component->get('coefficients'))
-        ->toHaveKey($primaireOnly->id)
-        ->not->toHaveKey($secondaireOnly->id);
+    expect($subjects->pluck('id'))->toContain($this->subject->id)
+        ->not->toContain($primaireOnly->id);
+});
+
+test('le sélecteur de niveau ne propose que des niveaux secondaire', function () {
+    $this->actingAs($this->directeur);
+
+    $primaireLevel = Level::factory()->primaire()->create();
+    $secondaireLevel = Level::factory()->create(['requires_series' => false]);
+
+    $levels = Livewire::test(Index::class)->viewData('levels');
+
+    expect($levels->pluck('id'))->toContain($secondaireLevel->id)
+        ->not->toContain($primaireLevel->id);
 });
 
 test('un enseignant peut consulter la grille mais ne peut pas l’enregistrer', function () {
@@ -114,4 +127,13 @@ test('un enseignant peut consulter la grille mais ne peut pas l’enregistrer', 
         ->assertForbidden();
 
     expect(SubjectCoefficient::count())->toBe(0);
+});
+
+test('un établissement préscolaire/primaire n’a pas accès à l’écran', function () {
+    $establishment = Establishment::factory()->create(['type' => EstablishmentType::PrescolairePrimaire]);
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    $this->actingAs($directeur);
+
+    Livewire::test(Index::class)->assertForbidden();
 });

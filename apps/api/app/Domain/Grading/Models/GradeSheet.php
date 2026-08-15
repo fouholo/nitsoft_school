@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Grading\Models;
 
 use App\Domain\Academics\Models\Classroom;
+use App\Domain\Academics\Models\PrimarySubject;
 use App\Domain\Academics\Models\Subject;
 use App\Domain\Academics\Models\Term;
 use App\Domain\Establishments\Concerns\TenantScoped;
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property-read Term|null $term Nul pour une évaluation préscolaire/primaire (composition_number renseigné à la place).
+ * @property-read Subject|null $subject Nul pour une évaluation préscolaire/primaire (primary_subject_id renseigné à la place).
  */
 class GradeSheet extends Model
 {
@@ -30,6 +32,7 @@ class GradeSheet extends Model
         'establishment_id',
         'classroom_id',
         'subject_id',
+        'primary_subject_id',
         'term_id',
         'composition_number',
         'teacher_id',
@@ -70,6 +73,14 @@ class GradeSheet extends Model
     public function subject(): BelongsTo
     {
         return $this->belongsTo(Subject::class);
+    }
+
+    /**
+     * @return BelongsTo<PrimarySubject, $this>
+     */
+    public function primarySubject(): BelongsTo
+    {
+        return $this->belongsTo(PrimarySubject::class);
     }
 
     /**

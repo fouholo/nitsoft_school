@@ -35,13 +35,13 @@
 
             <div>
                 <label class="block text-sm font-medium text-slate-700">Matière</label>
-                <select wire:model="subject_id" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                <select wire:model="primary_subject_id" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
                     <option value="">—</option>
                     @foreach ($subjects as $subject)
                         <option value="{{ $subject->id }}">{{ $subject->name }}</option>
                     @endforeach
                 </select>
-                @error('subject_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                @error('primary_subject_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
@@ -96,7 +96,7 @@
                     <tr wire:key="grade-sheet-{{ $gradeSheet->id }}">
                         <td class="px-4 py-2 text-slate-900">{{ $gradeSheet->title }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $gradeSheet->classroom?->name }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ $gradeSheet->subject?->name }}</td>
+                        <td class="px-4 py-2 text-slate-600">{{ $gradeSheet->primarySubject?->name }}</td>
                         <td class="px-4 py-2 text-slate-600">Composition {{ $gradeSheet->composition_number }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $gradeSheet->graded_on->format('d/m/Y') }}</td>
                         <td class="px-4 py-2 text-right">

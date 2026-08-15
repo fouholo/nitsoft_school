@@ -6,7 +6,7 @@ namespace App\Livewire\Grading\GradeSheets\Primaire;
 
 use App\Domain\Academics\Enums\Cycle;
 use App\Domain\Academics\Models\Classroom;
-use App\Domain\Academics\Models\Subject;
+use App\Domain\Academics\Models\PrimarySubject;
 use App\Domain\Academics\Models\TeacherAssignment;
 use App\Domain\Establishments\Support\RolePermissions;
 use App\Domain\Grading\Models\GradeSheet;
@@ -21,7 +21,7 @@ class Index extends Component
 
     public ?int $classroom_id = null;
 
-    public ?int $subject_id = null;
+    public ?int $primary_subject_id = null;
 
     public ?int $composition_number = null;
 
@@ -42,7 +42,7 @@ class Index extends Component
     {
         $this->authorize('create', GradeSheet::class);
 
-        $this->reset(['classroom_id', 'subject_id', 'composition_number', 'title']);
+        $this->reset(['classroom_id', 'primary_subject_id', 'composition_number', 'title']);
         $this->max_score = 20.0;
         $this->weight = 1.0;
         $this->graded_on = now()->toDateString();
@@ -52,7 +52,7 @@ class Index extends Component
     public function updatedClassroomId(): void
     {
         $this->weight = 1.0;
-        $this->subject_id = null;
+        $this->primary_subject_id = null;
         $this->composition_number = null;
     }
 
@@ -62,7 +62,7 @@ class Index extends Component
 
         $data = $this->validate([
             'classroom_id' => ['required', 'exists:classrooms,id'],
-            'subject_id' => ['required', 'exists:subjects,id'],
+            'primary_subject_id' => ['required', 'exists:primary_subjects,id'],
             'composition_number' => ['required', 'integer', 'min:1', 'max:10'],
             'title' => ['required', 'string', 'max:255'],
             'max_score' => ['required', 'numeric', 'min:1', 'max:1000'],
@@ -91,11 +91,11 @@ class Index extends Component
             ]);
         }
 
-        $subject = Subject::findOrFail($data['subject_id']);
+        $primarySubject = PrimarySubject::findOrFail($data['primary_subject_id']);
 
-        if (! $subject->is_prescolaire_primaire) {
+        if ($primarySubject->coefficientFor($classroom->level) === null) {
             throw ValidationException::withMessages([
-                'subject_id' => "Cette matière n'est pas disponible pour ce cycle.",
+                'primary_subject_id' => "Cette matière n'est pas configurée pour ce niveau.",
             ]);
         }
 
@@ -128,7 +128,7 @@ class Index extends Component
         $isAdmin = $this->hasBroadGradeAccess($user);
 
         $gradeSheets = GradeSheet::query()
-            ->with(['classroom', 'subject'])
+            ->with(['classroom', 'primarySubject'])
             ->whereHas('classroom.level', fn ($query) => $query->where('cycle', Cycle::Primaire))
             ->when(! $isAdmin, fn ($query) => $query->where('teacher_id', $user->id))
             ->orderByDesc('graded_on')
@@ -137,20 +137,19 @@ class Index extends Component
         $assignments = TeacherAssignment::query()
             ->when(! $isAdmin, fn ($query) => $query->where('user_id', $user->id))
             ->whereHas('classroom.level', fn ($query) => $query->where('cycle', Cycle::Primaire))
-            ->with(['classroom', 'subject'])
+            ->with('classroom')
             ->get();
 
-        if ($isAdmin) {
-            $subjects = Subject::where('is_prescolaire_primaire', true)->orderBy('name')->get();
-        } else {
-            $assignedSubjects = $assignments->pluck('subject')->filter();
+        $classroom = $this->classroom_id ? Classroom::find($this->classroom_id) : null;
 
-            // Une affectation "classe entière" (sans matière) autorise
-            // l'enseignant à noter n'importe quelle matière du cycle.
-            $subjects = $assignments->contains(fn (TeacherAssignment $assignment) => $assignment->subject_id === null)
-                ? $assignedSubjects->merge(Subject::where('is_prescolaire_primaire', true)->get())->unique('id')->values()
-                : $assignedSubjects->unique('id')->values();
-        }
+        // Une affectation primaire porte toujours sur la classe entière (pas
+        // de matière) : si l'enseignant a une affectation sur cette classe,
+        // il peut noter n'importe quelle matière configurée pour ce niveau.
+        $isAssignedToClassroom = $classroom && ($isAdmin || $assignments->contains(fn (TeacherAssignment $a) => $a->classroom_id === $classroom->id));
+
+        $subjects = $isAssignedToClassroom
+            ? PrimarySubject::whereNotNull(PrimarySubject::coefficientColumn($classroom->level))->orderBy('name')->get()
+            : collect();
 
         return view('livewire.grading.grade-sheets.primaire.index', [
             'gradeSheets' => $gradeSheets,

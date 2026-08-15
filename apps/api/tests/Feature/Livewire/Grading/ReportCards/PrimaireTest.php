@@ -3,9 +3,8 @@
 declare(strict_types=1);
 
 use App\Domain\Academics\Models\Classroom;
+use App\Domain\Academics\Models\PrimarySubject;
 use App\Domain\Academics\Models\SchoolYear;
-use App\Domain\Academics\Models\Subject;
-use App\Domain\Academics\Models\SubjectCoefficient;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Enums\EstablishmentType;
 use App\Domain\Establishments\Models\Establishment;
@@ -39,13 +38,15 @@ test('la génération est bloquée si le coefficient d’une matière notée n�
         'establishment_id' => $this->establishment->id,
         'school_year_id' => $this->schoolYear->id,
     ]);
-    $subject = Subject::factory()->create();
+    $column = PrimarySubject::coefficientColumn($classroom->level);
+    $subject = PrimarySubject::factory()->create([$column => null]);
     $student = Student::factory()->create(['establishment_id' => $this->establishment->id]);
 
     $gradeSheet = GradeSheet::factory()->create([
         'establishment_id' => $this->establishment->id,
         'classroom_id' => $classroom->id,
-        'subject_id' => $subject->id,
+        'subject_id' => null,
+        'primary_subject_id' => $subject->id,
         'term_id' => null,
         'composition_number' => 1,
     ]);
@@ -70,21 +71,15 @@ test('la génération de bulletin par composition fonctionne', function () {
         'establishment_id' => $this->establishment->id,
         'school_year_id' => $this->schoolYear->id,
     ]);
-    $subject = Subject::factory()->create();
+    $column = PrimarySubject::coefficientColumn($classroom->level);
+    $subject = PrimarySubject::factory()->create([$column => 1]);
     $student = Student::factory()->create(['establishment_id' => $this->establishment->id]);
-
-    SubjectCoefficient::factory()->create([
-        'establishment_id' => $this->establishment->id,
-        'level_id' => $classroom->level_id,
-        'serie_id' => null,
-        'subject_id' => $subject->id,
-        'coefficient' => 1,
-    ]);
 
     $gradeSheet = GradeSheet::factory()->create([
         'establishment_id' => $this->establishment->id,
         'classroom_id' => $classroom->id,
-        'subject_id' => $subject->id,
+        'subject_id' => null,
+        'primary_subject_id' => $subject->id,
         'term_id' => null,
         'composition_number' => 1,
         'weight' => 1,

@@ -32,7 +32,7 @@ class StudentGrades extends Component
             'grades' => Grade::query()
                 ->where('student_id', $this->student->id)
                 ->whereNotNull('score')
-                ->with(['gradeSheet.subject', 'gradeSheet.term'])
+                ->with(['gradeSheet.subject', 'gradeSheet.primarySubject', 'gradeSheet.term'])
                 ->get(),
         ]);
     }

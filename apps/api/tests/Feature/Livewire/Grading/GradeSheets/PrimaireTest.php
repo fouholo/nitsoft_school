@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Domain\Academics\Models\Classroom;
+use App\Domain\Academics\Models\PrimarySubject;
 use App\Domain\Academics\Models\SchoolYear;
-use App\Domain\Academics\Models\Subject;
 use App\Domain\Academics\Models\TeacherAssignment;
 use App\Domain\Establishments\Enums\EstablishmentType;
 use App\Domain\Establishments\Models\Establishment;
@@ -25,13 +25,14 @@ beforeEach(function () {
         'establishment_id' => $this->establishment->id,
         'school_year_id' => $schoolYear->id,
     ]);
-    $this->subject = Subject::factory()->create(['is_prescolaire_primaire' => true]);
+    $this->column = PrimarySubject::coefficientColumn($this->primaireClassroom->level);
+    $this->subject = PrimarySubject::factory()->create([$this->column => 1]);
 });
 
 test('la création d’une feuille de notes pour une classe primaire fonctionne', function () {
     Livewire::test(Index::class)
         ->set('classroom_id', $this->primaireClassroom->id)
-        ->set('subject_id', $this->subject->id)
+        ->set('primary_subject_id', $this->subject->id)
         ->set('composition_number', 1)
         ->set('title', 'Composition 1')
         ->set('graded_on', now()->toDateString())
@@ -44,13 +45,15 @@ test('la création d’une feuille de notes pour une classe primaire fonctionne'
 
     expect($gradeSheet->type)->toBe('composition')
         ->and($gradeSheet->term_id)->toBeNull()
+        ->and($gradeSheet->subject_id)->toBeNull()
+        ->and($gradeSheet->primary_subject_id)->toBe($this->subject->id)
         ->and($gradeSheet->composition_number)->toBe(1);
 });
 
 test('le n° de composition est requis', function () {
     Livewire::test(Index::class)
         ->set('classroom_id', $this->primaireClassroom->id)
-        ->set('subject_id', $this->subject->id)
+        ->set('primary_subject_id', $this->subject->id)
         ->set('title', 'Composition 1')
         ->set('graded_on', now()->toDateString())
         ->call('save')
@@ -65,28 +68,31 @@ test('sélectionner une classe pré-remplit le poids par défaut à 1', function
         ->assertSet('weight', 1.0);
 });
 
-test('la liste des matières est filtrée sur les matières préscolaire/primaire', function () {
-    $secondaireOnly = Subject::factory()->create(['is_prescolaire_primaire' => false, 'is_secondaire' => true]);
+test('la liste des matières ne propose que celles ayant un coefficient pour ce niveau', function () {
+    $otherLevelColumn = PrimarySubject::coefficientColumn($this->primaireClassroom->level) === 'coefficient_cp1'
+        ? 'coefficient_cm2'
+        : 'coefficient_cp1';
+    $notConfigured = PrimarySubject::factory()->create([$this->column => null, $otherLevelColumn => 1]);
 
     $subjects = Livewire::test(Index::class)
         ->set('classroom_id', $this->primaireClassroom->id)
         ->viewData('subjects');
 
     expect($subjects->pluck('id'))->toContain($this->subject->id)
-        ->not->toContain($secondaireOnly->id);
+        ->not->toContain($notConfigured->id);
 });
 
-test('une matière incompatible avec le cycle primaire est rejetée côté serveur', function () {
-    $secondaireOnly = Subject::factory()->create(['is_prescolaire_primaire' => false, 'is_secondaire' => true]);
+test('une matière sans coefficient configuré pour ce niveau est rejetée côté serveur', function () {
+    $notConfigured = PrimarySubject::factory()->create([$this->column => null]);
 
     Livewire::test(Index::class)
         ->set('classroom_id', $this->primaireClassroom->id)
-        ->set('subject_id', $secondaireOnly->id)
+        ->set('primary_subject_id', $notConfigured->id)
         ->set('composition_number', 1)
         ->set('title', 'Composition 1')
         ->set('graded_on', now()->toDateString())
         ->call('save')
-        ->assertHasErrors(['subject_id']);
+        ->assertHasErrors(['primary_subject_id']);
 
     expect(GradeSheet::count())->toBe(0);
 });
@@ -99,7 +105,7 @@ test('un enseignant avec une affectation classe entière voit toutes les matièr
         'classroom_id' => $this->primaireClassroom->id,
         'subject_id' => null,
     ]);
-    $otherPrimaireSubject = Subject::factory()->create(['is_prescolaire_primaire' => true]);
+    $otherPrimaireSubject = PrimarySubject::factory()->create([$this->column => 2]);
 
     $this->actingAs($teacher);
 
@@ -113,7 +119,7 @@ test('un enseignant avec une affectation classe entière voit toutes les matièr
 
     Livewire::test(Index::class)
         ->set('classroom_id', $this->primaireClassroom->id)
-        ->set('subject_id', $otherPrimaireSubject->id)
+        ->set('primary_subject_id', $otherPrimaireSubject->id)
         ->set('composition_number', 1)
         ->set('title', 'Composition 1')
         ->set('graded_on', now()->toDateString())
@@ -129,7 +135,7 @@ test('un enseignant sans affectation sur la classe est refusé', function () {
 
     Livewire::test(Index::class)
         ->set('classroom_id', $this->primaireClassroom->id)
-        ->set('subject_id', $this->subject->id)
+        ->set('primary_subject_id', $this->subject->id)
         ->set('composition_number', 1)
         ->set('title', 'Composition 1')
         ->set('graded_on', now()->toDateString())

@@ -4,7 +4,7 @@
     <div class="mt-2">
         <h1 class="text-2xl font-semibold text-slate-900">{{ $gradeSheet->title }}</h1>
         <p class="text-sm text-slate-500">
-            {{ $gradeSheet->classroom?->name }} — {{ $gradeSheet->subject?->name }} — Barème {{ $gradeSheet->max_score }} — {{ $gradeSheet->term?->label }}
+            {{ $gradeSheet->classroom?->name }} — {{ $gradeSheet->subject?->name ?? $gradeSheet->primarySubject?->name }} — Barème {{ $gradeSheet->max_score }} — {{ $gradeSheet->term?->label }}
         </p>
     </div>
 

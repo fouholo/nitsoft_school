@@ -69,12 +69,7 @@ class Index extends Component
      */
     private function subjectsForSelectedLevel(): Collection
     {
-        $cycle = $this->level_id ? Level::whereKey($this->level_id)->value('cycle') : null;
-
-        return Subject::when($cycle === Cycle::Primaire, fn ($query) => $query->where('is_prescolaire_primaire', true))
-            ->when($cycle === Cycle::Secondaire, fn ($query) => $query->where('is_secondaire', true))
-            ->orderBy('name')
-            ->get();
+        return Subject::where('is_secondaire', true)->orderBy('name')->get();
     }
 
     public function save(): void
@@ -115,7 +110,7 @@ class Index extends Component
     public function render()
     {
         return view('livewire.academics.subject-coefficients.index', [
-            'levels' => Level::orderBy('level_wording')->get(),
+            'levels' => Level::where('cycle', Cycle::Secondaire)->orderBy('level_wording')->get(),
             'series' => Serie::orderBy('serie')->get(),
             'subjects' => $this->subjectsForSelectedLevel(),
         ]);
