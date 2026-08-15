@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-15T00:00:00.000Z",
+  "title": "Design System: Nitsoft School",
+  "extensions": {
+    "colorMeta": {
+      "bleu-institutionnel": { "role": "primary", "displayName": "Bleu Institutionnel", "canonical": "#4f46e5", "tonalRamp": ["#312e81", "#3730a3", "#4338ca", "#4f46e5", "#6366f1", "#818cf8", "#a5b4fc", "#e0e7ff"] },
+      "gris-ardoise-encre": { "role": "neutral", "displayName": "Gris Ardoise Encre", "canonical": "#0f172a", "tonalRamp": ["#0f172a", "#1e293b", "#334155", "#475569", "#64748b", "#94a3b8", "#cbd5e1", "#f1f5f9"] },
+      "succes-texte": { "role": "success", "displayName": "Succès (Émeraude)", "canonical": "#047857", "tonalRamp": ["#064e3b", "#065f46", "#047857", "#059669", "#10b981", "#34d399", "#6ee7b7", "#d1fae5"] },
+      "attention-texte": { "role": "warning", "displayName": "Attention (Ambre)", "canonical": "#b45309", "tonalRamp": ["#78350f", "#92400e", "#b45309", "#d97706", "#f59e0b", "#fbbf24", "#fcd34d", "#fef3c7"] },
+      "danger-texte": { "role": "danger", "displayName": "Danger (Rouge)", "canonical": "#b91c1c", "tonalRamp": ["#7f1d1d", "#991b1b", "#b91c1c", "#dc2626", "#ef4444", "#f87171", "#fca5a5", "#fee2e2"] },
+      "cycle-primaire-texte": { "role": "categorical", "displayName": "Cycle Primaire (Ciel)", "canonical": "#0369a1", "tonalRamp": ["#0c4a6e", "#075985", "#0369a1", "#0284c7", "#0ea5e9", "#38bdf8", "#7dd3fc", "#e0f2fe"] }
+    },
+    "typographyMeta": {
+      "title": { "displayName": "Title", "purpose": "Titre de page (h1 unique par écran)." },
+      "headline": { "displayName": "Headline", "purpose": "Titre de sous-section, utilisé avec parcimonie." },
+      "body": { "displayName": "Body", "purpose": "Taille dominante : libellés, cellules, boutons, navigation." },
+      "label": { "displayName": "Label", "purpose": "Méta-texte, badges, en-têtes de section en majuscules." }
+    },
+    "shadows": [
+      { "name": "flottant", "value": "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)", "purpose": "Menus déroulants détachés du flux (ex. sélecteur d'établissement)." },
+      { "name": "entree", "value": "0 1px 2px 0 rgba(0,0,0,0.05)", "purpose": "Champs des écrans de connexion/inscription — dérive du gabarit Laravel par défaut, à ne pas propager." }
+    ],
+    "motion": [],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Bouton d'action principal (Enregistrer, Nouvelle tranche, etc.).",
+      "html": "<button class=\"ds-btn-primary\">Enregistrer</button>",
+      "css": ".ds-btn-primary { background: #4f46e5; color: #fff; padding: 6px 12px; border-radius: 6px; border: none; font-size: 14px; font-weight: 500; font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; cursor: pointer; transition: background 0.15s; } .ds-btn-primary:hover { background: #4338ca; } .ds-btn-primary:focus-visible { outline: 2px solid #4f46e5; outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Bouton secondaire/ghost (Annuler), toujours à côté d'un bouton primaire.",
+      "html": "<button class=\"ds-btn-secondary\">Annuler</button>",
+      "css": ".ds-btn-secondary { background: #fff; color: #475569; padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 14px; font-weight: 400; font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; cursor: pointer; transition: background 0.15s; } .ds-btn-secondary:hover { background: #f8fafc; } .ds-btn-secondary:focus-visible { outline: 2px solid #4f46e5; outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Champ de formulaire standard, avec libellé au-dessus.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Libellé</span><input type=\"text\" class=\"ds-field-input\" placeholder=\"Valeur\"></label>",
+      "css": ".ds-field { display: block; font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; } .ds-field-label { display: block; font-size: 14px; font-weight: 500; color: #334155; margin-bottom: 4px; } .ds-field-input { display: block; width: 100%; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; font-size: 14px; padding: 6px 10px; color: #0f172a; } .ds-field-input:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 1px #6366f1; }"
+    },
+    {
+      "name": "Card / Container",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Conteneur de liste/formulaire standard des écrans de gestion — plat, bordé, sans ombre.",
+      "html": "<div class=\"ds-card\"><p class=\"ds-card-text\">Contenu de la carte</p></div>",
+      "css": ".ds-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; } .ds-card-text { font-size: 14px; color: #475569; margin: 0; }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": "badge-success",
+      "description": "Badge de statut (actif/payé/présent) — la forme se réutilise pour tous les statuts, seule la couleur change.",
+      "html": "<span class=\"ds-badge ds-badge-success\">Actif</span>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; border-radius: 9999px; padding: 2px 8px; font-size: 12px; font-weight: 500; font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; } .ds-badge-success { background: #d1fae5; color: #047857; } .ds-badge-warning { background: #fef3c7; color: #b45309; } .ds-badge-danger { background: #fee2e2; color: #b91c1c; } .ds-badge-neutral { background: #f1f5f9; color: #64748b; }"
+    },
+    {
+      "name": "Sidebar Nav Link",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "Lien de la navigation latérale, état actif vs. au repos.",
+      "html": "<a href=\"#\" class=\"ds-nav-link ds-nav-link-active\">Tableau de bord</a><a href=\"#\" class=\"ds-nav-link\">Élèves</a>",
+      "css": ".ds-nav-link { display: flex; align-items: center; gap: 12px; border-radius: 8px; padding: 8px 12px; font-size: 14px; font-weight: 500; font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; color: #475569; text-decoration: none; margin-bottom: 4px; } .ds-nav-link:hover { background: #f1f5f9; color: #0f172a; } .ds-nav-link-active { background: #eef2ff; color: #4f46e5; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Le Bureau du Directeur",
+    "overview": "Nitsoft School emprunte le langage visuel du bureau d'un chef d'établissement sérieux mais accessible : des documents propres, une hiérarchie claire, une seule couleur d'accent utilisée avec parcimonie pour signaler l'action, et un fond largement neutre (blanc et gris ardoise) qui laisse la donnée — élèves, notes, factures — occuper l'écran. L'ambiance visée est chaleureuse malgré le sérieux administratif : rien d'exubérant ni de ludique, mais une interface qui ne doit jamais sembler froide ou punitive à un directeur, un caissier ou un parent qui s'y connecte pour la première fois. Le système est aujourd'hui entièrement porté par la palette par défaut de Tailwind CSS v4 (aucune personnalisation de couleur dans @theme) — seule la police (Instrument Sans) a été substituée à la pile système par défaut. Il n'y a pas de logo dessiné : la marque sidebar est aujourd'hui un simple monogramme « N » sur fond bleu institutionnel, à traiter comme un placeholder plutôt que comme un choix d'identité définitif.",
+    "keyCharacteristics": [
+      "Une seule couleur d'accent (bleu institutionnel), jamais en fond de page, réservée à l'action et à l'état actif.",
+      "Surfaces plates et bordées ; aucune ombre portée sur les écrans de travail — l'ombre est réservée aux éléments flottants (menus) et aux écrans d'entrée (connexion/inscription).",
+      "Une seule famille de police, hiérarchie construite uniquement par taille et graisse (pas de police display séparée).",
+      "Densité élevée assumée : texte à 14px (text-sm) dominant sur la quasi-totalité de l'interface, cohérent avec un outil de travail administratif consulté toute la journée."
+    ],
+    "rules": [
+      { "name": "La règle du Fond Neutre", "body": "Le fond de page est toujours gris ardoise (#f8fafc) ou blanc ; le bleu institutionnel n'apparaît jamais en arrière-plan d'une zone de contenu, uniquement sur des éléments d'action ou d'état ponctuels.", "section": "colors" },
+      { "name": "La règle Une Seule Police", "body": "Aucune police display ou serif n'est introduite, même pour les grands titres — la distinction se fait uniquement par font-size/font-weight.", "section": "typography" },
+      { "name": "La règle Plat-au-Repos", "body": "Une surface ne porte une ombre que si elle est physiquement détachée du flux normal de la page (menu, popover) — jamais une carte ou un conteneur de contenu statique.", "section": "elevation" },
+      { "name": "La règle du Cran Supplémentaire", "body": "Le tableau de bord (rounded-xl) est visuellement un cran plus doux que les écrans de gestion (rounded-md) — cette différence marque intentionnellement la bascule entre « vue d'ensemble » et « outil de travail ».", "section": "shapes" }
+    ],
+    "dos": [
+      "Do réserver le bleu institutionnel à l'action et à l'état actif — jamais en fond de section ou de page.",
+      "Do garder les écrans de gestion plats (bordure + fond blanc, aucune ombre) ; réserver l'ombre aux éléments flottants et aux écrans d'entrée.",
+      "Do utiliser rounded-md par défaut pour tout nouveau composant ; ne passer à rounded-xl que pour une carte de type tableau de bord/vue d'ensemble.",
+      "Do garder toute l'interface en une seule police (Instrument Sans) — construire la hiérarchie par taille/graisse, jamais par changement de famille."
+    ],
+    "donts": [
+      "Don't copier les classes shadow-sm / focus:ring-slate-500 des écrans de connexion/inscription dans un nouvel écran — c'est un reste du gabarit par défaut de Laravel, pas la convention du reste du produit.",
+      "Don't traiter resources/views/welcome.blade.php comme une référence de design — c'est la page de démonstration par défaut de Laravel, jamais liée dans la navigation réelle.",
+      "Don't introduire une nouvelle couleur de statut sans vérifier bg-emerald-* (majoritaire) vs bg-green-* (minoritaire) pour « actif » — une incohérence connue, non encore arbitrée.",
+      "Don't construire de modale personnalisée pour une confirmation destructive sans décision explicite — le produit s'appuie aujourd'hui uniquement sur wire:confirm natif."
+    ]
+  }
+}
