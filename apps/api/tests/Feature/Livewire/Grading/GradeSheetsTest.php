@@ -61,14 +61,45 @@ test('la création d’une feuille de notes pour une classe primaire fonctionne'
     Livewire::test(Index::class)
         ->set('classroom_id', $this->primaireClassroom->id)
         ->set('subject_id', $this->subject->id)
-        ->set('term_id', $this->term->id)
+        ->set('composition_number', 1)
         ->set('title', 'Devoir 1')
         ->set('graded_on', now()->toDateString())
         ->call('save')
         ->assertHasNoErrors();
 
-    expect(GradeSheet::count())->toBe(1)
-        ->and(GradeSheet::sole()->type)->toBe('composition');
+    expect(GradeSheet::count())->toBe(1);
+
+    $gradeSheet = GradeSheet::sole();
+
+    expect($gradeSheet->type)->toBe('composition')
+        ->and($gradeSheet->term_id)->toBeNull()
+        ->and($gradeSheet->composition_number)->toBe(1);
+});
+
+test('une classe primaire rejette une période et exige un n° de composition', function () {
+    Livewire::test(Index::class)
+        ->set('classroom_id', $this->primaireClassroom->id)
+        ->set('subject_id', $this->subject->id)
+        ->set('term_id', $this->term->id)
+        ->set('title', 'Composition 1')
+        ->set('graded_on', now()->toDateString())
+        ->call('save')
+        ->assertHasErrors(['term_id', 'composition_number']);
+
+    expect(GradeSheet::count())->toBe(0);
+});
+
+test('une classe secondaire rejette un n° de composition et exige une période', function () {
+    Livewire::test(Index::class)
+        ->set('classroom_id', $this->secondaireClassroom->id)
+        ->set('subject_id', $this->subject->id)
+        ->set('composition_number', 1)
+        ->set('title', 'Devoir 1')
+        ->set('graded_on', now()->toDateString())
+        ->call('save')
+        ->assertHasErrors(['term_id', 'composition_number']);
+
+    expect(GradeSheet::count())->toBe(0);
 });
 
 test('sélectionner une classe primaire impose le type composition et le poids 1', function () {
@@ -110,7 +141,7 @@ test('une matière incompatible avec le cycle de la classe est rejetée côté s
     Livewire::test(Index::class)
         ->set('classroom_id', $this->primaireClassroom->id)
         ->set('subject_id', $secondaireOnly->id)
-        ->set('term_id', $this->term->id)
+        ->set('composition_number', 1)
         ->set('title', 'Composition 1')
         ->set('graded_on', now()->toDateString())
         ->call('save')
@@ -123,7 +154,7 @@ test('un type incompatible avec le cycle de la classe est rejeté côté serveur
     Livewire::test(Index::class)
         ->set('classroom_id', $this->primaireClassroom->id)
         ->set('subject_id', $this->subject->id)
-        ->set('term_id', $this->term->id)
+        ->set('composition_number', 1)
         ->set('title', 'Devoir 1')
         ->set('type', 'devoir')
         ->set('graded_on', now()->toDateString())
@@ -156,7 +187,7 @@ test('un enseignant avec une affectation classe entière (primaire) voit toutes 
     Livewire::test(Index::class)
         ->set('classroom_id', $this->primaireClassroom->id)
         ->set('subject_id', $otherPrimaireSubject->id)
-        ->set('term_id', $this->term->id)
+        ->set('composition_number', 1)
         ->set('title', 'Composition 1')
         ->set('graded_on', now()->toDateString())
         ->call('save')

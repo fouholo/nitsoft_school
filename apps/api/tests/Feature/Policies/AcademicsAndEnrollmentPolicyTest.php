@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\SchoolYear;
-use App\Domain\Academics\Models\Term;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Models\Establishment;
@@ -15,10 +14,13 @@ use App\Domain\Establishments\Models\Establishment;
  * établissement — voir plan d'architecture, section 2.2 et Policies.
  * Subject n'est plus une ressource d'établissement (catalogue global SaaS
  * admin, voir SubjectsTest) — retiré de ce dataset.
+ * Term n'est accessible qu'aux établissements de type secondaire depuis le
+ * chantier "primaire sans période" (voir TermsTest) — retiré de ce dataset,
+ * car Establishment::factory() tire un type aléatoire et rendrait ces
+ * assertions flaky.
  */
 dataset('policy_models', [
     'school_years' => [SchoolYear::class],
-    'terms' => [Term::class],
     'classrooms' => [Classroom::class],
     'students' => [Student::class],
     'enrollments' => [Enrollment::class],

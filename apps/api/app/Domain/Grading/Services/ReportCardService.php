@@ -29,6 +29,32 @@ class ReportCardService
      */
     public function generateForClassroomAndTerm(Classroom $classroom, Term $term): Collection
     {
+        return $this->generate(
+            $classroom,
+            fn ($query) => $query->where('term_id', $term->id),
+            ['term_id' => $term->id],
+        );
+    }
+
+    /**
+     * @return Collection<int, ReportCard>
+     */
+    public function generateForClassroomAndComposition(Classroom $classroom, int $compositionNumber): Collection
+    {
+        return $this->generate(
+            $classroom,
+            fn ($query) => $query->where('composition_number', $compositionNumber),
+            ['school_year_id' => $classroom->school_year_id, 'composition_number' => $compositionNumber],
+        );
+    }
+
+    /**
+     * @param  callable(\Illuminate\Contracts\Database\Query\Builder): \Illuminate\Contracts\Database\Query\Builder  $scopeGradeSheets
+     * @param  array<string, int>  $reportCardKey  Clé (hors student_id) passée à updateOrCreate pour identifier le bulletin.
+     * @return Collection<int, ReportCard>
+     */
+    private function generate(Classroom $classroom, callable $scopeGradeSheets, array $reportCardKey): Collection
+    {
         if (! $classroom->isGradable()) {
             throw ValidationException::withMessages([
                 'classroom_id' => "Ce niveau n'a pas de notation.",
@@ -37,8 +63,8 @@ class ReportCardService
 
         $gradesByStudent = Grade::query()
             ->whereNotNull('score')
-            ->whereHas('gradeSheet', function ($query) use ($classroom, $term): void {
-                $query->where('classroom_id', $classroom->id)->where('term_id', $term->id);
+            ->whereHas('gradeSheet', function ($query) use ($classroom, $scopeGradeSheets): void {
+                $scopeGradeSheets($query->where('classroom_id', $classroom->id));
             })
             ->with('gradeSheet.subject')
             ->get()
@@ -68,7 +94,7 @@ class ReportCardService
             $previousAverage = $average;
 
             $reportCards->push(ReportCard::updateOrCreate(
-                ['student_id' => $studentId, 'term_id' => $term->id],
+                ['student_id' => $studentId, ...$reportCardKey],
                 [
                     'establishment_id' => $classroom->establishment_id,
                     'classroom_id' => $classroom->id,
@@ -97,7 +123,11 @@ class ReportCardService
             ->where('student_id', $reportCard->student_id)
             ->whereNotNull('score')
             ->whereHas('gradeSheet', function ($query) use ($reportCard): void {
-                $query->where('classroom_id', $reportCard->classroom_id)->where('term_id', $reportCard->term_id);
+                $query->where('classroom_id', $reportCard->classroom_id);
+
+                $reportCard->term_id !== null
+                    ? $query->where('term_id', $reportCard->term_id)
+                    : $query->where('composition_number', $reportCard->composition_number);
             })
             ->with(['gradeSheet.subject'])
             ->get();

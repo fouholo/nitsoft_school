@@ -98,6 +98,34 @@ test('aucun logo affiché en en-tête du bulletin quand l’établissement n’e
     expect($html)->not->toContain('<img');
 });
 
+test('le PDF d’un bulletin primaire affiche "Composition N" au lieu d’une période', function () {
+    $establishment = Establishment::factory()->create();
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $classroom = Classroom::factory()->primaire()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+    $student = Student::factory()->create(['establishment_id' => $establishment->id]);
+
+    actingInEstablishment($establishment);
+
+    $reportCard = ReportCard::factory()->create([
+        'establishment_id' => $establishment->id,
+        'classroom_id' => $classroom->id,
+        'term_id' => null,
+        'school_year_id' => $schoolYear->id,
+        'composition_number' => 2,
+        'student_id' => $student->id,
+    ]);
+    $reportCard->loadMissing(['student', 'classroom', 'term.schoolYear', 'schoolYear', 'establishment']);
+
+    $html = view('pdf.report-card', [
+        'reportCard' => $reportCard,
+        'breakdown' => app(ReportCardService::class)->subjectBreakdown($reportCard),
+    ])->render();
+
+    expect($html)->toContain('Composition 2')
+        ->and($html)->toContain($schoolYear->label)
+        ->and($html)->not->toContain('Bulletin —  (');
+});
+
 test('le cadre signature affiche "Le directeur" et le nom du directeur de l’établissement', function () {
     $establishment = Establishment::factory()->create();
     $director = createUserWithRole($establishment, 'directeur');

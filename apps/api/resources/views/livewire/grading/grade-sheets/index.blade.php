@@ -54,14 +54,20 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-slate-700">Période</label>
-                <select wire:model="term_id" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
-                    <option value="">—</option>
-                    @foreach ($terms as $term)
-                        <option value="{{ $term->id }}">{{ $term->label }}</option>
-                    @endforeach
-                </select>
-                @error('term_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                @if ($this->selectedClassroomCycle()?->value === \App\Domain\Academics\Enums\Cycle::Primaire->value)
+                    <label class="block text-sm font-medium text-slate-700">N° de composition</label>
+                    <input type="number" min="1" max="10" wire:model="composition_number" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                    @error('composition_number') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                @else
+                    <label class="block text-sm font-medium text-slate-700">Période</label>
+                    <select wire:model="term_id" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                        <option value="">—</option>
+                        @foreach ($terms as $term)
+                            <option value="{{ $term->id }}">{{ $term->label }}</option>
+                        @endforeach
+                    </select>
+                    @error('term_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                @endif
             </div>
 
             <div>
@@ -113,7 +119,7 @@
                         <td class="px-4 py-2 text-slate-600">{{ ucfirst($gradeSheet->type) }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $gradeSheet->classroom?->name }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $gradeSheet->subject?->name }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ $gradeSheet->term?->label }}</td>
+                        <td class="px-4 py-2 text-slate-600">{{ $gradeSheet->term?->label ?? ($gradeSheet->composition_number ? "Composition {$gradeSheet->composition_number}" : null) }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $gradeSheet->graded_on->format('d/m/Y') }}</td>
                         <td class="px-4 py-2 text-right">
                             <a href="{{ route('grading.grade-sheets.enter', $gradeSheet) }}" class="text-slate-500 hover:text-slate-900">

@@ -156,6 +156,65 @@ test('le détail par matière du bulletin liste chaque matière notée avec sa m
         ->and($francaisRow->average)->toBe(12.0);
 });
 
+test('la moyenne pondérée et le rang sont calculés correctement par composition (primaire)', function () {
+    $establishment = Establishment::factory()->create();
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $classroom = Classroom::factory()->primaire()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+    $subjectA = Subject::factory()->create();
+    $subjectB = Subject::factory()->create();
+
+    $sheetA = GradeSheet::factory()->create([
+        'establishment_id' => $establishment->id,
+        'classroom_id' => $classroom->id,
+        'subject_id' => $subjectA->id,
+        'term_id' => null,
+        'composition_number' => 1,
+        'max_score' => 20,
+        'weight' => 1,
+    ]);
+    $sheetB = GradeSheet::factory()->create([
+        'establishment_id' => $establishment->id,
+        'classroom_id' => $classroom->id,
+        'subject_id' => $subjectB->id,
+        'term_id' => null,
+        'composition_number' => 1,
+        'max_score' => 20,
+        'weight' => 1,
+    ]);
+
+    // Une composition existante ailleurs (n° 2) ne doit pas être mélangée à la n° 1.
+    $otherSheet = GradeSheet::factory()->create([
+        'establishment_id' => $establishment->id,
+        'classroom_id' => $classroom->id,
+        'subject_id' => $subjectA->id,
+        'term_id' => null,
+        'composition_number' => 2,
+        'max_score' => 20,
+        'weight' => 1,
+    ]);
+
+    SubjectCoefficient::factory()->create(['establishment_id' => $establishment->id, 'level_id' => $classroom->level_id, 'serie_id' => null, 'subject_id' => $subjectA->id, 'coefficient' => 1]);
+    SubjectCoefficient::factory()->create(['establishment_id' => $establishment->id, 'level_id' => $classroom->level_id, 'serie_id' => null, 'subject_id' => $subjectB->id, 'coefficient' => 1]);
+
+    $student = Student::factory()->create(['establishment_id' => $establishment->id]);
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'student_id' => $student->id, 'classroom_id' => $classroom->id, 'status' => 'active']);
+
+    Grade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $sheetA->id, 'student_id' => $student->id, 'score' => 16]);
+    Grade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $sheetB->id, 'student_id' => $student->id, 'score' => 10]);
+    Grade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $otherSheet->id, 'student_id' => $student->id, 'score' => 2]);
+
+    $reportCards = (new ReportCardService)->generateForClassroomAndComposition($classroom, 1);
+
+    expect($reportCards)->toHaveCount(1);
+
+    $card = $reportCards->first();
+
+    expect((float) $card->average)->toBe(13.0)
+        ->and($card->term_id)->toBeNull()
+        ->and($card->composition_number)->toBe(1)
+        ->and($card->school_year_id)->toBe($schoolYear->id);
+});
+
 test('la génération de bulletin est refusée pour une classe préscolaire', function () {
     $establishment = Establishment::factory()->create();
     $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);

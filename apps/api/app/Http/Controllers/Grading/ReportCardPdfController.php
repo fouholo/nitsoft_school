@@ -25,14 +25,15 @@ class ReportCardPdfController extends Controller
     {
         Gate::authorize('view', $reportCard);
 
-        $reportCard->loadMissing(['student', 'classroom', 'term.schoolYear', 'establishment']);
+        $reportCard->loadMissing(['student', 'classroom', 'term.schoolYear', 'schoolYear', 'establishment']);
 
         $pdf = Pdf::loadView('pdf.report-card', [
             'reportCard' => $reportCard,
             'breakdown' => $reportCardService->subjectBreakdown($reportCard),
         ])->setPaper('a4');
 
-        $filename = Str::slug("bulletin-{$reportCard->student->last_name}-{$reportCard->student->first_name}-{$reportCard->term->label}").'.pdf';
+        $periodSlug = $reportCard->term_id !== null ? $reportCard->term->label : "Composition {$reportCard->composition_number}";
+        $filename = Str::slug("bulletin-{$reportCard->student->last_name}-{$reportCard->student->first_name}-{$periodSlug}").'.pdf';
 
         return $request->boolean('download')
             ? $pdf->download($filename)

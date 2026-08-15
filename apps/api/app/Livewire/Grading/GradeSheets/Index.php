@@ -30,6 +30,8 @@ class Index extends Component
 
     public ?int $term_id = null;
 
+    public ?int $composition_number = null;
+
     public string $title = '';
 
     public string $type = 'devoir';
@@ -49,7 +51,7 @@ class Index extends Component
     {
         $this->authorize('create', GradeSheet::class);
 
-        $this->reset(['classroom_id', 'subject_id', 'term_id', 'title', 'type']);
+        $this->reset(['classroom_id', 'subject_id', 'term_id', 'composition_number', 'title', 'type']);
         $this->max_score = 20.0;
         $this->weight = 2.0;
         $this->graded_on = now()->toDateString();
@@ -67,6 +69,8 @@ class Index extends Component
         }
 
         $this->subject_id = null;
+        $this->term_id = null;
+        $this->composition_number = null;
     }
 
     public function updatedType(): void
@@ -83,10 +87,13 @@ class Index extends Component
     {
         $this->authorize('create', GradeSheet::class);
 
+        $isPrimaire = $this->selectedClassroomCycle() === Cycle::Primaire;
+
         $data = $this->validate([
             'classroom_id' => ['required', 'exists:classrooms,id'],
             'subject_id' => ['required', 'exists:subjects,id'],
-            'term_id' => ['required', 'exists:terms,id'],
+            'term_id' => $isPrimaire ? ['prohibited'] : ['required', 'exists:terms,id'],
+            'composition_number' => $isPrimaire ? ['required', 'integer', 'min:1', 'max:10'] : ['prohibited'],
             'title' => ['required', 'string', 'max:255'],
             'type' => ['required', 'in:devoir,interrogation,composition'],
             'max_score' => ['required', 'numeric', 'min:1', 'max:1000'],

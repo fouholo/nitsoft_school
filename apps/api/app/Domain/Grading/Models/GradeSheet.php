@@ -16,6 +16,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property-read Term|null $term Nul pour une évaluation préscolaire/primaire (composition_number renseigné à la place).
+ */
 class GradeSheet extends Model
 {
     use HasFactory;
@@ -28,6 +31,7 @@ class GradeSheet extends Model
         'classroom_id',
         'subject_id',
         'term_id',
+        'composition_number',
         'teacher_id',
         'title',
         'type',

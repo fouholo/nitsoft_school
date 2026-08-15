@@ -75,6 +75,60 @@ test('la génération est bloquée si le coefficient d’une matière notée n�
     expect(ReportCard::count())->toBe(0);
 });
 
+test('la génération de bulletin par composition (primaire) fonctionne et rejette une période', function () {
+    $classroom = Classroom::factory()->primaire()->create([
+        'establishment_id' => $this->establishment->id,
+        'school_year_id' => $this->term->school_year_id,
+    ]);
+    $subject = Subject::factory()->create();
+    $student = Student::factory()->create(['establishment_id' => $this->establishment->id]);
+
+    SubjectCoefficient::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'level_id' => $classroom->level_id,
+        'serie_id' => null,
+        'subject_id' => $subject->id,
+        'coefficient' => 1,
+    ]);
+
+    $gradeSheet = GradeSheet::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'classroom_id' => $classroom->id,
+        'subject_id' => $subject->id,
+        'term_id' => null,
+        'composition_number' => 1,
+        'weight' => 1,
+        'max_score' => 20,
+    ]);
+    Grade::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'grade_sheet_id' => $gradeSheet->id,
+        'student_id' => $student->id,
+        'score' => 14,
+    ]);
+
+    Livewire::test(Index::class)
+        ->set('classroom_id', $classroom->id)
+        ->set('term_id', $this->term->id)
+        ->call('generate')
+        ->assertHasErrors(['term_id', 'composition_number']);
+
+    expect(ReportCard::count())->toBe(0);
+
+    Livewire::test(Index::class)
+        ->set('classroom_id', $classroom->id)
+        ->set('composition_number', 1)
+        ->call('generate')
+        ->assertHasNoErrors();
+
+    $reportCard = ReportCard::sole();
+
+    expect((float) $reportCard->average)->toBe(14.0)
+        ->and($reportCard->term_id)->toBeNull()
+        ->and($reportCard->composition_number)->toBe(1)
+        ->and($reportCard->school_year_id)->toBe($classroom->school_year_id);
+});
+
 test('la moyenne générale pondère chaque matière par son coefficient', function () {
     $classroom = Classroom::factory()->create([
         'establishment_id' => $this->establishment->id,

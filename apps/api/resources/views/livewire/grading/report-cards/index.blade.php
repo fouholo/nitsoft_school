@@ -13,13 +13,18 @@
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-slate-700">Période</label>
-            <select wire:model.live="term_id" class="mt-1 block w-48 rounded-md border-slate-300 text-sm">
-                <option value="">—</option>
-                @foreach ($terms as $term)
-                    <option value="{{ $term->id }}">{{ $term->label }}</option>
-                @endforeach
-            </select>
+            @if ($this->selectedClassroomCycle()?->value === \App\Domain\Academics\Enums\Cycle::Primaire->value)
+                <label class="block text-sm font-medium text-slate-700">N° de composition</label>
+                <input type="number" min="1" max="10" wire:model.live="composition_number" class="mt-1 block w-48 rounded-md border-slate-300 text-sm">
+            @else
+                <label class="block text-sm font-medium text-slate-700">Période</label>
+                <select wire:model.live="term_id" class="mt-1 block w-48 rounded-md border-slate-300 text-sm">
+                    <option value="">—</option>
+                    @foreach ($terms as $term)
+                        <option value="{{ $term->id }}">{{ $term->label }}</option>
+                    @endforeach
+                </select>
+            @endif
         </div>
 
         @can('create', \App\Domain\Grading\Models\ReportCard::class)
@@ -62,7 +67,7 @@
                 @empty
                     <tr>
                         <td colspan="4" class="px-4 py-6 text-center text-slate-500">
-                            Sélectionnez une classe et une période{{ $classroom_id && $term_id ? ', puis générez les bulletins' : '' }}.
+                            Sélectionnez une classe et une période{{ $classroom_id && ($term_id || $composition_number) ? ', puis générez les bulletins' : '' }}.
                         </td>
                     </tr>
                 @endforelse

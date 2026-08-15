@@ -26,7 +26,7 @@
             <img src="{{ public_path('storage/'.$reportCard->establishment->logo_path) }}" style="height: 60px; margin-bottom: 8px;">
         @endif
         <h1>{{ $reportCard->establishment->name }}</h1>
-        <p>Bulletin — {{ $reportCard->term->label }} ({{ $reportCard->term->schoolYear?->label }})</p>
+        <p>Bulletin — {{ $reportCard->term?->label ?? "Composition {$reportCard->composition_number}" }} ({{ ($reportCard->term?->schoolYear ?? $reportCard->schoolYear)?->label }})</p>
     </div>
 
     <table class="meta">

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Grading\Models;
 
 use App\Domain\Academics\Models\Classroom;
+use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Academics\Models\Term;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Concerns\TenantScoped;
@@ -13,6 +14,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property-read Term|null $term Nul pour un bulletin préscolaire/primaire (composition_number renseigné à la place).
+ */
 class ReportCard extends Model
 {
     use HasFactory;
@@ -23,6 +27,8 @@ class ReportCard extends Model
         'establishment_id',
         'student_id',
         'term_id',
+        'school_year_id',
+        'composition_number',
         'classroom_id',
         'average',
         'rank',
@@ -57,5 +63,13 @@ class ReportCard extends Model
     public function classroom(): BelongsTo
     {
         return $this->belongsTo(Classroom::class);
+    }
+
+    /**
+     * @return BelongsTo<SchoolYear, $this>
+     */
+    public function schoolYear(): BelongsTo
+    {
+        return $this->belongsTo(SchoolYear::class);
     }
 }
