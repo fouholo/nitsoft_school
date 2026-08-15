@@ -6,6 +6,7 @@ namespace App\Livewire\GuardianPortal;
 
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Grading\Models\Grade;
+use App\Domain\Grading\Models\PrimaryGrade;
 use App\Livewire\GuardianPortal\Concerns\EnsuresGuardianAccess;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -28,12 +29,20 @@ class StudentGrades extends Component
 
     public function render()
     {
+        $grades = Grade::query()
+            ->where('student_id', $this->student->id)
+            ->whereNotNull('score')
+            ->with(['gradeSheet.subject', 'gradeSheet.term'])
+            ->get();
+
+        $primaryGrades = PrimaryGrade::query()
+            ->where('student_id', $this->student->id)
+            ->whereNotNull('score')
+            ->with('gradeSheet.primarySubject')
+            ->get();
+
         return view('livewire.guardian-portal.student-grades', [
-            'grades' => Grade::query()
-                ->where('student_id', $this->student->id)
-                ->whereNotNull('score')
-                ->with(['gradeSheet.subject', 'gradeSheet.primarySubject', 'gradeSheet.term'])
-                ->get(),
+            'grades' => $grades->concat($primaryGrades),
         ]);
     }
 }

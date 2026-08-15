@@ -13,6 +13,7 @@ use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Grading\Models\Grade;
 use App\Domain\Grading\Models\GradeSheet;
+use App\Domain\Grading\Models\PrimaryGrade;
 use App\Domain\Grading\Services\ReportCardService;
 
 function makeGradedStudent(Establishment $establishment, Classroom $classroom, Term $term, array $gradesBySheet): Student
@@ -201,9 +202,9 @@ test('la moyenne pondérée et le rang sont calculés correctement par compositi
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
     Enrollment::factory()->create(['establishment_id' => $establishment->id, 'student_id' => $student->id, 'classroom_id' => $classroom->id, 'status' => 'active']);
 
-    Grade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $sheetA->id, 'student_id' => $student->id, 'score' => 16]);
-    Grade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $sheetB->id, 'student_id' => $student->id, 'score' => 10]);
-    Grade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $otherSheet->id, 'student_id' => $student->id, 'score' => 2]);
+    PrimaryGrade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $sheetA->id, 'student_id' => $student->id, 'primary_subject_id' => $subjectA->id, 'score' => 16]);
+    PrimaryGrade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $sheetB->id, 'student_id' => $student->id, 'primary_subject_id' => $subjectB->id, 'score' => 10]);
+    PrimaryGrade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $otherSheet->id, 'student_id' => $student->id, 'primary_subject_id' => $subjectA->id, 'score' => 2]);
 
     $reportCards = (new ReportCardService)->generateForClassroomAndComposition($classroom, 1);
 
@@ -237,7 +238,7 @@ test('le détail par matière (primaire) affiche le nom de la matière du catalo
 
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
     Enrollment::factory()->create(['establishment_id' => $establishment->id, 'student_id' => $student->id, 'classroom_id' => $classroom->id, 'status' => 'active']);
-    Grade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $sheet->id, 'student_id' => $student->id, 'score' => 15]);
+    PrimaryGrade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $sheet->id, 'student_id' => $student->id, 'primary_subject_id' => $subject->id, 'score' => 15]);
 
     $service = new ReportCardService;
     $reportCard = $service->generateForClassroomAndComposition($classroom, 1)->first();

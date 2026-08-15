@@ -8,8 +8,8 @@ use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Enums\EstablishmentType;
 use App\Domain\Establishments\Models\Establishment;
-use App\Domain\Grading\Models\Grade;
 use App\Domain\Grading\Models\GradeSheet;
+use App\Domain\Grading\Models\PrimaryGrade;
 use App\Domain\Grading\Models\ReportCard;
 use App\Livewire\Grading\ReportCards\Primaire\Index;
 use Livewire\Livewire;
@@ -50,10 +50,11 @@ test('la génération est bloquée si le coefficient d’une matière notée n�
         'term_id' => null,
         'composition_number' => 1,
     ]);
-    Grade::factory()->create([
+    PrimaryGrade::factory()->create([
         'establishment_id' => $this->establishment->id,
         'grade_sheet_id' => $gradeSheet->id,
         'student_id' => $student->id,
+        'primary_subject_id' => $subject->id,
         'score' => 12,
     ]);
 
@@ -85,10 +86,11 @@ test('la génération de bulletin par composition fonctionne', function () {
         'weight' => 1,
         'max_score' => 20,
     ]);
-    Grade::factory()->create([
+    PrimaryGrade::factory()->create([
         'establishment_id' => $this->establishment->id,
         'grade_sheet_id' => $gradeSheet->id,
         'student_id' => $student->id,
+        'primary_subject_id' => $subject->id,
         'score' => 14,
     ]);
 

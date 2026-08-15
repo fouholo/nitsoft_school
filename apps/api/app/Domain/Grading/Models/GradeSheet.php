@@ -106,4 +106,12 @@ class GradeSheet extends Model
     {
         return $this->hasMany(Grade::class);
     }
+
+    /**
+     * @return HasMany<PrimaryGrade, $this>
+     */
+    public function primaryGrades(): HasMany
+    {
+        return $this->hasMany(PrimaryGrade::class);
+    }
 }
