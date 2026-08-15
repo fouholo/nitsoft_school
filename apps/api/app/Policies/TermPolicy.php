@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Domain\Academics\Models\Term;
-use App\Domain\Establishments\Enums\EstablishmentType;
 use App\Domain\Establishments\Models\Establishment;
 use App\Models\User;
 use App\Policies\Concerns\ChecksEstablishmentMembership;
@@ -28,7 +27,7 @@ class TermPolicy
 
         $establishment = Establishment::find((int) app('currentEstablishmentId'));
 
-        return $establishment?->type === EstablishmentType::Secondaire;
+        return $establishment?->isSecondaire() ?? false;
     }
 
     public function view(User $user, Term $term): bool

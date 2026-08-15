@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Establishments\Models;
 
+use App\Domain\Academics\Enums\Cycle;
 use App\Domain\Establishments\Enums\EstablishmentType;
 use App\Domain\Sync\Concerns\Syncable;
 use App\Models\User;
@@ -86,5 +87,25 @@ class Establishment extends Model
             ->wherePivot('role', 'directeur')
             ->wherePivot('is_active', true)
             ->first();
+    }
+
+    public function isPrescolairePrimaire(): bool
+    {
+        return $this->type === EstablishmentType::PrescolairePrimaire;
+    }
+
+    public function isSecondaire(): bool
+    {
+        return $this->type === EstablishmentType::Secondaire;
+    }
+
+    /**
+     * @return array<int, Cycle>
+     */
+    public function allowedCycles(): array
+    {
+        return $this->isPrescolairePrimaire()
+            ? [Cycle::Prescolaire, Cycle::Primaire]
+            : [Cycle::Secondaire];
     }
 }

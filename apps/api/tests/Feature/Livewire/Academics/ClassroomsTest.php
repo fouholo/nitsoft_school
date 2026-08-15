@@ -7,12 +7,13 @@ use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\Level;
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Academics\Models\Serie;
+use App\Domain\Establishments\Enums\EstablishmentType;
 use App\Domain\Establishments\Models\Establishment;
 use App\Livewire\Academics\Classrooms\Index;
 use Livewire\Livewire;
 
 beforeEach(function () {
-    $this->establishment = Establishment::factory()->create();
+    $this->establishment = Establishment::factory()->create(['type' => EstablishmentType::Secondaire]);
     $this->admin = createUserWithRole($this->establishment, 'directeur');
     actingInEstablishment($this->establishment);
     $this->actingAs($this->admin);
@@ -21,13 +22,19 @@ beforeEach(function () {
 });
 
 test('une classe peut être créée avec un cycle préscolaire', function () {
+    $establishment = Establishment::factory()->create(['type' => EstablishmentType::PrescolairePrimaire]);
+    $admin = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    $this->actingAs($admin);
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+
     $level = Level::factory()->prescolaire()->create(['level_wording' => 'Grande Section']);
 
     Livewire::test(Index::class)
         ->set('cycle', Cycle::Prescolaire->value)
         ->set('level_id', $level->id)
         ->set('numero', 'A')
-        ->set('school_year_id', $this->schoolYear->id)
+        ->set('school_year_id', $schoolYear->id)
         ->call('save')
         ->assertHasNoErrors();
 
@@ -38,13 +45,19 @@ test('une classe peut être créée avec un cycle préscolaire', function () {
 });
 
 test('le numéro n’est pas exigé et le nom de la classe se compose sans lui', function () {
+    $establishment = Establishment::factory()->create(['type' => EstablishmentType::PrescolairePrimaire]);
+    $admin = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    $this->actingAs($admin);
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+
     $level = Level::factory()->prescolaire()->create(['level_wording' => 'Grande Section']);
 
     Livewire::test(Index::class)
         ->set('cycle', Cycle::Prescolaire->value)
         ->set('level_id', $level->id)
         ->set('numero', '')
-        ->set('school_year_id', $this->schoolYear->id)
+        ->set('school_year_id', $schoolYear->id)
         ->call('save')
         ->assertHasNoErrors();
 
@@ -110,10 +123,37 @@ test('une classe de terminale avec série se compose correctement', function () 
     expect($classroom->name)->toBe('Terminale C 1');
 });
 
+test('un niveau dont le cycle n’est pas autorisé pour ce type d’établissement est rejeté', function () {
+    $establishment = Establishment::factory()->create(['type' => EstablishmentType::PrescolairePrimaire]);
+    $admin = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    $this->actingAs($admin);
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+
+    $secondaireLevel = Level::factory()->terminale()->create();
+
+    Livewire::test(Index::class)
+        ->set('cycle', Cycle::Secondaire->value)
+        ->set('level_id', $secondaireLevel->id)
+        ->set('serie_id', Serie::factory()->create()->id)
+        ->set('numero', '1')
+        ->set('school_year_id', $schoolYear->id)
+        ->call('save')
+        ->assertHasErrors(['level_id']);
+
+    expect(Classroom::where('level_id', $secondaireLevel->id)->count())->toBe(0);
+});
+
 test('éditer une classe hydrate correctement son niveau', function () {
+    $establishment = Establishment::factory()->create(['type' => EstablishmentType::PrescolairePrimaire]);
+    $admin = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    $this->actingAs($admin);
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+
     $classroom = Classroom::factory()->primaire()->create([
-        'establishment_id' => $this->establishment->id,
-        'school_year_id' => $this->schoolYear->id,
+        'establishment_id' => $establishment->id,
+        'school_year_id' => $schoolYear->id,
     ]);
 
     Livewire::test(Index::class)

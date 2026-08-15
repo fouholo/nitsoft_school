@@ -9,7 +9,9 @@ use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\Level;
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Academics\Models\Serie;
+use App\Domain\Establishments\Models\Establishment;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -37,6 +39,8 @@ class Index extends Component
     public function mount(): void
     {
         $this->authorize('viewAny', Classroom::class);
+
+        $this->cycle = $this->currentEstablishment()->allowedCycles()[0]->value;
     }
 
     public function updatedCycle(): void
@@ -84,6 +88,14 @@ class Index extends Component
             'school_year_id' => ['required', 'exists:school_years,id'],
         ]);
 
+        $level = Level::findOrFail($data['level_id']);
+
+        if (! in_array($level->cycle, $this->currentEstablishment()->allowedCycles(), true)) {
+            throw ValidationException::withMessages([
+                'level_id' => "Ce niveau n'est pas disponible pour ce type d'établissement.",
+            ]);
+        }
+
         if (! $this->selectedLevelRequiresSeries()) {
             $data['serie_id'] = null;
         }
@@ -121,7 +133,12 @@ class Index extends Component
     protected function resetForm(): void
     {
         $this->reset(['editingId', 'level_id', 'serie_id', 'numero', 'capacity', 'school_year_id']);
-        $this->cycle = Cycle::Secondaire->value;
+        $this->cycle = $this->currentEstablishment()->allowedCycles()[0]->value;
+    }
+
+    private function currentEstablishment(): Establishment
+    {
+        return Establishment::findOrFail((int) app('currentEstablishmentId'));
     }
 
     public function selectedLevelRequiresSeries(): bool
@@ -148,7 +165,7 @@ class Index extends Component
         return view('livewire.academics.classrooms.index', [
             'classrooms' => Classroom::with(['schoolYear', 'level', 'serie'])->orderBy('name')->get(),
             'schoolYears' => SchoolYear::orderByDesc('starts_on')->get(),
-            'cycles' => Cycle::cases(),
+            'cycles' => $this->currentEstablishment()->allowedCycles(),
             'levels' => $this->cycle !== ''
                 ? Level::where('cycle', $this->cycle)->orderBy('level_wording')->get()
                 : collect(),
