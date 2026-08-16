@@ -105,6 +105,8 @@
         </tr>
     </table>
 
+    <hr class="title-separator">
+
     <p class="section-title">a- Notes</p>
     <table class="grades notes-table">
         <thead>
