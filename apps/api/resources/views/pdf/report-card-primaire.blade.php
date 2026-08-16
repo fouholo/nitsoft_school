@@ -13,10 +13,10 @@
         table.report-header td.logo-col { width: 20%; vertical-align: middle; }
         table.report-header td.left { width: 50%; }
         table.report-header td.right { width: 30%; vertical-align: middle; }
-        table.report-header p { margin: 0; font-size: 10.5px; }
+        table.report-header p { margin: 0; font-size: 7px; }
         table.report-header p.establishment-name { margin-top: 4px; font-size: 14px; font-weight: bold; }
-        table.report-header img.logo { height: 67.5px; }
-        table.report-header img.armoirie { height: 97.5px; }
+        table.report-header img.logo { height: 45px; }
+        table.report-header img.armoirie { height: 65px; }
         .identity td { padding: 1px 0; }
         .identity td.label { color: #64748b; width: 80px; }
         table.grades { width: 100%; border-collapse: collapse; margin: 12px 0; }
@@ -57,6 +57,7 @@
             <td class="left">
                 @foreach ($headerLines as $line)
                     <p>{{ $line }}</p>
+                    <p>----------------------</p>
                 @endforeach
                 <p class="establishment-name">{{ $establishment->name }}</p>
             </td>
