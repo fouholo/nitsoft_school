@@ -177,6 +177,26 @@ class ReportCardService
     }
 
     /**
+     * Notes brutes d'une composition primaire, une ligne par matière — pour
+     * le bulletin A5. Contrairement à subjectBreakdown(), pas de
+     * normalisation : la note et le barème bruts de chaque matière sont
+     * affichés tels quels (ex. « 46 / 50 »).
+     *
+     * @return Collection<int, PrimaryGrade>
+     */
+    public function primaryGradeRows(ReportCard $reportCard): Collection
+    {
+        return PrimaryGrade::query()
+            ->with('primarySubject')
+            ->where('student_id', $reportCard->student_id)
+            ->whereNotNull('score')
+            ->whereHas('gradeSheet', fn ($query) => $query->where('composition_number', $reportCard->composition_number))
+            ->get()
+            ->sortBy(fn (PrimaryGrade $grade) => $grade->primarySubject->name)
+            ->values();
+    }
+
+    /**
      * @return Collection<int, float>
      */
     private function coefficientsFor(Classroom $classroom): Collection

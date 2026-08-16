@@ -304,6 +304,42 @@ test('le détail par matière (primaire) affiche le nom de la matière du catalo
         ->and($breakdown->first()->coefficient)->toBe(1.0);
 });
 
+test('primaryGradeRows() retourne les notes brutes triées par matière, sans les absences', function () {
+    $establishment = Establishment::factory()->create();
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $classroom = Classroom::factory()->primaire()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+    $column = PrimarySubject::coefficientColumn($classroom->level);
+    $baremeColumn = PrimarySubject::baremeColumn($classroom->level);
+    $maths = PrimarySubject::factory()->create(['name' => 'Mathématiques', $column => 1, $baremeColumn => 20]);
+    $francais = PrimarySubject::factory()->create(['name' => 'Français', $column => 1, $baremeColumn => 20]);
+
+    $sheet = GradeSheet::factory()->create([
+        'establishment_id' => $establishment->id,
+        'classroom_id' => null,
+        'subject_id' => null,
+        'primary_subject_id' => null,
+        'term_id' => null,
+        'composition_number' => 1,
+    ]);
+
+    $student = Student::factory()->create(['establishment_id' => $establishment->id]);
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'student_id' => $student->id, 'classroom_id' => $classroom->id, 'status' => 'active']);
+    PrimaryGrade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $sheet->id, 'student_id' => $student->id, 'primary_subject_id' => $francais->id, 'score' => 12]);
+    PrimaryGrade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $sheet->id, 'student_id' => $student->id, 'primary_subject_id' => $maths->id, 'score' => 18]);
+    // Absence : score null, ne doit pas apparaître dans les lignes.
+    $anglais = PrimarySubject::factory()->create(['name' => 'Anglais', $column => 1, $baremeColumn => 20]);
+    PrimaryGrade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $sheet->id, 'student_id' => $student->id, 'primary_subject_id' => $anglais->id, 'score' => null, 'is_absent' => true]);
+
+    $service = new ReportCardService;
+    $reportCard = $service->generateForClassroomAndComposition($classroom, 1)->first();
+
+    $rows = $service->primaryGradeRows($reportCard);
+
+    expect($rows)->toHaveCount(2)
+        ->and($rows->pluck('primarySubject.name')->all())->toBe(['Français', 'Mathématiques'])
+        ->and((float) $rows->first()->score)->toBe(12.0);
+});
+
 test('generate() calcule l’appréciation depuis le barème pour le secondaire', function () {
     AppreciationScale::factory()->create(['percentage' => 70, 'appreciation' => 'Bien']);
     AppreciationScale::factory()->create(['percentage' => 0, 'appreciation' => 'Insuffisant']);
