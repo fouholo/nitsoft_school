@@ -82,6 +82,24 @@ test('un bulletin primaire est rendu via le gabarit A5 dédié, un bulletin seco
     expect($response->headers->get('Content-Type'))->toContain('application/pdf');
 });
 
+test('l’en-tête n’affiche pas la colonne République/armoiries', function () {
+    $establishment = Establishment::factory()->create();
+    actingInEstablishment($establishment);
+
+    $reportCard = makePrimaireReportCard($establishment);
+    $reportCard->loadMissing(['student', 'classroom.level', 'establishment']);
+
+    $html = view('pdf.report-card-primaire', [
+        'reportCard' => $reportCard,
+        'rows' => app(ReportCardService::class)->primaryGradeRows($reportCard),
+        'generalInformation' => \App\Domain\Establishments\Models\GeneralInformation::current(),
+    ])->render();
+
+    expect($html)->not->toContain('REPUBLIQUE DE')
+        ->and($html)->not->toContain('Union-Discipline-Travail')
+        ->and($html)->toContain('width: 100%; vertical-align:top; text-align:center;');
+});
+
 test('la civilité et le résultat s’accordent au genre de l’élève', function (?string $gender, string $expectedCivilite, string $expectedResultat) {
     $establishment = Establishment::factory()->create();
     actingInEstablishment($establishment);

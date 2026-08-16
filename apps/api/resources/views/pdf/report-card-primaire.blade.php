@@ -20,7 +20,7 @@
     </style>
 </head>
 <body>
-    @include('pdf.partials.reports-header', ['establishment' => $reportCard->establishment, 'generalInformation' => $generalInformation])
+    @include('pdf.partials.reports-header', ['establishment' => $reportCard->establishment, 'generalInformation' => $generalInformation, 'showRepublicColumn' => false])
 
     <h1>Relevé de notes - Composition N°{{ $reportCard->composition_number }}</h1>
 
