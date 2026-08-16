@@ -11,7 +11,7 @@
         .identity td.label { color: #64748b; width: 80px; }
         table.grades { width: 100%; border-collapse: collapse; margin: 12px 0; }
         table.grades th, table.grades td { border: 1px solid #cbd5e1; padding: 4px 6px; text-align: left; }
-        table.grades th { background-color: #f1f5f9; }
+        table.grades th { background-color: #f1f5f9; text-align: center; }
         table.grades tr.total td { background-color: #f1f5f9; font-weight: bold; }
         .notes-table th:nth-child(2), .notes-table td:nth-child(2),
         .notes-table th:nth-child(3), .notes-table td:nth-child(3) { text-align: center; }
@@ -66,10 +66,10 @@
     <table class="grades notes-table">
         <thead>
             <tr>
-                <th>Épreuve</th>
-                <th>Coefficient</th>
-                <th>Note</th>
-                <th>Appréciation</th>
+                <th>Épreuves</th>
+                <th>Coefficients</th>
+                <th>Notes</th>
+                <th>Appréciations</th>
             </tr>
         </thead>
         <tbody>
@@ -92,7 +92,7 @@
             @endforelse
             @if ($rows->isNotEmpty())
                 <tr class="total">
-                    <td>Total</td>
+                    <td style="text-align: center;">Total</td>
                     <td>{{ $formatNumber($rows->sum(fn ($g) => $g->primarySubject->coefficientFor($level) ?? 0.0)) }}</td>
                     <td>{{ $formatNumber($rows->sum(fn ($g) => (float) $g->score)) }} / {{ $formatNumber($rows->sum(fn ($g) => $g->primarySubject->bareme($level) ?? 20.0)) }}</td>
                     <td></td>
