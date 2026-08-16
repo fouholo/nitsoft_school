@@ -11,6 +11,7 @@ use App\Domain\Billing\Models\Installment;
 use App\Domain\Billing\Models\Invoice;
 use App\Domain\Billing\Models\LevelFee;
 use App\Domain\Enrollment\Models\Enrollment;
+use App\Domain\Establishments\Models\Establishment;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
@@ -305,10 +306,12 @@ class Index extends Component
             ? LevelFee::where('school_year_id', $this->school_year_id)->with('installmentAmounts')->get()->keyBy('level_id')
             : collect();
 
+        $allowedCycles = Establishment::findOrFail((int) app('currentEstablishmentId'))->allowedCycles();
+
         return view('livewire.billing.tuition-fees.index', [
             'schoolYears' => SchoolYear::orderByDesc('starts_on')->get(),
             'installments' => $installments,
-            'levels' => Level::orderBy('level_wording')->get(),
+            'levels' => Level::whereIn('cycle', $allowedCycles)->orderBy('level_wording')->get(),
             'levelFees' => $levelFees,
         ]);
     }

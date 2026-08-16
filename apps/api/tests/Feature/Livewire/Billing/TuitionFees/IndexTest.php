@@ -10,9 +10,26 @@ use App\Domain\Billing\Models\Installment;
 use App\Domain\Billing\Models\Invoice;
 use App\Domain\Billing\Models\LevelFee;
 use App\Domain\Enrollment\Models\Enrollment;
+use App\Domain\Establishments\Enums\EstablishmentType;
 use App\Domain\Establishments\Models\Establishment;
 use App\Livewire\Billing\TuitionFees\Index;
 use Livewire\Livewire;
+
+test('la rubrique "Tarifs par niveau" n’affiche que les niveaux du cycle de l’établissement', function () {
+    $establishment = Establishment::factory()->create(['type' => EstablishmentType::PrescolairePrimaire]);
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $primaireLevel = Level::factory()->primaire()->create();
+    $secondaireLevel = Level::factory()->create();
+
+    Livewire::test(Index::class)
+        ->set('school_year_id', $schoolYear->id)
+        ->assertSee($primaireLevel->level_wording)
+        ->assertDontSee($secondaireLevel->level_wording);
+});
 
 test('un directeur crée une tranche', function () {
     $establishment = Establishment::factory()->create();
