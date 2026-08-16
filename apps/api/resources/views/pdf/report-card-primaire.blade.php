@@ -9,11 +9,12 @@
         h1 { font-size: 13px; text-align: center; margin: 16px 0; text-transform: uppercase; }
         table.report-header { width: 100%; border-collapse: collapse; margin-bottom: 16px; table-layout: fixed; }
         table.report-header td { vertical-align: top; text-align: center; }
-        table.report-header td.left { width: 68%; }
-        table.report-header td.right { width: 32%; }
+        table.report-header td.logo-col { width: 20%; vertical-align: middle; }
+        table.report-header td.left { width: 50%; }
+        table.report-header td.right { width: 30%; vertical-align: middle; }
         table.report-header p { margin: 0; font-size: 7px; }
         table.report-header p.establishment-name { margin-top: 4px; font-size: 14px; font-weight: bold; }
-        table.report-header img.logo { height: 45px; margin-top: 4px; }
+        table.report-header img.logo { height: 45px; }
         table.report-header img.armoirie { height: 65px; }
         .identity td { padding: 1px 0; }
         .identity td.label { color: #64748b; width: 80px; }
@@ -47,14 +48,16 @@
     @endphp
     <table class="report-header">
         <tr>
+            <td class="logo-col">
+                @if ($establishment->logo_path)
+                    <img class="logo" src="{{ public_path('storage/'.$establishment->logo_path) }}">
+                @endif
+            </td>
             <td class="left">
                 @foreach ($headerLines as $line)
                     <p>{{ $line }}</p>
                 @endforeach
                 <p class="establishment-name">{{ $establishment->name }}</p>
-                @if ($establishment->logo_path)
-                    <img class="logo" src="{{ public_path('storage/'.$establishment->logo_path) }}">
-                @endif
             </td>
             <td class="right">
                 @if ($generalInformation->armoirie_path)

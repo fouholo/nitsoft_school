@@ -100,6 +100,7 @@ test('l’en-tête n’affiche pas de texte République, seulement le logo à ga
 
     expect($html)->not->toContain('REPUBLIQUE DE')
         ->and($html)->not->toContain('Union-Discipline-Travail')
+        ->and($html)->toContain('td class="logo-col"')
         ->and($html)->toContain('td class="left"')
         ->and($html)->toContain('td class="right"')
         ->and($html)->toContain('class="armoirie"')
