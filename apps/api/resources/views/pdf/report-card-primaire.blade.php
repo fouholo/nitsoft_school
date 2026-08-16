@@ -13,6 +13,9 @@
         table.grades th, table.grades td { border: 1px solid #cbd5e1; padding: 4px 6px; text-align: left; }
         table.grades th { background-color: #f1f5f9; }
         table.grades tr.total td { background-color: #f1f5f9; font-weight: bold; }
+        .notes-table th:nth-child(2), .notes-table td:nth-child(2),
+        .notes-table th:nth-child(3), .notes-table td:nth-child(3) { text-align: center; }
+        .results-table th, .results-table td { text-align: center; }
         .section-title { font-weight: bold; margin: 10px 0 4px; }
         .footer { margin-top: 24px; font-size: 10px; }
         .signatures td { text-align: center; vertical-align: top; padding-top: 8px; }
@@ -60,7 +63,7 @@
     </table>
 
     <p class="section-title">a- Notes</p>
-    <table class="grades">
+    <table class="grades notes-table">
         <thead>
             <tr>
                 <th>Épreuve</th>
@@ -111,7 +114,7 @@
             },
         };
     @endphp
-    <table class="grades">
+    <table class="grades results-table">
         <thead>
             <tr>
                 <th>Moyenne</th>
