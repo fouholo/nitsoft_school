@@ -6,7 +6,8 @@
     <style>
         @page { margin-top: 0.6cm; margin-bottom: 0.6cm; }
         body { font-family: "DejaVu Sans", sans-serif; font-size: 10px; color: #1e293b; }
-        h1 { font-size: 13px; text-align: center; margin: 16px 0; text-transform: uppercase; }
+        h1 { font-size: 13px; text-align: center; margin: 16px 0 0; text-transform: uppercase; }
+        hr.title-separator { border: none; border-top: 2px solid #64748b; margin: 8px 0 16px; }
         table.report-header { width: 100%; border-collapse: collapse; margin-bottom: 16px; table-layout: fixed; }
         table.report-header td { vertical-align: top; text-align: center; }
         table.report-header td.logo-col { width: 20%; vertical-align: middle; }
@@ -68,6 +69,7 @@
     </table>
 
     <h1>Relevé de notes - Composition N°{{ $reportCard->composition_number }}</h1>
+    <hr class="title-separator">
 
     @php
         $student = $reportCard->student;
