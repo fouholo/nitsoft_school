@@ -162,7 +162,8 @@ test('le détail par matière du bulletin liste chaque matière notée avec sa m
 test('la moyenne pondérée et le rang sont calculés correctement par composition (primaire)', function () {
     $establishment = Establishment::factory()->create();
     $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
-    $classroom = Classroom::factory()->primaire()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+    // Niveau fixé à CM2 (échelle /20) — voir Level::compositionAverageScale().
+    $classroom = Classroom::factory()->primaireLevel('CM2')->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $column = PrimarySubject::coefficientColumn($classroom->level);
     $baremeColumn = PrimarySubject::baremeColumn($classroom->level);
     $subjectA = PrimarySubject::factory()->create([$column => 1, $baremeColumn => 20]);
@@ -207,6 +208,36 @@ test('la moyenne pondérée et le rang sont calculés correctement par compositi
         ->and($card->composition_number)->toBe(1)
         ->and($card->school_year_id)->toBe($schoolYear->id);
 });
+
+test('generalAverage() ramène la moyenne sur 10 pour CP1/CP2/CE1, sur 20 pour CE2/CM1/CM2', function (string $level, float $expectedAverage) {
+    $establishment = Establishment::factory()->create();
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $classroom = Classroom::factory()->primaireLevel($level)->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+    $column = PrimarySubject::coefficientColumn($classroom->level);
+    $baremeColumn = PrimarySubject::baremeColumn($classroom->level);
+    $subject = PrimarySubject::factory()->create([$column => 1, $baremeColumn => 20]);
+
+    $sheet = GradeSheet::factory()->create([
+        'establishment_id' => $establishment->id,
+        'classroom_id' => null,
+        'subject_id' => null,
+        'primary_subject_id' => null,
+        'term_id' => null,
+        'composition_number' => 1,
+    ]);
+
+    $student = Student::factory()->create(['establishment_id' => $establishment->id]);
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'student_id' => $student->id, 'classroom_id' => $classroom->id, 'status' => 'active']);
+    // 16/20 → même note brute pour les deux niveaux, seule l'échelle de restitution diffère.
+    PrimaryGrade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $sheet->id, 'student_id' => $student->id, 'primary_subject_id' => $subject->id, 'score' => 16]);
+
+    $reportCard = (new ReportCardService)->generateForClassroomAndComposition($classroom, 1)->first();
+
+    expect((float) $reportCard->average)->toBe($expectedAverage);
+})->with([
+    'CP1 → 8/10' => ['CP1', 8.0],
+    'CM2 → 16/20' => ['CM2', 16.0],
+]);
 
 test('une composition commune à toutes les classes n’agrège que les élèves de la classe demandée', function () {
     $establishment = Establishment::factory()->create();

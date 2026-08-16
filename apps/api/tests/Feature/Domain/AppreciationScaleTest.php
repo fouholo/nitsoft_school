@@ -30,3 +30,9 @@ test('retourne null si aucune tranche ne correspond', function () {
 
     expect(AppreciationScale::forAverage(20.0))->toBeNull();
 });
+
+test('forAverage tient compte de l’échelle passée en second paramètre', function () {
+    // 8/10 = 80 % → même tranche qu'une moyenne 16/20.
+    expect(AppreciationScale::forAverage(8.0, 10.0)->appreciation)->toBe('Très bien')
+        ->and(AppreciationScale::forAverage(5.0, 10.0)->appreciation)->toBe('Insuffisant');
+});

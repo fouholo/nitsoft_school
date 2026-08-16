@@ -42,13 +42,13 @@ class AppreciationScale extends Model
     }
 
     /**
-     * $average est une moyenne sur 20 (convention utilisée par
-     * ReportCardService/EnterStudent) — convertie en pourcentage pour
-     * trouver la tranche la plus haute atteinte.
+     * $average est une moyenne sur $scale (20 par défaut ; 10 pour une
+     * composition primaire CP1/CP2/CE1 — voir Level::compositionAverageScale())
+     * — convertie en pourcentage pour trouver la tranche la plus haute atteinte.
      */
-    public static function forAverage(float $average): ?self
+    public static function forAverage(float $average, float $scale = 20.0): ?self
     {
-        $percentage = ($average / 20) * 100;
+        $percentage = ($average / $scale) * 100;
 
         return static::query()
             ->where('percentage', '<=', $percentage)

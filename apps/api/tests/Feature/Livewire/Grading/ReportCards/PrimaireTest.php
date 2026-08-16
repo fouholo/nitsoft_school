@@ -70,7 +70,8 @@ test('la génération est bloquée si le coefficient d’une matière notée n�
 });
 
 test('la génération de bulletin par composition agrège plusieurs matières sous une seule évaluation', function () {
-    $classroom = Classroom::factory()->primaire()->create([
+    // Niveau fixé à CM2 (échelle /20) — voir Level::compositionAverageScale().
+    $classroom = Classroom::factory()->primaireLevel('CM2')->create([
         'establishment_id' => $this->establishment->id,
         'school_year_id' => $this->schoolYear->id,
     ]);

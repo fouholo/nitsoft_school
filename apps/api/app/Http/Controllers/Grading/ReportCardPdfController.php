@@ -25,7 +25,7 @@ class ReportCardPdfController extends Controller
     {
         Gate::authorize('view', $reportCard);
 
-        $reportCard->loadMissing(['student', 'classroom', 'term.schoolYear', 'schoolYear', 'establishment']);
+        $reportCard->loadMissing(['student', 'classroom.level', 'term.schoolYear', 'schoolYear', 'establishment']);
 
         $pdf = Pdf::loadView('pdf.report-card', [
             'reportCard' => $reportCard,

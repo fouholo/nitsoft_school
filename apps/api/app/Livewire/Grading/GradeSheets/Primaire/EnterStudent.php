@@ -24,14 +24,6 @@ use Livewire\Component;
 #[Title('Saisie des notes')]
 class EnterStudent extends Component
 {
-    /**
-     * Seuil de réussite : moyenne >= 10/20, ce qui correspond à la fois au
-     * seuil « 5/10 » utilisé pour CP1/CP2/CE1 et au seuil « 10/20 » utilisé
-     * pour CE2/CM1/CM2 dans cet établissement — les deux sont la même
-     * fraction (50 %), la moyenne étant toujours normalisée sur 20 ici.
-     */
-    private const PASSING_AVERAGE = 10.0;
-
     public GradeSheet $gradeSheet;
 
     public Student $student;
@@ -114,22 +106,66 @@ class EnterStudent extends Component
         return PrimarySubject::whereNotNull($column)->orderBy('name')->get();
     }
 
+    /**
+     * Contrôle la note d'une matière dès la saisie (avant même
+     * l'enregistrement) pour alerter immédiatement en cas de dépassement du
+     * barème de la matière.
+     */
+    public function updatedScores(mixed $value, string $key): void
+    {
+        $rules = $this->scoreRules();
+
+        if (isset($rules["scores.{$key}"])) {
+            $this->validateOnly("scores.{$key}", $rules, $this->scoreMessages());
+        }
+    }
+
+    /**
+     * @return array<string, array<int, string>>
+     */
+    private function scoreRules(): array
+    {
+        $level = $this->classroom->level;
+        $rules = [];
+
+        foreach ($this->subjects() as $subject) {
+            if ($this->absences[$subject->id] ?? false) {
+                continue;
+            }
+
+            $bareme = $subject->bareme($level) ?? 20.0;
+            $rules["scores.{$subject->id}"] = ['nullable', 'numeric', 'min:0', "max:{$bareme}"];
+        }
+
+        return $rules;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function scoreMessages(): array
+    {
+        $level = $this->classroom->level;
+        $messages = [];
+
+        foreach ($this->subjects() as $subject) {
+            $bareme = $subject->bareme($level) ?? 20.0;
+            $messages["scores.{$subject->id}.max"] = "La note dépasse le barème de la matière (maximum {$bareme}).";
+        }
+
+        return $messages;
+    }
+
     public function save(): void
     {
         /** @var User $user */
         $user = Auth::user();
         abort_unless($this->hasBroadGradeAccess($user) || $user->isAssignedToClassroom($this->classroom->id), 403);
 
-        $rules = [];
-        foreach (array_keys($this->scores) as $subjectId) {
-            if ($this->absences[$subjectId] ?? false) {
-                continue;
-            }
-            $rules["scores.{$subjectId}"] = ['nullable', 'numeric', 'min:0'];
-        }
+        $rules = $this->scoreRules();
 
         if ($rules !== []) {
-            $this->validate($rules);
+            $this->validate($rules, $this->scoreMessages());
         }
 
         foreach ($this->scores as $subjectId => $score) {
@@ -195,7 +231,11 @@ class EnterStudent extends Component
             $totalCoefficient += $coefficient;
         }
 
-        $average = $totalCoefficient > 0 ? round($totalPoints / $totalCoefficient, 2) : null;
+        // Moyenne calculée sur 20 (chaque matière y est normalisée), ramenée
+        // à l'échelle du niveau : 10 pour CP1/CP2/CE1, 20 sinon.
+        $scale = $level->compositionAverageScale();
+        $average = $totalCoefficient > 0 ? round(($totalPoints / $totalCoefficient) * ($scale / 20), 2) : null;
+        $passingAverage = $scale / 2;
 
         return [
             'totalPoints' => round($totalPoints, 2),
@@ -203,10 +243,10 @@ class EnterStudent extends Component
             'average' => $average,
             'result' => match (true) {
                 $average === null => 'Absence',
-                $average >= self::PASSING_AVERAGE => 'Admis(e)',
+                $average >= $passingAverage => 'Admis(e)',
                 default => 'Refusé(e)',
             },
-            'appreciation' => $average !== null ? AppreciationScale::forAverage($average)?->appreciation : null,
+            'appreciation' => $average !== null ? AppreciationScale::forAverage($average, $scale)?->appreciation : null,
         ];
     }
 
@@ -215,6 +255,7 @@ class EnterStudent extends Component
         return view('livewire.grading.grade-sheets.primaire.enter-student', [
             'subjects' => $this->subjects(),
             'preview' => $this->preview(),
+            'scale' => $this->classroom->level->compositionAverageScale(),
         ]);
     }
 }

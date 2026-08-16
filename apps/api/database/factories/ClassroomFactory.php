@@ -46,6 +46,18 @@ class ClassroomFactory extends Factory
         ]);
     }
 
+    /**
+     * Force un code de niveau primaire précis (au lieu du round-robin de
+     * primaire()) — voir Level::factory()->primaireLevel().
+     */
+    public function primaireLevel(string $code): static
+    {
+        return $this->state(fn (): array => [
+            'level_id' => Level::factory()->primaireLevel($code),
+            'numero' => fake()->randomElement(['A', 'B']),
+        ]);
+    }
+
     public function terminale(): static
     {
         return $this->state(fn (): array => [

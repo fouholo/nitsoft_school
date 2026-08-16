@@ -70,7 +70,7 @@
     <table class="summary">
         <tr>
             <td class="label">Moyenne générale</td>
-            <td>{{ number_format((float) $reportCard->average, 2) }} / 20</td>
+            <td>{{ number_format((float) $reportCard->average, 2) }} / {{ (int) $reportCard->classroom->level->compositionAverageScale() }}</td>
         </tr>
         <tr>
             <td class="label">Rang</td>

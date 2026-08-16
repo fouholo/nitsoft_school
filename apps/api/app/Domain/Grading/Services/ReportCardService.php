@@ -113,7 +113,7 @@ class ReportCardService
                     'classroom_id' => $classroom->id,
                     'average' => $average,
                     'rank' => $rank,
-                    'appreciation' => AppreciationScale::forAverage($average)?->appreciation,
+                    'appreciation' => AppreciationScale::forAverage($average, $classroom->level->compositionAverageScale())?->appreciation,
                     'generated_at' => now(),
                 ]
             ));
@@ -274,7 +274,15 @@ class ReportCardService
             $totalCoefficient += $coefficient;
         }
 
-        return $totalCoefficient > 0 ? round($weightedSum / $totalCoefficient, 2) : null;
+        if ($totalCoefficient <= 0) {
+            return null;
+        }
+
+        // Moyenne calculée sur 20 (chaque matière y est normalisée), ramenée
+        // à l'échelle du niveau : 10 pour CP1/CP2/CE1, 20 sinon (inchangé).
+        $scale = $classroom->level->compositionAverageScale();
+
+        return round(($weightedSum / $totalCoefficient) * ($scale / 20), 2);
     }
 
     /**

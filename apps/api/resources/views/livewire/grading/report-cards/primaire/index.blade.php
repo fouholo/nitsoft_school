@@ -35,7 +35,7 @@
                 <tr>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Rang</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Élève</th>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">Moyenne / 20</th>
+                    <th class="px-4 py-2 text-left font-medium text-slate-500">Moyenne / {{ (int) $scale }}</th>
                     <th class="px-4 py-2"></th>
                 </tr>
             </thead>

@@ -25,7 +25,9 @@ beforeEach(function () {
     $this->actingAs($this->admin);
 
     $this->schoolYear = SchoolYear::factory()->create(['establishment_id' => $this->establishment->id]);
-    $this->classroom = Classroom::factory()->primaire()->create([
+    // Niveau fixé à CM2 (échelle /20) pour que les assertions de moyenne de
+    // ce fichier soient déterministes — voir Level::compositionAverageScale().
+    $this->classroom = Classroom::factory()->primaireLevel('CM2')->create([
         'establishment_id' => $this->establishment->id,
         'school_year_id' => $this->schoolYear->id,
     ]);
@@ -194,6 +196,54 @@ test('l’appréciation en aperçu suit le barème et disparaît si l’élève 
     $component->set('absentGenerale', true);
 
     expect($component->viewData('preview')['appreciation'])->toBeNull();
+});
+
+test('une note supérieure au barème de la matière est refusée à la saisie et au blocage de l’enregistrement', function () {
+    // Le barème de Français est 10 pour ce niveau (voir beforeEach).
+    Livewire::test(EnterStudent::class, ['gradeSheet' => $this->gradeSheet, 'student' => $this->student])
+        ->set("scores.{$this->francais->id}", '12')
+        ->assertHasErrors(["scores.{$this->francais->id}" => 'max']);
+
+    Livewire::test(EnterStudent::class, ['gradeSheet' => $this->gradeSheet, 'student' => $this->student])
+        ->set("scores.{$this->francais->id}", '12')
+        ->call('save')
+        ->assertHasErrors(["scores.{$this->francais->id}" => 'max']);
+
+    expect(PrimaryGrade::where('primary_subject_id', $this->francais->id)->exists())->toBeFalse();
+});
+
+test('pour un niveau CP1/CP2/CE1, la moyenne, le seuil de réussite et l’appréciation sont sur 10', function () {
+    $classroom = Classroom::factory()->primaireLevel('CP1')->create([
+        'establishment_id' => $this->establishment->id,
+        'school_year_id' => $this->schoolYear->id,
+    ]);
+    $student = Student::factory()->create(['establishment_id' => $this->establishment->id]);
+    Enrollment::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'student_id' => $student->id,
+        'classroom_id' => $classroom->id,
+        'status' => 'active',
+    ]);
+
+    $column = PrimarySubject::coefficientColumn($classroom->level);
+    $baremeColumn = PrimarySubject::baremeColumn($classroom->level);
+    $maths = PrimarySubject::factory()->create(['name' => 'Mathématiques', $column => 1, $baremeColumn => 20]);
+
+    // AppreciationScale 80 % → « Très bien » déjà créée dans le beforeEach.
+    // 16/20 normalisé, ramené sur 10 → moyenne 8/10, 80 % → « Très bien ».
+    $component = Livewire::test(EnterStudent::class, ['gradeSheet' => $this->gradeSheet, 'student' => $student])
+        ->set("scores.{$maths->id}", '16');
+
+    $preview = $component->viewData('preview');
+
+    expect($preview['average'])->toBe(8.0)
+        ->and($preview['result'])->toBe('Admis(e)')
+        ->and($preview['appreciation'])->toBe('Très bien')
+        ->and($component->viewData('scale'))->toBe(10.0);
+
+    $component->call('save')->assertHasNoErrors();
+
+    expect(ReportCard::sole()->appreciation)->toBe('Très bien');
 });
 
 test('le résultat affiche « Admis(e) » si la moyenne atteint 10/20, « Refusé(e) » sinon', function () {

@@ -108,7 +108,7 @@
                             <div class="rounded-md border border-rose-100 bg-rose-50 px-3 py-2 text-slate-900">{{ $preview['totalPoints'] }}</div>
                         </div>
                         <div>
-                            <label class="mb-1 block text-xs font-medium text-emerald-700">Moyenne / 20</label>
+                            <label class="mb-1 block text-xs font-medium text-emerald-700">Moyenne / {{ (int) $scale }}</label>
                             <div class="rounded-md border border-rose-100 bg-rose-50 px-3 py-2 font-semibold text-slate-900">{{ $preview['average'] ?? '—' }}</div>
                         </div>
                         <div>

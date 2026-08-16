@@ -45,14 +45,13 @@ class Index extends Component
     {
         /** @var Collection<int, ReportCard> $reportCards */
         $reportCards = collect();
+        $classroom = $this->classroom_id ? Classroom::with('level')->find($this->classroom_id) : null;
 
-        if ($this->classroom_id && $this->composition_number) {
-            $classroom = Classroom::find($this->classroom_id);
-
+        if ($classroom && $this->composition_number) {
             $reportCards = ReportCard::query()
                 ->with('student')
                 ->where('classroom_id', $this->classroom_id)
-                ->where('school_year_id', $classroom?->school_year_id)
+                ->where('school_year_id', $classroom->school_year_id)
                 ->where('composition_number', $this->composition_number)
                 ->whereNotNull('average')
                 ->orderBy('rank')
@@ -62,6 +61,7 @@ class Index extends Component
         return view('livewire.grading.report-cards.primaire.index', [
             'reportCards' => $reportCards,
             'classrooms' => Classroom::gradable()->whereHas('level', fn ($query) => $query->where('cycle', Cycle::Primaire))->orderBy('name')->get(),
+            'scale' => $classroom?->level->compositionAverageScale() ?? 20.0,
         ]);
     }
 }

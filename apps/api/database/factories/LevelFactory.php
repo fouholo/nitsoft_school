@@ -58,6 +58,21 @@ class LevelFactory extends Factory
         });
     }
 
+    /**
+     * Force un code de niveau primaire précis (au lieu du round-robin de
+     * primaire()) — utile aux tests dont l'assertion dépend de l'échelle de
+     * la moyenne générale (Level::compositionAverageScale()).
+     */
+    public function primaireLevel(string $code): static
+    {
+        return $this->state(fn (): array => [
+            'level' => $code,
+            'level_wording' => $code,
+            'cycle' => Cycle::Primaire->value,
+            'requires_series' => false,
+        ]);
+    }
+
     public function terminale(): static
     {
         return $this->state(fn (): array => [
