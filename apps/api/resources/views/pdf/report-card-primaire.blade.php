@@ -16,7 +16,7 @@
         .section-title { font-weight: bold; margin: 10px 0 4px; }
         .footer { margin-top: 24px; font-size: 10px; }
         .signatures td { text-align: center; vertical-align: top; padding-top: 8px; }
-        .signatures p.label { font-weight: bold; margin: 0 0 24px; }
+        .signatures p.label { font-weight: bold; margin: 0 0 36px; }
         .signatures p.name { margin: 0; }
     </style>
 </head>
