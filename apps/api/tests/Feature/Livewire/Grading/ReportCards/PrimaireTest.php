@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\PrimarySubject;
 use App\Domain\Academics\Models\SchoolYear;
+use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Enums\EstablishmentType;
 use App\Domain\Establishments\Models\Establishment;
@@ -41,10 +42,11 @@ test('la génération est bloquée si le coefficient d’une matière notée n�
     $column = PrimarySubject::coefficientColumn($classroom->level);
     $subject = PrimarySubject::factory()->create([$column => null]);
     $student = Student::factory()->create(['establishment_id' => $this->establishment->id]);
+    Enrollment::factory()->create(['establishment_id' => $this->establishment->id, 'student_id' => $student->id, 'classroom_id' => $classroom->id, 'status' => 'active']);
 
     $gradeSheet = GradeSheet::factory()->create([
         'establishment_id' => $this->establishment->id,
-        'classroom_id' => $classroom->id,
+        'classroom_id' => null,
         'subject_id' => null,
         'primary_subject_id' => null,
         'term_id' => null,
@@ -77,10 +79,11 @@ test('la génération de bulletin par composition agrège plusieurs matières so
     $maths = PrimarySubject::factory()->create([$column => 4, $baremeColumn => 20]);
     $francais = PrimarySubject::factory()->create([$column => 1, $baremeColumn => 10]);
     $student = Student::factory()->create(['establishment_id' => $this->establishment->id]);
+    Enrollment::factory()->create(['establishment_id' => $this->establishment->id, 'student_id' => $student->id, 'classroom_id' => $classroom->id, 'status' => 'active']);
 
     $gradeSheet = GradeSheet::factory()->create([
         'establishment_id' => $this->establishment->id,
-        'classroom_id' => $classroom->id,
+        'classroom_id' => null,
         'subject_id' => null,
         'primary_subject_id' => null,
         'term_id' => null,

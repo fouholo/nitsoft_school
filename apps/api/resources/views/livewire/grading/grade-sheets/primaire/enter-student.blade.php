@@ -4,7 +4,7 @@
     <div class="mt-2">
         <h1 class="text-2xl font-semibold text-slate-900">{{ $student->last_name }} {{ $student->first_name }}</h1>
         <p class="text-sm text-slate-500">
-            {{ $gradeSheet->classroom?->name }} — {{ $gradeSheet->title }} (Composition {{ $gradeSheet->composition_number }})
+            {{ $classroom->name }} — {{ $gradeSheet->title }} (Composition {{ $gradeSheet->composition_number }})
         </p>
     </div>
 

@@ -167,10 +167,11 @@ test('la moyenne pondérée et le rang sont calculés correctement par compositi
     $subjectA = PrimarySubject::factory()->create([$column => 1, $baremeColumn => 20]);
     $subjectB = PrimarySubject::factory()->create([$column => 1, $baremeColumn => 20]);
 
-    // Une seule évaluation ("composition") couvre toutes les matières.
+    // Une seule évaluation ("composition") couvre toutes les matières et
+    // toutes les classes — plus de classroom_id sur GradeSheet.
     $sheet = GradeSheet::factory()->create([
         'establishment_id' => $establishment->id,
-        'classroom_id' => $classroom->id,
+        'classroom_id' => null,
         'subject_id' => null,
         'primary_subject_id' => null,
         'term_id' => null,
@@ -180,7 +181,7 @@ test('la moyenne pondérée et le rang sont calculés correctement par compositi
     // Une composition existante ailleurs (n° 2) ne doit pas être mélangée à la n° 1.
     $otherSheet = GradeSheet::factory()->create([
         'establishment_id' => $establishment->id,
-        'classroom_id' => $classroom->id,
+        'classroom_id' => null,
         'subject_id' => null,
         'primary_subject_id' => null,
         'term_id' => null,
@@ -206,6 +207,39 @@ test('la moyenne pondérée et le rang sont calculés correctement par compositi
         ->and($card->school_year_id)->toBe($schoolYear->id);
 });
 
+test('une composition commune à toutes les classes n’agrège que les élèves de la classe demandée', function () {
+    $establishment = Establishment::factory()->create();
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $classroomA = Classroom::factory()->primaire()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+    $classroomB = Classroom::factory()->primaire()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+    $columnA = PrimarySubject::coefficientColumn($classroomA->level);
+    $baremeColumnA = PrimarySubject::baremeColumn($classroomA->level);
+    $subject = PrimarySubject::factory()->create([$columnA => 1, $baremeColumnA => 20]);
+
+    // Une seule composition, partagée par les deux classes.
+    $sheet = GradeSheet::factory()->create([
+        'establishment_id' => $establishment->id,
+        'classroom_id' => null,
+        'subject_id' => null,
+        'primary_subject_id' => null,
+        'term_id' => null,
+        'composition_number' => 1,
+    ]);
+
+    $studentA = Student::factory()->create(['establishment_id' => $establishment->id]);
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'student_id' => $studentA->id, 'classroom_id' => $classroomA->id, 'status' => 'active']);
+    $studentB = Student::factory()->create(['establishment_id' => $establishment->id]);
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'student_id' => $studentB->id, 'classroom_id' => $classroomB->id, 'status' => 'active']);
+
+    PrimaryGrade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $sheet->id, 'student_id' => $studentA->id, 'primary_subject_id' => $subject->id, 'score' => 12]);
+    PrimaryGrade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $sheet->id, 'student_id' => $studentB->id, 'primary_subject_id' => $subject->id, 'score' => 18]);
+
+    $reportCards = (new ReportCardService)->generateForClassroomAndComposition($classroomA, 1);
+
+    expect($reportCards)->toHaveCount(1)
+        ->and($reportCards->first()->student_id)->toBe($studentA->id);
+});
+
 test('le détail par matière (primaire) affiche le nom de la matière du catalogue primaire', function () {
     $establishment = Establishment::factory()->create();
     $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
@@ -216,7 +250,7 @@ test('le détail par matière (primaire) affiche le nom de la matière du catalo
 
     $sheet = GradeSheet::factory()->create([
         'establishment_id' => $establishment->id,
-        'classroom_id' => $classroom->id,
+        'classroom_id' => null,
         'subject_id' => null,
         'primary_subject_id' => null,
         'term_id' => null,

@@ -2,9 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Domain\Academics\Models\Classroom;
-use App\Domain\Academics\Models\SchoolYear;
-use App\Domain\Academics\Models\TeacherAssignment;
 use App\Domain\Establishments\Enums\EstablishmentType;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Grading\Models\GradeSheet;
@@ -13,22 +10,13 @@ use Livewire\Livewire;
 
 beforeEach(function () {
     $this->establishment = Establishment::factory()->create(['type' => EstablishmentType::PrescolairePrimaire]);
-    // educateur : seul rôle admin-tier habilité à saisir des notes depuis le
-    // chantier "privilèges par rôle" (RolePermissions::MATRIX['grades.enter']).
-    $this->admin = createUserWithRole($this->establishment, 'educateur');
+    $this->directeur = createUserWithRole($this->establishment, 'directeur');
     actingInEstablishment($this->establishment);
-    $this->actingAs($this->admin);
-
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $this->establishment->id]);
-    $this->primaireClassroom = Classroom::factory()->primaire()->create([
-        'establishment_id' => $this->establishment->id,
-        'school_year_id' => $schoolYear->id,
-    ]);
+    $this->actingAs($this->directeur);
 });
 
-test('la création d’une composition pour une classe primaire fonctionne', function () {
+test('un directeur peut créer une composition, commune à toutes les classes', function () {
     Livewire::test(Index::class)
-        ->set('classroom_id', $this->primaireClassroom->id)
         ->set('composition_number', 1)
         ->set('title', 'Composition 1')
         ->set('graded_on', now()->toDateString())
@@ -41,13 +29,13 @@ test('la création d’une composition pour une classe primaire fonctionne', fun
 
     expect($gradeSheet->type)->toBe('composition')
         ->and($gradeSheet->term_id)->toBeNull()
+        ->and($gradeSheet->classroom_id)->toBeNull()
         ->and($gradeSheet->primary_subject_id)->toBeNull()
         ->and($gradeSheet->composition_number)->toBe(1);
 });
 
 test('le n° de composition est requis', function () {
     Livewire::test(Index::class)
-        ->set('classroom_id', $this->primaireClassroom->id)
         ->set('title', 'Composition 1')
         ->set('graded_on', now()->toDateString())
         ->call('save')
@@ -58,7 +46,6 @@ test('le n° de composition est requis', function () {
 
 test('le titre est requis', function () {
     Livewire::test(Index::class)
-        ->set('classroom_id', $this->primaireClassroom->id)
         ->set('composition_number', 1)
         ->set('title', '')
         ->set('graded_on', now()->toDateString())
@@ -68,51 +55,11 @@ test('le titre est requis', function () {
     expect(GradeSheet::count())->toBe(0);
 });
 
-test('une classe secondaire est rejetée', function () {
-    $secondaireClassroom = Classroom::factory()->create([
-        'establishment_id' => $this->establishment->id,
-        'school_year_id' => $this->primaireClassroom->school_year_id,
-    ]);
+test('un educateur ne peut pas créer de composition', function () {
+    $educateur = createUserWithRole($this->establishment, 'educateur');
+    $this->actingAs($educateur);
 
     Livewire::test(Index::class)
-        ->set('classroom_id', $secondaireClassroom->id)
-        ->set('composition_number', 1)
-        ->set('title', 'Composition 1')
-        ->set('graded_on', now()->toDateString())
-        ->call('save')
-        ->assertHasErrors(['classroom_id']);
-
-    expect(GradeSheet::count())->toBe(0);
-});
-
-test('un enseignant avec une affectation classe entière peut créer une composition', function () {
-    $teacher = createUserWithRole($this->establishment, 'enseignant');
-    TeacherAssignment::factory()->create([
-        'establishment_id' => $this->establishment->id,
-        'user_id' => $teacher->id,
-        'classroom_id' => $this->primaireClassroom->id,
-        'subject_id' => null,
-    ]);
-
-    $this->actingAs($teacher);
-
-    Livewire::test(Index::class)
-        ->set('classroom_id', $this->primaireClassroom->id)
-        ->set('composition_number', 1)
-        ->set('title', 'Composition 1')
-        ->set('graded_on', now()->toDateString())
-        ->call('save')
-        ->assertHasNoErrors();
-
-    expect(GradeSheet::count())->toBe(1);
-});
-
-test('un enseignant sans affectation sur la classe est refusé', function () {
-    $teacher = createUserWithRole($this->establishment, 'enseignant');
-    $this->actingAs($teacher);
-
-    Livewire::test(Index::class)
-        ->set('classroom_id', $this->primaireClassroom->id)
         ->set('composition_number', 1)
         ->set('title', 'Composition 1')
         ->set('graded_on', now()->toDateString())
@@ -120,4 +67,27 @@ test('un enseignant sans affectation sur la classe est refusé', function () {
         ->assertForbidden();
 
     expect(GradeSheet::count())->toBe(0);
+});
+
+test('un enseignant ne peut pas créer de composition', function () {
+    $teacher = createUserWithRole($this->establishment, 'enseignant');
+    $this->actingAs($teacher);
+
+    Livewire::test(Index::class)
+        ->set('composition_number', 1)
+        ->set('title', 'Composition 1')
+        ->set('graded_on', now()->toDateString())
+        ->call('save')
+        ->assertForbidden();
+
+    expect(GradeSheet::count())->toBe(0);
+});
+
+test('un educateur peut consulter la liste des compositions sans pouvoir en créer', function () {
+    $educateur = createUserWithRole($this->establishment, 'educateur');
+    $this->actingAs($educateur);
+
+    $isDirecteur = Livewire::test(Index::class)->viewData('isDirecteur');
+
+    expect($isDirecteur)->toBeFalse();
 });

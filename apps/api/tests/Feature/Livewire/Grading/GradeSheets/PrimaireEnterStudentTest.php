@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\PrimarySubject;
 use App\Domain\Academics\Models\SchoolYear;
+use App\Domain\Academics\Models\TeacherAssignment;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Enums\EstablishmentType;
@@ -29,7 +30,7 @@ beforeEach(function () {
     ]);
     $this->gradeSheet = GradeSheet::factory()->create([
         'establishment_id' => $this->establishment->id,
-        'classroom_id' => $this->classroom->id,
+        'classroom_id' => null,
         'subject_id' => null,
         'primary_subject_id' => null,
         'term_id' => null,
@@ -138,4 +139,27 @@ test('un enseignant sans affectation sur la classe est refusé', function () {
 
     Livewire::test(EnterStudent::class, ['gradeSheet' => $this->gradeSheet, 'student' => $this->student])
         ->assertForbidden();
+});
+
+test('un enseignant affecté à la classe de l’élève peut noter même s’il n’a pas créé la composition', function () {
+    // La composition a été créée par $this->admin (educateur) dans le
+    // beforeEach de GradeSheet::factory() — un autre enseignant, simplement
+    // affecté à la classe de l'élève, doit pouvoir y saisir des notes : la
+    // composition est commune à toutes les classes, l'autorisation ne
+    // dépend plus de qui l'a créée.
+    $teacher = createUserWithRole($this->establishment, 'enseignant');
+    TeacherAssignment::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'user_id' => $teacher->id,
+        'classroom_id' => $this->classroom->id,
+        'subject_id' => null,
+    ]);
+    $this->actingAs($teacher);
+
+    Livewire::test(EnterStudent::class, ['gradeSheet' => $this->gradeSheet, 'student' => $this->student])
+        ->set("scores.{$this->maths->id}", '15')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect(PrimaryGrade::where('primary_subject_id', $this->maths->id)->sole()->score)->toEqualWithDelta(15.0, 0.001);
 });

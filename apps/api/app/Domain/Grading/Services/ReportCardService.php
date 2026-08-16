@@ -66,13 +66,19 @@ class ReportCardService
             ]);
         }
 
-        $scopeToClassroom = function ($query) use ($classroom, $scopeGradeSheets): void {
-            $scopeGradeSheets($query->where('classroom_id', $classroom->id));
-        };
-
+        // Le primaire n'a plus de classroom_id sur GradeSheet (une composition
+        // est commune à toutes les classes) : le filtrage par classe se fait
+        // via l'inscription active de l'élève plutôt que via l'évaluation.
         $gradeRows = $classroom->level->cycle === Cycle::Primaire
-            ? PrimaryGrade::query()->with(['gradeSheet.classroom.level', 'primarySubject'])->whereNotNull('score')->whereHas('gradeSheet', $scopeToClassroom)->get()->all()
-            : Grade::query()->with('gradeSheet.subject')->whereNotNull('score')->whereHas('gradeSheet', $scopeToClassroom)->get()->all();
+            ? PrimaryGrade::query()->with('primarySubject')
+                ->whereNotNull('score')
+                ->whereHas('gradeSheet', $scopeGradeSheets)
+                ->whereHas('student.enrollments', fn ($query) => $query->where('classroom_id', $classroom->id)->where('status', 'active'))
+                ->get()->all()
+            : Grade::query()->with('gradeSheet.subject')
+                ->whereNotNull('score')
+                ->whereHas('gradeSheet', fn ($query) => $scopeGradeSheets($query->where('classroom_id', $classroom->id)))
+                ->get()->all();
 
         $gradesByStudent = collect($gradeRows)->groupBy('student_id');
 
@@ -81,7 +87,7 @@ class ReportCardService
         $this->assertCoefficientsConfigured($classroom, $gradesByStudent, $coefficients);
 
         $averages = $gradesByStudent
-            ->map(fn (Collection $grades) => $this->generalAverage($grades, $coefficients))
+            ->map(fn (Collection $grades) => $this->generalAverage($grades, $coefficients, $classroom))
             ->filter(fn (?float $average) => $average !== null)
             ->sortDesc();
 
@@ -131,17 +137,23 @@ class ReportCardService
             return collect();
         }
 
-        $scopeToReportCard = function ($query) use ($reportCard): void {
-            $query->where('classroom_id', $reportCard->classroom_id);
-
-            $reportCard->term_id !== null
-                ? $query->where('term_id', $reportCard->term_id)
-                : $query->where('composition_number', $reportCard->composition_number);
-        };
-
+        // Déjà filtré par student_id : pour le primaire, pas besoin de
+        // re-filtrer par classe (une composition est commune à toutes les
+        // classes, et GradeSheet ne porte plus de classroom_id).
         $gradeRows = $classroom->level->cycle === Cycle::Primaire
-            ? PrimaryGrade::query()->with(['gradeSheet.classroom.level', 'primarySubject'])->where('student_id', $reportCard->student_id)->whereNotNull('score')->whereHas('gradeSheet', $scopeToReportCard)->get()->all()
-            : Grade::query()->with('gradeSheet.subject')->where('student_id', $reportCard->student_id)->whereNotNull('score')->whereHas('gradeSheet', $scopeToReportCard)->get()->all();
+            ? PrimaryGrade::query()->with('primarySubject')
+                ->where('student_id', $reportCard->student_id)
+                ->whereNotNull('score')
+                ->whereHas('gradeSheet', fn ($query) => $query->where('composition_number', $reportCard->composition_number))
+                ->get()->all()
+            : Grade::query()->with('gradeSheet.subject')
+                ->where('student_id', $reportCard->student_id)
+                ->whereNotNull('score')
+                ->whereHas('gradeSheet', function ($query) use ($reportCard): void {
+                    $query->where('classroom_id', $reportCard->classroom_id)
+                        ->where('term_id', $reportCard->term_id);
+                })
+                ->get()->all();
 
         $grades = collect($gradeRows);
 
@@ -152,7 +164,7 @@ class ReportCardService
         foreach ($grades->groupBy(fn (Grade|PrimaryGrade $grade) => $this->subjectKeyFor($grade)) as $subjectId => $subjectGrades) {
             $rows[] = new SubjectAverage(
                 $this->subjectFor($subjectGrades),
-                $this->weightedAverage($subjectGrades),
+                $this->weightedAverage($subjectGrades, $classroom),
                 $coefficients->get($subjectId),
             );
         }
@@ -243,13 +255,13 @@ class ReportCardService
      * @param  Collection<int, Grade|PrimaryGrade>  $grades
      * @param  Collection<int, float>  $coefficients
      */
-    private function generalAverage(Collection $grades, Collection $coefficients): ?float
+    private function generalAverage(Collection $grades, Collection $coefficients, Classroom $classroom): ?float
     {
         $weightedSum = 0.0;
         $totalCoefficient = 0.0;
 
         foreach ($grades->groupBy(fn (Grade|PrimaryGrade $grade) => $this->subjectKeyFor($grade)) as $subjectId => $subjectGrades) {
-            $subjectAverage = $this->weightedAverage($subjectGrades);
+            $subjectAverage = $this->weightedAverage($subjectGrades, $classroom);
 
             if ($subjectAverage === null) {
                 continue;
@@ -276,7 +288,7 @@ class ReportCardService
     /**
      * @param  Collection<int, Grade|PrimaryGrade>  $grades
      */
-    private function weightedAverage(Collection $grades): ?float
+    private function weightedAverage(Collection $grades, Classroom $classroom): ?float
     {
         $totalWeight = $grades->sum(fn (Grade|PrimaryGrade $grade) => (float) $grade->gradeSheet->weight);
 
@@ -285,7 +297,7 @@ class ReportCardService
         }
 
         $weightedSum = $grades->sum(
-            fn (Grade|PrimaryGrade $grade) => ((float) $grade->score / $this->maxScoreFor($grade)) * 20 * (float) $grade->gradeSheet->weight
+            fn (Grade|PrimaryGrade $grade) => ((float) $grade->score / $this->maxScoreFor($grade, $classroom)) * 20 * (float) $grade->gradeSheet->weight
         );
 
         return round($weightedSum / $totalWeight, 2);
@@ -293,12 +305,15 @@ class ReportCardService
 
     /**
      * Barème d'une note : celui de l'évaluation au secondaire, celui de la
-     * matière pour ce niveau au primaire (PrimarySubject.bareme_*).
+     * matière pour ce niveau au primaire (PrimarySubject.bareme_*). Le niveau
+     * primaire n'est plus lisible depuis l'évaluation (GradeSheet n'a plus de
+     * classe, commune à toutes) — il vient de la classe déjà résolue par
+     * l'appelant (generate()/subjectBreakdown()).
      */
-    private function maxScoreFor(Grade|PrimaryGrade $grade): float
+    private function maxScoreFor(Grade|PrimaryGrade $grade, Classroom $classroom): float
     {
         if ($grade instanceof PrimaryGrade) {
-            return $grade->primarySubject->bareme($grade->gradeSheet->classroom->level) ?? 20.0;
+            return $grade->primarySubject->bareme($classroom->level) ?? 20.0;
         }
 
         return (float) $grade->gradeSheet->max_score;
