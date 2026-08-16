@@ -246,6 +246,32 @@ test('pour un niveau CP1/CP2/CE1, la moyenne, le seuil de réussite et l’appr�
     expect(ReportCard::sole()->appreciation)->toBe('Très bien');
 });
 
+test('le total affiché n’est pas doublé quand le barème de la matière est déjà sur 10 (niveau CP1)', function () {
+    $classroom = Classroom::factory()->primaireLevel('CP1')->create([
+        'establishment_id' => $this->establishment->id,
+        'school_year_id' => $this->schoolYear->id,
+    ]);
+    $student = Student::factory()->create(['establishment_id' => $this->establishment->id]);
+    Enrollment::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'student_id' => $student->id,
+        'classroom_id' => $classroom->id,
+        'status' => 'active',
+    ]);
+
+    $column = PrimarySubject::coefficientColumn($classroom->level);
+    $baremeColumn = PrimarySubject::baremeColumn($classroom->level);
+    // Barème déjà sur 10, comme l'échelle de la composition à ce niveau.
+    $maths = PrimarySubject::factory()->create(['name' => 'Mathématiques', $column => 1, $baremeColumn => 10]);
+
+    $preview = Livewire::test(EnterStudent::class, ['gradeSheet' => $this->gradeSheet, 'student' => $student])
+        ->set("scores.{$maths->id}", '8')
+        ->viewData('preview');
+
+    expect($preview['totalPoints'])->toBe(8.0)
+        ->and($preview['average'])->toBe(8.0);
+});
+
 test('le résultat affiche « Admis(e) » si la moyenne atteint 10/20, « Refusé(e) » sinon', function () {
     $component = Livewire::test(EnterStudent::class, ['gradeSheet' => $this->gradeSheet, 'student' => $this->student])
         ->set("scores.{$this->maths->id}", '10')

@@ -209,6 +209,7 @@ class EnterStudent extends Component
     private function preview(): array
     {
         $level = $this->classroom->level;
+        $scale = $level->compositionAverageScale();
         $totalPoints = 0.0;
         $totalCoefficient = 0.0;
 
@@ -225,16 +226,17 @@ class EnterStudent extends Component
 
             $coefficient = $subject->coefficientFor($level) ?? 0.0;
             $bareme = $subject->bareme($level) ?? 20.0;
-            $normalized = ((float) $score / $bareme) * 20;
+            // Normalisé directement sur l'échelle du niveau (10 pour
+            // CP1/CP2/CE1, 20 sinon) — pas de passage par 20 puis mise à
+            // l'échelle, qui doublerait artificiellement le total affiché
+            // quand le barème de la matière est déjà sur 10.
+            $normalized = ((float) $score / $bareme) * $scale;
 
             $totalPoints += $normalized * $coefficient;
             $totalCoefficient += $coefficient;
         }
 
-        // Moyenne calculée sur 20 (chaque matière y est normalisée), ramenée
-        // à l'échelle du niveau : 10 pour CP1/CP2/CE1, 20 sinon.
-        $scale = $level->compositionAverageScale();
-        $average = $totalCoefficient > 0 ? round(($totalPoints / $totalCoefficient) * ($scale / 20), 2) : null;
+        $average = $totalCoefficient > 0 ? round($totalPoints / $totalCoefficient, 2) : null;
         $passingAverage = $scale / 2;
 
         return [
