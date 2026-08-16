@@ -26,6 +26,7 @@ class PrimaryGrade extends Model
         'student_id',
         'primary_subject_id',
         'score',
+        'is_absent',
         'uid_local',
         'uid_serveur',
         'device_id',
@@ -34,6 +35,7 @@ class PrimaryGrade extends Model
 
     protected $casts = [
         'score' => 'decimal:2',
+        'is_absent' => 'boolean',
         'client_updated_at' => 'datetime',
     ];
 

@@ -10,6 +10,7 @@ use App\Domain\Academics\Models\PrimarySubject;
 use App\Domain\Academics\Models\Subject;
 use App\Domain\Academics\Models\SubjectCoefficient;
 use App\Domain\Academics\Models\Term;
+use App\Domain\Grading\Models\AppreciationScale;
 use App\Domain\Grading\Models\Grade;
 use App\Domain\Grading\Models\PrimaryGrade;
 use App\Domain\Grading\Models\ReportCard;
@@ -112,6 +113,7 @@ class ReportCardService
                     'classroom_id' => $classroom->id,
                     'average' => $average,
                     'rank' => $rank,
+                    'appreciation' => AppreciationScale::forAverage($average)?->appreciation,
                     'generated_at' => now(),
                 ]
             ));

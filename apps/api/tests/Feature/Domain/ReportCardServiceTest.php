@@ -11,6 +11,7 @@ use App\Domain\Academics\Models\Term;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Models\Establishment;
+use App\Domain\Grading\Models\AppreciationScale;
 use App\Domain\Grading\Models\Grade;
 use App\Domain\Grading\Models\GradeSheet;
 use App\Domain\Grading\Models\PrimaryGrade;
@@ -270,6 +271,65 @@ test('le détail par matière (primaire) affiche le nom de la matière du catalo
         ->and($breakdown->first()->subject->name)->toBe('Éveil scientifique')
         ->and($breakdown->first()->average)->toBe(15.0)
         ->and($breakdown->first()->coefficient)->toBe(1.0);
+});
+
+test('generate() calcule l’appréciation depuis le barème pour le secondaire', function () {
+    AppreciationScale::factory()->create(['percentage' => 70, 'appreciation' => 'Bien']);
+    AppreciationScale::factory()->create(['percentage' => 0, 'appreciation' => 'Insuffisant']);
+
+    $establishment = Establishment::factory()->create();
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+    $term = Term::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+    $subject = Subject::factory()->create();
+
+    $sheet = GradeSheet::factory()->create([
+        'establishment_id' => $establishment->id,
+        'classroom_id' => $classroom->id,
+        'subject_id' => $subject->id,
+        'term_id' => $term->id,
+        'max_score' => 20,
+        'weight' => 1,
+    ]);
+
+    SubjectCoefficient::factory()->create(['establishment_id' => $establishment->id, 'level_id' => $classroom->level_id, 'serie_id' => null, 'subject_id' => $subject->id, 'coefficient' => 1]);
+
+    // 14/20 = 70 % → tranche « Bien ».
+    $student = makeGradedStudent($establishment, $classroom, $term, [[$sheet, 14]]);
+
+    $reportCard = (new ReportCardService)->generateForClassroomAndTerm($classroom, $term)->firstWhere('student_id', $student->id);
+
+    expect($reportCard->appreciation)->toBe('Bien');
+});
+
+test('generate() calcule l’appréciation depuis le barème pour le primaire', function () {
+    AppreciationScale::factory()->create(['percentage' => 50, 'appreciation' => 'Passable']);
+    AppreciationScale::factory()->create(['percentage' => 0, 'appreciation' => 'Insuffisant']);
+
+    $establishment = Establishment::factory()->create();
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $classroom = Classroom::factory()->primaire()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+    $column = PrimarySubject::coefficientColumn($classroom->level);
+    $baremeColumn = PrimarySubject::baremeColumn($classroom->level);
+    $subject = PrimarySubject::factory()->create([$column => 1, $baremeColumn => 20]);
+
+    $sheet = GradeSheet::factory()->create([
+        'establishment_id' => $establishment->id,
+        'classroom_id' => null,
+        'subject_id' => null,
+        'primary_subject_id' => null,
+        'term_id' => null,
+        'composition_number' => 1,
+    ]);
+
+    $student = Student::factory()->create(['establishment_id' => $establishment->id]);
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'student_id' => $student->id, 'classroom_id' => $classroom->id, 'status' => 'active']);
+    // 10/20 = 50 % → tranche « Passable ».
+    PrimaryGrade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $sheet->id, 'student_id' => $student->id, 'primary_subject_id' => $subject->id, 'score' => 10]);
+
+    $reportCard = (new ReportCardService)->generateForClassroomAndComposition($classroom, 1)->first();
+
+    expect($reportCard->appreciation)->toBe('Passable');
 });
 
 test('la génération de bulletin est refusée pour une classe préscolaire', function () {

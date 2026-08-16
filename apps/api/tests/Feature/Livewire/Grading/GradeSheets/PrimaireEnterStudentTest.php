@@ -10,6 +10,7 @@ use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Enums\EstablishmentType;
 use App\Domain\Establishments\Models\Establishment;
+use App\Domain\Grading\Models\AppreciationScale;
 use App\Domain\Grading\Models\GradeSheet;
 use App\Domain\Grading\Models\PrimaryGrade;
 use App\Domain\Grading\Models\ReportCard;
@@ -49,13 +50,15 @@ beforeEach(function () {
     $baremeColumn = PrimarySubject::baremeColumn($this->classroom->level);
     $this->maths = PrimarySubject::factory()->create(['name' => 'Mathématiques', $column => 4, $baremeColumn => 20]);
     $this->francais = PrimarySubject::factory()->create(['name' => 'Français', $column => 1, $baremeColumn => 10]);
+
+    AppreciationScale::factory()->create(['percentage' => 80, 'appreciation' => 'Très bien']);
+    AppreciationScale::factory()->create(['percentage' => 0, 'appreciation' => 'Insuffisant']);
 });
 
 test('les notes de plusieurs matières sont enregistrées pour l’élève sous une même composition', function () {
     Livewire::test(EnterStudent::class, ['gradeSheet' => $this->gradeSheet, 'student' => $this->student])
         ->set("scores.{$this->maths->id}", '16')
         ->set("scores.{$this->francais->id}", '8')
-        ->set('appreciation', 'Bon trimestre')
         ->call('save')
         ->assertHasNoErrors();
 
@@ -69,32 +72,31 @@ test('les notes de plusieurs matières sont enregistrées pour l’élève sous 
         ->and((float) $francaisGrade->score)->toBe(8.0);
 });
 
-test('l’appréciation est enregistrée sur le ReportCard sans moyenne officielle', function () {
+test('l’appréciation est calculée depuis le barème et enregistrée sur le ReportCard sans moyenne officielle', function () {
+    // Maths seule : 16/20, coef 4 → moyenne 16 → 80 % → « Très bien ».
     Livewire::test(EnterStudent::class, ['gradeSheet' => $this->gradeSheet, 'student' => $this->student])
         ->set("scores.{$this->maths->id}", '16')
-        ->set('appreciation', 'Bon trimestre')
         ->call('save')
         ->assertHasNoErrors();
 
     $reportCard = ReportCard::sole();
 
-    expect($reportCard->appreciation)->toBe('Bon trimestre')
+    expect($reportCard->appreciation)->toBe('Très bien')
         ->and($reportCard->average)->toBeNull()
         ->and($reportCard->rank)->toBeNull();
 });
 
-test('générer officiellement les bulletins après la saisie ne perd pas l’appréciation', function () {
+test('générer officiellement les bulletins après la saisie recalcule la même appréciation', function () {
     Livewire::test(EnterStudent::class, ['gradeSheet' => $this->gradeSheet, 'student' => $this->student])
         ->set("scores.{$this->maths->id}", '16')
         ->set("scores.{$this->francais->id}", '8')
-        ->set('appreciation', 'Bon trimestre')
         ->call('save');
 
     (new ReportCardService)->generateForClassroomAndComposition($this->classroom, 1);
 
     $reportCard = ReportCard::sole();
 
-    expect($reportCard->appreciation)->toBe('Bon trimestre')
+    expect($reportCard->appreciation)->toBe('Très bien')
         ->and($reportCard->average)->not->toBeNull();
 });
 
@@ -106,19 +108,8 @@ test('les notes déjà saisies sont préchargées à l’ouverture de l’écran
         'primary_subject_id' => $this->maths->id,
         'score' => 12,
     ]);
-    ReportCard::factory()->create([
-        'establishment_id' => $this->establishment->id,
-        'student_id' => $this->student->id,
-        'classroom_id' => $this->classroom->id,
-        'school_year_id' => $this->schoolYear->id,
-        'term_id' => null,
-        'composition_number' => 1,
-        'appreciation' => 'Peut mieux faire',
-    ]);
-
     Livewire::test(EnterStudent::class, ['gradeSheet' => $this->gradeSheet, 'student' => $this->student])
-        ->assertSet("scores.{$this->maths->id}", '12.00')
-        ->assertSet('appreciation', 'Peut mieux faire');
+        ->assertSet("scores.{$this->maths->id}", '12.00');
 });
 
 test('l’aperçu en direct calcule la moyenne pondérée par coefficient et barème', function () {
@@ -162,4 +153,58 @@ test('un enseignant affecté à la classe de l’élève peut noter même s’il
         ->assertHasNoErrors();
 
     expect(PrimaryGrade::where('primary_subject_id', $this->maths->id)->sole()->score)->toEqualWithDelta(15.0, 0.001);
+});
+
+test('une matière cochée absente est ignorée dans la moyenne et enregistrée sans note', function () {
+    $component = Livewire::test(EnterStudent::class, ['gradeSheet' => $this->gradeSheet, 'student' => $this->student])
+        ->set("scores.{$this->francais->id}", '8')
+        ->set("absences.{$this->maths->id}", true);
+
+    expect($component->viewData('preview')['average'])->toBe(16.0);
+
+    $component->call('save')->assertHasNoErrors();
+
+    $mathsGrade = PrimaryGrade::where('primary_subject_id', $this->maths->id)->sole();
+
+    expect($mathsGrade->is_absent)->toBeTrue()
+        ->and($mathsGrade->score)->toBeNull();
+});
+
+test('cocher « absent à la composition » marque toutes les matières absentes et le résultat affiche « Absence »', function () {
+    $component = Livewire::test(EnterStudent::class, ['gradeSheet' => $this->gradeSheet, 'student' => $this->student])
+        ->set("scores.{$this->maths->id}", '16')
+        ->set('absentGenerale', true);
+
+    expect($component->get('absences'))->toEqualCanonicalizing([$this->maths->id => true, $this->francais->id => true])
+        ->and($component->viewData('preview')['result'])->toBe('Absence');
+
+    $component->call('save')->assertHasNoErrors();
+
+    expect(PrimaryGrade::where('primary_subject_id', $this->maths->id)->sole()->is_absent)->toBeTrue()
+        ->and(PrimaryGrade::where('primary_subject_id', $this->francais->id)->sole()->is_absent)->toBeTrue();
+});
+
+test('l’appréciation en aperçu suit le barème et disparaît si l’élève est absent', function () {
+    $component = Livewire::test(EnterStudent::class, ['gradeSheet' => $this->gradeSheet, 'student' => $this->student])
+        ->set("scores.{$this->maths->id}", '16')
+        ->set("scores.{$this->francais->id}", '8');
+
+    expect($component->viewData('preview')['appreciation'])->toBe('Très bien');
+
+    $component->set('absentGenerale', true);
+
+    expect($component->viewData('preview')['appreciation'])->toBeNull();
+});
+
+test('le résultat affiche « Admis(e) » si la moyenne atteint 10/20, « Refusé(e) » sinon', function () {
+    $component = Livewire::test(EnterStudent::class, ['gradeSheet' => $this->gradeSheet, 'student' => $this->student])
+        ->set("scores.{$this->maths->id}", '10')
+        ->set("scores.{$this->francais->id}", '5');
+
+    expect($component->viewData('preview')['result'])->toBe('Admis(e)');
+
+    $component->set("scores.{$this->maths->id}", '9')
+        ->set("scores.{$this->francais->id}", '4');
+
+    expect($component->viewData('preview')['result'])->toBe('Refusé(e)');
 });

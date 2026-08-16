@@ -17,6 +17,7 @@ use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\Foundation;
 use App\Domain\Establishments\Models\Inspection;
 use App\Domain\Establishments\Models\SaasAdmin;
+use App\Domain\Grading\Models\AppreciationScale;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -72,6 +73,20 @@ class DatabaseSeeder extends Seeder
 
         foreach ($series as $serie) {
             Serie::create($serie);
+        }
+
+        $appreciationScales = [
+            ['percentage' => 90, 'appreciation' => 'Excellent', 'tableau_honneur' => true, 'tableau_excellence' => true, 'felicitation' => true, 'encouragement' => false],
+            ['percentage' => 80, 'appreciation' => 'Très bien', 'tableau_honneur' => true, 'tableau_excellence' => false, 'felicitation' => true, 'encouragement' => false],
+            ['percentage' => 70, 'appreciation' => 'Bien', 'tableau_honneur' => true, 'tableau_excellence' => false, 'felicitation' => false, 'encouragement' => false],
+            ['percentage' => 60, 'appreciation' => 'Assez bien', 'tableau_honneur' => false, 'tableau_excellence' => false, 'felicitation' => false, 'encouragement' => true],
+            ['percentage' => 50, 'appreciation' => 'Passable', 'tableau_honneur' => false, 'tableau_excellence' => false, 'felicitation' => false, 'encouragement' => false],
+            ['percentage' => 30, 'appreciation' => 'Médiocre', 'tableau_honneur' => false, 'tableau_excellence' => false, 'felicitation' => false, 'encouragement' => false],
+            ['percentage' => 0, 'appreciation' => 'Insuffisant', 'tableau_honneur' => false, 'tableau_excellence' => false, 'felicitation' => false, 'encouragement' => false],
+        ];
+
+        foreach ($appreciationScales as $appreciationScale) {
+            AppreciationScale::create($appreciationScale);
         }
 
         $directions = [

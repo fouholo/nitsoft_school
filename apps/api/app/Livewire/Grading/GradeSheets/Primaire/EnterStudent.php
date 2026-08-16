@@ -9,6 +9,7 @@ use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\PrimarySubject;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Support\RolePermissions;
+use App\Domain\Grading\Models\AppreciationScale;
 use App\Domain\Grading\Models\GradeSheet;
 use App\Domain\Grading\Models\PrimaryGrade;
 use App\Domain\Grading\Models\ReportCard;
@@ -23,6 +24,14 @@ use Livewire\Component;
 #[Title('Saisie des notes')]
 class EnterStudent extends Component
 {
+    /**
+     * Seuil de réussite : moyenne >= 10/20, ce qui correspond à la fois au
+     * seuil « 5/10 » utilisé pour CP1/CP2/CE1 et au seuil « 10/20 » utilisé
+     * pour CE2/CM1/CM2 dans cet établissement — les deux sont la même
+     * fraction (50 %), la moyenne étant toujours normalisée sur 20 ici.
+     */
+    private const PASSING_AVERAGE = 10.0;
+
     public GradeSheet $gradeSheet;
 
     public Student $student;
@@ -32,7 +41,10 @@ class EnterStudent extends Component
     /** @var array<int, string> */
     public array $scores = [];
 
-    public string $appreciation = '';
+    /** @var array<int, bool> */
+    public array $absences = [];
+
+    public bool $absentGenerale = false;
 
     public bool $justSaved = false;
 
@@ -60,15 +72,10 @@ class EnterStudent extends Component
         foreach ($this->subjects() as $subject) {
             $grade = $existingGrades->get($subject->id);
             $this->scores[$subject->id] = $grade?->score !== null ? (string) $grade->score : '';
+            $this->absences[$subject->id] = $grade !== null && $grade->is_absent;
         }
 
-        $reportCard = ReportCard::query()
-            ->where('student_id', $student->id)
-            ->where('school_year_id', $classroom->school_year_id)
-            ->where('composition_number', $gradeSheet->composition_number)
-            ->first();
-
-        $this->appreciation = $reportCard->appreciation ?? '';
+        $this->absentGenerale = $this->absences !== [] && ! in_array(false, $this->absences, true);
     }
 
     /**
@@ -79,6 +86,22 @@ class EnterStudent extends Component
     {
         return $user->hasAdminRightsOnCurrentEstablishment()
             || RolePermissions::can($user->currentRole(), 'grades.enter');
+    }
+
+    /**
+     * Case « absent à la composition » : coche l'absence de toutes les
+     * matières en une fois. Le décochement reste manuel, matière par
+     * matière, pour éviter de perdre une saisie déjà faite par erreur.
+     */
+    public function updatedAbsentGenerale(bool $value): void
+    {
+        if (! $value) {
+            return;
+        }
+
+        foreach ($this->subjects() as $subject) {
+            $this->absences[$subject->id] = true;
+        }
     }
 
     /**
@@ -97,21 +120,31 @@ class EnterStudent extends Component
         $user = Auth::user();
         abort_unless($this->hasBroadGradeAccess($user) || $user->isAssignedToClassroom($this->classroom->id), 403);
 
-        $rules = ['appreciation' => ['nullable', 'string', 'max:1000']];
+        $rules = [];
         foreach (array_keys($this->scores) as $subjectId) {
+            if ($this->absences[$subjectId] ?? false) {
+                continue;
+            }
             $rules["scores.{$subjectId}"] = ['nullable', 'numeric', 'min:0'];
         }
 
-        $this->validate($rules);
+        if ($rules !== []) {
+            $this->validate($rules);
+        }
 
         foreach ($this->scores as $subjectId => $score) {
+            $isAbsent = $this->absences[$subjectId] ?? false;
+
             PrimaryGrade::updateOrCreate(
                 [
                     'grade_sheet_id' => $this->gradeSheet->id,
                     'student_id' => $this->student->id,
                     'primary_subject_id' => $subjectId,
                 ],
-                ['score' => $score !== '' ? $score : null]
+                [
+                    'score' => ! $isAbsent && $score !== '' ? $score : null,
+                    'is_absent' => $isAbsent,
+                ]
             );
         }
 
@@ -124,7 +157,7 @@ class EnterStudent extends Component
             [
                 'establishment_id' => $this->gradeSheet->establishment_id,
                 'classroom_id' => $this->classroom->id,
-                'appreciation' => $this->appreciation !== '' ? $this->appreciation : null,
+                'appreciation' => $this->preview()['appreciation'],
             ]
         );
 
@@ -135,7 +168,7 @@ class EnterStudent extends Component
      * Aperçu en direct — mêmes formules que ReportCardService::generalAverage(),
      * calculé à partir des notes en cours de saisie (non persisté).
      *
-     * @return array{totalPoints: float, totalCoefficient: float, average: ?float}
+     * @return array{totalPoints: float, totalCoefficient: float, average: ?float, result: string, appreciation: ?string}
      */
     private function preview(): array
     {
@@ -144,6 +177,10 @@ class EnterStudent extends Component
         $totalCoefficient = 0.0;
 
         foreach ($this->subjects() as $subject) {
+            if ($this->absences[$subject->id] ?? false) {
+                continue;
+            }
+
             $score = $this->scores[$subject->id] ?? '';
 
             if ($score === '' || ! is_numeric($score)) {
@@ -158,10 +195,18 @@ class EnterStudent extends Component
             $totalCoefficient += $coefficient;
         }
 
+        $average = $totalCoefficient > 0 ? round($totalPoints / $totalCoefficient, 2) : null;
+
         return [
             'totalPoints' => round($totalPoints, 2),
             'totalCoefficient' => $totalCoefficient,
-            'average' => $totalCoefficient > 0 ? round($totalPoints / $totalCoefficient, 2) : null,
+            'average' => $average,
+            'result' => match (true) {
+                $average === null => 'Absence',
+                $average >= self::PASSING_AVERAGE => 'Admis(e)',
+                default => 'Refusé(e)',
+            },
+            'appreciation' => $average !== null ? AppreciationScale::forAverage($average)?->appreciation : null,
         ];
     }
 
