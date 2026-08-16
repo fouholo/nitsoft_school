@@ -15,7 +15,7 @@
         table.grades tr.total td { background-color: #f1f5f9; font-weight: bold; }
         .notes-table th:nth-child(2), .notes-table td:nth-child(2),
         .notes-table th:nth-child(3), .notes-table td:nth-child(3) { text-align: center; }
-        .results-table th, .results-table td { text-align: center; }
+        table.grades.results-table th, table.grades.results-table td { text-align: center; }
         .section-title { font-weight: bold; margin: 10px 0 4px; }
         .footer { margin-top: 24px; font-size: 10px; }
         .signatures td { text-align: center; vertical-align: top; padding-top: 8px; }
