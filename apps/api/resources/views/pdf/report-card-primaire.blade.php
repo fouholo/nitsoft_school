@@ -7,6 +7,14 @@
         @page { margin-top: 0.6cm; margin-bottom: 0.6cm; }
         body { font-family: "DejaVu Sans", sans-serif; font-size: 10px; color: #1e293b; }
         h1 { font-size: 13px; text-align: center; margin: 16px 0; text-transform: uppercase; }
+        table.report-header { width: 100%; border-collapse: collapse; margin-bottom: 16px; table-layout: fixed; }
+        table.report-header td { vertical-align: top; text-align: center; }
+        table.report-header td.left { width: 68%; }
+        table.report-header td.right { width: 32%; }
+        table.report-header p { margin: 0; font-size: 7px; }
+        table.report-header p.establishment-name { margin-top: 4px; font-size: 14px; font-weight: bold; }
+        table.report-header img.logo { height: 45px; margin-top: 4px; }
+        table.report-header img.armoirie { height: 65px; }
         .identity td { padding: 1px 0; }
         .identity td.label { color: #64748b; width: 80px; }
         table.grades { width: 100%; border-collapse: collapse; margin: 12px 0; }
@@ -24,7 +32,37 @@
     </style>
 </head>
 <body>
-    @include('pdf.partials.reports-header', ['establishment' => $reportCard->establishment, 'generalInformation' => $generalInformation, 'showRepublicColumn' => false])
+    @php
+        $establishment = $reportCard->establishment;
+        $headerLines = [];
+        if ($generalInformation->nom_ministere) {
+            $headerLines[] = \Illuminate\Support\Str::upper($generalInformation->nom_ministere);
+        }
+        if ($establishment->inspection?->direction) {
+            $headerLines[] = 'DIRECTION REGIONALE '.\Illuminate\Support\Str::upper($establishment->inspection->direction->direction_name);
+        }
+        if ($establishment->type === \App\Domain\Establishments\Enums\EstablishmentType::PrescolairePrimaire && $establishment->inspection) {
+            $headerLines[] = "INSPECTION DE L'ENSEIGNEMENT PRESCOLAIRE ET PRIMAIRE ".\Illuminate\Support\Str::upper($establishment->inspection->inspection_name);
+        }
+    @endphp
+    <table class="report-header">
+        <tr>
+            <td class="left">
+                @foreach ($headerLines as $line)
+                    <p>{{ $line }}</p>
+                @endforeach
+                <p class="establishment-name">{{ $establishment->name }}</p>
+                @if ($establishment->logo_path)
+                    <img class="logo" src="{{ public_path('storage/'.$establishment->logo_path) }}">
+                @endif
+            </td>
+            <td class="right">
+                @if ($generalInformation->armoirie_path)
+                    <img class="armoirie" src="{{ public_path('storage/'.$generalInformation->armoirie_path) }}">
+                @endif
+            </td>
+        </tr>
+    </table>
 
     <h1>Relevé de notes - Composition N°{{ $reportCard->composition_number }}</h1>
 

@@ -82,22 +82,28 @@ test('un bulletin primaire est rendu via le gabarit A5 dédié, un bulletin seco
     expect($response->headers->get('Content-Type'))->toContain('application/pdf');
 });
 
-test('l’en-tête n’affiche pas la colonne République/armoiries', function () {
+test('l’en-tête n’affiche pas de texte République, seulement le logo à gauche et l’armoirie à droite', function () {
     $establishment = Establishment::factory()->create();
     actingInEstablishment($establishment);
 
     $reportCard = makePrimaireReportCard($establishment);
     $reportCard->loadMissing(['student', 'classroom.level', 'establishment']);
 
+    $generalInformation = \App\Domain\Establishments\Models\GeneralInformation::current();
+    $generalInformation->update(['armoirie_path' => 'general-information/armoirie.png']);
+
     $html = view('pdf.report-card-primaire', [
         'reportCard' => $reportCard,
         'rows' => app(ReportCardService::class)->primaryGradeRows($reportCard),
-        'generalInformation' => \App\Domain\Establishments\Models\GeneralInformation::current(),
+        'generalInformation' => $generalInformation,
     ])->render();
 
     expect($html)->not->toContain('REPUBLIQUE DE')
         ->and($html)->not->toContain('Union-Discipline-Travail')
-        ->and($html)->toContain('width: 100%; vertical-align:top; text-align:center;');
+        ->and($html)->toContain('td class="left"')
+        ->and($html)->toContain('td class="right"')
+        ->and($html)->toContain('class="armoirie"')
+        ->and($html)->toContain('class="establishment-name"');
 });
 
 test('la civilité et le résultat s’accordent au genre de l’élève', function (?string $gender, string $expectedCivilite, string $expectedResultat) {
