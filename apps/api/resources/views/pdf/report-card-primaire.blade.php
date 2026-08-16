@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <title>Relevé de notes</title>
     <style>
+        @page { margin-top: 0.6cm; margin-bottom: 0.6cm; }
         body { font-family: "DejaVu Sans", sans-serif; font-size: 10px; color: #1e293b; }
         h1 { font-size: 13px; text-align: center; margin: 16px 0; text-transform: uppercase; }
         .identity td { padding: 1px 0; }
