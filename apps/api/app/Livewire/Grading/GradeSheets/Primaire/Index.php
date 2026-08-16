@@ -6,7 +6,6 @@ namespace App\Livewire\Grading\GradeSheets\Primaire;
 
 use App\Domain\Academics\Enums\Cycle;
 use App\Domain\Academics\Models\Classroom;
-use App\Domain\Academics\Models\PrimarySubject;
 use App\Domain\Academics\Models\TeacherAssignment;
 use App\Domain\Establishments\Support\RolePermissions;
 use App\Domain\Grading\Models\GradeSheet;
@@ -21,15 +20,9 @@ class Index extends Component
 
     public ?int $classroom_id = null;
 
-    public ?int $primary_subject_id = null;
-
     public ?int $composition_number = null;
 
     public string $title = '';
-
-    public float $max_score = 20.0;
-
-    public float $weight = 1.0;
 
     public string $graded_on = '';
 
@@ -42,17 +35,13 @@ class Index extends Component
     {
         $this->authorize('create', GradeSheet::class);
 
-        $this->reset(['classroom_id', 'primary_subject_id', 'composition_number', 'title']);
-        $this->max_score = 20.0;
-        $this->weight = 1.0;
+        $this->reset(['classroom_id', 'composition_number', 'title']);
         $this->graded_on = now()->toDateString();
         $this->showForm = true;
     }
 
     public function updatedClassroomId(): void
     {
-        $this->weight = 1.0;
-        $this->primary_subject_id = null;
         $this->composition_number = null;
     }
 
@@ -62,11 +51,8 @@ class Index extends Component
 
         $data = $this->validate([
             'classroom_id' => ['required', 'exists:classrooms,id'],
-            'primary_subject_id' => ['required', 'exists:primary_subjects,id'],
             'composition_number' => ['required', 'integer', 'min:1', 'max:10'],
             'title' => ['required', 'string', 'max:255'],
-            'max_score' => ['required', 'numeric', 'min:1', 'max:1000'],
-            'weight' => ['required', 'numeric', 'min:0.5', 'max:20'],
             'graded_on' => ['required', 'date'],
         ]);
 
@@ -91,14 +77,6 @@ class Index extends Component
             ]);
         }
 
-        $primarySubject = PrimarySubject::findOrFail($data['primary_subject_id']);
-
-        if ($primarySubject->coefficientFor($classroom->level) === null) {
-            throw ValidationException::withMessages([
-                'primary_subject_id' => "Cette matière n'est pas configurée pour ce niveau.",
-            ]);
-        }
-
         GradeSheet::create([...$data, 'type' => 'composition', 'teacher_id' => $user->id]);
 
         $this->showForm = false;
@@ -110,10 +88,9 @@ class Index extends Component
     }
 
     /**
-     * Accès large aux évaluations (toutes classes/matières, pas seulement
-     * ses propres affectations) : admin classique (vue seule depuis ce
-     * chantier) ou educateur (vue + saisie) — voir
-     * RolePermissions::MATRIX['grades.enter'].
+     * Accès large aux évaluations (toutes classes, pas seulement ses propres
+     * affectations) : admin classique (vue seule depuis ce chantier) ou
+     * educateur (vue + saisie) — voir RolePermissions::MATRIX['grades.enter'].
      */
     private function hasBroadGradeAccess(User $user): bool
     {
@@ -128,7 +105,7 @@ class Index extends Component
         $isAdmin = $this->hasBroadGradeAccess($user);
 
         $gradeSheets = GradeSheet::query()
-            ->with(['classroom', 'primarySubject'])
+            ->with('classroom')
             ->whereHas('classroom.level', fn ($query) => $query->where('cycle', Cycle::Primaire))
             ->when(! $isAdmin, fn ($query) => $query->where('teacher_id', $user->id))
             ->orderByDesc('graded_on')
@@ -140,23 +117,11 @@ class Index extends Component
             ->with('classroom')
             ->get();
 
-        $classroom = $this->classroom_id ? Classroom::find($this->classroom_id) : null;
-
-        // Une affectation primaire porte toujours sur la classe entière (pas
-        // de matière) : si l'enseignant a une affectation sur cette classe,
-        // il peut noter n'importe quelle matière configurée pour ce niveau.
-        $isAssignedToClassroom = $classroom && ($isAdmin || $assignments->contains(fn (TeacherAssignment $a) => $a->classroom_id === $classroom->id));
-
-        $subjects = $isAssignedToClassroom
-            ? PrimarySubject::whereNotNull(PrimarySubject::coefficientColumn($classroom->level))->orderBy('name')->get()
-            : collect();
-
         return view('livewire.grading.grade-sheets.primaire.index', [
             'gradeSheets' => $gradeSheets,
             'classrooms' => $isAdmin
                 ? Classroom::gradable()->whereHas('level', fn ($query) => $query->where('cycle', Cycle::Primaire))->orderBy('name')->get()
                 : $assignments->pluck('classroom')->unique('id'),
-            'subjects' => $subjects,
         ]);
     }
 }

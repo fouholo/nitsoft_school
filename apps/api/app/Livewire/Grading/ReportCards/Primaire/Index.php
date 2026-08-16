@@ -54,6 +54,7 @@ class Index extends Component
                 ->where('classroom_id', $this->classroom_id)
                 ->where('school_year_id', $classroom?->school_year_id)
                 ->where('composition_number', $this->composition_number)
+                ->whereNotNull('average')
                 ->orderBy('rank')
                 ->get();
         }

@@ -163,28 +163,18 @@ test('la moyenne pondérée et le rang sont calculés correctement par compositi
     $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
     $classroom = Classroom::factory()->primaire()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $column = PrimarySubject::coefficientColumn($classroom->level);
-    $subjectA = PrimarySubject::factory()->create([$column => 1]);
-    $subjectB = PrimarySubject::factory()->create([$column => 1]);
+    $baremeColumn = PrimarySubject::baremeColumn($classroom->level);
+    $subjectA = PrimarySubject::factory()->create([$column => 1, $baremeColumn => 20]);
+    $subjectB = PrimarySubject::factory()->create([$column => 1, $baremeColumn => 20]);
 
-    $sheetA = GradeSheet::factory()->create([
+    // Une seule évaluation ("composition") couvre toutes les matières.
+    $sheet = GradeSheet::factory()->create([
         'establishment_id' => $establishment->id,
         'classroom_id' => $classroom->id,
         'subject_id' => null,
-        'primary_subject_id' => $subjectA->id,
+        'primary_subject_id' => null,
         'term_id' => null,
         'composition_number' => 1,
-        'max_score' => 20,
-        'weight' => 1,
-    ]);
-    $sheetB = GradeSheet::factory()->create([
-        'establishment_id' => $establishment->id,
-        'classroom_id' => $classroom->id,
-        'subject_id' => null,
-        'primary_subject_id' => $subjectB->id,
-        'term_id' => null,
-        'composition_number' => 1,
-        'max_score' => 20,
-        'weight' => 1,
     ]);
 
     // Une composition existante ailleurs (n° 2) ne doit pas être mélangée à la n° 1.
@@ -192,18 +182,16 @@ test('la moyenne pondérée et le rang sont calculés correctement par compositi
         'establishment_id' => $establishment->id,
         'classroom_id' => $classroom->id,
         'subject_id' => null,
-        'primary_subject_id' => $subjectA->id,
+        'primary_subject_id' => null,
         'term_id' => null,
         'composition_number' => 2,
-        'max_score' => 20,
-        'weight' => 1,
     ]);
 
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
     Enrollment::factory()->create(['establishment_id' => $establishment->id, 'student_id' => $student->id, 'classroom_id' => $classroom->id, 'status' => 'active']);
 
-    PrimaryGrade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $sheetA->id, 'student_id' => $student->id, 'primary_subject_id' => $subjectA->id, 'score' => 16]);
-    PrimaryGrade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $sheetB->id, 'student_id' => $student->id, 'primary_subject_id' => $subjectB->id, 'score' => 10]);
+    PrimaryGrade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $sheet->id, 'student_id' => $student->id, 'primary_subject_id' => $subjectA->id, 'score' => 16]);
+    PrimaryGrade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $sheet->id, 'student_id' => $student->id, 'primary_subject_id' => $subjectB->id, 'score' => 10]);
     PrimaryGrade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $otherSheet->id, 'student_id' => $student->id, 'primary_subject_id' => $subjectA->id, 'score' => 2]);
 
     $reportCards = (new ReportCardService)->generateForClassroomAndComposition($classroom, 1);
@@ -223,17 +211,16 @@ test('le détail par matière (primaire) affiche le nom de la matière du catalo
     $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
     $classroom = Classroom::factory()->primaire()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $column = PrimarySubject::coefficientColumn($classroom->level);
-    $subject = PrimarySubject::factory()->create(['name' => 'Éveil scientifique', $column => 1]);
+    $baremeColumn = PrimarySubject::baremeColumn($classroom->level);
+    $subject = PrimarySubject::factory()->create(['name' => 'Éveil scientifique', $column => 1, $baremeColumn => 20]);
 
     $sheet = GradeSheet::factory()->create([
         'establishment_id' => $establishment->id,
         'classroom_id' => $classroom->id,
         'subject_id' => null,
-        'primary_subject_id' => $subject->id,
+        'primary_subject_id' => null,
         'term_id' => null,
         'composition_number' => 1,
-        'max_score' => 20,
-        'weight' => 1,
     ]);
 
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);

@@ -24,6 +24,12 @@ class PrimarySubject extends Model
         'coefficient_ce2',
         'coefficient_cm1',
         'coefficient_cm2',
+        'bareme_cp1',
+        'bareme_cp2',
+        'bareme_ce1',
+        'bareme_ce2',
+        'bareme_cm1',
+        'bareme_cm2',
         'uid_local',
         'uid_serveur',
         'device_id',
@@ -37,6 +43,12 @@ class PrimarySubject extends Model
         'coefficient_ce2' => 'decimal:2',
         'coefficient_cm1' => 'decimal:2',
         'coefficient_cm2' => 'decimal:2',
+        'bareme_cp1' => 'decimal:2',
+        'bareme_cp2' => 'decimal:2',
+        'bareme_ce1' => 'decimal:2',
+        'bareme_ce2' => 'decimal:2',
+        'bareme_cm1' => 'decimal:2',
+        'bareme_cm2' => 'decimal:2',
         'client_updated_at' => 'datetime',
     ];
 
@@ -45,22 +57,39 @@ class PrimarySubject extends Model
         return '224';
     }
 
-    public static function coefficientColumn(Level $level): string
+    private static function levelSuffix(Level $level): string
     {
         return match ($level->level) {
-            'CP1' => 'coefficient_cp1',
-            'CP2' => 'coefficient_cp2',
-            'CE1' => 'coefficient_ce1',
-            'CE2' => 'coefficient_ce2',
-            'CM1' => 'coefficient_cm1',
-            'CM2' => 'coefficient_cm2',
+            'CP1' => 'cp1',
+            'CP2' => 'cp2',
+            'CE1' => 'ce1',
+            'CE2' => 'ce2',
+            'CM1' => 'cm1',
+            'CM2' => 'cm2',
             default => throw new \InvalidArgumentException("Niveau primaire inconnu : {$level->level}"),
         };
+    }
+
+    public static function coefficientColumn(Level $level): string
+    {
+        return 'coefficient_'.self::levelSuffix($level);
+    }
+
+    public static function baremeColumn(Level $level): string
+    {
+        return 'bareme_'.self::levelSuffix($level);
     }
 
     public function coefficientFor(Level $level): ?float
     {
         $value = $this->{self::coefficientColumn($level)};
+
+        return $value !== null ? (float) $value : null;
+    }
+
+    public function bareme(Level $level): ?float
+    {
+        $value = $this->{self::baremeColumn($level)};
 
         return $value !== null ? (float) $value : null;
     }

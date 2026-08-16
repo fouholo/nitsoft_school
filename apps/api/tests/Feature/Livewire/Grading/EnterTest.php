@@ -3,14 +3,12 @@
 declare(strict_types=1);
 
 use App\Domain\Academics\Models\Classroom;
-use App\Domain\Academics\Models\PrimarySubject;
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Grading\Models\Grade;
 use App\Domain\Grading\Models\GradeSheet;
-use App\Domain\Grading\Models\PrimaryGrade;
 use App\Livewire\Grading\GradeSheets\Enter;
 use Livewire\Livewire;
 
@@ -69,80 +67,4 @@ test('une note supérieure au barème est rejetée', function () {
         ->assertHasErrors("scores.{$this->student->id}");
 
     expect(Grade::count())->toBe(0);
-});
-
-test('une note primaire est enregistrée dans PrimaryGrade, pas dans Grade', function () {
-    $primaireClassroom = Classroom::factory()->primaire()->create([
-        'establishment_id' => $this->establishment->id,
-        'school_year_id' => $this->classroom->school_year_id,
-    ]);
-    $primaireStudent = Student::factory()->create(['establishment_id' => $this->establishment->id]);
-    Enrollment::factory()->create([
-        'establishment_id' => $this->establishment->id,
-        'student_id' => $primaireStudent->id,
-        'classroom_id' => $primaireClassroom->id,
-        'status' => 'active',
-    ]);
-    $primarySubject = PrimarySubject::factory()->create([PrimarySubject::coefficientColumn($primaireClassroom->level) => 1]);
-    $primaireGradeSheet = GradeSheet::factory()->create([
-        'establishment_id' => $this->establishment->id,
-        'classroom_id' => $primaireClassroom->id,
-        'subject_id' => null,
-        'primary_subject_id' => $primarySubject->id,
-        'term_id' => null,
-        'composition_number' => 1,
-        'type' => 'composition',
-        'max_score' => 20,
-    ]);
-
-    Livewire::test(Enter::class, ['gradeSheet' => $primaireGradeSheet])
-        ->set("scores.{$primaireStudent->id}", '17')
-        ->set("comments.{$primaireStudent->id}", 'Bon travail')
-        ->call('save')
-        ->assertHasNoErrors();
-
-    expect(Grade::count())->toBe(0);
-
-    $grade = PrimaryGrade::sole();
-
-    expect((float) $grade->score)->toBe(17.0)
-        ->and($grade->comment)->toBe('Bon travail')
-        ->and($grade->primary_subject_id)->toBe($primarySubject->id);
-});
-
-test('les notes primaire existantes sont préchargées à l’ouverture de l’écran', function () {
-    $primaireClassroom = Classroom::factory()->primaire()->create([
-        'establishment_id' => $this->establishment->id,
-        'school_year_id' => $this->classroom->school_year_id,
-    ]);
-    $primaireStudent = Student::factory()->create(['establishment_id' => $this->establishment->id]);
-    Enrollment::factory()->create([
-        'establishment_id' => $this->establishment->id,
-        'student_id' => $primaireStudent->id,
-        'classroom_id' => $primaireClassroom->id,
-        'status' => 'active',
-    ]);
-    $primarySubject = PrimarySubject::factory()->create([PrimarySubject::coefficientColumn($primaireClassroom->level) => 1]);
-    $primaireGradeSheet = GradeSheet::factory()->create([
-        'establishment_id' => $this->establishment->id,
-        'classroom_id' => $primaireClassroom->id,
-        'subject_id' => null,
-        'primary_subject_id' => $primarySubject->id,
-        'term_id' => null,
-        'composition_number' => 1,
-        'type' => 'composition',
-        'max_score' => 20,
-    ]);
-    PrimaryGrade::factory()->create([
-        'establishment_id' => $this->establishment->id,
-        'grade_sheet_id' => $primaireGradeSheet->id,
-        'student_id' => $primaireStudent->id,
-        'primary_subject_id' => $primarySubject->id,
-        'score' => 9,
-        'comment' => 'À revoir',
-    ]);
-
-    Livewire::test(Enter::class, ['gradeSheet' => $primaireGradeSheet])
-        ->assertSet("scores.{$primaireStudent->id}", '9.00')
-        ->assertSet("comments.{$primaireStudent->id}", 'À revoir');
 });

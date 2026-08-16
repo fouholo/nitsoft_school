@@ -32,6 +32,7 @@ class ReportCard extends Model
         'classroom_id',
         'average',
         'rank',
+        'appreciation',
         'generated_at',
         'pdf_path',
     ];

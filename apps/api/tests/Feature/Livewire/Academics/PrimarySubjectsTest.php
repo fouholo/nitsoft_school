@@ -15,7 +15,7 @@ beforeEach(function () {
     $this->actingAs($this->superAdmin);
 });
 
-test('un super admin peut créer une matière primaire avec des coefficients par niveau', function () {
+test('un super admin peut créer une matière primaire avec des coefficients et des barèmes par niveau', function () {
     Livewire::test(Index::class)
         ->call('create')
         ->set('name', 'Mathématiques')
@@ -23,6 +23,9 @@ test('un super admin peut créer une matière primaire avec des coefficients par
         ->set('coefficient_cp1', '2')
         ->set('coefficient_cp2', '2')
         ->set('coefficient_cm2', '3')
+        ->set('bareme_cp1', '20')
+        ->set('bareme_cp2', '20')
+        ->set('bareme_cm2', '10')
         ->call('save')
         ->assertHasNoErrors();
 
@@ -33,6 +36,9 @@ test('un super admin peut créer une matière primaire avec des coefficients par
         ->and((float) $subject->coefficient_cp2)->toBe(2.0)
         ->and($subject->coefficient_ce1)->toBeNull()
         ->and((float) $subject->coefficient_cm2)->toBe(3.0)
+        ->and((float) $subject->bareme_cp1)->toBe(20.0)
+        ->and($subject->bareme_ce1)->toBeNull()
+        ->and((float) $subject->bareme_cm2)->toBe(10.0)
         ->and($subject->uid_serveur)->toMatch('/^224\d{9}$/');
 });
 
@@ -66,17 +72,22 @@ test('l’abréviation est obligatoire', function () {
     expect(PrimarySubject::where('name', 'Matière sans abréviation')->exists())->toBeFalse();
 });
 
-test('modifier une matière met à jour ses coefficients', function () {
-    $subject = PrimarySubject::factory()->create(['coefficient_cp1' => 1]);
+test('modifier une matière met à jour ses coefficients et barèmes', function () {
+    $subject = PrimarySubject::factory()->create(['coefficient_cp1' => 1, 'bareme_cp1' => 20]);
 
     Livewire::test(Index::class)
         ->call('edit', $subject->id)
         ->assertSet('coefficient_cp1', '1.00')
+        ->assertSet('bareme_cp1', '20.00')
         ->set('coefficient_cp1', '4')
+        ->set('bareme_cp1', '10')
         ->call('save')
         ->assertHasNoErrors();
 
-    expect((float) $subject->refresh()->coefficient_cp1)->toBe(4.0);
+    $subject->refresh();
+
+    expect((float) $subject->coefficient_cp1)->toBe(4.0)
+        ->and((float) $subject->bareme_cp1)->toBe(10.0);
 });
 
 test('supprimer une matière la retire de la liste', function () {

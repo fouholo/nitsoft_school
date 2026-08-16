@@ -7,7 +7,6 @@ namespace App\Livewire\Grading\GradeSheets;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Grading\Models\Grade;
 use App\Domain\Grading\Models\GradeSheet;
-use App\Domain\Grading\Models\PrimaryGrade;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Livewire\Attributes\Layout;
@@ -34,14 +33,12 @@ class Enter extends Component
 
         $this->gradeSheet = $gradeSheet;
 
-        $existingGrades = $this->isPrimaire()
-            ? $gradeSheet->primaryGrades()->get()->keyBy('student_id')
-            : $gradeSheet->grades()->get()->keyBy('student_id');
+        $existingGrades = $gradeSheet->grades()->get()->keyBy('student_id');
 
         foreach ($this->students() as $student) {
             $grade = $existingGrades->get($student->id);
-            $score = $grade instanceof Grade || $grade instanceof PrimaryGrade ? $grade->score : null;
-            $comment = $grade instanceof Grade || $grade instanceof PrimaryGrade ? $grade->comment : '';
+            $score = $grade instanceof Grade ? $grade->score : null;
+            $comment = $grade instanceof Grade ? $grade->comment : '';
 
             $this->scores[$student->id] = $score !== null ? (string) $score : '';
             $this->comments[$student->id] = $comment ?? '';
@@ -60,30 +57,16 @@ class Enter extends Component
         Validator::make(['scores' => $this->scores], $rules)->validate();
 
         foreach ($this->scores as $studentId => $score) {
-            $attributes = [
-                'score' => $score !== '' ? $score : null,
-                'comment' => $this->comments[$studentId] !== '' ? $this->comments[$studentId] : null,
-            ];
-
-            if ($this->isPrimaire()) {
-                PrimaryGrade::updateOrCreate(
-                    ['grade_sheet_id' => $this->gradeSheet->id, 'student_id' => $studentId],
-                    [...$attributes, 'primary_subject_id' => $this->gradeSheet->primary_subject_id]
-                );
-            } else {
-                Grade::updateOrCreate(
-                    ['grade_sheet_id' => $this->gradeSheet->id, 'student_id' => $studentId],
-                    $attributes
-                );
-            }
+            Grade::updateOrCreate(
+                ['grade_sheet_id' => $this->gradeSheet->id, 'student_id' => $studentId],
+                [
+                    'score' => $score !== '' ? $score : null,
+                    'comment' => $this->comments[$studentId] !== '' ? $this->comments[$studentId] : null,
+                ]
+            );
         }
 
         $this->justSaved = true;
-    }
-
-    private function isPrimaire(): bool
-    {
-        return $this->gradeSheet->primary_subject_id !== null;
     }
 
     /**

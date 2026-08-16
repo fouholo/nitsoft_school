@@ -46,7 +46,7 @@ test('la génération est bloquée si le coefficient d’une matière notée n�
         'establishment_id' => $this->establishment->id,
         'classroom_id' => $classroom->id,
         'subject_id' => null,
-        'primary_subject_id' => $subject->id,
+        'primary_subject_id' => null,
         'term_id' => null,
         'composition_number' => 1,
     ]);
@@ -67,31 +67,38 @@ test('la génération est bloquée si le coefficient d’une matière notée n�
     expect(ReportCard::count())->toBe(0);
 });
 
-test('la génération de bulletin par composition fonctionne', function () {
+test('la génération de bulletin par composition agrège plusieurs matières sous une seule évaluation', function () {
     $classroom = Classroom::factory()->primaire()->create([
         'establishment_id' => $this->establishment->id,
         'school_year_id' => $this->schoolYear->id,
     ]);
     $column = PrimarySubject::coefficientColumn($classroom->level);
-    $subject = PrimarySubject::factory()->create([$column => 1]);
+    $baremeColumn = PrimarySubject::baremeColumn($classroom->level);
+    $maths = PrimarySubject::factory()->create([$column => 4, $baremeColumn => 20]);
+    $francais = PrimarySubject::factory()->create([$column => 1, $baremeColumn => 10]);
     $student = Student::factory()->create(['establishment_id' => $this->establishment->id]);
 
     $gradeSheet = GradeSheet::factory()->create([
         'establishment_id' => $this->establishment->id,
         'classroom_id' => $classroom->id,
         'subject_id' => null,
-        'primary_subject_id' => $subject->id,
+        'primary_subject_id' => null,
         'term_id' => null,
         'composition_number' => 1,
-        'weight' => 1,
-        'max_score' => 20,
     ]);
     PrimaryGrade::factory()->create([
         'establishment_id' => $this->establishment->id,
         'grade_sheet_id' => $gradeSheet->id,
         'student_id' => $student->id,
-        'primary_subject_id' => $subject->id,
-        'score' => 14,
+        'primary_subject_id' => $maths->id,
+        'score' => 16,
+    ]);
+    PrimaryGrade::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'grade_sheet_id' => $gradeSheet->id,
+        'student_id' => $student->id,
+        'primary_subject_id' => $francais->id,
+        'score' => 8,
     ]);
 
     Livewire::test(Index::class)
@@ -102,7 +109,8 @@ test('la génération de bulletin par composition fonctionne', function () {
 
     $reportCard = ReportCard::sole();
 
-    expect((float) $reportCard->average)->toBe(14.0)
+    // Maths 16/20 coef 4 → 16 ; Français 8/10 coef 1 → 16. Moyenne = 16.
+    expect((float) $reportCard->average)->toBe(16.0)
         ->and($reportCard->term_id)->toBeNull()
         ->and($reportCard->composition_number)->toBe(1)
         ->and($reportCard->school_year_id)->toBe($classroom->school_year_id);
@@ -120,4 +128,32 @@ test('le n° de composition est requis', function () {
         ->assertHasErrors(['composition_number']);
 
     expect(ReportCard::count())->toBe(0);
+});
+
+test('un bulletin non encore officiellement généré (appréciation seule) n’apparaît pas dans la liste', function () {
+    $classroom = Classroom::factory()->primaire()->create([
+        'establishment_id' => $this->establishment->id,
+        'school_year_id' => $this->schoolYear->id,
+    ]);
+    $student = Student::factory()->create(['establishment_id' => $this->establishment->id]);
+
+    ReportCard::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'student_id' => $student->id,
+        'classroom_id' => $classroom->id,
+        'school_year_id' => $this->schoolYear->id,
+        'term_id' => null,
+        'composition_number' => 1,
+        'average' => null,
+        'rank' => null,
+        'generated_at' => null,
+        'appreciation' => 'Saisie en cours',
+    ]);
+
+    $reportCards = Livewire::test(Index::class)
+        ->set('classroom_id', $classroom->id)
+        ->set('composition_number', 1)
+        ->viewData('reportCards');
+
+    expect($reportCards)->toHaveCount(0);
 });

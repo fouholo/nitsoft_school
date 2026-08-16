@@ -4,7 +4,7 @@
 
         @can('create', \App\Domain\Grading\Models\GradeSheet::class)
             <button type="button" wire:click="create" class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700">
-                Nouvelle évaluation
+                Nouvelle composition
             </button>
         @endcan
     </div>
@@ -29,37 +29,9 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-slate-700">Type</label>
-                <p class="mt-1 block w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-600">Composition</p>
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-slate-700">Matière</label>
-                <select wire:model="primary_subject_id" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
-                    <option value="">—</option>
-                    @foreach ($subjects as $subject)
-                        <option value="{{ $subject->id }}">{{ $subject->name }}</option>
-                    @endforeach
-                </select>
-                @error('primary_subject_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-            </div>
-
-            <div>
                 <label class="block text-sm font-medium text-slate-700">N° de composition</label>
                 <input type="number" min="1" max="10" wire:model="composition_number" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
                 @error('composition_number') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-slate-700">Barème</label>
-                <input type="number" step="0.5" wire:model="max_score" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
-                @error('max_score') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-slate-700">Coefficient</label>
-                <input type="number" step="0.5" wire:model="weight" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
-                @error('weight') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
@@ -85,7 +57,6 @@
                 <tr>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Titre</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Classe</th>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">Matière</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Composition</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Date</th>
                     <th class="px-4 py-2"></th>
@@ -96,18 +67,17 @@
                     <tr wire:key="grade-sheet-{{ $gradeSheet->id }}">
                         <td class="px-4 py-2 text-slate-900">{{ $gradeSheet->title }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $gradeSheet->classroom?->name }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ $gradeSheet->primarySubject?->name }}</td>
                         <td class="px-4 py-2 text-slate-600">Composition {{ $gradeSheet->composition_number }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $gradeSheet->graded_on->format('d/m/Y') }}</td>
                         <td class="px-4 py-2 text-right">
-                            <a href="{{ route('grading.grade-sheets.enter', $gradeSheet) }}" class="text-slate-500 hover:text-slate-900">
+                            <a href="{{ route('grading.grade-sheets.primaire-students', $gradeSheet) }}" class="text-slate-500 hover:text-slate-900">
                                 Saisir les notes
                             </a>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-4 py-6 text-center text-slate-500">Aucune évaluation.</td>
+                        <td colspan="5" class="px-4 py-6 text-center text-slate-500">Aucune composition.</td>
                     </tr>
                 @endforelse
             </tbody>

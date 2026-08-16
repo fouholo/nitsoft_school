@@ -76,6 +76,12 @@
             <td class="label">Rang</td>
             <td>{{ $reportCard->rank }}</td>
         </tr>
+        @if ($reportCard->appreciation)
+            <tr>
+                <td class="label">Appréciation</td>
+                <td>{{ $reportCard->appreciation }}</td>
+            </tr>
+        @endif
     </table>
 
     @include('pdf.partials.director-stamp', ['establishment' => $reportCard->establishment])

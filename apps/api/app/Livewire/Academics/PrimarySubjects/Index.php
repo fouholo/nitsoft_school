@@ -33,6 +33,18 @@ class Index extends Component
 
     public ?string $coefficient_cm2 = null;
 
+    public ?string $bareme_cp1 = null;
+
+    public ?string $bareme_cp2 = null;
+
+    public ?string $bareme_ce1 = null;
+
+    public ?string $bareme_ce2 = null;
+
+    public ?string $bareme_cm1 = null;
+
+    public ?string $bareme_cm2 = null;
+
     public function mount(): void
     {
         $this->authorize('viewAny', PrimarySubject::class);
@@ -61,6 +73,12 @@ class Index extends Component
         $this->coefficient_ce2 = $primarySubject->coefficient_ce2;
         $this->coefficient_cm1 = $primarySubject->coefficient_cm1;
         $this->coefficient_cm2 = $primarySubject->coefficient_cm2;
+        $this->bareme_cp1 = $primarySubject->bareme_cp1;
+        $this->bareme_cp2 = $primarySubject->bareme_cp2;
+        $this->bareme_ce1 = $primarySubject->bareme_ce1;
+        $this->bareme_ce2 = $primarySubject->bareme_ce2;
+        $this->bareme_cm1 = $primarySubject->bareme_cm1;
+        $this->bareme_cm2 = $primarySubject->bareme_cm2;
         $this->showForm = true;
     }
 
@@ -75,6 +93,12 @@ class Index extends Component
             'coefficient_ce2' => ['nullable', 'numeric', 'min:0.5', 'max:20'],
             'coefficient_cm1' => ['nullable', 'numeric', 'min:0.5', 'max:20'],
             'coefficient_cm2' => ['nullable', 'numeric', 'min:0.5', 'max:20'],
+            'bareme_cp1' => ['nullable', 'numeric', 'min:1', 'max:1000'],
+            'bareme_cp2' => ['nullable', 'numeric', 'min:1', 'max:1000'],
+            'bareme_ce1' => ['nullable', 'numeric', 'min:1', 'max:1000'],
+            'bareme_ce2' => ['nullable', 'numeric', 'min:1', 'max:1000'],
+            'bareme_cm1' => ['nullable', 'numeric', 'min:1', 'max:1000'],
+            'bareme_cm2' => ['nullable', 'numeric', 'min:1', 'max:1000'],
         ]);
 
         if ($this->editingId) {
@@ -119,6 +143,12 @@ class Index extends Component
             'coefficient_ce2',
             'coefficient_cm1',
             'coefficient_cm2',
+            'bareme_cp1',
+            'bareme_cp2',
+            'bareme_ce1',
+            'bareme_ce2',
+            'bareme_cm1',
+            'bareme_cm2',
         ]);
     }
 

@@ -26,7 +26,6 @@ class PrimaryGrade extends Model
         'student_id',
         'primary_subject_id',
         'score',
-        'comment',
         'uid_local',
         'uid_serveur',
         'device_id',

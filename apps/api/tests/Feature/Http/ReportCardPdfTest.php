@@ -126,6 +126,35 @@ test('le PDF d’un bulletin primaire affiche "Composition N" au lieu d’une p�
         ->and($html)->not->toContain('Bulletin —  (');
 });
 
+test('l’appréciation s’affiche sur le bulletin quand elle est renseignée', function () {
+    $establishment = Establishment::factory()->create();
+    actingInEstablishment($establishment);
+    $reportCard = makeReportCardIn($establishment);
+    $reportCard->update(['appreciation' => 'Élève sérieux et appliqué.']);
+    $reportCard->loadMissing(['student', 'classroom', 'term.schoolYear', 'establishment']);
+
+    $html = view('pdf.report-card', [
+        'reportCard' => $reportCard,
+        'breakdown' => app(ReportCardService::class)->subjectBreakdown($reportCard),
+    ])->render();
+
+    expect($html)->toContain('Élève sérieux et appliqué.');
+});
+
+test('aucune ligne appréciation quand elle n’est pas renseignée', function () {
+    $establishment = Establishment::factory()->create();
+    actingInEstablishment($establishment);
+    $reportCard = makeReportCardIn($establishment);
+    $reportCard->loadMissing(['student', 'classroom', 'term.schoolYear', 'establishment']);
+
+    $html = view('pdf.report-card', [
+        'reportCard' => $reportCard,
+        'breakdown' => app(ReportCardService::class)->subjectBreakdown($reportCard),
+    ])->render();
+
+    expect($html)->not->toContain('Appréciation');
+});
+
 test('le cadre signature affiche "Le directeur" et le nom du directeur de l’établissement', function () {
     $establishment = Establishment::factory()->create();
     $director = createUserWithRole($establishment, 'directeur');
