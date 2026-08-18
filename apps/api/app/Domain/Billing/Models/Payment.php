@@ -37,6 +37,8 @@ class Payment extends Model implements HasOwnerColumn
         'paid_at',
         'received_by',
         'reference',
+        'registration_paid',
+        'registration_remaining',
         'tuition_paid_total',
         'tuition_remaining',
         'next_installment_due_date',
@@ -49,6 +51,8 @@ class Payment extends Model implements HasOwnerColumn
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'registration_paid' => 'decimal:2',
+        'registration_remaining' => 'decimal:2',
         'tuition_paid_total' => 'decimal:2',
         'tuition_remaining' => 'decimal:2',
         'next_installment_due_date' => 'date',

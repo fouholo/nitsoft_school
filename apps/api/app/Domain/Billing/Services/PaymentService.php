@@ -27,7 +27,7 @@ class PaymentService
     public function recordPayment(Enrollment $enrollment, array $data, User $receivedBy): Payment
     {
         return DB::transaction(function () use ($enrollment, $data, $receivedBy) {
-            $snapshot = $this->tuitionSnapshotFor($enrollment, (float) $data['amount']);
+            $snapshot = $this->financialSnapshotFor($enrollment, (float) $data['amount']);
 
             $payment = $enrollment->payments()->create([
                 'establishment_id' => $enrollment->establishment_id,
@@ -48,7 +48,7 @@ class PaymentService
     }
 
     /**
-     * Instantané de la situation financière (scolarité, hors inscription) de
+     * Instantané de la situation financière (inscription + scolarité) de
      * l'élève au moment de ce paiement — figé sur le Payment pour que le
      * reçu reste historiquement exact même après de futurs paiements.
      *
@@ -57,15 +57,17 @@ class PaymentService
      * d'inscription (dus dès l'inscription), puis aux tranches de scolarité
      * dans l'ordre de leurs échéances.
      *
-     * @return array{tuition_paid_total: float, tuition_remaining: float, next_installment_due_date: ?\Carbon\Carbon, next_installment_amount: ?float}
+     * @return array{registration_paid: float, registration_remaining: float, tuition_paid_total: float, tuition_remaining: float, next_installment_due_date: ?\Carbon\Carbon, next_installment_amount: ?float}
      */
-    private function tuitionSnapshotFor(Enrollment $enrollment, float $paymentAmount): array
+    private function financialSnapshotFor(Enrollment $enrollment, float $paymentAmount): array
     {
         $registrationAmount = (float) ($enrollment->registration_amount ?? 0);
         $installments = $enrollment->tuitionInstallments();
         $tuitionDueTotal = (float) $installments->sum('amount');
 
         $totalPaid = (float) $enrollment->total_paid + $paymentAmount;
+
+        $registrationPaid = min($registrationAmount, $totalPaid);
         $paidTowardTuition = max(0.0, min($tuitionDueTotal, $totalPaid - $registrationAmount));
 
         $cumulativeDue = 0.0;
@@ -84,6 +86,8 @@ class PaymentService
         }
 
         return [
+            'registration_paid' => $registrationPaid,
+            'registration_remaining' => $registrationAmount - $registrationPaid,
             'tuition_paid_total' => $paidTowardTuition,
             'tuition_remaining' => $tuitionDueTotal - $paidTowardTuition,
             'next_installment_due_date' => $nextInstallmentDueDate,

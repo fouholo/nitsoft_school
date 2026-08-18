@@ -114,22 +114,24 @@ test('le code-barres est absent tant que le paiement n’est pas synchronisé (u
     expect(substr_count($html, '<img'))->toBe(1);
 });
 
-test('le reçu affiche le total scolarité, le total versement, le reste scolarité et le cachet de l’établissement', function () {
+test('le reçu affiche les lignes inscription et scolarité (montant/versée/reste) et le cachet de l’établissement', function () {
     $establishment = Establishment::factory()->create();
     actingInEstablishment($establishment);
     $payment = makePaymentIn($establishment);
+    $payment->registration_paid = 25.0;
+    $payment->registration_remaining = 0.0;
     $payment->tuition_paid_total = 25.0;
     $payment->tuition_remaining = 75.0;
 
     $html = view('pdf.receipt', ['payment' => $payment])->render();
 
-    expect($html)->toContain('Total scolarité')
-        ->and($html)->toContain('Total versement')
-        ->and($html)->toContain('Reste scolarité')
+    expect($html)->toContain('Inscription :')
+        ->and($html)->toContain('Scolarité :')
+        ->and($html)->toContain('Versée :')
+        ->and($html)->toContain('Reste :')
         ->and($html)->toContain(money(75.0))
         ->and($html)->toContain("Cachet de l'établissement")
-        ->and($html)->not->toContain('Date du prochain paiement')
-        ->and($html)->not->toContain('Somme prochain versement');
+        ->and($html)->not->toContain('Prochain paiement');
 });
 
 test('le bloc situation financière est absent quand le paiement n’a pas d’instantané (ancien paiement)', function () {
@@ -141,15 +143,13 @@ test('le bloc situation financière est absent quand le paiement n’a pas d’i
 
     $html = view('pdf.receipt', ['payment' => $payment])->render();
 
-    expect($html)->not->toContain('Total scolarité')
-        ->and($html)->not->toContain('Total versement')
-        ->and($html)->not->toContain('Reste scolarité')
-        ->and($html)->not->toContain('Date du prochain paiement')
-        ->and($html)->not->toContain('Somme prochain versement')
+    expect($html)->not->toContain('Inscription :')
+        ->and($html)->not->toContain('Scolarité :')
+        ->and($html)->not->toContain('Prochain paiement')
         ->and($html)->toContain("Cachet de l'établissement");
 });
 
-test('la date et la somme du prochain versement s’affichent quand elles sont fournies', function () {
+test('la ligne "Prochain paiement" (montant et date) s’affiche quand elle est fournie', function () {
     $establishment = Establishment::factory()->create();
     actingInEstablishment($establishment);
     $payment = makePaymentIn($establishment);
@@ -160,9 +160,10 @@ test('la date et la somme du prochain versement s’affichent quand elles sont f
 
     $html = view('pdf.receipt', ['payment' => $payment])->render();
 
-    expect($html)->toContain('Date du prochain paiement')
+    expect($html)->toContain('Prochain paiement :')
+        ->and($html)->toContain('Montant :')
+        ->and($html)->toContain('Date :')
         ->and($html)->toContain('01/12/2026')
-        ->and($html)->toContain('Somme prochain versement')
         ->and($html)->toContain(money(150.0));
 });
 
@@ -198,7 +199,9 @@ test('l’instantané du paiement exclut les frais d’inscription déjà couver
         'reference' => null,
     ], $accountant);
 
-    expect((float) $payment->tuition_paid_total)->toBe(100.0)
+    expect((float) $payment->registration_paid)->toBe(50.0)
+        ->and((float) $payment->registration_remaining)->toBe(0.0)
+        ->and((float) $payment->tuition_paid_total)->toBe(100.0)
         ->and((float) $payment->tuition_remaining)->toBe(100.0);
 
     $html = view('pdf.receipt', ['payment' => $payment])->render();
