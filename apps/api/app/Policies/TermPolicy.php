@@ -6,6 +6,7 @@ namespace App\Policies;
 
 use App\Domain\Academics\Models\Term;
 use App\Domain\Establishments\Models\Establishment;
+use App\Domain\Establishments\Support\RolePermissions;
 use App\Models\User;
 use App\Policies\Concerns\ChecksEstablishmentMembership;
 
@@ -37,13 +38,14 @@ class TermPolicy
 
     public function create(User $user): bool
     {
-        return $this->isAdminOfCurrentEstablishment($user);
+        return $this->isAdminOfCurrentEstablishment($user)
+            || RolePermissions::can($user->currentRole(), 'terms.write');
     }
 
     public function update(User $user, Term $term): bool
     {
         return $this->belongsToSameEstablishment($user, $term->establishment_id)
-            && $this->isAdminOfCurrentEstablishment($user);
+            && ($this->isAdminOfCurrentEstablishment($user) || RolePermissions::can($user->currentRole(), 'terms.write'));
     }
 
     public function delete(User $user, Term $term): bool

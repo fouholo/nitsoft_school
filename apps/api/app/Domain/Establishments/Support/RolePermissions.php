@@ -34,6 +34,7 @@ final class RolePermissions
         'expenses.delete' => ['fondateur', 'directeur'],
 
         'grades.enter' => ['educateur'],
+        'terms.write' => ['educateur'],
 
         'guardians.notify' => ['caissier'],
     ];

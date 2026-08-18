@@ -42,6 +42,20 @@ test('un admin d’un établissement secondaire peut consulter, créer, modifier
         ->and($admin->can('delete', $term))->toBeTrue();
 });
 
+test('un éducateur d’un établissement secondaire peut consulter, créer, modifier et supprimer une période', function () {
+    $establishment = Establishment::factory()->create(['type' => EstablishmentType::Secondaire]);
+    $educateur = createUserWithRole($establishment, 'educateur');
+    actingInEstablishment($establishment);
+
+    $term = Term::factory()->create(['establishment_id' => $establishment->id]);
+
+    expect($educateur->can('viewAny', Term::class))->toBeTrue()
+        ->and($educateur->can('create', Term::class))->toBeTrue()
+        ->and($educateur->can('view', $term))->toBeTrue()
+        ->and($educateur->can('update', $term))->toBeTrue()
+        ->and($educateur->can('delete', $term))->toBeTrue();
+});
+
 test('un enseignant d’un établissement secondaire peut seulement consulter les périodes', function () {
     $establishment = Establishment::factory()->create(['type' => EstablishmentType::Secondaire]);
     $teacher = createUserWithRole($establishment, 'enseignant');
