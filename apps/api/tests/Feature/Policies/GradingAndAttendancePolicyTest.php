@@ -189,14 +189,16 @@ test('un caissier n’a aucun accès aux évaluations', function () {
         ->and($cashier->can('view', $gradeSheet))->toBeFalse();
 });
 
-test('seul un admin peut générer les bulletins, tout le monde peut les consulter', function () {
+test('un admin ou un éducateur peut générer les bulletins, tout le monde peut les consulter', function () {
     $establishment = Establishment::factory()->create();
     $admin = createUserWithRole($establishment, 'directeur');
+    $educateur = createUserWithRole($establishment, 'educateur');
     $teacher = createUserWithRole($establishment, 'enseignant');
 
     actingInEstablishment($establishment);
 
     expect($admin->can('create', ReportCard::class))->toBeTrue()
+        ->and($educateur->can('create', ReportCard::class))->toBeTrue()
         ->and($teacher->can('create', ReportCard::class))->toBeFalse()
         ->and($teacher->can('viewAny', ReportCard::class))->toBeTrue();
 });
