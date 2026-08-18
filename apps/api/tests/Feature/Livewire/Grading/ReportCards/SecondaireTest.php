@@ -65,7 +65,8 @@ test('la génération est bloquée si le coefficient d’une matière notée n�
         ->set('classroom_id', $classroom->id)
         ->set('term_id', $this->term->id)
         ->call('generate')
-        ->assertHasErrors(['classroom_id']);
+        ->assertHasErrors(['classroom_id'])
+        ->assertSee('Coefficient manquant pour');
 
     expect(ReportCard::count())->toBe(0);
 });

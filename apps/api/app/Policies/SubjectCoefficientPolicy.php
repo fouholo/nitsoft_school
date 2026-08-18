@@ -6,6 +6,7 @@ namespace App\Policies;
 
 use App\Domain\Academics\Models\SubjectCoefficient;
 use App\Domain\Establishments\Models\Establishment;
+use App\Domain\Establishments\Support\RolePermissions;
 use App\Models\User;
 use App\Policies\Concerns\ChecksEstablishmentMembership;
 
@@ -36,13 +37,14 @@ class SubjectCoefficientPolicy
 
     public function create(User $user): bool
     {
-        return $this->isAdminOfCurrentEstablishment($user);
+        return $this->isAdminOfCurrentEstablishment($user)
+            || RolePermissions::can($user->currentRole(), 'subject_coefficients.write');
     }
 
     public function update(User $user, SubjectCoefficient $subjectCoefficient): bool
     {
         return $this->belongsToSameEstablishment($user, $subjectCoefficient->establishment_id)
-            && $this->isAdminOfCurrentEstablishment($user);
+            && ($this->isAdminOfCurrentEstablishment($user) || RolePermissions::can($user->currentRole(), 'subject_coefficients.write'));
     }
 
     public function delete(User $user, SubjectCoefficient $subjectCoefficient): bool

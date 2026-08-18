@@ -114,6 +114,25 @@ test('le sélecteur de niveau ne propose que des niveaux secondaire', function (
         ->not->toContain($primaireLevel->id);
 });
 
+test('un éducateur peut configurer un coefficient', function () {
+    $educateur = createUserWithRole($this->establishment, 'educateur');
+    $this->actingAs($educateur);
+
+    $level = Level::factory()->create(['requires_series' => false]);
+
+    Livewire::test(Index::class)
+        ->set('level_id', $level->id)
+        ->set("coefficients.{$this->subject->id}", '3.5')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $coefficient = SubjectCoefficient::sole();
+
+    expect($coefficient->level_id)->toBe($level->id)
+        ->and($coefficient->subject_id)->toBe($this->subject->id)
+        ->and((float) $coefficient->coefficient)->toBe(3.5);
+});
+
 test('un enseignant peut consulter la grille mais ne peut pas l’enregistrer', function () {
     $teacher = createUserWithRole($this->establishment, 'enseignant');
     $this->actingAs($teacher);

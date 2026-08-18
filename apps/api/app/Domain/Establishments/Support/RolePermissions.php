@@ -36,6 +36,7 @@ final class RolePermissions
         'grades.enter' => ['educateur'],
         'terms.write' => ['educateur'],
         'report_cards.generate' => ['educateur'],
+        'subject_coefficients.write' => ['educateur'],
 
         'guardians.notify' => ['caissier'],
     ];

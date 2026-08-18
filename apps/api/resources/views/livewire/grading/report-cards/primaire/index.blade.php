@@ -29,6 +29,10 @@
         @endcan
     </div>
 
+    @error('classroom_id')
+        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+    @enderror
+
     <div class="mt-6 overflow-hidden rounded-md border border-slate-200 bg-white">
         <table class="min-w-full divide-y divide-slate-200 text-sm">
             <thead class="bg-slate-50">

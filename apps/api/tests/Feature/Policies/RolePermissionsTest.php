@@ -21,6 +21,7 @@ dataset('role_permissions_matrix', [
     'grades.enter' => ['grades.enter', ['fondateur' => false, 'directeur' => false, 'gestionnaire' => false, 'caissier' => false, 'educateur' => true]],
     'terms.write' => ['terms.write', ['fondateur' => false, 'directeur' => false, 'gestionnaire' => false, 'caissier' => false, 'educateur' => true]],
     'report_cards.generate' => ['report_cards.generate', ['fondateur' => false, 'directeur' => false, 'gestionnaire' => false, 'caissier' => false, 'educateur' => true]],
+    'subject_coefficients.write' => ['subject_coefficients.write', ['fondateur' => false, 'directeur' => false, 'gestionnaire' => false, 'caissier' => false, 'educateur' => true]],
     'guardians.notify' => ['guardians.notify', ['fondateur' => false, 'directeur' => false, 'gestionnaire' => false, 'caissier' => true, 'educateur' => false]],
 ]);
 
