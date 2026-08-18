@@ -18,9 +18,10 @@
         table.amount td.label { background-color: #f1f5f9; font-weight: bold; width: 150px; }
         table.amount td.value { font-size: 16px; font-weight: bold; }
         table.summary { width: 100%; border-collapse: collapse; margin-top: 12px; }
-        table.summary td { padding: 4px 0; }
-        .summary-item { display: inline-block; margin-right: 18px; font-weight: bold; }
-        .summary-item .summary-label { color: #64748b; font-weight: normal; margin-right: 3px; }
+        table.summary th { text-align: left; padding: 2px 12px 4px 0; font-weight: normal; font-size: 10px; color: #64748b; text-transform: uppercase; }
+        table.summary td { padding: 3px 12px 3px 0; font-weight: bold; }
+        table.summary td.row-label { font-weight: normal; color: #64748b; width: 150px; white-space: nowrap; }
+        table.summary .summary-label { color: #64748b; font-weight: normal; margin-right: 3px; }
         table.stamp { width: 100%; border-collapse: collapse; margin-top: 12px; }
         table.stamp td.box { width: 45%; text-align: center; }
         .stamp-box { border: 1px dashed #cbd5e1; height: 85px; padding-top: 6px; font-size: 10px; color: #94a3b8; }
@@ -83,33 +84,42 @@
     </table>
 
     @if ($payment->tuition_paid_total !== null)
+        @php
+            $shortMoney = fn (float $amount): string => str_replace(' CFA', '', money($amount));
+        @endphp
+
         <hr class="divider" style="margin-top: 12px;">
 
         <table class="summary">
             <tr>
-                <td>
-                    <span class="summary-item"><span class="summary-label">Inscription :</span> {{ money((float) $payment->registration_paid + (float) $payment->registration_remaining) }}</span>
-                    <span class="summary-item"><span class="summary-label">Versée :</span> {{ money((float) $payment->registration_paid) }}</span>
-                    <span class="summary-item"><span class="summary-label">Reste :</span> {{ money((float) $payment->registration_remaining) }}</span>
-                </td>
+                <th></th>
+                <th>Montant</th>
+                <th>Versée</th>
+                <th>Reste</th>
             </tr>
             <tr>
-                <td>
-                    <span class="summary-item"><span class="summary-label">Scolarité :</span> {{ money((float) $payment->tuition_paid_total + (float) $payment->tuition_remaining) }}</span>
-                    <span class="summary-item"><span class="summary-label">Versée :</span> {{ money((float) $payment->tuition_paid_total) }}</span>
-                    <span class="summary-item"><span class="summary-label">Reste :</span> {{ money((float) $payment->tuition_remaining) }}</span>
-                </td>
+                <td class="row-label">Inscription</td>
+                <td>{{ $shortMoney((float) $payment->registration_paid + (float) $payment->registration_remaining) }}</td>
+                <td>{{ $shortMoney((float) $payment->registration_paid) }}</td>
+                <td>{{ $shortMoney((float) $payment->registration_remaining) }}</td>
             </tr>
-            @if ($payment->next_installment_due_date)
-                <tr>
-                    <td>
-                        <span class="summary-item">Prochain paiement :</span>
-                        <span class="summary-item"><span class="summary-label">Montant :</span> {{ money((float) $payment->next_installment_amount) }}</span>
-                        <span class="summary-item"><span class="summary-label">Date :</span> {{ $payment->next_installment_due_date->format('d/m/Y') }}</span>
-                    </td>
-                </tr>
-            @endif
+            <tr>
+                <td class="row-label">Scolarité</td>
+                <td>{{ $shortMoney((float) $payment->tuition_paid_total + (float) $payment->tuition_remaining) }}</td>
+                <td>{{ $shortMoney((float) $payment->tuition_paid_total) }}</td>
+                <td>{{ $shortMoney((float) $payment->tuition_remaining) }}</td>
+            </tr>
         </table>
+
+        @if ($payment->next_installment_due_date)
+            <table class="summary" style="margin-top: 6px;">
+                <tr>
+                    <td class="row-label">Prochain paiement</td>
+                    <td><span class="summary-label">Montant :</span> {{ $shortMoney((float) $payment->next_installment_amount) }}</td>
+                    <td><span class="summary-label">Date :</span> {{ $payment->next_installment_due_date->format('d/m/Y') }}</td>
+                </tr>
+            </table>
+        @endif
     @endif
 
     <hr class="divider" style="margin-top: 12px;">

@@ -125,11 +125,12 @@ test('le reçu affiche les lignes inscription et scolarité (montant/versée/res
 
     $html = view('pdf.receipt', ['payment' => $payment])->render();
 
-    expect($html)->toContain('Inscription :')
-        ->and($html)->toContain('Scolarité :')
-        ->and($html)->toContain('Versée :')
-        ->and($html)->toContain('Reste :')
-        ->and($html)->toContain(money(75.0))
+    expect($html)->toContain('Inscription')
+        ->and($html)->toContain('Scolarité')
+        ->and($html)->toContain('Versée')
+        ->and($html)->toContain('Reste')
+        ->and($html)->toContain('75 F')
+        ->and($html)->not->toContain('75 F CFA')
         ->and($html)->toContain("Cachet de l'établissement")
         ->and($html)->not->toContain('Prochain paiement');
 });
@@ -143,8 +144,8 @@ test('le bloc situation financière est absent quand le paiement n’a pas d’i
 
     $html = view('pdf.receipt', ['payment' => $payment])->render();
 
-    expect($html)->not->toContain('Inscription :')
-        ->and($html)->not->toContain('Scolarité :')
+    expect($html)->not->toContain('Inscription')
+        ->and($html)->not->toContain('Scolarité')
         ->and($html)->not->toContain('Prochain paiement')
         ->and($html)->toContain("Cachet de l'établissement");
 });
@@ -160,11 +161,12 @@ test('la ligne "Prochain paiement" (montant et date) s’affiche quand elle est 
 
     $html = view('pdf.receipt', ['payment' => $payment])->render();
 
-    expect($html)->toContain('Prochain paiement :')
+    expect($html)->toContain('Prochain paiement')
         ->and($html)->toContain('Montant :')
         ->and($html)->toContain('Date :')
         ->and($html)->toContain('01/12/2026')
-        ->and($html)->toContain(money(150.0));
+        ->and($html)->toContain('150 F')
+        ->and($html)->not->toContain('150 F CFA');
 });
 
 test('l’instantané du paiement exclut les frais d’inscription déjà couverts', function () {
@@ -206,9 +208,9 @@ test('l’instantané du paiement exclut les frais d’inscription déjà couver
 
     $html = view('pdf.receipt', ['payment' => $payment])->render();
 
-    expect($html)->toContain(money(200.0))
-        ->and($html)->toContain(money(100.0))
-        ->and($html)->not->toContain(money(250.0));
+    expect($html)->toContain('200 F')
+        ->and($html)->toContain('100 F')
+        ->and($html)->not->toContain('250 F');
 });
 
 test('la date et la somme du prochain versement affichées sur le reçu correspondent au cumul des tranches dont la somme dépasse le total déjà versé', function () {
@@ -257,5 +259,5 @@ test('la date et la somme du prochain versement affichées sur le reçu correspo
     $html = view('pdf.receipt', ['payment' => $payment])->render();
 
     expect($html)->toContain($installment2->due_date->format('d/m/Y'))
-        ->and($html)->toContain(money(150.0));
+        ->and($html)->toContain('150 F');
 });
