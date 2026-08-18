@@ -45,6 +45,37 @@ test('un GENERAL_ADMIN d’une école indépendante peut créer, supprimer et no
     expect(EstablishmentUserPivot::find($cashierPivot->id))->toBeNull();
 });
 
+test('un GENERAL_ADMIN peut créer un compte Directeur ou Gestionnaire depuis "Mon organisation"', function () {
+    $establishment = Establishment::factory()->create(['foundation_id' => null]);
+    $generalAdmin = createGeneralAdmin($establishment);
+    test()->actingAs($generalAdmin);
+
+    Livewire::test(ManageOrganization::class)
+        ->set('staff_establishment_id', $establishment->id)
+        ->set('staff_name', 'Directeur Test')
+        ->set('staff_email', 'directeur.test@nitsoft.test')
+        ->set('staff_role', 'directeur')
+        ->call('create')
+        ->assertHasNoErrors()
+        ->assertSet('generatedPasswordFor', 'directeur.test@nitsoft.test');
+
+    $newDirector = User::where('email', 'directeur.test@nitsoft.test')->sole();
+    expect(EstablishmentUserPivot::where('user_id', $newDirector->id)->sole())
+        ->role->toBe('directeur')
+        ->is_active->toBeTrue();
+
+    Livewire::test(ManageOrganization::class)
+        ->set('staff_establishment_id', $establishment->id)
+        ->set('staff_name', 'Gestionnaire Test')
+        ->set('staff_email', 'gestionnaire.test@nitsoft.test')
+        ->set('staff_role', 'gestionnaire')
+        ->call('create')
+        ->assertHasNoErrors();
+
+    $newManager = User::where('email', 'gestionnaire.test@nitsoft.test')->sole();
+    expect(EstablishmentUserPivot::where('user_id', $newManager->id)->sole()->role)->toBe('gestionnaire');
+});
+
 test('un GENERAL_ADMIN ne peut pas se désactiver ni se supprimer lui-même', function () {
     $establishment = Establishment::factory()->create(['foundation_id' => null]);
     $generalAdmin = createGeneralAdmin($establishment);

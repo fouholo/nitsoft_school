@@ -245,6 +245,8 @@
             <div>
                 <label class="block text-xs font-medium text-slate-700">Rôle</label>
                 <select wire:model="staff_role" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                    <option value="directeur">Directeur</option>
+                    <option value="gestionnaire">Gestionnaire</option>
                     <option value="enseignant">Enseignant</option>
                     <option value="caissier">Caissier</option>
                     <option value="educateur">Éducateur</option>

@@ -94,7 +94,7 @@ class ManageOrganization extends Component
         $data = $this->validate([
             'staff_name' => ['required', 'string', 'max:255'],
             'staff_email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'staff_role' => ['required', Rule::in(['enseignant', 'caissier', 'educateur'])],
+            'staff_role' => ['required', Rule::in(['directeur', 'gestionnaire', 'enseignant', 'caissier', 'educateur'])],
             'staff_establishment_id' => ['required', Rule::in($establishmentIds)],
         ]);
 
