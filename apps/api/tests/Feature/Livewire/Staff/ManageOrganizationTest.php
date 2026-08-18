@@ -8,6 +8,7 @@ use App\Domain\Establishments\Models\EstablishmentUserPivot;
 use App\Domain\Establishments\Models\Foundation;
 use App\Domain\Establishments\Models\FoundationUserPivot;
 use App\Domain\Establishments\Models\Inspection;
+use App\Domain\Establishments\Models\Role;
 use App\Livewire\Staff\ManageOrganization;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -74,6 +75,18 @@ test('un GENERAL_ADMIN peut créer un compte Directeur ou Gestionnaire depuis "M
 
     $newManager = User::where('email', 'gestionnaire.test@nitsoft.test')->sole();
     expect(EstablishmentUserPivot::where('user_id', $newManager->id)->sole()->role)->toBe('gestionnaire');
+});
+
+test('la liste déroulante des rôles affiche les libellés définis dans la table roles', function () {
+    $establishment = Establishment::factory()->create(['foundation_id' => null]);
+    $generalAdmin = createGeneralAdmin($establishment);
+    test()->actingAs($generalAdmin);
+
+    Role::where('code', 'gestionnaire')->update(['wording' => 'Gestionnaire pédagogique']);
+
+    Livewire::test(ManageOrganization::class)
+        ->assertSee('Gestionnaire pédagogique')
+        ->assertDontSee('Comptable');
 });
 
 test('un GENERAL_ADMIN ne peut pas se désactiver ni se supprimer lui-même', function () {

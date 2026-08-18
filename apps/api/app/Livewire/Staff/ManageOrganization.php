@@ -10,6 +10,7 @@ use App\Domain\Establishments\Models\EstablishmentUserPivot;
 use App\Domain\Establishments\Models\Foundation;
 use App\Domain\Establishments\Models\FoundationUserPivot;
 use App\Domain\Establishments\Models\Inspection;
+use App\Domain\Establishments\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -27,6 +28,15 @@ use Livewire\WithFileUploads;
 class ManageOrganization extends Component
 {
     use WithFileUploads;
+
+    /**
+     * Rôles que le fondateur/GENERAL_ADMIN peut attribuer depuis cet écran —
+     * "fondateur" (auto-inscription/addFounder) et "parent" (liaison tuteur)
+     * ont leurs propres flux dédiés et ne figurent pas ici.
+     *
+     * @var list<string>
+     */
+    private const ASSIGNABLE_ROLES = ['directeur', 'gestionnaire', 'enseignant', 'caissier', 'educateur'];
 
     public Foundation|Establishment $organization;
 
@@ -94,7 +104,7 @@ class ManageOrganization extends Component
         $data = $this->validate([
             'staff_name' => ['required', 'string', 'max:255'],
             'staff_email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'staff_role' => ['required', Rule::in(['directeur', 'gestionnaire', 'enseignant', 'caissier', 'educateur'])],
+            'staff_role' => ['required', Rule::in(self::ASSIGNABLE_ROLES)],
             'staff_establishment_id' => ['required', Rule::in($establishmentIds)],
         ]);
 
@@ -334,6 +344,9 @@ class ManageOrganization extends Component
             'eligibleGeneralAdminTargets' => $isGeneralAdmin ? $this->eligibleGeneralAdminTargets() : collect(),
             'establishmentTypes' => EstablishmentType::cases(),
             'inspections' => Inspection::orderBy('inspection_name')->get(),
+            'assignableRoles' => Role::whereIn('code', self::ASSIGNABLE_ROLES)
+                ->get()
+                ->sortBy(fn (Role $role): int => array_search($role->code, self::ASSIGNABLE_ROLES, true)),
         ]);
     }
 
