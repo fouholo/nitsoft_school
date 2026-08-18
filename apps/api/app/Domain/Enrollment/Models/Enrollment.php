@@ -153,4 +153,37 @@ class Enrollment extends Model
     {
         return $this->tuitionInstallments()->filter(fn (array $installment): bool => $installment['due_date']->lte(now()));
     }
+
+    /**
+     * Tranches de scolarité avec leur statut de couverture, déduit par
+     * imputation cumulative des versements (d'abord l'inscription, puis les
+     * tranches dans l'ordre des échéances — même convention que
+     * PaymentService::tuitionSnapshotFor()) :
+     * - `paid` : entièrement couverte par les versements.
+     * - `partial_late`/`partial_upcoming` : partiellement couverte, échéance
+     *   passée ou à venir.
+     * - `late`/`due` : pas couverte du tout, échéance passée ou à venir.
+     *
+     * @return Collection<int, array{position: int, amount: float, due_date: \Carbon\Carbon, status: string}>
+     */
+    public function tuitionInstallmentsWithStatus(): Collection
+    {
+        $paidTowardTuition = max(0.0, (float) $this->total_paid - (float) ($this->registration_amount ?? 0));
+        $cumulativeDue = 0.0;
+
+        return $this->tuitionInstallments()->map(function (array $installment) use (&$cumulativeDue, $paidTowardTuition): array {
+            $dueBefore = $cumulativeDue;
+            $cumulativeDue += $installment['amount'];
+            $isPast = $installment['due_date']->lte(now());
+
+            $status = match (true) {
+                $paidTowardTuition >= $cumulativeDue => 'paid',
+                $paidTowardTuition > $dueBefore => $isPast ? 'partial_late' : 'partial_upcoming',
+                $isPast => 'late',
+                default => 'due',
+            };
+
+            return [...$installment, 'status' => $status];
+        });
+    }
 }

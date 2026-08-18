@@ -129,7 +129,7 @@ class Show extends Component
     public function render()
     {
         $registrationAmount = (float) ($this->enrollment->registration_amount ?? 0);
-        $tuitionInstallments = $this->enrollment->tuitionInstallments();
+        $tuitionInstallments = $this->enrollment->tuitionInstallmentsWithStatus();
         $totalDue = $registrationAmount + (float) $tuitionInstallments->sum('amount');
 
         return view('livewire.billing.enrollments.show', [

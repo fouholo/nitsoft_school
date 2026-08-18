@@ -118,6 +118,7 @@
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Poste</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Échéance</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Montant</th>
+                    <th class="px-4 py-2 text-left font-medium text-slate-500">Statut</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
@@ -125,12 +126,25 @@
                     <td class="px-4 py-2 text-slate-900">Frais d'inscription</td>
                     <td class="px-4 py-2 text-slate-600">—</td>
                     <td class="px-4 py-2 text-slate-600">{{ money($registrationAmount) }}</td>
+                    <td class="px-4 py-2"></td>
                 </tr>
                 @foreach ($tuitionInstallments as $installment)
+                    @php
+                        [$statusLabel, $statusClasses] = match ($installment['status']) {
+                            'paid' => ['Payé', 'bg-emerald-100 text-emerald-700'],
+                            'partial_late' => ['En cours', 'bg-orange-100 text-orange-700'],
+                            'partial_upcoming' => ['En cours', 'bg-blue-100 text-blue-700'],
+                            'late' => ['En retard', 'bg-red-100 text-red-700'],
+                            default => ['Dû', 'bg-slate-100 text-slate-700'],
+                        };
+                    @endphp
                     <tr>
                         <td class="px-4 py-2 text-slate-900">Tranche {{ $installment['position'] }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $installment['due_date']->format('d/m/Y') }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ money($installment['amount']) }}</td>
+                        <td class="px-4 py-2">
+                            <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $statusClasses }}">{{ $statusLabel }}</span>
+                        </td>
                     </tr>
                 @endforeach
             </tbody>
