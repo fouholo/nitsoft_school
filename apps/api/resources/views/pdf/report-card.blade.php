@@ -13,7 +13,11 @@
         .meta td.label { color: #64748b; width: 120px; }
         table.grades { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
         table.grades th, table.grades td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; }
-        table.grades th { background-color: #f1f5f9; }
+        table.grades th { background-color: #f1f5f9; text-align: center; }
+        table.grades th.col-narrow, table.grades td.col-narrow { width: 35px; text-align: center; }
+        table.grades th.col-disciplines, table.grades td.col-disciplines { width: 190px; }
+        table.grades th.col-appreciation, table.grades td.col-appreciation { width: 90px; }
+        table.grades td.col-rang { text-align: center; }
         .summary { width: 100%; border-collapse: collapse; }
         .summary td { padding: 6px 8px; border: 1px solid #cbd5e1; }
         .summary td.label { background-color: #f1f5f9; font-weight: bold; width: 150px; }
@@ -47,21 +51,29 @@
     <table class="grades">
         <thead>
             <tr>
-                <th>Matière</th>
-                <th>Coef.</th>
-                <th>Moyenne / 20</th>
+                <th class="col-disciplines">Disciplines</th>
+                <th class="col-narrow">Moy. /20</th>
+                <th class="col-narrow">Coéf.</th>
+                <th class="col-narrow">Moy. coéf.</th>
+                <th>Rang</th>
+                <th class="col-appreciation">Appréciation</th>
+                <th>Nom et signature du prof</th>
             </tr>
         </thead>
         <tbody>
             @forelse ($breakdown as $row)
                 <tr>
-                    <td>{{ $row->subject->name }}</td>
-                    <td>{{ $row->coefficient !== null ? number_format($row->coefficient, 1) : '—' }}</td>
-                    <td>{{ $row->average !== null ? number_format($row->average, 2) : '—' }}</td>
+                    <td class="col-disciplines">{{ $row->subject->name }}</td>
+                    <td class="col-narrow">{{ $row->average !== null ? number_format($row->average, 2) : '—' }}</td>
+                    <td class="col-narrow">{{ $row->coefficient !== null ? number_format($row->coefficient, 1) : '—' }}</td>
+                    <td class="col-narrow">{{ $row->coefficientWeightedAverage() !== null ? number_format($row->coefficientWeightedAverage(), 2) : '—' }}</td>
+                    <td class="col-rang">{{ $row->rank ?? '—' }}</td>
+                    <td class="col-appreciation">{{ $row->appreciation ?? '—' }}</td>
+                    <td>{{ $row->teacherName ?? '—' }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="3">Aucune note disponible pour cette période.</td>
+                    <td colspan="7">Aucune note disponible pour cette période.</td>
                 </tr>
             @endforelse
         </tbody>

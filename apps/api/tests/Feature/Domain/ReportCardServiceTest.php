@@ -159,6 +159,47 @@ test('le détail par matière du bulletin liste chaque matière notée avec sa m
         ->and($francaisRow->average)->toBe(12.0);
 });
 
+test('le détail par matière (secondaire) porte le rang par matière, l’appréciation et le professeur', function () {
+    $establishment = Establishment::factory()->create();
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+    $term = Term::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+    $maths = Subject::factory()->create(['name' => 'Mathématiques']);
+    $teacher = createUserWithRole($establishment, 'enseignant');
+
+    $sheetMaths = GradeSheet::factory()->create([
+        'establishment_id' => $establishment->id,
+        'classroom_id' => $classroom->id,
+        'subject_id' => $maths->id,
+        'term_id' => $term->id,
+        'teacher_id' => $teacher->id,
+        'max_score' => 20,
+        'weight' => 1,
+    ]);
+
+    SubjectCoefficient::factory()->create(['establishment_id' => $establishment->id, 'level_id' => $classroom->level_id, 'serie_id' => null, 'subject_id' => $maths->id, 'coefficient' => 2]);
+    AppreciationScale::factory()->create(['percentage' => 0, 'appreciation' => 'Insuffisant']);
+    AppreciationScale::factory()->create(['percentage' => 80, 'appreciation' => 'Très bien']);
+
+    $best = makeGradedStudent($establishment, $classroom, $term, [[$sheetMaths, 18]]);
+    $worst = Student::factory()->create(['establishment_id' => $establishment->id]);
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'student_id' => $worst->id, 'classroom_id' => $classroom->id, 'status' => 'active']);
+    Grade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $sheetMaths->id, 'student_id' => $worst->id, 'score' => 8]);
+
+    $service = new ReportCardService;
+    $reportCards = $service->generateForClassroomAndTerm($classroom, $term);
+
+    $bestRow = $service->subjectBreakdown($reportCards->firstWhere('student_id', $best->id))->firstWhere('subject.id', $maths->id);
+    $worstRow = $service->subjectBreakdown($reportCards->firstWhere('student_id', $worst->id))->firstWhere('subject.id', $maths->id);
+
+    expect($bestRow->rank)->toBe(1)
+        ->and($bestRow->appreciation)->toBe('Très bien')
+        ->and($bestRow->teacherName)->toBe($teacher->name)
+        ->and($bestRow->coefficientWeightedAverage())->toBe(36.0)
+        ->and($worstRow->rank)->toBe(2)
+        ->and($worstRow->appreciation)->toBe('Insuffisant');
+});
+
 test('la moyenne pondérée et le rang sont calculés correctement par composition (primaire)', function () {
     $establishment = Establishment::factory()->create();
     $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);

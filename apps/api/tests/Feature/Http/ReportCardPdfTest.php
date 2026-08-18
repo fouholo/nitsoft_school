@@ -152,7 +152,7 @@ test('aucune ligne appréciation quand elle n’est pas renseignée', function (
         'breakdown' => app(ReportCardService::class)->subjectBreakdown($reportCard),
     ])->render();
 
-    expect($html)->not->toContain('Appréciation');
+    expect($html)->not->toContain('<td class="label">Appréciation</td>');
 });
 
 test('le cadre signature affiche "Le directeur" et le nom du directeur de l’établissement', function () {

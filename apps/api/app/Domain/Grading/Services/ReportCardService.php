@@ -148,7 +148,7 @@ class ReportCardService
                 ->whereNotNull('score')
                 ->whereHas('gradeSheet', fn ($query) => $query->where('composition_number', $reportCard->composition_number))
                 ->get()->all()
-            : Grade::query()->with('gradeSheet.subject')
+            : Grade::query()->with('gradeSheet.subject', 'gradeSheet.teacher')
                 ->where('student_id', $reportCard->student_id)
                 ->whereNotNull('score')
                 ->whereHas('gradeSheet', function ($query) use ($reportCard): void {
@@ -160,20 +160,88 @@ class ReportCardService
         $grades = collect($gradeRows);
 
         $coefficients = $this->coefficientsFor($classroom);
+        $ranks = $classroom->level->cycle === Cycle::Primaire
+            ? collect()
+            : $this->subjectRanksFor($classroom, $reportCard->term_id, $reportCard->student_id);
 
         $rows = [];
 
         foreach ($grades->groupBy(fn (Grade|PrimaryGrade $grade) => $this->subjectKeyFor($grade)) as $subjectId => $subjectGrades) {
+            $average = $this->weightedAverage($subjectGrades, $classroom);
+
             $rows[] = new SubjectAverage(
                 $this->subjectFor($subjectGrades),
-                $this->weightedAverage($subjectGrades, $classroom),
+                $average,
                 $coefficients->get($subjectId),
+                $ranks->get($subjectId),
+                $average !== null ? AppreciationScale::forAverage($average, 20.0)?->appreciation : null,
+                $this->teacherNameFor($subjectGrades),
             );
         }
 
         usort($rows, fn (SubjectAverage $a, SubjectAverage $b) => $a->subject->name <=> $b->subject->name);
 
         return collect($rows);
+    }
+
+    /**
+     * Rang de l'élève dans chaque matière, parmi les élèves de la même
+     * classe pour la même période — même convention d'ex-aequo que le rang
+     * général (generate()).
+     *
+     * @return Collection<int, int>
+     */
+    private function subjectRanksFor(Classroom $classroom, ?int $termId, int $studentId): Collection
+    {
+        if ($termId === null) {
+            return collect();
+        }
+
+        $grades = collect(Grade::query()->with('gradeSheet.subject')
+            ->whereNotNull('score')
+            ->whereHas('gradeSheet', fn ($query) => $query->where('classroom_id', $classroom->id)->where('term_id', $termId))
+            ->get()->all());
+
+        $ranks = collect();
+
+        foreach ($grades->groupBy(fn (Grade $grade) => (int) $grade->gradeSheet->subject_id) as $subjectId => $subjectGrades) {
+            $averagesByStudent = $subjectGrades->groupBy('student_id')
+                ->map(fn (Collection $studentGrades) => $this->weightedAverage($studentGrades, $classroom))
+                ->filter(fn (?float $average) => $average !== null)
+                ->sortDesc();
+
+            $rank = 0;
+            $position = 0;
+            $previousAverage = null;
+
+            foreach ($averagesByStudent as $sid => $average) {
+                $position++;
+
+                if ($average !== $previousAverage) {
+                    $rank = $position;
+                }
+
+                $previousAverage = $average;
+
+                if ((int) $sid === $studentId) {
+                    $ranks[(int) $subjectId] = $rank;
+
+                    break;
+                }
+            }
+        }
+
+        return $ranks;
+    }
+
+    /**
+     * @param  Collection<int, Grade|PrimaryGrade>  $grades
+     */
+    private function teacherNameFor(Collection $grades): ?string
+    {
+        $grade = $grades->first();
+
+        return $grade instanceof Grade ? $grade->gradeSheet->teacher?->name : null;
     }
 
     /**
@@ -316,7 +384,7 @@ class ReportCardService
     }
 
     /**
-     * @param  Collection<int, Grade|PrimaryGrade>  $grades
+     * @param  Collection<int, Grade|PrimaryGrade>|Collection<int, Grade>  $grades
      */
     private function weightedAverage(Collection $grades, Classroom $classroom): ?float
     {
