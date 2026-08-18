@@ -140,7 +140,8 @@ class Index extends Component
 
     public function configureLevel(int $levelId): void
     {
-        $levelFee = LevelFee::where('school_year_id', $this->school_year_id)
+        $levelFee = LevelFee::withTrashed()
+            ->where('school_year_id', $this->school_year_id)
             ->where('level_id', $levelId)
             ->first();
 
@@ -174,21 +175,33 @@ class Index extends Component
             'installment_amounts.*' => ['nullable', 'numeric', 'min:0'],
         ]);
 
-        $existing = LevelFee::where('school_year_id', $this->school_year_id)
+        $existing = LevelFee::withTrashed()
+            ->where('school_year_id', $this->school_year_id)
             ->where('level_id', $this->configuringLevelId)
             ->first();
 
         $this->authorize($existing ? 'update' : 'create', $existing ?? LevelFee::class);
 
-        $levelFee = LevelFee::updateOrCreate(
-            ['school_year_id' => $this->school_year_id, 'level_id' => $this->configuringLevelId],
-            [
-                'registration_amount' => $data['registration_amount'],
-                'registration_amount_assigned' => $this->configuringLevelIsSecondaire
-                    ? ($data['registration_amount_assigned'] ?? null)
-                    : null,
-            ],
-        );
+        $attributes = [
+            'registration_amount' => $data['registration_amount'],
+            'registration_amount_assigned' => $this->configuringLevelIsSecondaire
+                ? ($data['registration_amount_assigned'] ?? null)
+                : null,
+        ];
+
+        if ($existing) {
+            if ($existing->trashed()) {
+                $existing->restore();
+            }
+
+            $existing->update($attributes);
+            $levelFee = $existing;
+        } else {
+            $levelFee = LevelFee::create($attributes + [
+                'school_year_id' => $this->school_year_id,
+                'level_id' => $this->configuringLevelId,
+            ]);
+        }
 
         foreach ($this->installment_amounts as $installmentId => $amount) {
             if ($amount === null || $amount === '') {

@@ -109,6 +109,37 @@ test('un directeur configure les tarifs d’un niveau en laissant une tranche vi
         ->and($levelFee->installmentAmounts()->where('installment_id', $installment2->id)->exists())->toBeFalse();
 });
 
+test('un directeur peut reconfigurer un niveau dont le tarif avait été supprimé (soft delete)', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $level = Level::factory()->create();
+
+    $trashedLevelFee = LevelFee::factory()->create([
+        'establishment_id' => $establishment->id,
+        'school_year_id' => $schoolYear->id,
+        'level_id' => $level->id,
+        'registration_amount' => 5000,
+    ]);
+    $trashedLevelFee->delete();
+
+    Livewire::test(Index::class)
+        ->set('school_year_id', $schoolYear->id)
+        ->call('configureLevel', $level->id)
+        ->set('registration_amount', 20000)
+        ->call('saveLevelFees')
+        ->assertHasNoErrors();
+
+    $levelFee = LevelFee::where('level_id', $level->id)->sole();
+
+    expect($levelFee->id)->toBe($trashedLevelFee->id)
+        ->and($levelFee->trashed())->toBeFalse()
+        ->and((float) $levelFee->registration_amount)->toBe(20000.0);
+});
+
 test('reconfigurer un niveau retire un montant de tranche précédemment saisi', function () {
     $establishment = Establishment::factory()->create();
     $directeur = createUserWithRole($establishment, 'directeur');
