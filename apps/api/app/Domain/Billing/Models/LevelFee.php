@@ -26,6 +26,7 @@ class LevelFee extends Model
         'school_year_id',
         'level_id',
         'registration_amount',
+        'registration_amount_assigned',
         'uid_local',
         'uid_serveur',
         'device_id',
@@ -34,6 +35,7 @@ class LevelFee extends Model
 
     protected $casts = [
         'registration_amount' => 'decimal:2',
+        'registration_amount_assigned' => 'decimal:2',
         'client_updated_at' => 'datetime',
     ];
 

@@ -126,7 +126,14 @@
                             @endphp
                             <tr wire:key="level-{{ $level->id }}">
                                 <td class="px-4 py-2 text-slate-900">{{ $level->level_wording }}</td>
-                                <td class="px-4 py-2 text-slate-600">{{ money((float) ($levelFee->registration_amount ?? 0)) }}</td>
+                                <td class="px-4 py-2 text-slate-600">
+                                    @if ($level->cycle === \App\Domain\Academics\Enums\Cycle::Secondaire)
+                                        <div>Non affecté : {{ money((float) ($levelFee->registration_amount ?? 0)) }}</div>
+                                        <div>Affecté : {{ money((float) ($levelFee->registration_amount_assigned ?? 0)) }}</div>
+                                    @else
+                                        {{ money((float) ($levelFee->registration_amount ?? 0)) }}
+                                    @endif
+                                </td>
                                 <td class="px-4 py-2 text-slate-600">{{ money((float) $total) }}</td>
                                 <td class="px-4 py-2 text-right">
                                     @can('create', \App\Domain\Billing\Models\LevelFee::class)
@@ -151,10 +158,18 @@
                                     <td colspan="4" class="bg-slate-50 px-4 py-4">
                                         <form wire:submit="saveLevelFees" class="grid grid-cols-2 gap-4 sm:grid-cols-4">
                                             <div>
-                                                <label class="block text-sm font-medium text-slate-700">Frais d'inscription</label>
+                                                <label class="block text-sm font-medium text-slate-700">Frais d'inscription {{ $configuringLevelIsSecondaire ? '(non affecté)' : '' }}</label>
                                                 <input type="number" step="0.01" wire:model="registration_amount" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
                                                 @error('registration_amount') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                                             </div>
+
+                                            @if ($configuringLevelIsSecondaire)
+                                                <div>
+                                                    <label class="block text-sm font-medium text-slate-700">Frais d'inscription (affecté)</label>
+                                                    <input type="number" step="0.01" wire:model="registration_amount_assigned" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                                                    @error('registration_amount_assigned') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                                                </div>
+                                            @endif
 
                                             @foreach ($installments as $installment)
                                                 <div>
