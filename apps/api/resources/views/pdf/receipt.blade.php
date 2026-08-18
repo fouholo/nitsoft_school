@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <title>Reçu</title>
     <style>
+        @page { margin-left: 0.8cm; margin-right: 0.8cm; }
         body { font-family: "DejaVu Sans", sans-serif; font-size: 12px; color: #1e293b; }
         .header { text-align: center; margin-bottom: 12px; }
         .header h1 { font-size: 16px; margin: 0 0 4px; }
