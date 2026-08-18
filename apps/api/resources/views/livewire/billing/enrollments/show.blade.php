@@ -133,7 +133,7 @@
                 @foreach ($tuitionInstallments as $installment)
                     @php
                         [$statusLabel, $statusClasses] = match ($installment['status']) {
-                            'paid' => ['Payé', 'bg-emerald-100 text-emerald-700'],
+                            'paid' => ['Soldé', 'bg-emerald-100 text-emerald-700'],
                             'partial_late' => ['En cours', 'bg-orange-100 text-orange-700'],
                             'partial_upcoming' => ['En cours', 'bg-blue-100 text-blue-700'],
                             'late' => ['En retard', 'bg-red-100 text-red-700'],

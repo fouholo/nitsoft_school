@@ -59,7 +59,7 @@ test('le détail des montants dus affiche le statut de chaque tranche', function
     ]);
 
     Livewire::test(Show::class, ['enrollment' => $enrollment])
-        ->assertSeeInOrder(['Payé', 'En cours', 'Dû']);
+        ->assertSeeInOrder(['Soldé', 'En cours', 'Dû']);
 });
 
 test('le détail des montants dus affiche le montant versé par poste', function () {
