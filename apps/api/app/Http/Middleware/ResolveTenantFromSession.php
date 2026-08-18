@@ -26,15 +26,26 @@ class ResolveTenantFromSession
 
         $establishmentId = $request->session()->get('current_establishment_id');
 
-        if ($establishmentId === null) {
+        /**
+         * L'établissement mémorisé en session peut devenir inaccessible entre
+         * deux requêtes (retrait d'accès, fondation supprimée/réorganisée...).
+         * On retombe alors sur le premier établissement encore accessible au
+         * lieu de laisser "currentEstablishmentId" non lié — sans ce filet,
+         * toute page qui suppose la liaison (ex: Dashboard) plante en plein
+         * visage de l'utilisateur, perçu comme une impossibilité de se
+         * connecter.
+         */
+        if ($establishmentId === null || ! $user->hasAccessTo((int) $establishmentId)) {
             $establishmentId = $user->accessibleEstablishments()->first()?->id;
 
             if ($establishmentId !== null) {
                 $request->session()->put('current_establishment_id', $establishmentId);
+            } else {
+                $request->session()->forget('current_establishment_id');
             }
         }
 
-        if ($establishmentId !== null && $user->hasAccessTo((int) $establishmentId)) {
+        if ($establishmentId !== null) {
             app()->instance('currentEstablishmentId', (int) $establishmentId);
         }
 

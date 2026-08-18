@@ -18,11 +18,16 @@ class Dashboard extends Component
 {
     public function render()
     {
+        if (! app()->bound('currentEstablishmentId')) {
+            return view('livewire.dashboard', ['noEstablishment' => true]);
+        }
+
         /** @var User $user */
         $user = Auth::user();
         $role = $user->currentRole();
 
         return view('livewire.dashboard', [
+            'noEstablishment' => false,
             'role' => $role,
             'roleLabel' => $user->currentRoleLabel(),
             'studentsCount' => Student::where('is_active', true)->count(),
