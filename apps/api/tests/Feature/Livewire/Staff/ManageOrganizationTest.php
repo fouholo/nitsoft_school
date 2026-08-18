@@ -178,3 +178,22 @@ test('un utilisateur sans rôle fondateur ne peut pas accéder à l’écran', f
 
     Livewire::test(ManageOrganization::class)->assertForbidden();
 });
+
+test('un fondateur avec une ancienne ligne foundation_user pointant vers une fondation supprimée accède quand même à sa fondation active', function () {
+    $deletedFoundation = Foundation::factory()->create();
+    $activeFoundation = Foundation::factory()->create();
+    Establishment::factory()->create(['foundation_id' => $activeFoundation->id]);
+
+    $founder = createFounder($deletedFoundation);
+    // Résidu d'un ancien groupe supprimé — la ligne foundation_user n'a pas
+    // été nettoyée. resolveOrganizationFor() doit l'ignorer plutôt que de
+    // planter sur Foundation::findOrFail() (voir le bug corrigé).
+    $deletedFoundation->delete();
+    $activeFoundation->users()->attach($founder->id, ['role' => 'fondateur', 'is_active' => true]);
+
+    test()->actingAs($founder);
+
+    Livewire::test(ManageOrganization::class)
+        ->assertOk()
+        ->assertSet('organization.id', $activeFoundation->id);
+});

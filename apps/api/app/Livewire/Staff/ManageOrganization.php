@@ -337,15 +337,26 @@ class ManageOrganization extends Component
         ]);
     }
 
+    /**
+     * Une ligne foundation_user peut survivre à la suppression (soft delete)
+     * de la fondation visée (ex : fondation recréée sans que l'ancien lien
+     * du fondateur soit nettoyé) — Foundation::findOrFail planterait alors
+     * en 404 sur ce résidu. On ne retient donc que les fondations encore
+     * existantes plutôt que la première ligne trouvée.
+     */
     private function resolveOrganizationFor(User $user): Foundation|Establishment|null
     {
-        $foundationPivot = FoundationUserPivot::where('user_id', $user->id)
+        $foundationIds = FoundationUserPivot::where('user_id', $user->id)
             ->where('role', 'fondateur')
             ->where('is_active', true)
-            ->first();
+            ->pluck('foundation_id');
 
-        if ($foundationPivot !== null) {
-            return Foundation::findOrFail($foundationPivot->foundation_id);
+        if ($foundationIds->isNotEmpty()) {
+            $foundation = Foundation::whereIn('id', $foundationIds)->first();
+
+            if ($foundation !== null) {
+                return $foundation;
+            }
         }
 
         $establishmentPivot = EstablishmentUserPivot::where('user_id', $user->id)
