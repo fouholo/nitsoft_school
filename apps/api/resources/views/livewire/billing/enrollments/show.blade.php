@@ -118,6 +118,7 @@
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Poste</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Échéance</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Montant</th>
+                    <th class="px-4 py-2 text-left font-medium text-slate-500">Versé</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Statut</th>
                 </tr>
             </thead>
@@ -126,6 +127,7 @@
                     <td class="px-4 py-2 text-slate-900">Frais d'inscription</td>
                     <td class="px-4 py-2 text-slate-600">—</td>
                     <td class="px-4 py-2 text-slate-600">{{ money($registrationAmount) }}</td>
+                    <td class="px-4 py-2 text-slate-600">{{ money($registrationAmountPaid) }}</td>
                     <td class="px-4 py-2"></td>
                 </tr>
                 @foreach ($tuitionInstallments as $installment)
@@ -142,6 +144,7 @@
                         <td class="px-4 py-2 text-slate-900">Tranche {{ $installment['position'] }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $installment['due_date']->format('d/m/Y') }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ money($installment['amount']) }}</td>
+                        <td class="px-4 py-2 text-slate-600">{{ money($installment['paid']) }}</td>
                         <td class="px-4 py-2">
                             <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $statusClasses }}">{{ $statusLabel }}</span>
                         </td>

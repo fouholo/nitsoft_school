@@ -62,6 +62,30 @@ test('le détail des montants dus affiche le statut de chaque tranche', function
         ->assertSeeInOrder(['Payé', 'En cours', 'Dû']);
 });
 
+test('le détail des montants dus affiche le montant versé par poste', function () {
+    $establishment = Establishment::factory()->create();
+    $accountant = createUserWithRole($establishment, 'caissier');
+    actingInEstablishment($establishment);
+    test()->actingAs($accountant);
+
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 1, 'due_date' => now()->subMonth()]);
+    $student = Student::factory()->create(['establishment_id' => $establishment->id]);
+
+    $enrollment = Enrollment::factory()->create([
+        'establishment_id' => $establishment->id,
+        'student_id' => $student->id,
+        'school_year_id' => $schoolYear->id,
+        'registration_amount' => 2000,
+        'installment_1_amount' => 5000,
+        'total_paid' => 6000,
+    ]);
+
+    Livewire::test(Show::class, ['enrollment' => $enrollment])
+        ->assertSee(money(2000.0))
+        ->assertSee(money(4000.0));
+});
+
 test('un caissier modifie les montants d’une inscription', function () {
     $establishment = Establishment::factory()->create();
     $accountant = createUserWithRole($establishment, 'caissier');

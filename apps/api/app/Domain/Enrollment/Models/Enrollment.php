@@ -155,16 +155,16 @@ class Enrollment extends Model
     }
 
     /**
-     * Tranches de scolarité avec leur statut de couverture, déduit par
-     * imputation cumulative des versements (d'abord l'inscription, puis les
-     * tranches dans l'ordre des échéances — même convention que
-     * PaymentService::tuitionSnapshotFor()) :
+     * Tranches de scolarité avec leur statut de couverture et le montant
+     * versé, déduits par imputation cumulative des versements (d'abord
+     * l'inscription, puis les tranches dans l'ordre des échéances — même
+     * convention que PaymentService::tuitionSnapshotFor()) :
      * - `paid` : entièrement couverte par les versements.
      * - `partial_late`/`partial_upcoming` : partiellement couverte, échéance
      *   passée ou à venir.
      * - `late`/`due` : pas couverte du tout, échéance passée ou à venir.
      *
-     * @return Collection<int, array{position: int, amount: float, due_date: \Carbon\Carbon, status: string}>
+     * @return Collection<int, array{position: int, amount: float, due_date: \Carbon\Carbon, status: string, paid: float}>
      */
     public function tuitionInstallmentsWithStatus(): Collection
     {
@@ -175,6 +175,7 @@ class Enrollment extends Model
             $dueBefore = $cumulativeDue;
             $cumulativeDue += $installment['amount'];
             $isPast = $installment['due_date']->lte(now());
+            $paid = min($installment['amount'], max(0.0, $paidTowardTuition - $dueBefore));
 
             $status = match (true) {
                 $paidTowardTuition >= $cumulativeDue => 'paid',
@@ -183,7 +184,16 @@ class Enrollment extends Model
                 default => 'due',
             };
 
-            return [...$installment, 'status' => $status];
+            return [...$installment, 'status' => $status, 'paid' => $paid];
         });
+    }
+
+    /**
+     * Montant versé imputé aux frais d'inscription (couverts en premier,
+     * avant toute tranche — voir tuitionInstallmentsWithStatus()).
+     */
+    public function registrationAmountPaid(): float
+    {
+        return min((float) ($this->registration_amount ?? 0), (float) $this->total_paid);
     }
 }

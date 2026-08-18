@@ -136,6 +136,7 @@ class Show extends Component
             'payments' => $this->enrollment->payments()->with('receivedBy')->latest('paid_at')->get(),
             'tuitionInstallments' => $tuitionInstallments,
             'registrationAmount' => $registrationAmount,
+            'registrationAmountPaid' => $this->enrollment->registrationAmountPaid(),
             'totalDue' => $totalDue,
             'balance' => $totalDue - (float) $this->enrollment->total_paid,
         ]);
