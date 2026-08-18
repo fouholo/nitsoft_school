@@ -78,6 +78,18 @@ test('un membre d’un autre établissement ne peut même pas résoudre le paiem
     $response->assertNotFound();
 });
 
+test('le reçu affiche le moyen de paiement en français plutôt que le code technique', function () {
+    $establishment = Establishment::factory()->create();
+    actingInEstablishment($establishment);
+    $payment = makePaymentIn($establishment);
+    $payment->method = 'mobile_money';
+
+    $html = view('pdf.receipt', ['payment' => $payment])->render();
+
+    expect($html)->toContain('Mobile Money')
+        ->and($html)->not->toContain('mobile_money');
+});
+
 test('le reçu contient un QR code (uid_local) et un code-barres (uid_serveur) une fois synchronisé', function () {
     $establishment = Establishment::factory()->create();
     actingInEstablishment($establishment);
