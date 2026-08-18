@@ -63,11 +63,13 @@ class Index extends Component
         $rows = $balances
             ->map(function (array $balance) use ($students) {
                 $student = $students->get($balance['student_id']);
+                $enrollment = $student?->enrollments->first();
 
                 return [
                     ...$balance,
                     'student' => $student,
-                    'classroom' => $student?->enrollments->first()?->classroom,
+                    'enrollment' => $enrollment,
+                    'classroom' => $enrollment?->classroom,
                 ];
             })
             ->filter(fn (array $row) => $row['student'] !== null)

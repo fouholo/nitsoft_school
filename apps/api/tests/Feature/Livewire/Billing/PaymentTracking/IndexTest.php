@@ -69,6 +69,27 @@ test('le filtre par niveau exclut un élève d’un autre niveau', function () {
     expect($rows->pluck('student_id')->all())->toBe([$studentA->id]);
 });
 
+test('un directeur peut accéder directement à l’encaissement depuis le suivi des paiements', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $student = Student::factory()->create(['establishment_id' => $establishment->id]);
+
+    $enrollment = Enrollment::factory()->create([
+        'establishment_id' => $establishment->id,
+        'school_year_id' => $schoolYear->id,
+        'student_id' => $student->id,
+        'registration_amount' => 1000,
+    ]);
+
+    Livewire::test(Index::class)
+        ->set('school_year_id', $schoolYear->id)
+        ->assertSee(route('billing.enrollments.show', $enrollment), false);
+});
+
 test('un enseignant n’a pas accès à l’écran de suivi des paiements', function () {
     $establishment = Establishment::factory()->create();
     $teacher = createUserWithRole($establishment, 'enseignant');
