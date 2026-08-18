@@ -6,6 +6,7 @@ namespace App\Domain\Billing\Models;
 
 use App\Domain\Billing\Concerns\HasOwnerScope;
 use App\Domain\Billing\Contracts\HasOwnerColumn;
+use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Concerns\TenantScoped;
 use App\Domain\Sync\Concerns\Syncable;
@@ -29,7 +30,7 @@ class Payment extends Model implements HasOwnerColumn
 
     protected $fillable = [
         'establishment_id',
-        'invoice_id',
+        'enrollment_id',
         'student_id',
         'amount',
         'method',
@@ -62,11 +63,11 @@ class Payment extends Model implements HasOwnerColumn
     }
 
     /**
-     * @return BelongsTo<Invoice, $this>
+     * @return BelongsTo<Enrollment, $this>
      */
-    public function invoice(): BelongsTo
+    public function enrollment(): BelongsTo
     {
-        return $this->belongsTo(Invoice::class);
+        return $this->belongsTo(Enrollment::class);
     }
 
     /**

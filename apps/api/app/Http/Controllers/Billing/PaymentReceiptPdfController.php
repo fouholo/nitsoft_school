@@ -25,7 +25,7 @@ class PaymentReceiptPdfController extends Controller
     {
         Gate::authorize('view', $payment);
 
-        $payment->loadMissing(['invoice', 'student', 'establishment', 'receivedBy']);
+        $payment->loadMissing(['enrollment.classroom', 'student', 'establishment', 'receivedBy']);
 
         $pdf = Pdf::loadView('pdf.receipt', [
             'payment' => $payment,

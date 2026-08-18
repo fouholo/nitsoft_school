@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Domain\Billing\Models\Invoice;
+use App\Domain\Billing\Models\Payment;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\Foundation;
@@ -34,8 +34,8 @@ test('un fondateur peut consulter et créer des élèves, et consulter (sans gé
 
     expect(Gate::forUser($founder)->allows('view', $student))->toBeTrue()
         ->and(Gate::forUser($founder)->allows('create', Student::class))->toBeTrue()
-        ->and(Gate::forUser($founder)->allows('viewAny', Invoice::class))->toBeTrue()
-        ->and(Gate::forUser($founder)->allows('create', Invoice::class))->toBeFalse();
+        ->and(Gate::forUser($founder)->allows('viewAny', Payment::class))->toBeTrue()
+        ->and(Gate::forUser($founder)->allows('create', Payment::class))->toBeFalse();
 });
 
 test('un fondateur n’a aucun accès sur un établissement hors de son groupe', function () {

@@ -48,9 +48,8 @@
                 ['type' => 'link', 'label' => 'Listes/Rapports', 'route' => 'reports.index', 'active' => 'reports.*', 'icon' => 'document-text', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\Classroom::class],
                 ['type' => 'group', 'label' => 'Facturation', 'icon' => 'banknote', 'active' => 'billing.*', 'children' => [
                     ['label' => 'Tarifs', 'route' => 'billing.tuition-fees.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Installment::class],
-                    ['label' => 'Factures', 'route' => 'billing.invoices.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Invoice::class],
                     ['label' => 'Dépenses', 'route' => 'billing.expenses.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Expense::class],
-                    ['label' => 'Suivi des paiements', 'route' => 'billing.payment-tracking.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Invoice::class],
+                    ['label' => 'Suivi des paiements', 'route' => 'billing.payment-tracking.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Payment::class],
                     ['label' => 'Réductions', 'route' => 'billing.discounts.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Discount::class],
                 ]],
                 ['type' => 'group', 'label' => 'SMS', 'icon' => 'chat', 'active' => 'notifications.*', 'children' => [

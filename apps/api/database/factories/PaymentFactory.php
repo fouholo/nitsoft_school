@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Domain\Billing\Models\Invoice;
 use App\Domain\Billing\Models\Payment;
+use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Models\Establishment;
 use App\Models\User;
@@ -22,7 +22,7 @@ class PaymentFactory extends Factory
     {
         return [
             'establishment_id' => Establishment::factory(),
-            'invoice_id' => Invoice::factory(),
+            'enrollment_id' => Enrollment::factory(),
             'student_id' => Student::factory(),
             'amount' => 10000,
             'method' => 'cash',

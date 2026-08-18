@@ -139,17 +139,6 @@
                                     @can('create', \App\Domain\Billing\Models\LevelFee::class)
                                         <button wire:click="configureLevel({{ $level->id }})" class="text-slate-500 hover:text-slate-900">Configurer</button>
                                     @endcan
-                                    @if ($levelFee)
-                                        @can('create', \App\Domain\Billing\Models\Invoice::class)
-                                            <button
-                                                wire:click="generateInvoices({{ $level->id }})"
-                                                wire:confirm="Générer les factures manquantes pour ce niveau ?"
-                                                class="ml-3 text-slate-500 hover:text-slate-900"
-                                            >
-                                                Générer les factures
-                                            </button>
-                                        @endcan
-                                    @endif
                                 </td>
                             </tr>
 

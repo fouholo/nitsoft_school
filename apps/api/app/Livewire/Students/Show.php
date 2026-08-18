@@ -7,6 +7,7 @@ namespace App\Livewire\Students;
 use App\Domain\Academics\Enums\Cycle;
 use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\SchoolYear;
+use App\Domain\Billing\Services\LevelFeeDefaultsService;
 use App\Domain\Billing\Services\PaymentTrackingService;
 use App\Domain\Enrollment\Enums\GuardianLinkStatus;
 use App\Domain\Enrollment\Enums\GuardianRelationship;
@@ -75,7 +76,7 @@ class Show extends Component
         $this->showEnrollmentForm = true;
     }
 
-    public function saveEnrollment(): void
+    public function saveEnrollment(LevelFeeDefaultsService $levelFeeDefaults): void
     {
         $this->authorize('create', Enrollment::class);
 
@@ -99,8 +100,13 @@ class Show extends Component
             $data['is_assigned'] = false;
         }
 
+        $levelId = Classroom::findOrFail($data['classroom_id'])->level_id;
+
+        $financialDefaults = $levelFeeDefaults->defaultsFor($data['school_year_id'], $levelId, $data['is_assigned']);
+
         $this->student->enrollments()->create([
             ...$data,
+            ...$financialDefaults,
             'status' => 'active',
         ]);
 

@@ -8,7 +8,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * À utiliser sur les modèles implémentant HasOwnerColumn (Invoice, Payment,
+ * À utiliser sur les modèles implémentant HasOwnerColumn (Payment,
  * Expense) — restreint une requête aux enregistrements saisis par un
  * utilisateur donné (portée "propres saisies" de l'éducateur, voir
  * RolePermissions::MATRIX['finance.scope_own_only']).

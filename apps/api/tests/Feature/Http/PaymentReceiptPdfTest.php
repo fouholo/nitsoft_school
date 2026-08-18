@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Billing\Models\Installment;
-use App\Domain\Billing\Models\Invoice;
 use App\Domain\Billing\Models\Payment;
 use App\Domain\Billing\Services\PaymentService;
+use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Models\Establishment;
 
 function makePaymentIn(Establishment $establishment): Payment
 {
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
-    $invoice = Invoice::factory()->create(['establishment_id' => $establishment->id, 'student_id' => $student->id]);
+    $enrollment = Enrollment::factory()->create(['establishment_id' => $establishment->id, 'student_id' => $student->id, 'registration_amount' => 100]);
     $accountant = createUserWithRole($establishment, 'caissier');
 
-    return (new PaymentService)->recordPayment($invoice, [
+    return (new PaymentService)->recordPayment($enrollment, [
         'amount' => 25,
         'method' => 'cash',
         'paid_at' => now()->toDateString(),
@@ -154,13 +154,13 @@ test('la date et la somme du prochain versement s’affichent quand elles sont f
         ->and($html)->toContain(money(150.0));
 });
 
-test('l’instantané du paiement exclut la facture d’inscription (installment_id null)', function () {
+test('l’instantané du paiement exclut les frais d’inscription déjà couverts', function () {
     $establishment = Establishment::factory()->create();
     actingInEstablishment($establishment);
 
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
     $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
-    $installment = Installment::create([
+    Installment::create([
         'establishment_id' => $establishment->id,
         'school_year_id' => $schoolYear->id,
         'label' => 'Tranche 1',
@@ -168,28 +168,18 @@ test('l’instantané du paiement exclut la facture d’inscription (installment
         'position' => 1,
     ]);
 
-    Invoice::factory()->create([
+    // Frais d'inscription (50) déjà couverts par un versement antérieur.
+    $enrollment = Enrollment::factory()->create([
         'establishment_id' => $establishment->id,
         'student_id' => $student->id,
         'school_year_id' => $schoolYear->id,
-        'installment_id' => null,
-        'label' => "Frais d'inscription",
-        'amount_due' => 50,
-        'amount_paid' => 50,
-    ]);
-
-    $tuitionInvoice = Invoice::factory()->create([
-        'establishment_id' => $establishment->id,
-        'student_id' => $student->id,
-        'school_year_id' => $schoolYear->id,
-        'installment_id' => $installment->id,
-        'label' => 'Tranche 1',
-        'amount_due' => 200,
-        'amount_paid' => 0,
+        'registration_amount' => 50,
+        'installment_1_amount' => 200,
+        'total_paid' => 50,
     ]);
 
     $accountant = createUserWithRole($establishment, 'caissier');
-    $payment = (new PaymentService)->recordPayment($tuitionInvoice, [
+    $payment = (new PaymentService)->recordPayment($enrollment, [
         'amount' => 100,
         'method' => 'cash',
         'paid_at' => now()->toDateString(),
@@ -213,7 +203,7 @@ test('la date et la somme du prochain versement affichées sur le reçu correspo
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
     $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
 
-    $installment1 = Installment::create([
+    Installment::create([
         'establishment_id' => $establishment->id,
         'school_year_id' => $schoolYear->id,
         'label' => 'Tranche 1',
@@ -228,29 +218,17 @@ test('la date et la somme du prochain versement affichées sur le reçu correspo
         'position' => 2,
     ]);
 
-    $invoice1 = Invoice::factory()->create([
+    $enrollment = Enrollment::factory()->create([
         'establishment_id' => $establishment->id,
         'student_id' => $student->id,
         'school_year_id' => $schoolYear->id,
-        'installment_id' => $installment1->id,
-        'label' => 'Tranche 1',
-        'amount_due' => 100,
-        'amount_paid' => 0,
-        'due_date' => $installment1->due_date,
-    ]);
-    Invoice::factory()->create([
-        'establishment_id' => $establishment->id,
-        'student_id' => $student->id,
-        'school_year_id' => $schoolYear->id,
-        'installment_id' => $installment2->id,
-        'label' => 'Tranche 2',
-        'amount_due' => 150,
-        'amount_paid' => 0,
-        'due_date' => $installment2->due_date,
+        'registration_amount' => 0,
+        'installment_1_amount' => 100,
+        'installment_2_amount' => 150,
     ]);
 
     $accountant = createUserWithRole($establishment, 'caissier');
-    $payment = (new PaymentService)->recordPayment($invoice1, [
+    $payment = (new PaymentService)->recordPayment($enrollment, [
         'amount' => 100,
         'method' => 'cash',
         'paid_at' => now()->toDateString(),

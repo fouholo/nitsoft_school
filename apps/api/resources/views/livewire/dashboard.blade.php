@@ -91,8 +91,8 @@
                 <p class="mt-1 text-xs text-slate-500">Faire l'appel du jour</p>
             </a>
 
-            <a href="{{ route('billing.invoices.index') }}" wire:navigate class="rounded-xl border border-slate-200 bg-white p-5 hover:border-indigo-200 hover:bg-indigo-50/40">
-                <p class="text-sm font-medium text-slate-900">Factures</p>
+            <a href="{{ route('billing.payment-tracking.index') }}" wire:navigate class="rounded-xl border border-slate-200 bg-white p-5 hover:border-indigo-200 hover:bg-indigo-50/40">
+                <p class="text-sm font-medium text-slate-900">Suivi des paiements</p>
                 <p class="mt-1 text-xs text-slate-500">Suivre les paiements</p>
             </a>
         </div>

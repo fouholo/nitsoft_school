@@ -6,6 +6,8 @@ namespace App\Livewire\Billing\Discounts;
 
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Billing\Models\Discount;
+use App\Domain\Billing\Services\DiscountService;
+use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -61,7 +63,7 @@ class Index extends Component
         $this->showForm = true;
     }
 
-    public function save(): void
+    public function save(DiscountService $discountService): void
     {
         $data = $this->validate([
             'student_id' => ['required', 'exists:students,id'],
@@ -85,7 +87,7 @@ class Index extends Component
 
         $this->authorize($existing ? 'update' : 'create', $existing ?? Discount::class);
 
-        Discount::updateOrCreate(
+        $discount = Discount::updateOrCreate(
             ['school_year_id' => $this->school_year_id, 'student_id' => $data['student_id']],
             [
                 'type' => $data['type'],
@@ -95,17 +97,35 @@ class Index extends Component
             ],
         );
 
+        $enrollment = Enrollment::where('school_year_id', $this->school_year_id)
+            ->where('student_id', $data['student_id'])
+            ->where('status', 'active')
+            ->first();
+
+        if ($enrollment) {
+            $discountService->applyToEnrollment($enrollment, $discount);
+        }
+
         $this->resetForm();
         $this->showForm = false;
     }
 
-    public function delete(int $discountId): void
+    public function delete(int $discountId, DiscountService $discountService): void
     {
         $discount = Discount::findOrFail($discountId);
 
         $this->authorize('delete', $discount);
 
+        $enrollment = Enrollment::where('school_year_id', $discount->school_year_id)
+            ->where('student_id', $discount->student_id)
+            ->where('status', 'active')
+            ->first();
+
         $discount->delete();
+
+        if ($enrollment) {
+            $discountService->resetToLevelDefaults($enrollment);
+        }
     }
 
     public function cancel(): void

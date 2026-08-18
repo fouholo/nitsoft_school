@@ -14,8 +14,8 @@
                     <a href="{{ route('guardian-portal.students.attendance', $student) }}" class="text-slate-600 hover:text-slate-900 hover:underline">
                         Présences
                     </a>
-                    <a href="{{ route('guardian-portal.students.invoices', $student) }}" class="text-slate-600 hover:text-slate-900 hover:underline">
-                        Factures
+                    <a href="{{ route('guardian-portal.students.billing', $student) }}" class="text-slate-600 hover:text-slate-900 hover:underline">
+                        Facturation
                     </a>
                 </div>
             </div>

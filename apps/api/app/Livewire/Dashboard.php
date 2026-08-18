@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Livewire;
 
 use App\Domain\Academics\Models\Classroom;
-use App\Domain\Billing\Models\Invoice;
+use App\Domain\Academics\Models\SchoolYear;
+use App\Domain\Billing\Services\PaymentTrackingService;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Models\EstablishmentUserPivot;
 use App\Models\User;
@@ -26,16 +27,19 @@ class Dashboard extends Component
         $user = Auth::user();
         $role = $user->currentRole();
 
+        $schoolYearId = SchoolYear::where('is_current', true)->value('id');
+        $pendingBalances = $schoolYearId
+            ? app(PaymentTrackingService::class)->balances($schoolYearId)->where('balance', '>', 0)
+            : collect();
+
         return view('livewire.dashboard', [
             'noEstablishment' => false,
             'role' => $role,
             'roleLabel' => $user->currentRoleLabel(),
             'studentsCount' => Student::where('is_active', true)->count(),
             'classroomsCount' => Classroom::whereHas('schoolYear', fn ($query) => $query->where('is_current', true))->count(),
-            'pendingInvoicesCount' => Invoice::whereIn('status', ['pending', 'partially_paid'])->count(),
-            'pendingInvoicesBalance' => (float) (Invoice::whereIn('status', ['pending', 'partially_paid'])
-                ->selectRaw('SUM(amount_due - amount_paid) as balance')
-                ->value('balance') ?? 0),
+            'pendingInvoicesCount' => $pendingBalances->count(),
+            'pendingInvoicesBalance' => (float) $pendingBalances->sum('balance'),
             'staffCount' => EstablishmentUserPivot::query()
                 ->where('establishment_id', app('currentEstablishmentId'))
                 ->whereIn('role', ['directeur', 'gestionnaire', 'enseignant', 'caissier', 'educateur'])

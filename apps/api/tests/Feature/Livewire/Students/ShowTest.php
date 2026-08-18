@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Domain\Academics\Models\SchoolYear;
-use App\Domain\Billing\Models\Invoice;
+use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Models\Establishment;
 use App\Livewire\Students\Show;
@@ -18,13 +18,12 @@ test('un directeur voit le bloc situation financière sur la fiche élève', fun
     $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
 
-    Invoice::factory()->create([
+    Enrollment::factory()->create([
         'establishment_id' => $establishment->id,
         'school_year_id' => $schoolYear->id,
         'student_id' => $student->id,
-        'amount_due' => 500,
-        'amount_paid' => 0,
-        'due_date' => now()->subDay(),
+        'status' => 'active',
+        'registration_amount' => 500,
     ]);
 
     Livewire::test(Show::class, ['student' => $student])

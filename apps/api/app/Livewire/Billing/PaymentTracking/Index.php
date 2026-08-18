@@ -6,7 +6,7 @@ namespace App\Livewire\Billing\PaymentTracking;
 
 use App\Domain\Academics\Models\Level;
 use App\Domain\Academics\Models\SchoolYear;
-use App\Domain\Billing\Models\Invoice;
+use App\Domain\Billing\Models\Payment;
 use App\Domain\Billing\Services\PaymentTrackingService;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
@@ -27,7 +27,7 @@ class Index extends Component
 
     public function mount(): void
     {
-        $this->authorize('viewAny', Invoice::class);
+        $this->authorize('viewAny', Payment::class);
 
         $this->school_year_id = SchoolYear::where('is_current', true)->value('id');
     }

@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Domain\Billing\Models\Discount;
 use App\Domain\Billing\Models\Expense;
 use App\Domain\Billing\Models\Installment;
-use App\Domain\Billing\Models\Invoice;
 use App\Domain\Billing\Models\LevelFee;
 use App\Domain\Billing\Models\Payment;
 use App\Domain\Establishments\Models\Establishment;
@@ -13,7 +12,6 @@ use App\Domain\Establishments\Models\Establishment;
 dataset('billing_models', [
     'installments' => [Installment::class],
     'level_fees' => [LevelFee::class],
-    'invoices' => [Invoice::class],
     'discounts' => [Discount::class],
 ]);
 
@@ -56,31 +54,31 @@ test('fondateur et gestionnaire voient les factures/paiements mais ne les gèren
 
     actingInEstablishment($establishment);
 
-    expect($manager->can('viewAny', Invoice::class))->toBeTrue()
-        ->and($manager->can('create', Invoice::class))->toBeFalse()
+    expect($manager->can('viewAny', Payment::class))->toBeTrue()
+        ->and($manager->can('create', Payment::class))->toBeFalse()
         ->and($manager->can('create', Installment::class))->toBeTrue()
         ->and($manager->can('create', LevelFee::class))->toBeTrue()
-        ->and($founder->can('viewAny', Invoice::class))->toBeTrue()
-        ->and($founder->can('create', Invoice::class))->toBeFalse()
+        ->and($founder->can('viewAny', Payment::class))->toBeTrue()
+        ->and($founder->can('create', Payment::class))->toBeFalse()
         ->and($founder->can('create', Installment::class))->toBeTrue()
         ->and($founder->can('create', LevelFee::class))->toBeTrue();
 });
 
-test('un éducateur ne voit que les factures/paiements/dépenses qu’il a lui-même saisis', function () {
+test('un éducateur ne voit que les paiements/dépenses qu’il a lui-même saisis', function () {
     $establishment = Establishment::factory()->create();
     $educator = createUserWithRole($establishment, 'educateur');
     $otherEducator = createUserWithRole($establishment, 'educateur');
 
     actingInEstablishment($establishment);
 
-    $ownInvoice = Invoice::factory()->create(['establishment_id' => $establishment->id, 'created_by' => $educator->id]);
-    $otherInvoice = Invoice::factory()->create(['establishment_id' => $establishment->id, 'created_by' => $otherEducator->id]);
+    $ownPayment = Payment::factory()->create(['establishment_id' => $establishment->id, 'received_by' => $educator->id]);
+    $otherPayment = Payment::factory()->create(['establishment_id' => $establishment->id, 'received_by' => $otherEducator->id]);
 
     $ownExpense = Expense::factory()->create(['establishment_id' => $establishment->id, 'recorded_by' => $educator->id]);
     $otherExpense = Expense::factory()->create(['establishment_id' => $establishment->id, 'recorded_by' => $otherEducator->id]);
 
-    expect($educator->can('view', $ownInvoice))->toBeTrue()
-        ->and($educator->can('view', $otherInvoice))->toBeFalse()
+    expect($educator->can('view', $ownPayment))->toBeTrue()
+        ->and($educator->can('view', $otherPayment))->toBeFalse()
         ->and($educator->can('view', $ownExpense))->toBeTrue()
         ->and($educator->can('view', $otherExpense))->toBeFalse();
 });

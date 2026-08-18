@@ -4,60 +4,74 @@ declare(strict_types=1);
 
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Billing\Models\Installment;
-use App\Domain\Billing\Models\Invoice;
 use App\Domain\Billing\Services\PaymentService;
+use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Models\Establishment;
 
-test('un paiement partiel passe la facture en partially_paid et génère un reçu', function () {
+function enrollmentIn(Establishment $establishment, array $overrides = []): Enrollment
+{
+    $student = Student::factory()->create(['establishment_id' => $establishment->id]);
+
+    return Enrollment::factory()->create([
+        'establishment_id' => $establishment->id,
+        'student_id' => $student->id,
+        ...$overrides,
+    ]);
+}
+
+test('un paiement met à jour le total versé de l’inscription et génère un reçu', function () {
     $establishment = Establishment::factory()->create();
     $accountant = createUserWithRole($establishment, 'caissier');
 
-    $invoice = Invoice::factory()->create([
-        'establishment_id' => $establishment->id,
-        'amount_due' => 100,
-        'amount_paid' => 0,
-        'status' => 'pending',
-    ]);
+    $enrollment = enrollmentIn($establishment, ['registration_amount' => 100]);
 
-    $payment = (new PaymentService)->recordPayment($invoice, [
+    $payment = (new PaymentService)->recordPayment($enrollment, [
         'amount' => 40,
         'method' => 'cash',
         'paid_at' => now()->toDateString(),
         'reference' => null,
     ], $accountant);
 
-    $invoice->refresh();
+    $enrollment->refresh();
 
-    expect((float) $invoice->amount_paid)->toBe(40.0)
-        ->and($invoice->status)->toBe('partially_paid')
+    expect((float) $enrollment->total_paid)->toBe(40.0)
         ->and($payment->uid_local)->not->toBeNull()
         ->and($payment->uid_serveur)->not->toBeNull()
         ->and($payment->receiptNumber())->toBe($payment->uid_serveur);
 });
 
-test('un paiement qui couvre le solde restant passe la facture à paid', function () {
+test('un second paiement additionne au total déjà versé', function () {
     $establishment = Establishment::factory()->create();
     $accountant = createUserWithRole($establishment, 'caissier');
 
-    $invoice = Invoice::factory()->create([
-        'establishment_id' => $establishment->id,
-        'amount_due' => 100,
-        'amount_paid' => 40,
-        'status' => 'partially_paid',
-    ]);
+    $enrollment = enrollmentIn($establishment, ['registration_amount' => 100]);
 
-    (new PaymentService)->recordPayment($invoice, [
-        'amount' => 60,
-        'method' => 'mobile_money',
-        'paid_at' => now()->toDateString(),
-        'reference' => 'MM-123',
-    ], $accountant);
+    $service = new PaymentService;
+    $service->recordPayment($enrollment, ['amount' => 40, 'method' => 'cash', 'paid_at' => now()->toDateString(), 'reference' => null], $accountant);
+    $service->recordPayment($enrollment, ['amount' => 60, 'method' => 'mobile_money', 'paid_at' => now()->toDateString(), 'reference' => 'MM-123'], $accountant);
 
-    $invoice->refresh();
+    $enrollment->refresh();
 
-    expect((float) $invoice->amount_paid)->toBe(100.0)
-        ->and($invoice->status)->toBe('paid');
+    expect((float) $enrollment->total_paid)->toBe(100.0);
+});
+
+test('le total versé est recalculé (jamais incrémenté) à partir de la somme des paiements', function () {
+    $establishment = Establishment::factory()->create();
+    $accountant = createUserWithRole($establishment, 'caissier');
+
+    $enrollment = enrollmentIn($establishment, ['registration_amount' => 100]);
+
+    // Un total_paid volontairement désynchronisé (ex: après une divergence
+    // de synchronisation hors-ligne) doit être corrigé, pas aggravé, par le
+    // prochain paiement.
+    $enrollment->update(['total_paid' => 999]);
+
+    (new PaymentService)->recordPayment($enrollment, ['amount' => 10, 'method' => 'cash', 'paid_at' => now()->toDateString(), 'reference' => null], $accountant);
+
+    $enrollment->refresh();
+
+    expect((float) $enrollment->total_paid)->toBe(10.0);
 });
 
 test('le numéro de reçu (uid_serveur) est attribué de façon séquentielle', function () {
@@ -65,11 +79,11 @@ test('le numéro de reçu (uid_serveur) est attribué de façon séquentielle', 
     $accountant = createUserWithRole($establishment, 'caissier');
     $service = new PaymentService;
 
-    $invoiceA = Invoice::factory()->create(['establishment_id' => $establishment->id, 'amount_due' => 100]);
-    $invoiceB = Invoice::factory()->create(['establishment_id' => $establishment->id, 'amount_due' => 100]);
+    $enrollmentA = enrollmentIn($establishment, ['registration_amount' => 100]);
+    $enrollmentB = enrollmentIn($establishment, ['registration_amount' => 100]);
 
-    $paymentA = $service->recordPayment($invoiceA, ['amount' => 10, 'method' => 'cash', 'paid_at' => now()->toDateString(), 'reference' => null], $accountant);
-    $paymentB = $service->recordPayment($invoiceB, ['amount' => 10, 'method' => 'cash', 'paid_at' => now()->toDateString(), 'reference' => null], $accountant);
+    $paymentA = $service->recordPayment($enrollmentA, ['amount' => 10, 'method' => 'cash', 'paid_at' => now()->toDateString(), 'reference' => null], $accountant);
+    $paymentB = $service->recordPayment($enrollmentB, ['amount' => 10, 'method' => 'cash', 'paid_at' => now()->toDateString(), 'reference' => null], $accountant);
 
     $sequenceA = (int) substr($paymentA->uid_serveur, 3);
     $sequenceB = (int) substr($paymentB->uid_serveur, 3);
@@ -99,35 +113,25 @@ test('l’instantané financier reste figé sur un paiement même après un paie
         'position' => 2,
     ]);
 
-    $invoice1 = Invoice::factory()->create([
+    $enrollment = Enrollment::factory()->create([
         'establishment_id' => $establishment->id,
         'student_id' => $student->id,
         'school_year_id' => $schoolYear->id,
-        'installment_id' => $installment1->id,
-        'amount_due' => 100,
-        'amount_paid' => 0,
-        'due_date' => $installment1->due_date,
-    ]);
-    $invoice2 = Invoice::factory()->create([
-        'establishment_id' => $establishment->id,
-        'student_id' => $student->id,
-        'school_year_id' => $schoolYear->id,
-        'installment_id' => $installment2->id,
-        'amount_due' => 150,
-        'amount_paid' => 0,
-        'due_date' => $installment2->due_date,
+        'registration_amount' => 0,
+        'installment_1_amount' => 100,
+        'installment_2_amount' => 150,
     ]);
 
     $service = new PaymentService;
 
-    $payment1 = $service->recordPayment($invoice1, ['amount' => 100, 'method' => 'cash', 'paid_at' => now()->toDateString(), 'reference' => null], $accountant);
+    $payment1 = $service->recordPayment($enrollment, ['amount' => 100, 'method' => 'cash', 'paid_at' => now()->toDateString(), 'reference' => null], $accountant);
 
     expect((float) $payment1->tuition_paid_total)->toBe(100.0)
         ->and((float) $payment1->tuition_remaining)->toBe(150.0)
         ->and($payment1->next_installment_due_date?->isSameDay($installment2->due_date))->toBeTrue()
         ->and((float) $payment1->next_installment_amount)->toBe(150.0);
 
-    $service->recordPayment($invoice2, ['amount' => 150, 'method' => 'cash', 'paid_at' => now()->toDateString(), 'reference' => null], $accountant);
+    $service->recordPayment($enrollment, ['amount' => 150, 'method' => 'cash', 'paid_at' => now()->toDateString(), 'reference' => null], $accountant);
 
     $payment1->refresh();
 
@@ -151,17 +155,15 @@ test('un élève soldé n’a pas de prochain versement dans l’instantané', f
         'position' => 1,
     ]);
 
-    $invoice = Invoice::factory()->create([
+    $enrollment = Enrollment::factory()->create([
         'establishment_id' => $establishment->id,
         'student_id' => $student->id,
         'school_year_id' => $schoolYear->id,
-        'installment_id' => $installment->id,
-        'amount_due' => 100,
-        'amount_paid' => 0,
-        'due_date' => $installment->due_date,
+        'registration_amount' => 0,
+        'installment_1_amount' => 100,
     ]);
 
-    $payment = (new PaymentService)->recordPayment($invoice, ['amount' => 100, 'method' => 'cash', 'paid_at' => now()->toDateString(), 'reference' => null], $accountant);
+    $payment = (new PaymentService)->recordPayment($enrollment, ['amount' => 100, 'method' => 'cash', 'paid_at' => now()->toDateString(), 'reference' => null], $accountant);
 
     expect((float) $payment->tuition_paid_total)->toBe(100.0)
         ->and((float) $payment->tuition_remaining)->toBe(0.0)
@@ -169,7 +171,7 @@ test('un élève soldé n’a pas de prochain versement dans l’instantané', f
         ->and($payment->next_installment_amount)->toBeNull();
 });
 
-test('le paiement de la facture d’inscription reflète l’instantané de la scolarité, pas de l’inscription', function () {
+test('un paiement qui couvre uniquement les frais d’inscription n’inflate pas le total scolarité de l’instantané', function () {
     $establishment = Establishment::factory()->create();
     $accountant = createUserWithRole($establishment, 'caissier');
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
@@ -183,31 +185,22 @@ test('le paiement de la facture d’inscription reflète l’instantané de la s
         'position' => 1,
     ]);
 
-    Invoice::factory()->create([
+    $enrollment = Enrollment::factory()->create([
         'establishment_id' => $establishment->id,
         'student_id' => $student->id,
         'school_year_id' => $schoolYear->id,
-        'installment_id' => $installment->id,
-        'amount_due' => 200,
-        'amount_paid' => 100,
-        'due_date' => $installment->due_date,
+        'registration_amount' => 50,
+        'installment_1_amount' => 200,
     ]);
 
-    $registrationInvoice = Invoice::factory()->create([
-        'establishment_id' => $establishment->id,
-        'student_id' => $student->id,
-        'school_year_id' => $schoolYear->id,
-        'installment_id' => null,
-        'label' => "Frais d'inscription",
-        'amount_due' => 50,
-        'amount_paid' => 0,
-        'due_date' => now()->addDay(),
-    ]);
+    // Les versements couvrent d'abord les frais d'inscription, par
+    // convention (aucune allocation explicite du caissier) — ce paiement
+    // couvre exactement l'inscription, rien ne doit apparaître côté
+    // scolarité.
+    $payment = (new PaymentService)->recordPayment($enrollment, ['amount' => 50, 'method' => 'cash', 'paid_at' => now()->toDateString(), 'reference' => null], $accountant);
 
-    $payment = (new PaymentService)->recordPayment($registrationInvoice, ['amount' => 50, 'method' => 'cash', 'paid_at' => now()->toDateString(), 'reference' => null], $accountant);
-
-    expect((float) $payment->tuition_paid_total)->toBe(100.0)
-        ->and((float) $payment->tuition_remaining)->toBe(100.0)
+    expect((float) $payment->tuition_paid_total)->toBe(0.0)
+        ->and((float) $payment->tuition_remaining)->toBe(200.0)
         ->and($payment->next_installment_due_date?->isSameDay($installment->due_date))->toBeTrue()
-        ->and((float) $payment->next_installment_amount)->toBe(100.0);
+        ->and((float) $payment->next_installment_amount)->toBe(200.0);
 });

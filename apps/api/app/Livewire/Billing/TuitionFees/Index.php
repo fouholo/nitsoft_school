@@ -7,14 +7,9 @@ namespace App\Livewire\Billing\TuitionFees;
 use App\Domain\Academics\Enums\Cycle;
 use App\Domain\Academics\Models\Level;
 use App\Domain\Academics\Models\SchoolYear;
-use App\Domain\Billing\Models\Discount;
 use App\Domain\Billing\Models\Installment;
-use App\Domain\Billing\Models\Invoice;
 use App\Domain\Billing\Models\LevelFee;
-use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Establishments\Models\Establishment;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -227,125 +222,6 @@ class Index extends Component
         $this->registration_amount = null;
         $this->registration_amount_assigned = null;
         $this->installment_amounts = [];
-    }
-
-    public function generateInvoices(int $levelId): void
-    {
-        $this->authorize('create', Invoice::class);
-
-        $levelFee = LevelFee::where('school_year_id', $this->school_year_id)
-            ->where('level_id', $levelId)
-            ->with('installmentAmounts.installment')
-            ->first();
-
-        if (! $levelFee) {
-            return;
-        }
-
-        $enrollments = Enrollment::where('school_year_id', $this->school_year_id)
-            ->where('status', 'active')
-            ->whereHas('classroom', fn ($query) => $query->where('level_id', $levelId))
-            ->get();
-
-        $assignedEnrollments = $enrollments->where('is_assigned', true);
-        $notAssignedEnrollments = $enrollments->where('is_assigned', false);
-
-        $studentsWithRegistrationInvoice = Invoice::where('school_year_id', $this->school_year_id)
-            ->whereNull('installment_id')
-            ->pluck('student_id');
-
-        $this->createRegistrationInvoices($notAssignedEnrollments, (float) $levelFee->registration_amount, $studentsWithRegistrationInvoice);
-        $this->createRegistrationInvoices($assignedEnrollments, (float) ($levelFee->registration_amount_assigned ?? 0), $studentsWithRegistrationInvoice);
-
-        $totalTuition = (float) $levelFee->installmentAmounts->whereNotNull('amount')->sum('amount');
-
-        $discountsByStudent = Discount::where('school_year_id', $this->school_year_id)->get()->keyBy('student_id');
-
-        foreach ($levelFee->installmentAmounts->whereNotNull('amount') as $installmentAmount) {
-            $installment = $installmentAmount->installment;
-
-            $studentsWithInstallmentInvoice = Invoice::where('installment_id', $installment->id)
-                ->pluck('student_id');
-
-            foreach ($notAssignedEnrollments as $enrollment) {
-                if ($studentsWithInstallmentInvoice->contains($enrollment->student_id)) {
-                    continue;
-                }
-
-                Invoice::create([
-                    'student_id' => $enrollment->student_id,
-                    'school_year_id' => $this->school_year_id,
-                    'installment_id' => $installment->id,
-                    'label' => $installment->label,
-                    'amount_due' => $this->applyDiscount(
-                        (float) $installmentAmount->amount,
-                        $totalTuition,
-                        $discountsByStudent->get($enrollment->student_id),
-                    ),
-                    'due_date' => $installment->due_date,
-                    'status' => 'pending',
-                    'created_by' => Auth::id(),
-                ]);
-            }
-        }
-
-        // Correction : un élève désormais affecté ne doit plus avoir de
-        // facture de tranche de ce niveau — sauf celles déjà (même
-        // partiellement) payées, jamais touchées.
-        if ($assignedEnrollments->isNotEmpty()) {
-            Invoice::whereIn('student_id', $assignedEnrollments->pluck('student_id'))
-                ->where('school_year_id', $this->school_year_id)
-                ->whereIn('installment_id', $levelFee->installmentAmounts->pluck('installment_id'))
-                ->where('amount_paid', 0)
-                ->delete();
-        }
-    }
-
-    /**
-     * @param  Collection<int, Enrollment>  $enrollments
-     * @param  Collection<int, int>  $studentsAlreadyInvoiced
-     */
-    private function createRegistrationInvoices(Collection $enrollments, float $registrationAmount, Collection $studentsAlreadyInvoiced): void
-    {
-        if ($registrationAmount <= 0) {
-            return;
-        }
-
-        foreach ($enrollments as $enrollment) {
-            if ($studentsAlreadyInvoiced->contains($enrollment->student_id)) {
-                continue;
-            }
-
-            Invoice::create([
-                'student_id' => $enrollment->student_id,
-                'school_year_id' => $this->school_year_id,
-                'installment_id' => null,
-                'label' => "Frais d'inscription",
-                'amount_due' => $registrationAmount,
-                'due_date' => $enrollment->enrolled_on,
-                'status' => 'pending',
-                'created_by' => Auth::id(),
-            ]);
-        }
-    }
-
-    private function applyDiscount(float $amount, float $totalTuition, ?Discount $discount): float
-    {
-        if (! $discount) {
-            return $amount;
-        }
-
-        if ($discount->type === 'percentage') {
-            return round($amount * (1 - ((float) $discount->value / 100)), 2);
-        }
-
-        if ($totalTuition <= 0) {
-            return $amount;
-        }
-
-        $reduction = (float) $discount->value * $amount / $totalTuition;
-
-        return round(max(0.0, $amount - $reduction), 2);
     }
 
     protected function resetInstallmentForm(): void

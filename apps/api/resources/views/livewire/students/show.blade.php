@@ -130,6 +130,7 @@
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Date</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Statut</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Statuts</th>
+                    <th class="px-4 py-2 text-left font-medium text-slate-500">Finances</th>
                     <th class="px-4 py-2"></th>
                 </tr>
             </thead>
@@ -156,6 +157,13 @@
                                 @endif
                             </div>
                         </td>
+                        <td class="px-4 py-2">
+                            @can('viewAny', \App\Domain\Billing\Models\Payment::class)
+                                <a href="{{ route('billing.enrollments.show', $enrollment) }}" wire:navigate class="text-slate-500 hover:text-slate-900">
+                                    Détails
+                                </a>
+                            @endcan
+                        </td>
                         <td class="px-4 py-2 text-right">
                             @can('update', $enrollment)
                                 @if ($enrollment->status === 'active')
@@ -172,14 +180,14 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-4 py-6 text-center text-slate-500">Aucune inscription.</td>
+                        <td colspan="7" class="px-4 py-6 text-center text-slate-500">Aucune inscription.</td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 
-    @can('viewAny', \App\Domain\Billing\Models\Invoice::class)
+    @can('viewAny', \App\Domain\Billing\Models\Payment::class)
         @if ($financialSummary)
             <h2 class="mt-8 text-sm font-semibold uppercase tracking-wide text-slate-500">Situation financière</h2>
             <div class="mt-2 grid grid-cols-1 gap-4 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-3">

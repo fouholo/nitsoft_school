@@ -50,8 +50,8 @@
             <td>{{ $payment->paid_at->format('d/m/Y') }}</td>
         </tr>
         <tr>
-            <td class="label">Facture</td>
-            <td>{{ $payment->invoice->label }}</td>
+            <td class="label">Classe</td>
+            <td>{{ $payment->enrollment->classroom?->name }}</td>
         </tr>
         <tr>
             <td class="label">Moyen de paiement</td>
