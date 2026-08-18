@@ -27,6 +27,10 @@ class Enrollment extends Model
         'school_year_id',
         'enrolled_on',
         'status',
+        'is_repeating',
+        'is_scholarship',
+        'is_boarding',
+        'is_assigned',
         'uid_local',
         'uid_serveur',
         'device_id',
@@ -35,6 +39,10 @@ class Enrollment extends Model
 
     protected $casts = [
         'enrolled_on' => 'date',
+        'is_repeating' => 'boolean',
+        'is_scholarship' => 'boolean',
+        'is_boarding' => 'boolean',
+        'is_assigned' => 'boolean',
         'client_updated_at' => 'datetime',
     ];
 

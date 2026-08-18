@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Students;
 
+use App\Domain\Academics\Enums\Cycle;
 use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Billing\Services\PaymentTrackingService;
@@ -35,6 +36,14 @@ class Show extends Component
 
     public string $enrolled_on = '';
 
+    public bool $is_repeating = false;
+
+    public bool $is_scholarship = false;
+
+    public bool $is_boarding = false;
+
+    public bool $is_assigned = false;
+
     public bool $showGuardianForm = false;
 
     public ?int $guardian_id = null;
@@ -59,6 +68,10 @@ class Show extends Component
         $this->classroom_id = null;
         $this->school_year_id = SchoolYear::where('is_current', true)->value('id');
         $this->enrolled_on = now()->toDateString();
+        $this->is_repeating = false;
+        $this->is_scholarship = false;
+        $this->is_boarding = false;
+        $this->is_assigned = false;
         $this->showEnrollmentForm = true;
     }
 
@@ -70,7 +83,21 @@ class Show extends Component
             'classroom_id' => ['required', 'exists:classrooms,id'],
             'school_year_id' => ['required', 'exists:school_years,id'],
             'enrolled_on' => ['required', 'date'],
+            'is_repeating' => ['boolean'],
+            'is_scholarship' => ['boolean'],
+            'is_boarding' => ['boolean'],
+            'is_assigned' => ['boolean'],
         ]);
+
+        // Défense en profondeur : ces statuts ne sont proposés que pour le
+        // secondaire côté vue, mais on ignore toute valeur transmise pour
+        // une classe d'un autre cycle plutôt que de faire confiance au client.
+        if (Classroom::find($data['classroom_id'])?->level?->cycle !== Cycle::Secondaire) {
+            $data['is_repeating'] = false;
+            $data['is_scholarship'] = false;
+            $data['is_boarding'] = false;
+            $data['is_assigned'] = false;
+        }
 
         $this->student->enrollments()->create([
             ...$data,
@@ -158,10 +185,15 @@ class Show extends Component
             ? app(PaymentTrackingService::class)->balanceForStudent($this->student->id, $schoolYearId, $ownerId)
             : null;
 
+        $isSecondaireClassroom = $this->classroom_id
+            ? Classroom::find($this->classroom_id)?->level?->cycle === Cycle::Secondaire
+            : false;
+
         return view('livewire.students.show', [
             'enrollments' => $this->student->enrollments()->with(['classroom', 'schoolYear'])->latest('enrolled_on')->get(),
             'classrooms' => Classroom::orderBy('name')->get(),
             'schoolYears' => SchoolYear::orderByDesc('starts_on')->get(),
+            'isSecondaireClassroom' => $isSecondaireClassroom,
             'financialSummary' => $financialSummary,
             'guardians' => $this->student->guardians()->wherePivot('status', GuardianLinkStatus::Approved)->get(),
             'availableGuardians' => Guardian::query()

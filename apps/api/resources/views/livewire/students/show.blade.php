@@ -65,7 +65,7 @@
         <form wire:submit="saveEnrollment" class="mt-4 grid grid-cols-1 gap-4 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-3">
             <div>
                 <label class="block text-sm font-medium text-slate-700">Classe</label>
-                <select wire:model="classroom_id" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                <select wire:model.live="classroom_id" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
                     <option value="">—</option>
                     @foreach ($classrooms as $classroom)
                         <option value="{{ $classroom->id }}">{{ $classroom->name }}</option>
@@ -91,6 +91,23 @@
                 @error('enrolled_on') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
+            @if ($isSecondaireClassroom)
+                <div class="grid grid-cols-2 gap-3 sm:col-span-3 sm:grid-cols-4">
+                    <label class="flex items-center gap-2 text-sm text-slate-700">
+                        <input type="checkbox" wire:model="is_repeating"> Redoublant
+                    </label>
+                    <label class="flex items-center gap-2 text-sm text-slate-700">
+                        <input type="checkbox" wire:model="is_scholarship"> Boursier
+                    </label>
+                    <label class="flex items-center gap-2 text-sm text-slate-700">
+                        <input type="checkbox" wire:model="is_boarding"> Internat
+                    </label>
+                    <label class="flex items-center gap-2 text-sm text-slate-700">
+                        <input type="checkbox" wire:model="is_assigned"> Affecté(e)
+                    </label>
+                </div>
+            @endif
+
             <div class="flex gap-2 sm:col-span-3">
                 <button type="submit" class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700">
                     Enregistrer
@@ -112,6 +129,7 @@
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Classe</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Date</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Statut</th>
+                    <th class="px-4 py-2 text-left font-medium text-slate-500">Statuts</th>
                     <th class="px-4 py-2"></th>
                 </tr>
             </thead>
@@ -122,6 +140,22 @@
                         <td class="px-4 py-2 text-slate-600">{{ $enrollment->classroom?->name }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $enrollment->enrolled_on->format('d/m/Y') }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $enrollment->status }}</td>
+                        <td class="px-4 py-2">
+                            <div class="flex flex-wrap gap-1">
+                                @if ($enrollment->is_repeating)
+                                    <span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-800">Redoublant</span>
+                                @endif
+                                @if ($enrollment->is_scholarship)
+                                    <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-800">Boursier</span>
+                                @endif
+                                @if ($enrollment->is_boarding)
+                                    <span class="rounded-full bg-indigo-100 px-2 py-0.5 text-xs text-indigo-800">Internat</span>
+                                @endif
+                                @if ($enrollment->is_assigned)
+                                    <span class="rounded-full bg-slate-200 px-2 py-0.5 text-xs text-slate-700">Affecté(e)</span>
+                                @endif
+                            </div>
+                        </td>
                         <td class="px-4 py-2 text-right">
                             @can('update', $enrollment)
                                 @if ($enrollment->status === 'active')
@@ -138,7 +172,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-4 py-6 text-center text-slate-500">Aucune inscription.</td>
+                        <td colspan="6" class="px-4 py-6 text-center text-slate-500">Aucune inscription.</td>
                     </tr>
                 @endforelse
             </tbody>
