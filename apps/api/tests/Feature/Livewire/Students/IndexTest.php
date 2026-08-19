@@ -162,3 +162,55 @@ test('un enseignant ne peut pas créer d’élève', function () {
         ->call('create')
         ->assertForbidden();
 });
+
+test('avancer à l’étape 2 sans les champs obligatoires de l’étape 1 échoue', function () {
+    Livewire::test(Index::class)
+        ->call('create')
+        ->assertSet('currentStep', 1)
+        ->call('nextStep')
+        ->assertHasErrors(['last_name', 'first_name', 'student_number'])
+        ->assertSet('currentStep', 1)
+        ->assertSee('Le champ nom est obligatoire');
+});
+
+test('le flux en 3 étapes avance jusqu’à l’enregistrement final', function () {
+    Livewire::test(Index::class)
+        ->call('create')
+        ->set('last_name', 'Traoré')
+        ->set('first_name', 'Awa')
+        ->set('student_number', 'MAT-0010')
+        ->call('nextStep')
+        ->assertHasNoErrors()
+        ->assertSet('currentStep', 2)
+        ->call('nextStep')
+        ->assertSet('currentStep', 3)
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect(Student::sole()->last_name)->toBe('Traoré');
+});
+
+test('revenir à l’étape précédente conserve les valeurs déjà saisies', function () {
+    Livewire::test(Index::class)
+        ->call('create')
+        ->set('last_name', 'Traoré')
+        ->set('first_name', 'Awa')
+        ->set('student_number', 'MAT-0011')
+        ->call('nextStep')
+        ->call('previousStep')
+        ->assertSet('currentStep', 1)
+        ->assertSet('last_name', 'Traoré');
+});
+
+test('modifier un élève repart toujours de l’étape 1 avec son nom affiché', function () {
+    $student = Student::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'last_name' => 'Koné',
+        'first_name' => 'Yao',
+    ]);
+
+    Livewire::test(Index::class)
+        ->call('edit', $student->id)
+        ->assertSet('currentStep', 1)
+        ->assertSee('Modification — Koné Yao');
+});

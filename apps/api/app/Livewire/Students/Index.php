@@ -22,9 +22,24 @@ class Index extends Component
     use WithFileUploads;
     use WithPagination;
 
+    /**
+     * Champs du formulaire de création/modification, regroupés par étape du
+     * flux progressif (voir critique /impeccable — un formulaire à plat de
+     * 17 champs générait une charge cognitive trop élevée).
+     *
+     * @var array<int, array<int, string>>
+     */
+    private const STEP_FIELDS = [
+        1 => ['last_name', 'first_name', 'birth_date', 'birth_place', 'gender', 'student_number', 'photo'],
+        2 => ['nationalite_code', 'birth_certificate_number', 'birth_certificate_date', 'birth_certificate_place', 'residence'],
+        3 => ['father_name', 'father_phone', 'mother_name', 'mother_phone', 'tutor_name', 'tutor_phone'],
+    ];
+
     public bool $showForm = false;
 
     public ?int $editingId = null;
+
+    public int $currentStep = 1;
 
     public string $search = '';
 
@@ -91,6 +106,7 @@ class Index extends Component
         $this->authorize('update', $student);
 
         $this->editingId = $student->id;
+        $this->currentStep = 1;
         $this->first_name = $student->first_name;
         $this->last_name = $student->last_name;
         $this->birth_date = $student->birth_date?->toDateString() ?? '';
@@ -112,34 +128,27 @@ class Index extends Component
         $this->showForm = true;
     }
 
+    public function nextStep(): void
+    {
+        $fields = self::STEP_FIELDS[$this->currentStep] ?? [];
+
+        $this->validate(array_intersect_key($this->rules(), array_flip($fields)), [], $this->validationAttributes());
+
+        if ($this->currentStep < count(self::STEP_FIELDS)) {
+            $this->currentStep++;
+        }
+    }
+
+    public function previousStep(): void
+    {
+        if ($this->currentStep > 1) {
+            $this->currentStep--;
+        }
+    }
+
     public function save(): void
     {
-        $establishmentId = (int) app('currentEstablishmentId');
-
-        $uniqueStudentNumber = Rule::unique('students', 'student_number')
-            ->where('establishment_id', $establishmentId)
-            ->ignore($this->editingId);
-
-        $data = $this->validate([
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
-            'birth_date' => ['nullable', 'date'],
-            'gender' => ['nullable', 'string', 'in:m,f'],
-            'student_number' => ['required', 'string', 'max:255', $uniqueStudentNumber],
-            'father_name' => ['nullable', 'string', 'max:255'],
-            'father_phone' => ['nullable', 'string', 'max:255'],
-            'mother_name' => ['nullable', 'string', 'max:255'],
-            'mother_phone' => ['nullable', 'string', 'max:255'],
-            'tutor_name' => ['nullable', 'string', 'max:255'],
-            'tutor_phone' => ['nullable', 'string', 'max:255'],
-            'birth_place' => ['nullable', 'string', 'max:255'],
-            'nationalite_code' => ['nullable', 'string', 'exists:nationalites,code'],
-            'birth_certificate_number' => ['nullable', 'string', 'max:255'],
-            'birth_certificate_date' => ['nullable', 'date'],
-            'birth_certificate_place' => ['nullable', 'string', 'max:255'],
-            'residence' => ['nullable', 'string', 'max:255'],
-            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:100'],
-        ]);
+        $data = $this->validate($this->rules(), [], $this->validationAttributes());
 
         // Les champs optionnels vides arrivent comme '' (pas null) depuis les
         // inputs HTML ; il faut normaliser avant insertion (date/enum SQL stricts).
@@ -190,10 +199,70 @@ class Index extends Component
         $this->showForm = false;
     }
 
+    /**
+     * @return array<string, array<int, mixed>>
+     */
+    protected function rules(): array
+    {
+        $establishmentId = (int) app('currentEstablishmentId');
+
+        $uniqueStudentNumber = Rule::unique('students', 'student_number')
+            ->where('establishment_id', $establishmentId)
+            ->ignore($this->editingId);
+
+        return [
+            'last_name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'birth_date' => ['nullable', 'date'],
+            'birth_place' => ['nullable', 'string', 'max:255'],
+            'gender' => ['nullable', 'string', 'in:m,f'],
+            'student_number' => ['required', 'string', 'max:255', $uniqueStudentNumber],
+            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:100'],
+            'nationalite_code' => ['nullable', 'string', 'exists:nationalites,code'],
+            'birth_certificate_number' => ['nullable', 'string', 'max:255'],
+            'birth_certificate_date' => ['nullable', 'date'],
+            'birth_certificate_place' => ['nullable', 'string', 'max:255'],
+            'residence' => ['nullable', 'string', 'max:255'],
+            'father_name' => ['nullable', 'string', 'max:255'],
+            'father_phone' => ['nullable', 'string', 'max:255'],
+            'mother_name' => ['nullable', 'string', 'max:255'],
+            'mother_phone' => ['nullable', 'string', 'max:255'],
+            'tutor_name' => ['nullable', 'string', 'max:255'],
+            'tutor_phone' => ['nullable', 'string', 'max:255'],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function validationAttributes(): array
+    {
+        return [
+            'last_name' => 'nom',
+            'first_name' => 'prénom',
+            'birth_date' => 'date de naissance',
+            'birth_place' => 'lieu de naissance',
+            'gender' => 'genre',
+            'student_number' => 'matricule',
+            'photo' => 'photo',
+            'nationalite_code' => 'nationalité',
+            'birth_certificate_number' => 'numéro d\'acte de naissance',
+            'birth_certificate_date' => 'date de l\'acte de naissance',
+            'birth_certificate_place' => 'lieu de l\'acte de naissance',
+            'residence' => 'résidence',
+            'father_name' => 'nom du père',
+            'father_phone' => 'téléphone du père',
+            'mother_name' => 'nom de la mère',
+            'mother_phone' => 'téléphone de la mère',
+            'tutor_name' => 'nom du tuteur',
+            'tutor_phone' => 'téléphone du tuteur',
+        ];
+    }
+
     protected function resetForm(): void
     {
         $this->reset([
-            'editingId', 'first_name', 'last_name', 'birth_date', 'gender', 'student_number',
+            'editingId', 'currentStep', 'first_name', 'last_name', 'birth_date', 'gender', 'student_number',
             'father_name', 'father_phone', 'mother_name', 'mother_phone', 'tutor_name', 'tutor_phone',
             'birth_place', 'nationalite_code', 'birth_certificate_number', 'birth_certificate_date',
             'birth_certificate_place', 'residence', 'photo', 'existingPhotoPath',
