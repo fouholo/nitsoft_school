@@ -25,11 +25,27 @@ class Index extends Component
 
     public ?int $levelFilter = null;
 
+    public string $statusFilter = '';
+
+    public string $search = '';
+
     public function mount(): void
     {
         $this->authorize('viewAny', Payment::class);
 
         $this->school_year_id = SchoolYear::where('is_current', true)->value('id');
+    }
+
+    /**
+     * @param  array{student_id: int, due_so_far: float, total_paid: float, balance: float}  $row
+     */
+    private function statusOf(array $row): string
+    {
+        return match (true) {
+            $row['balance'] > 0 => 'late',
+            $row['balance'] < 0 => 'advance',
+            default => 'ontime',
+        };
     }
 
     public function render()
@@ -60,7 +76,7 @@ class Index extends Component
             ->get()
             ->keyBy('id');
 
-        $rows = $balances
+        $allRows = $balances
             ->map(function (array $balance) use ($students) {
                 $student = $students->get($balance['student_id']);
                 $enrollment = $student?->enrollments->first();
@@ -76,10 +92,33 @@ class Index extends Component
             ->sortByDesc('balance')
             ->values();
 
+        $lateRows = $allRows->filter(fn (array $row) => $this->statusOf($row) === 'late');
+
+        $rows = $allRows;
+
+        if ($this->search !== '') {
+            $needle = mb_strtolower($this->search);
+            $rows = $rows->filter(fn (array $row) => str_contains(
+                mb_strtolower($row['student']->last_name.' '.$row['student']->first_name),
+                $needle
+            ));
+        }
+
+        if ($this->statusFilter !== '') {
+            $rows = $rows->filter(fn (array $row) => $this->statusOf($row) === $this->statusFilter);
+        }
+
+        $rows = $rows->values();
+
         return view('livewire.billing.payment-tracking.index', [
             'rows' => $rows,
             'schoolYears' => SchoolYear::orderByDesc('starts_on')->get(),
             'levels' => Level::orderBy('level_wording')->get(),
+            'lateCount' => $lateRows->count(),
+            'lateTotal' => (float) $lateRows->sum('balance'),
+            'displayedDue' => (float) $rows->sum('due_so_far'),
+            'displayedPaid' => (float) $rows->sum('total_paid'),
+            'displayedBalance' => (float) $rows->sum('balance'),
         ]);
     }
 }

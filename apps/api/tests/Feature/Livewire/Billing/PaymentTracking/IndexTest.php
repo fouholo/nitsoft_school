@@ -90,6 +90,72 @@ test('un directeur peut accéder directement à l’encaissement depuis le suivi
         ->assertSee(route('billing.enrollments.show', $enrollment), false);
 });
 
+test('le filtre de statut isole les élèves en retard, à jour ou en avance', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $late = Student::factory()->create(['establishment_id' => $establishment->id]);
+    $onTime = Student::factory()->create(['establishment_id' => $establishment->id]);
+    $advance = Student::factory()->create(['establishment_id' => $establishment->id]);
+
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'student_id' => $late->id, 'registration_amount' => 1000, 'total_paid' => 400]);
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'student_id' => $onTime->id, 'registration_amount' => 1000, 'total_paid' => 1000]);
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'student_id' => $advance->id, 'registration_amount' => 1000, 'total_paid' => 1500]);
+
+    $component = Livewire::test(Index::class)->set('school_year_id', $schoolYear->id);
+
+    expect($component->set('statusFilter', 'late')->viewData('rows')->pluck('student_id')->all())->toBe([$late->id])
+        ->and($component->set('statusFilter', 'ontime')->viewData('rows')->pluck('student_id')->all())->toBe([$onTime->id])
+        ->and($component->set('statusFilter', 'advance')->viewData('rows')->pluck('student_id')->all())->toBe([$advance->id]);
+
+    $component->set('statusFilter', '');
+    expect($component->viewData('lateCount'))->toBe(1)
+        ->and((float) $component->viewData('lateTotal'))->toBe(600.0);
+});
+
+test('la recherche filtre par nom d’élève', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $kone = Student::factory()->create(['establishment_id' => $establishment->id, 'first_name' => 'Aïcha', 'last_name' => 'Koné']);
+    $traore = Student::factory()->create(['establishment_id' => $establishment->id, 'first_name' => 'Moussa', 'last_name' => 'Traoré']);
+
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'student_id' => $kone->id, 'registration_amount' => 500]);
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'student_id' => $traore->id, 'registration_amount' => 500]);
+
+    $rows = Livewire::test(Index::class)
+        ->set('school_year_id', $schoolYear->id)
+        ->set('search', 'koné')
+        ->viewData('rows');
+
+    expect($rows->pluck('student_id')->all())->toBe([$kone->id]);
+});
+
+test('le message d’état vide distingue l’absence d’année scolaire d’une sélection sans résultat', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    Livewire::test(Index::class)
+        ->set('school_year_id', null)
+        ->assertSee('Sélectionnez une année scolaire')
+        ->assertDontSee('Aucun élève ne correspond');
+
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+
+    Livewire::test(Index::class)
+        ->set('school_year_id', $schoolYear->id)
+        ->assertSee('Aucun élève ne correspond')
+        ->assertDontSee('Sélectionnez une année scolaire');
+});
+
 test('un enseignant n’a pas accès à l’écran de suivi des paiements', function () {
     $establishment = Establishment::factory()->create();
     $teacher = createUserWithRole($establishment, 'enseignant');
