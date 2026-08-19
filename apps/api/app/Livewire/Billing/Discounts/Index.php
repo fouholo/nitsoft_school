@@ -28,6 +28,10 @@ class Index extends Component
 
     public ?int $student_id = null;
 
+    public string $studentSearch = '';
+
+    public string $editingStudentLabel = '';
+
     public string $type = 'percentage';
 
     public ?float $value = null;
@@ -57,6 +61,7 @@ class Index extends Component
 
         $this->editingId = $discount->id;
         $this->student_id = $discount->student_id;
+        $this->editingStudentLabel = trim($discount->student->last_name.' '.$discount->student->first_name);
         $this->type = $discount->type;
         $this->value = (float) $discount->value;
         $this->reason = (string) $discount->reason;
@@ -136,8 +141,29 @@ class Index extends Component
 
     protected function resetForm(): void
     {
-        $this->reset(['editingId', 'student_id', 'value', 'reason']);
+        $this->reset(['editingId', 'student_id', 'studentSearch', 'editingStudentLabel', 'value', 'reason']);
         $this->type = 'percentage';
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection<int, Student>
+     */
+    protected function studentOptions(): \Illuminate\Support\Collection
+    {
+        return Student::query()
+            ->when($this->studentSearch !== '', function ($query): void {
+                $query->where(function ($query): void {
+                    $query->where('first_name', 'like', "%{$this->studentSearch}%")
+                        ->orWhere('last_name', 'like', "%{$this->studentSearch}%");
+                });
+            })
+            ->with(['enrollments' => fn ($query) => $query
+                ->where('school_year_id', $this->school_year_id)
+                ->where('status', 'active')
+                ->with('classroom')])
+            ->orderBy('last_name')
+            ->limit(50)
+            ->get();
     }
 
     public function render()
@@ -154,7 +180,7 @@ class Index extends Component
 
         return view('livewire.billing.discounts.index', [
             'discounts' => $discounts,
-            'students' => Student::orderBy('last_name')->get(),
+            'students' => $this->studentOptions(),
             'schoolYears' => SchoolYear::orderByDesc('starts_on')->get(),
         ]);
     }

@@ -32,12 +32,28 @@
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-4">
             <div>
                 <label class="block text-sm font-medium text-slate-700">Élève</label>
-                <select wire:model="student_id" @disabled($editingId) class="mt-1 block w-full rounded-md border-slate-300 text-sm">
-                    <option value="">—</option>
-                    @foreach ($students as $student)
-                        <option value="{{ $student->id }}">{{ $student->last_name }} {{ $student->first_name }}</option>
-                    @endforeach
-                </select>
+                @if ($editingId)
+                    <select disabled class="mt-1 block w-full rounded-md border-slate-300 bg-slate-50 text-sm text-slate-500">
+                        <option>{{ $editingStudentLabel }}</option>
+                    </select>
+                @else
+                    <input
+                        type="search"
+                        wire:model.live.debounce.300ms="studentSearch"
+                        placeholder="Rechercher un élève par nom..."
+                        class="mt-1 block w-full rounded-md border-slate-300 text-sm"
+                    >
+                    <select wire:model="student_id" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+                        <option value="">—</option>
+                        @foreach ($students as $student)
+                            @php $classroom = $student->enrollments->first()?->classroom; @endphp
+                            <option value="{{ $student->id }}">{{ $student->last_name }} {{ $student->first_name }}{{ $classroom ? ' — '.$classroom->name : '' }}</option>
+                        @endforeach
+                    </select>
+                    @if ($studentSearch === '' && $students->count() >= 50)
+                        <p class="mt-1 text-xs text-slate-500">Affichage des 50 premiers élèves — utilisez la recherche pour affiner.</p>
+                    @endif
+                @endif
                 @error('student_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
@@ -73,46 +89,48 @@
     @endif
 
     <div class="mt-6 overflow-hidden rounded-md border border-slate-200 bg-white">
-        <table class="min-w-full divide-y divide-slate-200 text-sm">
-            <thead class="bg-slate-50">
-                <tr>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">Élève</th>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">Type</th>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">Valeur</th>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">Motif</th>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">Accordée par</th>
-                    <th class="px-4 py-2"></th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-                @forelse ($discounts as $discount)
-                    <tr wire:key="discount-{{ $discount->id }}">
-                        <td class="px-4 py-2 text-slate-900">{{ $discount->student->last_name }} {{ $discount->student->first_name }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ $discount->type === 'percentage' ? 'Pourcentage' : 'Montant fixe' }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ $discount->type === 'percentage' ? number_format((float) $discount->value, 2) . ' %' : money((float) $discount->value) }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ $discount->reason ?: '—' }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ $discount->createdBy?->name }}</td>
-                        <td class="px-4 py-2 text-right">
-                            @can('update', $discount)
-                                <button wire:click="edit({{ $discount->id }})" class="text-slate-500 hover:text-slate-900">Modifier</button>
-                            @endcan
-                            @can('delete', $discount)
-                                <button
-                                    wire:click="delete({{ $discount->id }})"
-                                    wire:confirm="Supprimer cette réduction ?"
-                                    class="ml-3 text-red-500 hover:text-red-700"
-                                >
-                                    Supprimer
-                                </button>
-                            @endcan
-                        </td>
-                    </tr>
-                @empty
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200 text-sm">
+                <thead class="bg-slate-50">
                     <tr>
-                        <td colspan="6" class="px-4 py-6 text-center text-slate-500">Aucune réduction pour cette année scolaire.</td>
+                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Élève</th>
+                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Type</th>
+                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Valeur</th>
+                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Motif</th>
+                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Accordée par</th>
+                        <th class="whitespace-nowrap px-4 py-2"></th>
                     </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @forelse ($discounts as $discount)
+                        <tr wire:key="discount-{{ $discount->id }}">
+                            <td class="whitespace-nowrap px-4 py-2 text-slate-900">{{ $discount->student->last_name }} {{ $discount->student->first_name }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-slate-600">{{ $discount->type === 'percentage' ? 'Pourcentage' : 'Montant fixe' }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-slate-600">{{ $discount->type === 'percentage' ? number_format((float) $discount->value, 2) . ' %' : money((float) $discount->value) }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-slate-600">{{ $discount->reason ?: '—' }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-slate-600">{{ $discount->createdBy?->name }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-right">
+                                @can('update', $discount)
+                                    <button wire:click="edit({{ $discount->id }})" class="inline-flex min-h-11 items-center text-slate-500 hover:text-slate-900">Modifier</button>
+                                @endcan
+                                @can('delete', $discount)
+                                    <button
+                                        wire:click="delete({{ $discount->id }})"
+                                        wire:confirm="Supprimer cette réduction ? Les tranches de scolarité de {{ $discount->student->last_name }} {{ $discount->student->first_name }} seront remises aux montants standards du niveau."
+                                        class="ml-3 inline-flex min-h-11 items-center text-red-600 hover:text-red-700"
+                                    >
+                                        Supprimer
+                                    </button>
+                                @endcan
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="px-4 py-6 text-center text-slate-500">Aucune réduction pour cette année scolaire.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>

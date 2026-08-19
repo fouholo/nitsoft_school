@@ -104,6 +104,65 @@ test('un enseignant n’a aucun accès à l’écran des réductions', function 
     Livewire::test(Index::class)->assertForbidden();
 });
 
+test('la recherche filtre la liste des élèves du formulaire sans affecter la liste des réductions', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    Student::factory()->create(['establishment_id' => $establishment->id, 'last_name' => 'Koné', 'first_name' => 'Yao']);
+    Student::factory()->create(['establishment_id' => $establishment->id, 'last_name' => 'Diarra', 'first_name' => 'Fatou']);
+
+    Livewire::test(Index::class)
+        ->call('create')
+        ->assertSee('Koné Yao')
+        ->assertSee('Diarra Fatou')
+        ->set('studentSearch', 'Koné')
+        ->assertSee('Koné Yao')
+        ->assertDontSee('Diarra Fatou');
+});
+
+test('modifier une réduction affiche le nom de l’élève sans permettre de le changer', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $student = Student::factory()->create(['establishment_id' => $establishment->id, 'last_name' => 'Bamba', 'first_name' => 'Issa']);
+    $discount = Discount::factory()->create([
+        'establishment_id' => $establishment->id,
+        'student_id' => $student->id,
+        'school_year_id' => $schoolYear->id,
+        'created_by' => $directeur->id,
+    ]);
+
+    Livewire::test(Index::class)
+        ->call('edit', $discount->id)
+        ->assertSet('editingStudentLabel', 'Bamba Issa')
+        ->assertSee('Bamba Issa');
+});
+
+test('le message de confirmation de suppression mentionne l’effet sur les tranches de l’élève', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $student = Student::factory()->create(['establishment_id' => $establishment->id, 'last_name' => 'Ouattara', 'first_name' => 'Nadège']);
+    Discount::factory()->create([
+        'establishment_id' => $establishment->id,
+        'student_id' => $student->id,
+        'school_year_id' => $schoolYear->id,
+        'created_by' => $directeur->id,
+    ]);
+
+    Livewire::test(Index::class)
+        ->assertSee('Ouattara Nadège seront remises aux montants standards du niveau');
+});
+
 /**
  * @return array{enrollment: Enrollment, schoolYear: SchoolYear, student: Student}
  */
