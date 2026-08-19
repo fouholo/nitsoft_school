@@ -202,3 +202,105 @@ test('le champ frais d’inscription affecté n’apparaît pas pour un niveau p
         ->call('configureLevel', $primaireLevel->id)
         ->assertDontSee('Frais d\'inscription (affecté)', false);
 });
+
+test('un message confirme l’enregistrement d’une tranche puis d’un tarif de niveau', function () {
+    $establishment = Establishment::factory()->create(['type' => EstablishmentType::Secondaire]);
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $level = Level::factory()->create();
+
+    $component = Livewire::test(Index::class)
+        ->set('school_year_id', $schoolYear->id)
+        ->assertDontSee('Tranche enregistrée.')
+        ->call('createInstallment')
+        ->set('label', 'Octobre')
+        ->set('due_date', now()->addMonth()->toDateString())
+        ->set('position', 1)
+        ->call('saveInstallment')
+        ->assertHasNoErrors()
+        ->assertSee('Tranche enregistrée.');
+
+    $component->assertDontSee('Tarifs enregistrés.')
+        ->call('configureLevel', $level->id)
+        ->set('registration_amount', 15000)
+        ->call('saveLevelFees')
+        ->assertHasNoErrors()
+        ->assertSee('Tarifs enregistrés.');
+});
+
+test('changer d’année scolaire efface les messages de confirmation affichés', function () {
+    $establishment = Establishment::factory()->create(['type' => EstablishmentType::Secondaire]);
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    $schoolYearA = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYearB = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+
+    Livewire::test(Index::class)
+        ->set('school_year_id', $schoolYearA->id)
+        ->call('createInstallment')
+        ->set('label', 'Octobre')
+        ->set('due_date', now()->addMonth()->toDateString())
+        ->set('position', 1)
+        ->call('saveInstallment')
+        ->assertSee('Tranche enregistrée.')
+        ->set('school_year_id', $schoolYearB->id)
+        ->assertDontSee('Tranche enregistrée.');
+});
+
+test('dupliquer les montants depuis un autre niveau déjà configuré pré-remplit le formulaire', function () {
+    $establishment = Establishment::factory()->create(['type' => EstablishmentType::Secondaire]);
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $installment = Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 1]);
+    $sourceLevel = Level::factory()->create();
+    $targetLevel = Level::factory()->create();
+
+    $sourceLevelFee = LevelFee::factory()->create([
+        'establishment_id' => $establishment->id,
+        'school_year_id' => $schoolYear->id,
+        'level_id' => $sourceLevel->id,
+        'registration_amount' => 25000,
+        'registration_amount_assigned' => 15000,
+    ]);
+    $sourceLevelFee->installmentAmounts()->create(['installment_id' => $installment->id, 'amount' => 50000]);
+
+    Livewire::test(Index::class)
+        ->set('school_year_id', $schoolYear->id)
+        ->call('configureLevel', $targetLevel->id)
+        ->assertSee($sourceLevel->level_wording)
+        ->set('duplicateSourceLevelId', $sourceLevel->id)
+        ->assertSet('registration_amount', 25000.0)
+        ->assertSet('registration_amount_assigned', 15000.0)
+        ->assertSet("installment_amounts.{$installment->id}", 50000.0)
+        ->call('saveLevelFees')
+        ->assertHasNoErrors();
+
+    $targetLevelFee = LevelFee::where('level_id', $targetLevel->id)->sole();
+
+    expect((float) $targetLevelFee->registration_amount)->toBe(25000.0)
+        ->and((float) $targetLevelFee->registration_amount_assigned)->toBe(15000.0)
+        ->and((float) $targetLevelFee->installmentAmounts()->where('installment_id', $installment->id)->sole()->amount)->toBe(50000.0);
+});
+
+test('le sélecteur de duplication n’apparaît pas quand aucun autre niveau n’est configuré', function () {
+    $establishment = Establishment::factory()->create(['type' => EstablishmentType::Secondaire]);
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $level = Level::factory()->create();
+
+    Livewire::test(Index::class)
+        ->set('school_year_id', $schoolYear->id)
+        ->call('configureLevel', $level->id)
+        ->assertDontSee('Dupliquer les montants depuis un autre niveau');
+});

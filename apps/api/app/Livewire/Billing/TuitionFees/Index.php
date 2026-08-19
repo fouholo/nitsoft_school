@@ -50,6 +50,14 @@ class Index extends Component
      */
     public array $installment_amounts = [];
 
+    public bool $installmentJustSaved = false;
+
+    public bool $levelFeeJustSaved = false;
+
+    public ?int $lastSavedLevelId = null;
+
+    public ?int $duplicateSourceLevelId = null;
+
     public function mount(): void
     {
         $this->authorize('viewAny', Installment::class);
@@ -61,6 +69,9 @@ class Index extends Component
     {
         $this->cancelInstallment();
         $this->cancelLevelFee();
+        $this->installmentJustSaved = false;
+        $this->levelFeeJustSaved = false;
+        $this->lastSavedLevelId = null;
     }
 
     public function createInstallment(): void
@@ -70,6 +81,7 @@ class Index extends Component
         $this->resetInstallmentForm();
         $this->position = 1 + (int) Installment::where('school_year_id', $this->school_year_id)->max('position');
         $this->showInstallmentForm = true;
+        $this->installmentJustSaved = false;
     }
 
     public function editInstallment(int $installmentId): void
@@ -83,6 +95,7 @@ class Index extends Component
         $this->due_date = $installment->due_date->toDateString();
         $this->position = $installment->position;
         $this->showInstallmentForm = true;
+        $this->installmentJustSaved = false;
     }
 
     public function saveInstallment(): void
@@ -116,6 +129,7 @@ class Index extends Component
 
         $this->resetInstallmentForm();
         $this->showInstallmentForm = false;
+        $this->installmentJustSaved = true;
     }
 
     public function deleteInstallment(int $installmentId): void
@@ -141,6 +155,9 @@ class Index extends Component
             ->first();
 
         $this->authorize($levelFee ? 'update' : 'create', $levelFee ?? LevelFee::class);
+
+        $this->levelFeeJustSaved = false;
+        $this->duplicateSourceLevelId = null;
 
         $this->configuringLevelId = $levelId;
         $this->configuringLevelIsSecondaire = Level::find($levelId)?->cycle === Cycle::Secondaire;
@@ -211,7 +228,53 @@ class Index extends Component
             );
         }
 
+        $savedLevelId = $this->configuringLevelId;
+
         $this->cancelLevelFee();
+
+        $this->levelFeeJustSaved = true;
+        $this->lastSavedLevelId = $savedLevelId;
+    }
+
+    public function updatedDuplicateSourceLevelId(): void
+    {
+        if ($this->duplicateSourceLevelId === null || ! $this->configuringLevelId) {
+            return;
+        }
+
+        $sourceLevelId = $this->duplicateSourceLevelId;
+        $this->duplicateSourceLevelId = null;
+
+        $existing = LevelFee::withTrashed()
+            ->where('school_year_id', $this->school_year_id)
+            ->where('level_id', $this->configuringLevelId)
+            ->first();
+
+        $this->authorize($existing ? 'update' : 'create', $existing ?? LevelFee::class);
+
+        $source = LevelFee::where('school_year_id', $this->school_year_id)
+            ->where('level_id', $sourceLevelId)
+            ->with('installmentAmounts')
+            ->first();
+
+        if (! $source) {
+            return;
+        }
+
+        $this->registration_amount = (float) $source->registration_amount;
+        $this->registration_amount_assigned = $this->configuringLevelIsSecondaire && $source->registration_amount_assigned !== null
+            ? (float) $source->registration_amount_assigned
+            : null;
+
+        $this->installment_amounts = Installment::where('school_year_id', $this->school_year_id)
+            ->orderBy('position')
+            ->get()
+            ->mapWithKeys(function (Installment $installment) use ($source) {
+                $amount = $source->installmentAmounts->firstWhere('installment_id', $installment->id);
+
+                return [$installment->id => $amount ? (float) $amount->amount : null];
+            })
+            ->all();
     }
 
     public function cancelLevelFee(): void
@@ -222,6 +285,7 @@ class Index extends Component
         $this->registration_amount = null;
         $this->registration_amount_assigned = null;
         $this->installment_amounts = [];
+        $this->duplicateSourceLevelId = null;
     }
 
     protected function resetInstallmentForm(): void
