@@ -9,6 +9,18 @@
         @endcan
     </div>
 
+    <div class="mt-4 flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <label class="block text-sm font-medium text-slate-700">Mois</label>
+            <input type="month" wire:model.live="month" class="mt-1 rounded-md border-slate-300 text-sm">
+        </div>
+
+        <div class="text-right">
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Total {{ $month !== '' ? 'du mois' : 'affiché' }}</p>
+            <p class="text-lg font-semibold text-slate-900">{{ money((float) $total) }}</p>
+        </div>
+    </div>
+
     @if ($showForm)
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-3">
             <div class="sm:col-span-2">
@@ -41,41 +53,47 @@
     @endif
 
     <div class="mt-6 overflow-hidden rounded-md border border-slate-200 bg-white">
-        <table class="min-w-full divide-y divide-slate-200 text-sm">
-            <thead class="bg-slate-50">
-                <tr>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">Libellé</th>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">Montant</th>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">Date</th>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">Saisie par</th>
-                    <th class="px-4 py-2"></th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-                @forelse ($expenses as $expense)
-                    <tr wire:key="expense-{{ $expense->id }}">
-                        <td class="px-4 py-2 text-slate-900">{{ $expense->label }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ money((float) $expense->amount) }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ $expense->spent_at->format('d/m/Y') }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ $expense->recordedBy->name }}</td>
-                        <td class="px-4 py-2 text-right">
-                            @can('delete', $expense)
-                                <button
-                                    wire:click="delete({{ $expense->id }})"
-                                    wire:confirm="Supprimer cette dépense ?"
-                                    class="text-red-500 hover:text-red-700"
-                                >
-                                    Supprimer
-                                </button>
-                            @endcan
-                        </td>
-                    </tr>
-                @empty
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200 text-sm">
+                <thead class="bg-slate-50">
                     <tr>
-                        <td colspan="5" class="px-4 py-6 text-center text-slate-500">Aucune dépense.</td>
+                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Libellé</th>
+                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Montant</th>
+                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Date</th>
+                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Saisie par</th>
+                        <th class="whitespace-nowrap px-4 py-2"></th>
                     </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @forelse ($expenses as $expense)
+                        <tr wire:key="expense-{{ $expense->id }}">
+                            <td class="whitespace-nowrap px-4 py-2 text-slate-900">{{ $expense->label }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-slate-600">{{ money((float) $expense->amount) }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-slate-600">{{ $expense->spent_at->format('d/m/Y') }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-slate-600">{{ $expense->recordedBy->name }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-right">
+                                @can('delete', $expense)
+                                    <button
+                                        wire:click="delete({{ $expense->id }})"
+                                        wire:confirm="Supprimer la dépense « {{ $expense->label }} » ?"
+                                        class="inline-flex min-h-11 items-center text-red-600 hover:text-red-700"
+                                    >
+                                        Supprimer
+                                    </button>
+                                @endcan
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="px-4 py-6 text-center text-slate-500">Aucune dépense.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <div class="border-t border-slate-200 px-4 py-3">
+            {{ $expenses->links() }}
+        </div>
     </div>
 </div>

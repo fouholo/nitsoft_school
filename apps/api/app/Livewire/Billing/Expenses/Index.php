@@ -11,12 +11,17 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
 #[Title('Dépenses')]
 class Index extends Component
 {
+    use WithPagination;
+
     public bool $showForm = false;
+
+    public string $month = '';
 
     public string $label = '';
 
@@ -27,6 +32,11 @@ class Index extends Component
     public function mount(): void
     {
         $this->authorize('viewAny', Expense::class);
+    }
+
+    public function updatingMonth(): void
+    {
+        $this->resetPage();
     }
 
     public function create(): void
@@ -79,14 +89,22 @@ class Index extends Component
         /** @var User $user */
         $user = Auth::user();
 
+        $query = Expense::with('recordedBy')
+            ->when(
+                RolePermissions::can($user->currentRole(), 'finance.scope_own_only'),
+                fn ($query) => $query->ownedBy($user),
+            )
+            ->when($this->month !== '', function ($query): void {
+                [$year, $month] = explode('-', $this->month);
+                $query->whereYear('spent_at', (int) $year)->whereMonth('spent_at', (int) $month);
+            })
+            ->orderByDesc('spent_at');
+
+        $total = (clone $query)->sum('amount');
+
         return view('livewire.billing.expenses.index', [
-            'expenses' => Expense::with('recordedBy')
-                ->when(
-                    RolePermissions::can($user->currentRole(), 'finance.scope_own_only'),
-                    fn ($query) => $query->ownedBy($user),
-                )
-                ->orderByDesc('spent_at')
-                ->get(),
+            'expenses' => $query->paginate(15),
+            'total' => $total,
         ]);
     }
 }
