@@ -14,11 +14,11 @@
         <nav class="border-b border-slate-200 bg-white">
             <div class="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
                 <a href="{{ route('guardian-portal.dashboard') }}" class="text-sm font-semibold text-slate-900">
-                    {{ config('app.name') }} — Espace parents
+                    {{ config('app.name') }}<span class="hidden sm:inline"> — Espace parents</span>
                 </a>
 
-                <div class="flex items-center gap-4">
-                    <a href="{{ route('guardian-portal.link-child') }}" wire:navigate class="text-sm text-indigo-600 hover:text-indigo-700">
+                <div class="flex items-center gap-3">
+                    <a href="{{ route('guardian-portal.link-child') }}" wire:navigate class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700">
                         Lier un enfant
                     </a>
 
