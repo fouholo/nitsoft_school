@@ -61,6 +61,7 @@
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Date</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Classe</th>
                     <th class="px-4 py-2 text-left font-medium text-slate-500">Matière</th>
+                    <th class="px-4 py-2 text-left font-medium text-slate-500">Statut</th>
                     <th class="px-4 py-2"></th>
                 </tr>
             </thead>
@@ -70,6 +71,20 @@
                         <td class="px-4 py-2 text-slate-900">{{ $session->session_date->format('d/m/Y') }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $session->classroom?->name }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $session->subject?->name ?? 'Appel général' }}</td>
+                        <td class="px-4 py-2">
+                            @if ($session->records_count > 0)
+                                <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                                    Fait
+                                    @if ($session->absences_count > 0)
+                                        — {{ $session->absences_count }} {{ $session->absences_count > 1 ? 'exceptions' : 'exception' }}
+                                    @endif
+                                </span>
+                            @else
+                                <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+                                    À faire
+                                </span>
+                            @endif
+                        </td>
                         <td class="px-4 py-2 text-right">
                             <a href="{{ route('attendance.sessions.mark', $session) }}" class="text-slate-500 hover:text-slate-900">
                                 Faire l'appel
@@ -78,7 +93,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="px-4 py-6 text-center text-slate-500">Aucun appel.</td>
+                        <td colspan="5" class="px-4 py-6 text-center text-slate-500">Aucun appel.</td>
                     </tr>
                 @endforelse
             </tbody>

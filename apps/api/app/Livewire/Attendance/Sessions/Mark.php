@@ -45,6 +45,15 @@ class Mark extends Component
         }
     }
 
+    public function markAll(string $status): void
+    {
+        $this->authorize('update', $this->session);
+
+        foreach (array_keys($this->statuses) as $studentId) {
+            $this->statuses[$studentId] = $status;
+        }
+    }
+
     public function save(): void
     {
         $this->authorize('update', $this->session);

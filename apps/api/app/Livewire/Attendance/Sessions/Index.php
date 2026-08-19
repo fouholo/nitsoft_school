@@ -81,6 +81,10 @@ class Index extends Component
 
         $sessions = AttendanceSession::query()
             ->with(['classroom', 'subject'])
+            ->withCount([
+                'records',
+                'records as absences_count' => fn ($query) => $query->whereIn('status', ['absent', 'late', 'excused']),
+            ])
             ->when(! $isAdmin, fn ($query) => $query->where('teacher_id', $user->id))
             ->orderByDesc('session_date')
             ->get();

@@ -58,3 +58,23 @@ test('un statut invalide est rejeté', function () {
 
     expect(AttendanceRecord::count())->toBe(0);
 });
+
+test('marquer tout absent bascule le statut de tous les élèves affichés', function () {
+    $otherStudent = Student::factory()->create(['establishment_id' => $this->establishment->id]);
+    Enrollment::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'student_id' => $otherStudent->id,
+        'classroom_id' => $this->classroom->id,
+        'status' => 'active',
+    ]);
+
+    Livewire::test(Mark::class, ['session' => $this->session])
+        ->assertSet("statuses.{$this->student->id}", 'present')
+        ->call('markAll', 'absent')
+        ->assertSet("statuses.{$this->student->id}", 'absent')
+        ->assertSet("statuses.{$otherStudent->id}", 'absent')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect(AttendanceRecord::where('status', 'absent')->count())->toBe(2);
+});
