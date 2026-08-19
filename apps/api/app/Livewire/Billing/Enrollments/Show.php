@@ -57,6 +57,7 @@ class Show extends Component
             $this->installment_amounts[$position] = $amount !== null ? (float) $amount : null;
         }
 
+        $this->showPaymentForm = false;
         $this->showAmountsForm = true;
     }
 
@@ -93,6 +94,7 @@ class Show extends Component
         $this->method = 'cash';
         $this->paid_at = now()->toDateString();
         $this->reference = '';
+        $this->showAmountsForm = false;
         $this->showPaymentForm = true;
     }
 

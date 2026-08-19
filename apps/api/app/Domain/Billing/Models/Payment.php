@@ -103,4 +103,15 @@ class Payment extends Model implements HasOwnerColumn
     {
         return $this->uid_serveur ?? $this->uid_local;
     }
+
+    public function methodLabel(): string
+    {
+        return match ($this->method) {
+            'cash' => 'Espèces',
+            'mobile_money' => 'Mobile Money',
+            'bank_transfer' => 'Virement',
+            'card' => 'Carte',
+            default => $this->method,
+        };
+    }
 }

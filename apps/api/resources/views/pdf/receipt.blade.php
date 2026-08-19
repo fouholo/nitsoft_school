@@ -58,13 +58,7 @@
         </tr>
         <tr>
             <td class="label">Moyen de paiement</td>
-            <td>{{ match ($payment->method) {
-                'cash' => 'Espèces',
-                'mobile_money' => 'Mobile Money',
-                'bank_transfer' => 'Virement',
-                'card' => 'Carte',
-                default => $payment->method,
-            } }}</td>
+            <td>{{ $payment->methodLabel() }}</td>
         </tr>
         <tr>
             <td class="label">Référence</td>

@@ -139,6 +139,58 @@ test('un caissier enregistre un paiement, le total versé de l’inscription est
         ->and(Payment::where('enrollment_id', $enrollment->id)->count())->toBe(1);
 });
 
+test('ouvrir le formulaire de paiement referme celui des montants et inversement', function () {
+    $establishment = Establishment::factory()->create();
+    $accountant = createUserWithRole($establishment, 'caissier');
+    actingInEstablishment($establishment);
+    test()->actingAs($accountant);
+
+    $student = Student::factory()->create(['establishment_id' => $establishment->id]);
+    $enrollment = Enrollment::factory()->create([
+        'establishment_id' => $establishment->id,
+        'student_id' => $student->id,
+        'registration_amount' => 5000,
+    ]);
+
+    $component = Livewire::test(Show::class, ['enrollment' => $enrollment])
+        ->call('editAmounts')
+        ->assertSet('showAmountsForm', true);
+
+    $component->call('addPayment')
+        ->assertSet('showAmountsForm', false)
+        ->assertSet('showPaymentForm', true);
+
+    $component->call('editAmounts')
+        ->assertSet('showPaymentForm', false)
+        ->assertSet('showAmountsForm', true);
+});
+
+test('le moyen de paiement est affiché traduit dans le tableau des paiements', function () {
+    $establishment = Establishment::factory()->create();
+    $accountant = createUserWithRole($establishment, 'caissier');
+    actingInEstablishment($establishment);
+    test()->actingAs($accountant);
+
+    $student = Student::factory()->create(['establishment_id' => $establishment->id]);
+    $enrollment = Enrollment::factory()->create([
+        'establishment_id' => $establishment->id,
+        'student_id' => $student->id,
+        'registration_amount' => 5000,
+    ]);
+
+    Payment::factory()->create([
+        'establishment_id' => $establishment->id,
+        'enrollment_id' => $enrollment->id,
+        'student_id' => $student->id,
+        'received_by' => $accountant->id,
+        'method' => 'mobile_money',
+    ]);
+
+    Livewire::test(Show::class, ['enrollment' => $enrollment])
+        ->assertSee('Mobile Money')
+        ->assertDontSee('mobile_money');
+});
+
 test('un enseignant n’a aucun accès à la fiche financière d’une inscription', function () {
     $establishment = Establishment::factory()->create();
     $teacher = createUserWithRole($establishment, 'enseignant');
