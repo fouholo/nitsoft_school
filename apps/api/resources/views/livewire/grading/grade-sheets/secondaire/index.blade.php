@@ -111,9 +111,11 @@
                         <td class="px-4 py-2 text-slate-600">{{ $gradeSheet->term?->label }}</td>
                         <td class="px-4 py-2 text-slate-600">{{ $gradeSheet->graded_on->format('d/m/Y') }}</td>
                         <td class="px-4 py-2 text-right">
-                            <a href="{{ route('grading.grade-sheets.enter', $gradeSheet) }}" class="text-slate-500 hover:text-slate-900">
-                                Saisir les notes
-                            </a>
+                            @can('update', $gradeSheet)
+                                <a href="{{ route('grading.grade-sheets.enter', $gradeSheet) }}" class="text-slate-500 hover:text-slate-900">
+                                    Saisir les notes
+                                </a>
+                            @endcan
                         </td>
                     </tr>
                 @empty

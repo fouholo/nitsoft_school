@@ -68,3 +68,18 @@ test('une note supérieure au barème est rejetée', function () {
 
     expect(Grade::count())->toBe(0);
 });
+
+test('le nombre d’élèves notés est affiché et se met à jour', function () {
+    $otherStudent = Student::factory()->create(['establishment_id' => $this->establishment->id]);
+    Enrollment::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'student_id' => $otherStudent->id,
+        'classroom_id' => $this->classroom->id,
+        'status' => 'active',
+    ]);
+
+    Livewire::test(Enter::class, ['gradeSheet' => $this->gradeSheet])
+        ->assertSee('0/2 notées')
+        ->set("scores.{$this->student->id}", '12')
+        ->assertSee('1/2 notées');
+});

@@ -134,3 +134,28 @@ test('un enseignant sans affectation sur la matière est refusé', function () {
 
     expect(GradeSheet::count())->toBe(0);
 });
+
+test('un éducateur voit le lien Saisir les notes', function () {
+    GradeSheet::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'classroom_id' => $this->secondaireClassroom->id,
+        'subject_id' => $this->subject->id,
+        'term_id' => $this->term->id,
+    ]);
+
+    Livewire::test(Index::class)->assertSee('Saisir les notes');
+});
+
+test('un directeur ne voit pas le lien Saisir les notes pour une feuille qu’il ne peut pas modifier', function () {
+    GradeSheet::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'classroom_id' => $this->secondaireClassroom->id,
+        'subject_id' => $this->subject->id,
+        'term_id' => $this->term->id,
+    ]);
+
+    $directeur = createUserWithRole($this->establishment, 'directeur');
+    $this->actingAs($directeur);
+
+    Livewire::test(Index::class)->assertDontSee('Saisir les notes');
+});

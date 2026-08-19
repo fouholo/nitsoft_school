@@ -85,8 +85,13 @@ class Enter extends Component
 
     public function render()
     {
+        $students = $this->students();
+        $scoredCount = collect($this->scores)->filter(fn ($score) => $score !== '')->count();
+
         return view('livewire.grading.grade-sheets.enter', [
-            'students' => $this->students(),
+            'students' => $students,
+            'scoredCount' => $scoredCount,
+            'totalCount' => $students->count(),
         ]);
     }
 }

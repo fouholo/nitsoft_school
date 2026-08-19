@@ -5,6 +5,9 @@
         <h1 class="text-2xl font-semibold text-slate-900">{{ $gradeSheet->title }}</h1>
         <p class="text-sm text-slate-500">
             {{ $gradeSheet->classroom?->name }} — {{ $gradeSheet->subject?->name }} — Barème {{ $gradeSheet->max_score }} — {{ $gradeSheet->term?->label }}
+            @if ($totalCount > 0)
+                — {{ $scoredCount }}/{{ $totalCount }} notées
+            @endif
         </p>
     </div>
 
@@ -14,46 +17,61 @@
         </div>
     @endif
 
-    <form wire:submit="save" class="mt-6">
+    <form
+        wire:submit="save"
+        novalidate
+        x-data="{ dirty: false }"
+        x-on:input="dirty = true"
+        x-on:submit="dirty = false"
+        x-on:beforeunload.window="dirty && ($event.preventDefault(), $event.returnValue = '')"
+        class="mt-6"
+    >
         <div class="overflow-hidden rounded-md border border-slate-200 bg-white">
-            <table class="min-w-full divide-y divide-slate-200 text-sm">
-                <thead class="bg-slate-50">
-                    <tr>
-                        <th class="px-4 py-2 text-left font-medium text-slate-500">Élève</th>
-                        <th class="px-4 py-2 text-left font-medium text-slate-500">Note / {{ $gradeSheet->max_score }}</th>
-                        <th class="px-4 py-2 text-left font-medium text-slate-500">Commentaire</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    @forelse ($students as $student)
-                        <tr wire:key="grade-row-{{ $student->id }}">
-                            <td class="px-4 py-2 text-slate-900">{{ $student->last_name }} {{ $student->first_name }}</td>
-                            <td class="px-4 py-2">
-                                <input
-                                    type="number"
-                                    step="0.25"
-                                    min="0"
-                                    max="{{ $gradeSheet->max_score }}"
-                                    wire:model="scores.{{ $student->id }}"
-                                    class="block w-24 rounded-md border-slate-300 text-sm"
-                                >
-                                @error('scores.'.$student->id) <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-                            </td>
-                            <td class="px-4 py-2">
-                                <input
-                                    type="text"
-                                    wire:model="comments.{{ $student->id }}"
-                                    class="block w-full rounded-md border-slate-300 text-sm"
-                                >
-                            </td>
-                        </tr>
-                    @empty
+            <div class="max-h-[70vh] overflow-y-auto overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200 text-sm">
+                    <thead class="sticky top-0 z-10 bg-slate-50">
                         <tr>
-                            <td colspan="3" class="px-4 py-6 text-center text-slate-500">Aucun élève inscrit dans cette classe.</td>
+                            <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Élève</th>
+                            <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Note / {{ $gradeSheet->max_score }}</th>
+                            <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Commentaire</th>
                         </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @forelse ($students as $student)
+                            <tr wire:key="grade-row-{{ $student->id }}" class="odd:bg-white even:bg-slate-50/60">
+                                <td class="whitespace-nowrap px-4 py-2 text-slate-900">{{ $student->last_name }} {{ $student->first_name }}</td>
+                                <td class="whitespace-nowrap px-4 py-2" x-data="{ invalid: false }">
+                                    <input
+                                        type="number"
+                                        step="0.25"
+                                        min="0"
+                                        max="{{ $gradeSheet->max_score }}"
+                                        wire:model="scores.{{ $student->id }}"
+                                        data-score-input
+                                        x-on:input="invalid = $el.value !== '' && (Number($el.value) < 0 || Number($el.value) > {{ $gradeSheet->max_score }})"
+                                        x-on:keydown.enter.prevent="const next = $el.closest('tr').nextElementSibling?.querySelector('[data-score-input]'); if (next) next.focus();"
+                                        :class="invalid ? 'border-red-400' : 'border-slate-300'"
+                                        class="block w-24 rounded-md text-sm"
+                                    >
+                                    <p x-show="invalid" x-cloak class="mt-1 text-sm text-red-600">Doit être compris entre 0 et {{ $gradeSheet->max_score }}.</p>
+                                    @error('scores.'.$student->id) <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                                </td>
+                                <td class="whitespace-nowrap px-4 py-2">
+                                    <input
+                                        type="text"
+                                        wire:model="comments.{{ $student->id }}"
+                                        class="block w-full rounded-md border-slate-300 text-sm"
+                                    >
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="3" class="px-4 py-6 text-center text-slate-500">Aucun élève inscrit dans cette classe.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <button type="submit" class="mt-4 rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700">
