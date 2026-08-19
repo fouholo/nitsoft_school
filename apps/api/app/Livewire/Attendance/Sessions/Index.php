@@ -89,6 +89,8 @@ class Index extends Component
             ->orderByDesc('session_date')
             ->get();
 
+        $todaySessions = $sessions->filter(fn ($session) => $session->session_date->isToday());
+
         $assignments = TeacherAssignment::query()
             ->when(! $isAdmin, fn ($query) => $query->where('user_id', $user->id))
             ->with(['classroom', 'subject'])
@@ -96,6 +98,8 @@ class Index extends Component
 
         return view('livewire.attendance.sessions.index', [
             'sessions' => $sessions,
+            'pendingToday' => $todaySessions->where('records_count', 0)->count(),
+            'todayTotal' => $todaySessions->count(),
             'classrooms' => $isAdmin ? Classroom::orderBy('name')->get() : $assignments->pluck('classroom')->unique('id'),
             'subjects' => $isAdmin ? Subject::orderBy('name')->get() : $assignments->pluck('subject')->unique('id'),
         ]);

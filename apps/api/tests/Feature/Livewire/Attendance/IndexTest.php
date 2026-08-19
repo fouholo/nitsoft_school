@@ -53,3 +53,71 @@ test('une session sans présences saisies affiche le statut à faire, une sessio
 
     $component->assertSee('À faire')->assertSee('Fait');
 });
+
+test('une session à faire dont la date est passée affiche le statut en retard', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id]);
+
+    AttendanceSession::factory()->create([
+        'establishment_id' => $establishment->id,
+        'classroom_id' => $classroom->id,
+        'session_date' => now()->subWeek()->toDateString(),
+    ]);
+
+    Livewire::test(Index::class)
+        ->assertSee('En retard')
+        ->assertDontSee('À faire');
+});
+
+test('une bannière signale le nombre d’appels à faire aujourd’hui', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id]);
+
+    AttendanceSession::factory()->create([
+        'establishment_id' => $establishment->id,
+        'classroom_id' => $classroom->id,
+        'session_date' => now()->toDateString(),
+    ]);
+    AttendanceSession::factory()->create([
+        'establishment_id' => $establishment->id,
+        'classroom_id' => $classroom->id,
+        'session_date' => now()->toDateString(),
+    ]);
+
+    Livewire::test(Index::class)
+        ->assertSee('2 appels à faire aujourd\'hui');
+});
+
+test('une bannière positive confirme que tout est fait quand les appels du jour sont complétés', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id]);
+    $student = Student::factory()->create(['establishment_id' => $establishment->id]);
+
+    $session = AttendanceSession::factory()->create([
+        'establishment_id' => $establishment->id,
+        'classroom_id' => $classroom->id,
+        'session_date' => now()->toDateString(),
+    ]);
+    AttendanceRecord::create([
+        'establishment_id' => $establishment->id,
+        'attendance_session_id' => $session->id,
+        'student_id' => $student->id,
+        'status' => 'present',
+    ]);
+
+    Livewire::test(Index::class)
+        ->assertSee('Tout est fait pour aujourd\'hui', false)
+        ->assertDontSee('à faire aujourd\'hui', false);
+});
