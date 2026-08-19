@@ -43,3 +43,12 @@ test('désigner un nouveau contact principal décoche les autres pour le même �
         ->and($secondLink->pivot->is_primary_contact)->toBeTrue()
         ->and($secondLink->pivot->status)->toBe(GuardianLinkStatus::Approved);
 });
+
+test('les erreurs de validation du formulaire de tuteur utilisent des noms de champs en français', function () {
+    Livewire::test(Show::class, ['student' => $this->student])
+        ->call('addGuardian')
+        ->call('saveGuardian')
+        ->assertSee('Le champ tuteur est obligatoire.')
+        ->assertSee('Le champ rôle est obligatoire.')
+        ->assertDontSee('guardian id');
+});

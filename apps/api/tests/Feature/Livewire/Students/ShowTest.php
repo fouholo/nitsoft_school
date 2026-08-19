@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
@@ -27,7 +28,7 @@ test('un directeur voit le bloc situation financière sur la fiche élève', fun
     ]);
 
     Livewire::test(Show::class, ['student' => $student])
-        ->assertSee('Situation financière')
+        ->assertSee('Dû à ce jour')
         ->assertSee('Retard de 500 F CFA');
 });
 
@@ -40,5 +41,35 @@ test('un enseignant ne voit pas le bloc situation financière sur la fiche élè
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
 
     Livewire::test(Show::class, ['student' => $student])
-        ->assertDontSee('Situation financière');
+        ->assertDontSee('Dû à ce jour');
+});
+
+test('le bandeau résumé affiche la classe de l’inscription active', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    $previousYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => false]);
+    $currentYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $currentYear->id]);
+    $student = Student::factory()->create(['establishment_id' => $establishment->id]);
+
+    Enrollment::factory()->create([
+        'establishment_id' => $establishment->id,
+        'school_year_id' => $previousYear->id,
+        'student_id' => $student->id,
+        'status' => 'withdrawn',
+    ]);
+    Enrollment::factory()->create([
+        'establishment_id' => $establishment->id,
+        'school_year_id' => $currentYear->id,
+        'classroom_id' => $classroom->id,
+        'student_id' => $student->id,
+        'status' => 'active',
+    ]);
+
+    Livewire::test(Show::class, ['student' => $student])
+        ->assertSee('Classe actuelle')
+        ->assertSee($classroom->name);
 });

@@ -20,46 +20,42 @@
         @endcan
     </div>
 
-    @if ($student->birth_place || $student->nationalite || $student->birth_certificate_number || $student->birth_certificate_date || $student->birth_certificate_place || $student->residence)
-        <h2 class="mt-8 text-sm font-semibold uppercase tracking-wide text-slate-500">Identité</h2>
-        <div class="mt-2 grid grid-cols-1 gap-4 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-3">
-            @if ($student->birth_place)
-                <div>
-                    <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Lieu de naissance</p>
-                    <p class="text-sm text-slate-900">{{ $student->birth_place }}</p>
-                </div>
-            @endif
-
-            @if ($student->nationalite)
-                <div>
-                    <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Nationalité</p>
-                    <p class="text-sm text-slate-900">{{ $student->nationalite->libelle }}</p>
-                </div>
-            @endif
-
-            @if ($student->residence)
-                <div>
-                    <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Résidence</p>
-                    <p class="text-sm text-slate-900">{{ $student->residence }}</p>
-                </div>
-            @endif
-
-            @if ($student->birth_certificate_number || $student->birth_certificate_date || $student->birth_certificate_place)
-                <div class="sm:col-span-3">
-                    <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Acte de naissance</p>
-                    <p class="text-sm text-slate-900">
-                        {{ $student->birth_certificate_number ?: '—' }}
-                        @if ($student->birth_certificate_date)
-                            &middot; {{ $student->birth_certificate_date->format('d/m/Y') }}
-                        @endif
-                        @if ($student->birth_certificate_place)
-                            &middot; {{ $student->birth_certificate_place }}
-                        @endif
-                    </p>
-                </div>
-            @endif
+    <div class="mt-4 grid grid-cols-1 gap-4 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-4">
+        <div>
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Classe actuelle</p>
+            <p class="text-sm text-slate-900">{{ $currentEnrollment?->classroom?->name ?? '—' }}</p>
+            <p class="text-sm text-slate-500">{{ $currentEnrollment?->schoolYear?->label }}</p>
         </div>
-    @endif
+
+        @can('viewAny', \App\Domain\Billing\Models\Payment::class)
+            @if ($financialSummary)
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Dû à ce jour</p>
+                    <p class="text-sm text-slate-900">{{ money($financialSummary['due_so_far']) }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Payé</p>
+                    <p class="text-sm text-slate-900">{{ money($financialSummary['total_paid']) }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Solde</p>
+                    @if ($financialSummary['balance'] > 0)
+                        <span class="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+                            Retard de {{ money($financialSummary['balance']) }}
+                        </span>
+                    @elseif ($financialSummary['balance'] < 0)
+                        <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                            Avance de {{ money(abs($financialSummary['balance'])) }}
+                        </span>
+                    @else
+                        <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+                            À jour
+                        </span>
+                    @endif
+                </div>
+            @endif
+        @endcan
+    </div>
 
     @if ($showEnrollmentForm)
         <form wire:submit="saveEnrollment" class="mt-4 grid grid-cols-1 gap-4 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-3">
@@ -122,131 +118,72 @@
     <h2 class="mt-8 text-sm font-semibold uppercase tracking-wide text-slate-500">Inscriptions</h2>
 
     <div class="mt-2 overflow-hidden rounded-md border border-slate-200 bg-white">
-        <table class="min-w-full divide-y divide-slate-200 text-sm">
-            <thead class="bg-slate-50">
-                <tr>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">Année scolaire</th>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">Classe</th>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">Date</th>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">Statut</th>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">Statuts</th>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">Finances</th>
-                    <th class="px-4 py-2"></th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-                @forelse ($enrollments as $enrollment)
-                    <tr wire:key="enrollment-{{ $enrollment->id }}">
-                        <td class="px-4 py-2 text-slate-900">{{ $enrollment->schoolYear?->label }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ $enrollment->classroom?->name }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ $enrollment->enrolled_on->format('d/m/Y') }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ $enrollment->status }}</td>
-                        <td class="px-4 py-2">
-                            <div class="flex flex-wrap gap-1">
-                                @if ($enrollment->is_repeating)
-                                    <span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-800">Redoublant</span>
-                                @endif
-                                @if ($enrollment->is_scholarship)
-                                    <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-800">Boursier</span>
-                                @endif
-                                @if ($enrollment->is_boarding)
-                                    <span class="rounded-full bg-indigo-100 px-2 py-0.5 text-xs text-indigo-800">Internat</span>
-                                @endif
-                                @if ($enrollment->is_assigned)
-                                    <span class="rounded-full bg-slate-200 px-2 py-0.5 text-xs text-slate-700">Affecté(e)</span>
-                                @endif
-                            </div>
-                        </td>
-                        <td class="px-4 py-2">
-                            @can('viewAny', \App\Domain\Billing\Models\Payment::class)
-                                <a href="{{ route('billing.enrollments.show', $enrollment) }}" wire:navigate class="text-slate-500 hover:text-slate-900">
-                                    Détails
-                                </a>
-                            @endcan
-                        </td>
-                        <td class="px-4 py-2 text-right">
-                            @can('update', $enrollment)
-                                @if ($enrollment->status === 'active')
-                                    <button
-                                        wire:click="withdrawEnrollment({{ $enrollment->id }})"
-                                        wire:confirm="Marquer cette inscription comme retirée ?"
-                                        class="text-red-500 hover:text-red-700"
-                                    >
-                                        Retirer
-                                    </button>
-                                @endif
-                            @endcan
-                        </td>
-                    </tr>
-                @empty
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200 text-sm">
+                <thead class="bg-slate-50">
                     <tr>
-                        <td colspan="7" class="px-4 py-6 text-center text-slate-500">Aucune inscription.</td>
+                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Année scolaire</th>
+                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Classe</th>
+                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Date</th>
+                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Statut</th>
+                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Statuts</th>
+                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Finances</th>
+                        <th class="whitespace-nowrap px-4 py-2"></th>
                     </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    @can('viewAny', \App\Domain\Billing\Models\Payment::class)
-        @if ($financialSummary)
-            <h2 class="mt-8 text-sm font-semibold uppercase tracking-wide text-slate-500">Situation financière</h2>
-            <div class="mt-2 grid grid-cols-1 gap-4 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-3">
-                <div>
-                    <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Dû à ce jour</p>
-                    <p class="text-sm text-slate-900">{{ money($financialSummary['due_so_far']) }}</p>
-                </div>
-                <div>
-                    <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Payé</p>
-                    <p class="text-sm text-slate-900">{{ money($financialSummary['total_paid']) }}</p>
-                </div>
-                <div>
-                    <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Solde</p>
-                    @if ($financialSummary['balance'] > 0)
-                        <span class="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
-                            Retard de {{ money($financialSummary['balance']) }}
-                        </span>
-                    @elseif ($financialSummary['balance'] < 0)
-                        <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">
-                            Avance de {{ money(abs($financialSummary['balance'])) }}
-                        </span>
-                    @else
-                        <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
-                            À jour
-                        </span>
-                    @endif
-                </div>
-            </div>
-        @endif
-    @endcan
-
-    @if ($student->father_name || $student->father_phone || $student->mother_name || $student->mother_phone || $student->tutor_name || $student->tutor_phone)
-        <h2 class="mt-8 text-sm font-semibold uppercase tracking-wide text-slate-500">Contacts familiaux (référence école)</h2>
-        <div class="mt-2 grid grid-cols-1 gap-4 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-3">
-            @if ($student->father_name || $student->father_phone)
-                <div>
-                    <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Père</p>
-                    <p class="text-sm text-slate-900">{{ $student->father_name ?: '—' }}</p>
-                    <p class="text-sm text-slate-600">{{ $student->father_phone ?: '—' }}</p>
-                </div>
-            @endif
-
-            @if ($student->mother_name || $student->mother_phone)
-                <div>
-                    <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Mère</p>
-                    <p class="text-sm text-slate-900">{{ $student->mother_name ?: '—' }}</p>
-                    <p class="text-sm text-slate-600">{{ $student->mother_phone ?: '—' }}</p>
-                </div>
-            @endif
-
-            @if ($student->tutor_name || $student->tutor_phone)
-                <div>
-                    <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Tuteur</p>
-                    <p class="text-sm text-slate-900">{{ $student->tutor_name ?: '—' }}</p>
-                    <p class="text-sm text-slate-600">{{ $student->tutor_phone ?: '—' }}</p>
-                </div>
-            @endif
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @forelse ($enrollments as $enrollment)
+                        <tr wire:key="enrollment-{{ $enrollment->id }}">
+                            <td class="whitespace-nowrap px-4 py-2 text-slate-900">{{ $enrollment->schoolYear?->label }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-slate-600">{{ $enrollment->classroom?->name }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-slate-600">{{ $enrollment->enrolled_on->format('d/m/Y') }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-slate-600">{{ $enrollment->status }}</td>
+                            <td class="whitespace-nowrap px-4 py-2">
+                                <div class="flex flex-wrap gap-1">
+                                    @if ($enrollment->is_repeating)
+                                        <span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-800">Redoublant</span>
+                                    @endif
+                                    @if ($enrollment->is_scholarship)
+                                        <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-800">Boursier</span>
+                                    @endif
+                                    @if ($enrollment->is_boarding)
+                                        <span class="rounded-full bg-indigo-100 px-2 py-0.5 text-xs text-indigo-800">Internat</span>
+                                    @endif
+                                    @if ($enrollment->is_assigned)
+                                        <span class="rounded-full bg-slate-200 px-2 py-0.5 text-xs text-slate-700">Affecté(e)</span>
+                                    @endif
+                                </div>
+                            </td>
+                            <td class="whitespace-nowrap px-4 py-2">
+                                @can('viewAny', \App\Domain\Billing\Models\Payment::class)
+                                    <a href="{{ route('billing.enrollments.show', $enrollment) }}" wire:navigate class="text-slate-500 hover:text-slate-900">
+                                        Détails
+                                    </a>
+                                @endcan
+                            </td>
+                            <td class="whitespace-nowrap px-4 py-2 text-right">
+                                @can('update', $enrollment)
+                                    @if ($enrollment->status === 'active')
+                                        <button
+                                            wire:click="withdrawEnrollment({{ $enrollment->id }})"
+                                            wire:confirm="Retirer cette inscription ? L'élève ne sera plus compté comme actif dans cette classe pour cette année scolaire."
+                                            class="text-red-500 hover:text-red-700"
+                                        >
+                                            Retirer
+                                        </button>
+                                    @endif
+                                @endcan
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="px-4 py-6 text-center text-slate-500">Aucune inscription.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-    @endif
+    </div>
 
     <div class="mt-8 flex items-center justify-between">
         <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Tuteurs</h2>
@@ -304,41 +241,113 @@
     @endif
 
     <div class="mt-2 overflow-hidden rounded-md border border-slate-200 bg-white">
-        <table class="min-w-full divide-y divide-slate-200 text-sm">
-            <thead class="bg-slate-50">
-                <tr>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">Nom</th>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">Rôle</th>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">Téléphone</th>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">Contact principal</th>
-                    <th class="px-4 py-2"></th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-                @forelse ($guardians as $guardian)
-                    <tr wire:key="student-guardian-{{ $guardian->id }}">
-                        <td class="px-4 py-2 text-slate-900">{{ $guardian->last_name }} {{ $guardian->first_name }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ $guardian->pivot->relationship?->label() }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ $guardian->phone }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ $guardian->pivot->is_primary_contact ? 'Oui' : '' }}</td>
-                        <td class="px-4 py-2 text-right">
-                            @can('update', $student)
-                                <button
-                                    wire:click="removeGuardian({{ $guardian->id }})"
-                                    wire:confirm="Délier ce tuteur ?"
-                                    class="text-red-500 hover:text-red-700"
-                                >
-                                    Délier
-                                </button>
-                            @endcan
-                        </td>
-                    </tr>
-                @empty
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200 text-sm">
+                <thead class="bg-slate-50">
                     <tr>
-                        <td colspan="5" class="px-4 py-6 text-center text-slate-500">Aucun tuteur lié.</td>
+                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Nom</th>
+                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Rôle</th>
+                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Téléphone</th>
+                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Contact principal</th>
+                        <th class="whitespace-nowrap px-4 py-2"></th>
                     </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @forelse ($guardians as $guardian)
+                        <tr wire:key="student-guardian-{{ $guardian->id }}">
+                            <td class="whitespace-nowrap px-4 py-2 text-slate-900">{{ $guardian->last_name }} {{ $guardian->first_name }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-slate-600">{{ $guardian->pivot->relationship?->label() }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-slate-600">{{ $guardian->phone }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-slate-600">{{ $guardian->pivot->is_primary_contact ? 'Oui' : '' }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-right">
+                                @can('update', $student)
+                                    <button
+                                        wire:click="removeGuardian({{ $guardian->id }})"
+                                        wire:confirm="Délier ce tuteur ? Il perdra l'accès à l'espace parent pour cet élève si ce lien lui donnait accès au portail."
+                                        class="text-red-500 hover:text-red-700"
+                                    >
+                                        Délier
+                                    </button>
+                                @endcan
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="px-4 py-6 text-center text-slate-500">Aucun tuteur lié.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
+
+    @if ($student->birth_place || $student->nationalite || $student->birth_certificate_number || $student->birth_certificate_date || $student->birth_certificate_place || $student->residence)
+        <h2 class="mt-8 text-sm font-semibold uppercase tracking-wide text-slate-500">Identité</h2>
+        <div class="mt-2 grid grid-cols-1 gap-4 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-3">
+            @if ($student->birth_place)
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Lieu de naissance</p>
+                    <p class="text-sm text-slate-900">{{ $student->birth_place }}</p>
+                </div>
+            @endif
+
+            @if ($student->nationalite)
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Nationalité</p>
+                    <p class="text-sm text-slate-900">{{ $student->nationalite->libelle }}</p>
+                </div>
+            @endif
+
+            @if ($student->residence)
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Résidence</p>
+                    <p class="text-sm text-slate-900">{{ $student->residence }}</p>
+                </div>
+            @endif
+
+            @if ($student->birth_certificate_number || $student->birth_certificate_date || $student->birth_certificate_place)
+                <div class="sm:col-span-3">
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Acte de naissance</p>
+                    <p class="text-sm text-slate-900">
+                        {{ $student->birth_certificate_number ?: '—' }}
+                        @if ($student->birth_certificate_date)
+                            &middot; {{ $student->birth_certificate_date->format('d/m/Y') }}
+                        @endif
+                        @if ($student->birth_certificate_place)
+                            &middot; {{ $student->birth_certificate_place }}
+                        @endif
+                    </p>
+                </div>
+            @endif
+        </div>
+    @endif
+
+    @if ($student->father_name || $student->father_phone || $student->mother_name || $student->mother_phone || $student->tutor_name || $student->tutor_phone)
+        <h2 class="mt-8 text-sm font-semibold uppercase tracking-wide text-slate-500">Contacts familiaux (référence école)</h2>
+        <div class="mt-2 grid grid-cols-1 gap-4 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-3">
+            @if ($student->father_name || $student->father_phone)
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Père</p>
+                    <p class="text-sm text-slate-900">{{ $student->father_name ?: '—' }}</p>
+                    <p class="text-sm text-slate-600">{{ $student->father_phone ?: '—' }}</p>
+                </div>
+            @endif
+
+            @if ($student->mother_name || $student->mother_phone)
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Mère</p>
+                    <p class="text-sm text-slate-900">{{ $student->mother_name ?: '—' }}</p>
+                    <p class="text-sm text-slate-600">{{ $student->mother_phone ?: '—' }}</p>
+                </div>
+            @endif
+
+            @if ($student->tutor_name || $student->tutor_phone)
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Tuteur</p>
+                    <p class="text-sm text-slate-900">{{ $student->tutor_name ?: '—' }}</p>
+                    <p class="text-sm text-slate-600">{{ $student->tutor_phone ?: '—' }}</p>
+                </div>
+            @endif
+        </div>
+    @endif
 </div>

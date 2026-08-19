@@ -234,3 +234,22 @@ test('une inscription sur un niveau sans tarif configuré a des montants à zér
     expect((float) $enrollment->registration_amount)->toBe(0.0)
         ->and((float) $enrollment->installment_1_amount)->toBe(0.0);
 });
+
+test('les erreurs de validation du formulaire d’inscription utilisent des noms de champs en français', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    $student = Student::factory()->create(['establishment_id' => $establishment->id]);
+
+    Livewire::test(Show::class, ['student' => $student])
+        ->call('addEnrollment')
+        ->set('classroom_id', null)
+        ->set('school_year_id', null)
+        ->call('saveEnrollment')
+        ->assertSee('Le champ classe est obligatoire.')
+        ->assertSee('Le champ année scolaire est obligatoire.')
+        ->assertDontSee('classroom id')
+        ->assertDontSee('school year id');
+});

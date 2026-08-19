@@ -88,6 +88,10 @@ class Show extends Component
             'is_scholarship' => ['boolean'],
             'is_boarding' => ['boolean'],
             'is_assigned' => ['boolean'],
+        ], [], [
+            'classroom_id' => 'classe',
+            'school_year_id' => 'année scolaire',
+            'enrolled_on' => "date d'inscription",
         ]);
 
         // Défense en profondeur : ces statuts ne sont proposés que pour le
@@ -143,6 +147,9 @@ class Show extends Component
             'guardian_id' => ['required', 'exists:guardians,id'],
             'relationship' => ['required', Rule::enum(GuardianRelationship::class)],
             'is_primary_contact' => ['boolean'],
+        ], [], [
+            'guardian_id' => 'tuteur',
+            'relationship' => 'rôle',
         ]);
 
         DB::transaction(function () use ($data): void {
@@ -195,8 +202,11 @@ class Show extends Component
             ? Classroom::find($this->classroom_id)?->level?->cycle === Cycle::Secondaire
             : false;
 
+        $enrollments = $this->student->enrollments()->with(['classroom', 'schoolYear'])->latest('enrolled_on')->get();
+
         return view('livewire.students.show', [
-            'enrollments' => $this->student->enrollments()->with(['classroom', 'schoolYear'])->latest('enrolled_on')->get(),
+            'enrollments' => $enrollments,
+            'currentEnrollment' => $enrollments->firstWhere('status', 'active') ?? $enrollments->first(),
             'classrooms' => Classroom::orderBy('name')->get(),
             'schoolYears' => SchoolYear::orderByDesc('starts_on')->get(),
             'isSecondaireClassroom' => $isSecondaireClassroom,
