@@ -7,6 +7,7 @@ namespace App\Livewire\Grading\ReportCards\Secondaire;
 use App\Domain\Academics\Enums\Cycle;
 use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\Term;
+use App\Domain\Enrollment\Models\Student;
 use App\Domain\Grading\Models\ReportCard;
 use App\Domain\Grading\Services\ReportCardService;
 use Illuminate\Support\Collection;
@@ -35,6 +36,9 @@ class Index extends Component
         $data = $this->validate([
             'classroom_id' => ['required', 'exists:classrooms,id'],
             'term_id' => ['required', 'exists:terms,id'],
+        ], [], [
+            'classroom_id' => 'classe',
+            'term_id' => 'période',
         ]);
 
         $classroom = Classroom::findOrFail($data['classroom_id']);
@@ -56,10 +60,18 @@ class Index extends Component
                 ->get();
         }
 
+        $totalStudents = $this->classroom_id
+            ? Student::query()
+                ->whereHas('enrollments', fn ($query) => $query->where('classroom_id', $this->classroom_id)->where('status', 'active'))
+                ->count()
+            : null;
+
         return view('livewire.grading.report-cards.secondaire.index', [
             'reportCards' => $reportCards,
             'classrooms' => Classroom::gradable()->whereHas('level', fn ($query) => $query->where('cycle', Cycle::Secondaire))->orderBy('name')->get(),
             'terms' => Term::orderBy('sequence')->get(),
+            'totalStudents' => $totalStudents,
+            'generatedAt' => $reportCards->max('generated_at'),
         ]);
     }
 }
