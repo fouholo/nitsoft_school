@@ -191,6 +191,26 @@ test('le moyen de paiement est affiché traduit dans le tableau des paiements', 
         ->assertDontSee('mobile_money');
 });
 
+test('le formulaire de paiement affiche un aperçu du solde actuel avant enregistrement', function () {
+    $establishment = Establishment::factory()->create();
+    $accountant = createUserWithRole($establishment, 'caissier');
+    actingInEstablishment($establishment);
+    test()->actingAs($accountant);
+
+    $student = Student::factory()->create(['establishment_id' => $establishment->id]);
+    $enrollment = Enrollment::factory()->create([
+        'establishment_id' => $establishment->id,
+        'student_id' => $student->id,
+        'registration_amount' => 5000,
+    ]);
+
+    Livewire::test(Show::class, ['enrollment' => $enrollment])
+        ->call('addPayment')
+        ->assertSee('Solde actuel')
+        ->assertSee('Nouveau solde')
+        ->assertSee(money(5000.0));
+});
+
 test('un enseignant n’a aucun accès à la fiche financière d’une inscription', function () {
     $establishment = Establishment::factory()->create();
     $teacher = createUserWithRole($establishment, 'enseignant');

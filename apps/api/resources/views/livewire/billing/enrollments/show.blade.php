@@ -1,17 +1,15 @@
 <div>
     <a href="{{ route('students.show', $enrollment->student) }}" class="text-sm text-slate-500 hover:text-slate-900">&larr; Retour à la fiche élève</a>
 
-    <div class="mt-2 flex items-center justify-between">
+    <div class="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
             <h1 class="text-2xl font-semibold text-slate-900">{{ $enrollment->student?->last_name }} {{ $enrollment->student?->first_name }}</h1>
             <p class="text-sm text-slate-500">
-                {{ $enrollment->classroom?->name }} — {{ $enrollment->schoolYear?->label }} —
-                Dû {{ money($totalDue) }} —
-                Payé {{ money((float) $enrollment->total_paid) }}
+                {{ $enrollment->classroom?->name }} — {{ $enrollment->schoolYear?->label }}
             </p>
         </div>
 
-        <div class="flex gap-2">
+        <div class="flex flex-col gap-2 sm:flex-row">
             @can('create', \App\Domain\Billing\Models\Payment::class)
                 <button type="button" wire:click="editAmounts" class="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
                     Modifier les montants
@@ -35,7 +33,7 @@
         <div>
             <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Solde</p>
             @if ($balance > 0)
-                <span class="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">Reste {{ money($balance) }}</span>
+                <p class="text-lg font-semibold text-red-700">Reste {{ money($balance) }}</p>
             @else
                 <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">Soldé</span>
             @endif
@@ -102,6 +100,11 @@
             <div>
                 <label class="block text-sm font-medium text-slate-700">Référence</label>
                 <input type="text" wire:model="reference" class="mt-1 block w-full rounded-md border-slate-300 text-sm">
+            </div>
+
+            <div class="rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-600 sm:col-span-4" x-data>
+                Solde actuel : <span class="font-medium text-slate-900">{{ money($balance) }}</span>
+                — Nouveau solde après ce paiement : <span class="font-medium text-slate-900" x-text="new Intl.NumberFormat('fr-FR').format(Math.max({{ $balance }} - (parseFloat($wire.amount) || 0), 0)) + ' F CFA'"></span>
             </div>
 
             <div class="flex gap-2 sm:col-span-4">
@@ -187,9 +190,9 @@
                             <td class="whitespace-nowrap px-4 py-2 text-slate-600">{{ $payment->receivedBy?->name }}</td>
                             <td class="whitespace-nowrap px-4 py-2 text-slate-600">
                                 @can('view', $payment)
-                                    <a href="{{ route('billing.payments.receipt', $payment) }}" target="_blank" class="text-slate-700 hover:text-slate-900">Voir le reçu</a>
+                                    <a href="{{ route('billing.payments.receipt', $payment) }}" target="_blank" class="inline-flex min-h-11 items-center text-slate-700 hover:text-slate-900">Voir le reçu</a>
                                     &middot;
-                                    <a href="{{ route('billing.payments.receipt', ['payment' => $payment, 'download' => 1]) }}" class="text-slate-700 hover:text-slate-900">Télécharger</a>
+                                    <a href="{{ route('billing.payments.receipt', ['payment' => $payment, 'download' => 1]) }}" class="inline-flex min-h-11 items-center text-slate-700 hover:text-slate-900">Télécharger</a>
                                 @endcan
                             </td>
                         </tr>
