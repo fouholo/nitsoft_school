@@ -107,11 +107,27 @@
                 ->implode('');
         @endphp
 
-        <div class="flex min-h-screen">
-            <aside class="flex w-64 shrink-0 flex-col border-r border-slate-200 bg-white">
+        <div class="flex min-h-screen" x-data="{ sidebarOpen: false }">
+            <div
+                x-show="sidebarOpen"
+                x-transition.opacity
+                class="fixed inset-0 z-30 bg-slate-900/50 lg:hidden"
+                @click="sidebarOpen = false"
+                style="display: none;"
+            ></div>
+
+            <aside
+                class="fixed inset-y-0 left-0 z-40 flex w-64 shrink-0 -translate-x-full transform flex-col border-r border-slate-200 bg-white transition-transform duration-200 ease-out lg:static lg:translate-x-0"
+                :class="sidebarOpen && '!translate-x-0'"
+            >
                 <div class="flex h-16 items-center gap-2 border-b border-slate-200 px-5">
                     <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">N</span>
                     <span class="text-sm font-semibold text-slate-900">{{ config('app.name') }}</span>
+                    <button type="button" class="ml-auto rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 lg:hidden" aria-label="Fermer le menu" @click="sidebarOpen = false">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                            <path d="M6 6l12 12M18 6 6 18" />
+                        </svg>
+                    </button>
                 </div>
 
                 <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4">
@@ -121,6 +137,7 @@
                             <a
                                 href="{{ route($item['route'], $item['params'] ?? []) }}"
                                 wire:navigate
+                                @click="sidebarOpen = false"
                                 class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium {{ $isActive ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 shrink-0">
@@ -130,7 +147,7 @@
                             </a>
                         @else
                             <div class="pt-4 first:pt-0">
-                                <div class="flex items-center gap-2 px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                <div class="flex items-center gap-2 px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 shrink-0">
                                         {!! $icon($item['icon']) !!}
                                     </svg>
@@ -142,6 +159,7 @@
                                         <a
                                             href="{{ route($child['route']) }}"
                                             wire:navigate
+                                            @click="sidebarOpen = false"
                                             class="block rounded-lg py-1.5 pl-10 pr-3 text-sm {{ $childActive ? 'bg-indigo-50 font-medium text-indigo-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}"
                                         >
                                             {{ $child['label'] }}
@@ -159,12 +177,12 @@
                             {{ $initials }}
                         </span>
                         <div class="min-w-0 flex-1">
-                            <p class="truncate text-sm font-medium text-slate-900">{{ auth()->user()->name }}</p>
+                            <p class="truncate text-sm font-medium text-slate-900" title="{{ auth()->user()->name }}">{{ auth()->user()->name }}</p>
                             <p class="truncate text-xs text-slate-500">{{ auth()->user()->currentRoleLabel() }}</p>
                         </div>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" title="Déconnexion" class="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+                            <button type="submit" title="Déconnexion" aria-label="Déconnexion" class="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
                                     {!! $icon('logout') !!}
                                 </svg>
@@ -175,11 +193,18 @@
             </aside>
 
             <div class="flex min-w-0 flex-1 flex-col">
-                <header class="flex h-16 items-center justify-end border-b border-slate-200 bg-white px-6">
-                    @livewire('establishments.switcher')
+                <header class="flex h-16 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 sm:px-6">
+                    <button type="button" class="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700 lg:hidden" aria-label="Ouvrir le menu" @click="sidebarOpen = true">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6">
+                            <path d="M4 7h16M4 12h16M4 17h16" />
+                        </svg>
+                    </button>
+                    <div class="ml-auto">
+                        @livewire('establishments.switcher')
+                    </div>
                 </header>
 
-                <main class="flex-1 px-6 py-8">
+                <main class="flex-1 px-4 py-6 sm:px-6 sm:py-8">
                     <div class="mx-auto max-w-6xl">
                         {{ $slot }}
                     </div>

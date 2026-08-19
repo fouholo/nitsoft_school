@@ -6,8 +6,10 @@ namespace App\Livewire;
 
 use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\SchoolYear;
+use App\Domain\Academics\Models\Term;
 use App\Domain\Billing\Services\PaymentTrackingService;
 use App\Domain\Enrollment\Models\Student;
+use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\EstablishmentUserPivot;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -27,7 +29,22 @@ class Dashboard extends Component
         $user = Auth::user();
         $role = $user->currentRole();
 
-        $schoolYearId = SchoolYear::where('is_current', true)->value('id');
+        $currentEstablishment = Establishment::find((int) app('currentEstablishmentId'));
+        $currentSchoolYear = SchoolYear::where('is_current', true)->first();
+        $schoolYearId = $currentSchoolYear?->id;
+
+        $currentTerm = null;
+
+        if ($schoolYearId && $currentEstablishment?->isSecondaire()) {
+            $currentTerm = Term::where('school_year_id', $schoolYearId)
+                ->where('starts_on', '<=', now())
+                ->where('ends_on', '>=', now())
+                ->orderBy('sequence')
+                ->first();
+
+            $currentTerm ??= Term::where('school_year_id', $schoolYearId)->orderByDesc('sequence')->first();
+        }
+
         $pendingBalances = $schoolYearId
             ? app(PaymentTrackingService::class)->balances($schoolYearId)->where('balance', '>', 0)
             : collect();
@@ -36,6 +53,9 @@ class Dashboard extends Component
             'noEstablishment' => false,
             'role' => $role,
             'roleLabel' => $user->currentRoleLabel(),
+            'currentEstablishment' => $currentEstablishment,
+            'currentSchoolYear' => $currentSchoolYear,
+            'currentTerm' => $currentTerm,
             'studentsCount' => Student::where('is_active', true)->count(),
             'classroomsCount' => Classroom::whereHas('schoolYear', fn ($query) => $query->where('is_current', true))->count(),
             'pendingInvoicesCount' => $pendingBalances->count(),

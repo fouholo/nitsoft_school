@@ -6,9 +6,30 @@
             Aucun établissement ne vous est actuellement accessible. Contactez votre administrateur.
         </div>
     @else
-        <p class="mt-1 text-sm text-slate-500">
-            Connecté en tant que <span class="font-medium text-slate-700">{{ $roleLabel }}</span> sur cet établissement.
-        </p>
+        <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-slate-500">
+            <span>Connecté en tant que <span class="font-medium text-slate-700">{{ $roleLabel }}</span> sur cet établissement.</span>
+
+            @if ($currentSchoolYear || $currentEstablishment)
+                <span class="text-slate-300">·</span>
+            @endif
+
+            @if ($currentSchoolYear)
+                <span>Année scolaire <span class="font-medium text-slate-700">{{ $currentSchoolYear->label }}</span></span>
+            @endif
+
+            @if ($currentTerm)
+                <span class="text-slate-300">·</span>
+                <span>{{ $currentTerm->label }}</span>
+            @endif
+
+            @if ($currentEstablishment)
+                @if ($currentEstablishment->isSecondaire())
+                    <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">Secondaire</span>
+                @else
+                    <span class="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-700">Cycle Primaire</span>
+                @endif
+            @endif
+        </div>
 
         <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div class="rounded-xl border border-slate-200 bg-white p-5">
@@ -21,6 +42,9 @@
                     <div>
                         <p class="text-2xl font-semibold text-slate-900">{{ $studentsCount }}</p>
                         <p class="text-sm text-slate-500">Élèves actifs</p>
+                        @if ($studentsCount === 0)
+                            <p class="mt-0.5 text-xs text-slate-500">Aucun élève inscrit pour l'instant</p>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -35,6 +59,11 @@
                     <div>
                         <p class="text-2xl font-semibold text-slate-900">{{ $classroomsCount }}</p>
                         <p class="text-sm text-slate-500">Classes (année en cours)</p>
+                        @if ($classroomsCount === 0)
+                            <p class="mt-0.5 text-xs text-slate-500">
+                                {{ $currentSchoolYear ? "Aucune classe créée pour {$currentSchoolYear->label}" : "Aucune année scolaire en cours" }}
+                            </p>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -50,7 +79,11 @@
                         <div>
                             <p class="text-2xl font-semibold text-slate-900">{{ $pendingInvoicesCount }}</p>
                             <p class="text-sm text-slate-500">Factures en attente</p>
-                            <p class="text-xs text-slate-400">{{ money($pendingInvoicesBalance) }} restant à percevoir</p>
+                            @if ($pendingInvoicesCount === 0)
+                                <p class="mt-0.5 text-xs text-slate-500">Aucun solde restant à percevoir</p>
+                            @else
+                                <p class="text-xs text-slate-500">{{ money($pendingInvoicesBalance) }} restant à percevoir</p>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -73,28 +106,43 @@
             @endif
         </div>
 
-        <h2 class="mt-10 text-sm font-semibold uppercase tracking-wide text-slate-500">Accès rapides</h2>
+        @if (
+            auth()->user()->can('viewAny', \App\Domain\Enrollment\Models\Student::class)
+            || auth()->user()->can('viewAny', \App\Domain\Grading\Models\ReportCard::class)
+            || auth()->user()->can('viewAny', \App\Domain\Attendance\Models\AttendanceSession::class)
+            || auth()->user()->can('viewAny', \App\Domain\Billing\Models\Payment::class)
+        )
+            <h2 class="mt-10 text-sm font-semibold uppercase tracking-wide text-slate-500">Accès rapides</h2>
 
-        <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <a href="{{ route('students.index') }}" wire:navigate class="rounded-xl border border-slate-200 bg-white p-5 hover:border-indigo-200 hover:bg-indigo-50/40">
-                <p class="text-sm font-medium text-slate-900">Élèves</p>
-                <p class="mt-1 text-xs text-slate-500">Gérer les fiches et inscriptions</p>
-            </a>
+            <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                @can('viewAny', \App\Domain\Enrollment\Models\Student::class)
+                    <a href="{{ route('students.index') }}" wire:navigate class="rounded-xl border border-slate-200 bg-white p-5 hover:border-indigo-200 hover:bg-indigo-50/40">
+                        <p class="text-sm font-medium text-slate-900">Élèves</p>
+                        <p class="mt-1 text-xs text-slate-500">Gérer les fiches et inscriptions</p>
+                    </a>
+                @endcan
 
-            <a href="{{ route('grading.report-cards.index') }}" wire:navigate class="rounded-xl border border-slate-200 bg-white p-5 hover:border-indigo-200 hover:bg-indigo-50/40">
-                <p class="text-sm font-medium text-slate-900">Bulletins</p>
-                <p class="mt-1 text-xs text-slate-500">Générer et consulter les bulletins</p>
-            </a>
+                @can('viewAny', \App\Domain\Grading\Models\ReportCard::class)
+                    <a href="{{ route('grading.report-cards.index') }}" wire:navigate class="rounded-xl border border-slate-200 bg-white p-5 hover:border-indigo-200 hover:bg-indigo-50/40">
+                        <p class="text-sm font-medium text-slate-900">Bulletins</p>
+                        <p class="mt-1 text-xs text-slate-500">Générer et consulter les bulletins</p>
+                    </a>
+                @endcan
 
-            <a href="{{ route('attendance.sessions.index') }}" wire:navigate class="rounded-xl border border-slate-200 bg-white p-5 hover:border-indigo-200 hover:bg-indigo-50/40">
-                <p class="text-sm font-medium text-slate-900">Présences</p>
-                <p class="mt-1 text-xs text-slate-500">Faire l'appel du jour</p>
-            </a>
+                @can('viewAny', \App\Domain\Attendance\Models\AttendanceSession::class)
+                    <a href="{{ route('attendance.sessions.index') }}" wire:navigate class="rounded-xl border border-slate-200 bg-white p-5 hover:border-indigo-200 hover:bg-indigo-50/40">
+                        <p class="text-sm font-medium text-slate-900">Présences</p>
+                        <p class="mt-1 text-xs text-slate-500">Faire l'appel du jour</p>
+                    </a>
+                @endcan
 
-            <a href="{{ route('billing.payment-tracking.index') }}" wire:navigate class="rounded-xl border border-slate-200 bg-white p-5 hover:border-indigo-200 hover:bg-indigo-50/40">
-                <p class="text-sm font-medium text-slate-900">Suivi des paiements</p>
-                <p class="mt-1 text-xs text-slate-500">Suivre les paiements</p>
-            </a>
-        </div>
+                @can('viewAny', \App\Domain\Billing\Models\Payment::class)
+                    <a href="{{ route('billing.payment-tracking.index') }}" wire:navigate class="rounded-xl border border-slate-200 bg-white p-5 hover:border-indigo-200 hover:bg-indigo-50/40">
+                        <p class="text-sm font-medium text-slate-900">Suivi des paiements</p>
+                        <p class="mt-1 text-xs text-slate-500">Suivre les paiements</p>
+                    </a>
+                @endcan
+            </div>
+        @endif
     @endif
 </div>
