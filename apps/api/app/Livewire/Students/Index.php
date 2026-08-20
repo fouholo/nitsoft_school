@@ -4,9 +4,16 @@ declare(strict_types=1);
 
 namespace App\Livewire\Students;
 
+use App\Domain\Enrollment\Enums\GuardianLinkStatus;
+use App\Domain\Enrollment\Enums\GuardianRelationship;
+use App\Domain\Enrollment\Models\Guardian;
 use App\Domain\Enrollment\Models\Nationalite;
 use App\Domain\Enrollment\Models\Student;
+use App\Domain\Establishments\Models\Establishment;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -65,6 +72,35 @@ class Index extends Component
 
     public string $tutor_phone = '';
 
+    /**
+     * Relation ('father'|'mother'|'tutor') désignée comme contact principal
+     * — un seul choix possible parmi les 3 lignes de contacts familiaux.
+     */
+    public string $primaryContact = '';
+
+    public bool $createAccountForFather = false;
+
+    public bool $createAccountForMother = false;
+
+    public bool $createAccountForTutor = false;
+
+    public string $fatherEmail = '';
+
+    public string $motherEmail = '';
+
+    public string $tutorEmail = '';
+
+    /**
+     * Comptes portail créés lors du dernier enregistrement — affichés une
+     * fois pour que l'administrateur puisse copier les mots de passe
+     * générés avant qu'ils ne disparaissent.
+     *
+     * @var list<array{name: string, email: string, password: string}>
+     */
+    public array $generatedAccounts = [];
+
+    public bool $passwordsAcknowledged = false;
+
     public string $birth_place = '';
 
     public string $nationalite_code = '';
@@ -84,6 +120,10 @@ class Index extends Component
     public function mount(): void
     {
         $this->authorize('viewAny', Student::class);
+
+        if ($stored = session('student_guardian_generated_accounts')) {
+            $this->generatedAccounts = $stored;
+        }
     }
 
     public function updatingSearch(): void
@@ -180,8 +220,119 @@ class Index extends Component
         $student->fill($data);
         $student->save();
 
+        $accounts = [];
+
+        foreach ([
+            'father' => ['create' => $this->createAccountForFather, 'name' => $data['father_name'], 'phone' => $data['father_phone'], 'email' => $this->fatherEmail, 'relationship' => GuardianRelationship::Pere],
+            'mother' => ['create' => $this->createAccountForMother, 'name' => $data['mother_name'], 'phone' => $data['mother_phone'], 'email' => $this->motherEmail, 'relationship' => GuardianRelationship::Mere],
+            'tutor' => ['create' => $this->createAccountForTutor, 'name' => $data['tutor_name'], 'phone' => $data['tutor_phone'], 'email' => $this->tutorEmail, 'relationship' => GuardianRelationship::Tuteur],
+        ] as $key => $row) {
+            if (! $row['create']) {
+                continue;
+            }
+
+            $account = $this->linkGuardianAccount(
+                $student,
+                (string) $row['name'],
+                $row['phone'],
+                $row['email'],
+                $row['relationship'],
+                $this->primaryContact === $key,
+            );
+
+            if ($account !== null) {
+                $accounts[] = $account;
+            }
+        }
+
+        if ($accounts !== []) {
+            $this->generatedAccounts = $accounts;
+            $this->passwordsAcknowledged = false;
+            session(['student_guardian_generated_accounts' => $accounts]);
+        }
+
         $this->resetForm();
         $this->showForm = false;
+    }
+
+    /**
+     * Trouve ou crée le Guardian correspondant à cet e-mail, crée son compte
+     * portail s'il n'en a pas encore, le lie à l'élève (tuteur approuvé,
+     * rôle et contact principal éventuel), et le rattache à l'établissement
+     * courant avec le rôle "parent". Retourne les identifiants générés
+     * uniquement quand un nouveau compte a été créé (pour affichage unique).
+     *
+     * @return array{name: string, email: string, password: string}|null
+     */
+    protected function linkGuardianAccount(
+        Student $student,
+        string $name,
+        ?string $phone,
+        string $email,
+        GuardianRelationship $relationship,
+        bool $isPrimary,
+    ): ?array {
+        $guardian = Guardian::where('email', $email)->first();
+        $generated = null;
+
+        if ($guardian === null) {
+            $parts = preg_split('/\s+/', trim($name), 2) ?: [''];
+            $firstName = $parts[0] !== '' ? $parts[0] : $name;
+            $lastName = $parts[1] ?? $firstName;
+
+            $guardian = Guardian::create([
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'phone' => $phone,
+                'email' => $email,
+            ]);
+        }
+
+        if (! $guardian->user_id) {
+            $password = Str::password(12);
+            $fullName = trim("{$guardian->first_name} {$guardian->last_name}");
+
+            $user = User::create([
+                'name' => $fullName,
+                'email' => $guardian->email,
+                'phone' => $guardian->phone,
+                'password' => $password,
+            ]);
+
+            $guardian->update(['user_id' => $user->id]);
+
+            $generated = ['name' => $fullName, 'email' => $guardian->email, 'password' => $password];
+        }
+
+        /** @var Establishment $establishment */
+        $establishment = Establishment::findOrFail((int) app('currentEstablishmentId'));
+
+        if (! $establishment->users()->where('users.id', $guardian->user_id)->exists()) {
+            $establishment->users()->attach($guardian->user_id, ['role' => 'parent', 'is_active' => true]);
+        }
+
+        if ($isPrimary) {
+            DB::table('guardian_student')->where('student_id', $student->id)->update(['is_primary_contact' => false]);
+        }
+
+        $student->guardians()->syncWithoutDetaching([
+            $guardian->id => [
+                'establishment_id' => (int) app('currentEstablishmentId'),
+                'status' => GuardianLinkStatus::Approved,
+                'relationship' => $relationship,
+                'is_primary_contact' => $isPrimary,
+            ],
+        ]);
+
+        return $generated;
+    }
+
+    public function dismissGeneratedAccounts(): void
+    {
+        $this->generatedAccounts = [];
+        $this->passwordsAcknowledged = false;
+
+        session()->forget('student_guardian_generated_accounts');
     }
 
     public function delete(int $studentId): void
@@ -223,12 +374,16 @@ class Index extends Component
             'birth_certificate_date' => ['nullable', 'date'],
             'birth_certificate_place' => ['nullable', 'string', 'max:255'],
             'residence' => ['nullable', 'string', 'max:255'],
-            'father_name' => ['nullable', 'string', 'max:255'],
+            'father_name' => ['required_if:createAccountForFather,true', 'nullable', 'string', 'max:255'],
             'father_phone' => ['nullable', 'string', 'max:255'],
-            'mother_name' => ['nullable', 'string', 'max:255'],
+            'mother_name' => ['required_if:createAccountForMother,true', 'nullable', 'string', 'max:255'],
             'mother_phone' => ['nullable', 'string', 'max:255'],
-            'tutor_name' => ['nullable', 'string', 'max:255'],
+            'tutor_name' => ['required_if:createAccountForTutor,true', 'nullable', 'string', 'max:255'],
             'tutor_phone' => ['nullable', 'string', 'max:255'],
+            'primaryContact' => ['nullable', Rule::in(['father', 'mother', 'tutor'])],
+            'fatherEmail' => ['nullable', 'email', 'max:255', 'required_if:createAccountForFather,true'],
+            'motherEmail' => ['nullable', 'email', 'max:255', 'required_if:createAccountForMother,true'],
+            'tutorEmail' => ['nullable', 'email', 'max:255', 'required_if:createAccountForTutor,true'],
         ];
     }
 
@@ -256,6 +411,9 @@ class Index extends Component
             'mother_phone' => 'téléphone de la mère',
             'tutor_name' => 'nom du tuteur',
             'tutor_phone' => 'téléphone du tuteur',
+            'fatherEmail' => 'e-mail du père',
+            'motherEmail' => 'e-mail de la mère',
+            'tutorEmail' => 'e-mail du tuteur',
         ];
     }
 
@@ -264,6 +422,8 @@ class Index extends Component
         $this->reset([
             'editingId', 'currentStep', 'first_name', 'last_name', 'birth_date', 'gender', 'student_number',
             'father_name', 'father_phone', 'mother_name', 'mother_phone', 'tutor_name', 'tutor_phone',
+            'primaryContact', 'createAccountForFather', 'createAccountForMother', 'createAccountForTutor',
+            'fatherEmail', 'motherEmail', 'tutorEmail',
             'birth_place', 'nationalite_code', 'birth_certificate_number', 'birth_certificate_date',
             'birth_certificate_place', 'residence', 'photo', 'existingPhotoPath',
         ]);

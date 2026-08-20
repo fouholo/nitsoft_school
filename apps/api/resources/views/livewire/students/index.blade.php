@@ -9,6 +9,41 @@
         @endcan
     </div>
 
+    @if (! empty($generatedAccounts))
+        <div class="mt-4 rounded-lg border border-amber-200 bg-amber-100 px-4 py-3 text-sm text-amber-900" role="alert" aria-live="assertive">
+            <p class="font-semibold">{{ count($generatedAccounts) > 1 ? 'Comptes portail créés' : 'Compte portail créé' }}</p>
+            <p class="mt-1">Mots de passe temporaires à communiquer aux parents — ils ne seront plus jamais affichés :</p>
+
+            <ul class="mt-2 space-y-2">
+                @foreach ($generatedAccounts as $account)
+                    <li class="flex flex-wrap items-center gap-2">
+                        <span class="font-medium">{{ $account['name'] }}</span>
+                        <span class="text-amber-700">{{ $account['email'] }}</span>
+                        <code class="rounded bg-amber-200 px-2 py-1 font-mono text-base">{{ $account['password'] }}</code>
+                        <button
+                            type="button"
+                            x-data
+                            x-on:click="navigator.clipboard.writeText(@js($account['password']))"
+                            class="inline-flex min-h-11 items-center rounded-lg border border-amber-300 bg-white px-3 text-xs font-medium text-amber-800 hover:bg-amber-50"
+                        >
+                            Copier
+                        </button>
+                    </li>
+                @endforeach
+            </ul>
+
+            <label class="mt-3 flex min-h-11 items-center gap-2">
+                <input type="checkbox" wire:model="passwordsAcknowledged" class="rounded border-amber-300">
+                J'ai noté {{ count($generatedAccounts) > 1 ? 'ces mots de passe' : 'ce mot de passe' }}
+            </label>
+            @if ($passwordsAcknowledged)
+                <button type="button" wire:click="dismissGeneratedAccounts" class="mt-1 inline-flex min-h-11 items-center text-sm font-medium text-amber-800 underline">
+                    Fermer
+                </button>
+            @endif
+        </div>
+    @endif
+
     <div class="mt-4">
         <input
             type="search"
@@ -137,42 +172,54 @@
                 @endif
 
                 @if ($currentStep === 3)
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-4">
-                        <div>
-                            <label for="father_name" class="block text-sm font-medium text-stone-700">Nom du père</label>
-                            <input id="father_name" type="text" wire:model="father_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
-                            @error('father_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-                        </div>
+                    <p class="mb-3 text-xs text-stone-500">Cochez « Créer et lier un compte » pour donner à un parent l'accès au portail parents — un mot de passe sera généré et affiché une seule fois.</p>
 
-                        <div>
-                            <label for="father_phone" class="block text-sm font-medium text-stone-700">Téléphone du père</label>
-                            <input id="father_phone" type="text" wire:model="father_phone" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
-                            @error('father_phone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-                        </div>
+                    <div class="space-y-4">
+                        @foreach ([
+                            ['key' => 'father', 'label' => 'Père', 'nameField' => 'father_name', 'phoneField' => 'father_phone', 'emailField' => 'fatherEmail', 'createField' => 'createAccountForFather'],
+                            ['key' => 'mother', 'label' => 'Mère', 'nameField' => 'mother_name', 'phoneField' => 'mother_phone', 'emailField' => 'motherEmail', 'createField' => 'createAccountForMother'],
+                            ['key' => 'tutor', 'label' => 'Tuteur', 'nameField' => 'tutor_name', 'phoneField' => 'tutor_phone', 'emailField' => 'tutorEmail', 'createField' => 'createAccountForTutor'],
+                        ] as $row)
+                            <div wire:key="family-row-{{ $row['key'] }}" class="rounded-lg border border-stone-200 p-4">
+                                <h3 class="text-sm font-semibold text-stone-900">{{ $row['label'] }}</h3>
 
-                        <div>
-                            <label for="mother_name" class="block text-sm font-medium text-stone-700">Nom de la mère</label>
-                            <input id="mother_name" type="text" wire:model="mother_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
-                            @error('mother_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-                        </div>
+                                <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label for="{{ $row['nameField'] }}" class="block text-sm font-medium text-stone-700">Nom</label>
+                                        <input id="{{ $row['nameField'] }}" type="text" wire:model="{{ $row['nameField'] }}" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                                        @error($row['nameField']) <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                                    </div>
 
-                        <div>
-                            <label for="mother_phone" class="block text-sm font-medium text-stone-700">Téléphone de la mère</label>
-                            <input id="mother_phone" type="text" wire:model="mother_phone" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
-                            @error('mother_phone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-                        </div>
+                                    <div>
+                                        <label for="{{ $row['phoneField'] }}" class="block text-sm font-medium text-stone-700">Téléphone</label>
+                                        <input id="{{ $row['phoneField'] }}" type="text" wire:model="{{ $row['phoneField'] }}" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                                        @error($row['phoneField']) <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                                    </div>
+                                </div>
 
-                        <div>
-                            <label for="tutor_name" class="block text-sm font-medium text-stone-700">Nom du tuteur</label>
-                            <input id="tutor_name" type="text" wire:model="tutor_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
-                            @error('tutor_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-                        </div>
+                                <div class="mt-3 flex flex-wrap items-center gap-4">
+                                    <label class="flex items-center gap-2 text-sm text-stone-700">
+                                        <input type="radio" wire:model="primaryContact" value="{{ $row['key'] }}" class="border-stone-300 text-orange-700 focus:ring-orange-600">
+                                        Contact principal
+                                    </label>
 
-                        <div>
-                            <label for="tutor_phone" class="block text-sm font-medium text-stone-700">Téléphone du tuteur</label>
-                            <input id="tutor_phone" type="text" wire:model="tutor_phone" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
-                            @error('tutor_phone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-                        </div>
+                                    <label class="flex items-center gap-2 text-sm text-stone-700">
+                                        <input type="checkbox" wire:model.live="{{ $row['createField'] }}" class="rounded border-stone-300 text-orange-700 focus:ring-orange-600">
+                                        Créer et lier un compte
+                                    </label>
+                                </div>
+
+                                @if (${$row['createField']})
+                                    <div class="mt-3">
+                                        <label for="{{ $row['emailField'] }}" class="block text-sm font-medium text-stone-700">
+                                            E-mail — {{ $row['label'] }} <span class="text-red-600">*</span>
+                                        </label>
+                                        <input id="{{ $row['emailField'] }}" type="email" wire:model="{{ $row['emailField'] }}" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                                        @error($row['emailField']) <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
                     </div>
                 @endif
 

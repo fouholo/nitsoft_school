@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Domain\Enrollment\Enums\GuardianLinkStatus;
+use App\Domain\Enrollment\Models\Guardian;
 use App\Domain\Enrollment\Models\Nationalite;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Models\Establishment;
 use App\Livewire\Students\Index;
+use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
@@ -213,4 +216,100 @@ test('modifier un élève repart toujours de l’étape 1 avec son nom affiché'
         ->call('edit', $student->id)
         ->assertSet('currentStep', 1)
         ->assertSee('Modification — Koné Yao');
+});
+
+test('cocher « créer et lier un compte » sans e-mail bloque l’enregistrement', function () {
+    Livewire::test(Index::class)
+        ->call('create')
+        ->set('last_name', 'Traoré')
+        ->set('first_name', 'Awa')
+        ->set('student_number', 'MAT-0020')
+        ->set('father_name', 'Koffi Traoré')
+        ->set('createAccountForFather', true)
+        ->call('save')
+        ->assertHasErrors(['fatherEmail']);
+
+    expect(Student::count())->toBe(0);
+});
+
+test('créer un élève avec un compte parent lié crée le tuteur, son compte portail et le lien approuvé', function () {
+    Livewire::test(Index::class)
+        ->call('create')
+        ->set('last_name', 'Traoré')
+        ->set('first_name', 'Awa')
+        ->set('student_number', 'MAT-0021')
+        ->set('father_name', 'Koffi Traoré')
+        ->set('father_phone', '+2250700000001')
+        ->set('createAccountForFather', true)
+        ->set('fatherEmail', 'koffi.traore@example.test')
+        ->set('primaryContact', 'father')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $student = Student::sole();
+    $guardian = Guardian::sole();
+
+    expect($guardian->email)->toBe('koffi.traore@example.test')
+        ->and($guardian->first_name)->toBe('Koffi')
+        ->and($guardian->last_name)->toBe('Traoré')
+        ->and($guardian->user_id)->not->toBeNull();
+
+    $user = User::findOrFail($guardian->user_id);
+    expect($user->email)->toBe('koffi.traore@example.test')
+        ->and($user->establishments()->wherePivot('role', 'parent')->count())->toBe(1);
+
+    $pivot = $student->guardians()->sole()->pivot;
+    expect($pivot->relationship->value)->toBe('pere')
+        ->and($pivot->status)->toBe(GuardianLinkStatus::Approved)
+        ->and($pivot->is_primary_contact)->toBeTrue();
+});
+
+test('un seul contact peut être principal parmi père, mère et tuteur', function () {
+    Livewire::test(Index::class)
+        ->call('create')
+        ->set('last_name', 'Traoré')
+        ->set('first_name', 'Awa')
+        ->set('student_number', 'MAT-0022')
+        ->set('father_name', 'Koffi Traoré')
+        ->set('createAccountForFather', true)
+        ->set('fatherEmail', 'koffi@example.test')
+        ->set('mother_name', 'Aya Kouassi')
+        ->set('createAccountForMother', true)
+        ->set('motherEmail', 'aya@example.test')
+        ->set('primaryContact', 'mother')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $student = Student::sole();
+    $primaries = $student->guardians()->wherePivot('is_primary_contact', true)->get();
+
+    expect($primaries)->toHaveCount(1)
+        ->and($primaries->first()->email)->toBe('aya@example.test');
+});
+
+test('un tuteur existant identifié par e-mail est réutilisé plutôt que dupliqué', function () {
+    $existingUser = User::factory()->create(['email' => 'koffi@example.test']);
+    $existingGuardian = Guardian::factory()->create([
+        'first_name' => 'Koffi',
+        'last_name' => 'Traoré',
+        'email' => 'koffi@example.test',
+        'user_id' => $existingUser->id,
+    ]);
+
+    Livewire::test(Index::class)
+        ->call('create')
+        ->set('last_name', 'Traoré')
+        ->set('first_name', 'Awa')
+        ->set('student_number', 'MAT-0023')
+        ->set('father_name', 'Koffi Traoré')
+        ->set('createAccountForFather', true)
+        ->set('fatherEmail', 'koffi@example.test')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect(Guardian::count())->toBe(1)
+        ->and(User::where('email', 'koffi@example.test')->count())->toBe(1);
+
+    $student = Student::sole();
+    expect($student->guardians()->sole()->id)->toBe($existingGuardian->id);
 });
