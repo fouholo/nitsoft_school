@@ -12,15 +12,21 @@ use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Support\RolePermissions;
 use App\Models\User;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
 #[Title('Suivi des paiements')]
 class Index extends Component
 {
+    use WithPagination;
+
+    private const PER_PAGE = 25;
+
     public ?int $school_year_id = null;
 
     public ?int $levelFilter = null;
@@ -34,6 +40,26 @@ class Index extends Component
         $this->authorize('viewAny', Payment::class);
 
         $this->school_year_id = SchoolYear::where('is_current', true)->value('id');
+    }
+
+    public function updatingSchoolYearId(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingLevelFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingStatusFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
     }
 
     /**
@@ -54,6 +80,7 @@ class Index extends Component
         $user = Auth::user();
 
         $ownerId = RolePermissions::can($user->currentRole(), 'finance.scope_own_only') ? $user->id : null;
+        $canRecordPayments = $user->can('create', Payment::class);
 
         $balances = $this->school_year_id
             ? app(PaymentTrackingService::class)->balances($this->school_year_id, $ownerId)
@@ -110,15 +137,27 @@ class Index extends Component
 
         $rows = $rows->values();
 
+        $page = $this->getPage();
+        $pagedRows = new LengthAwarePaginator(
+            $rows->forPage($page, self::PER_PAGE)->values(),
+            $rows->count(),
+            self::PER_PAGE,
+            $page,
+            ['path' => request()->url(), 'pageName' => 'page'],
+        );
+
         return view('livewire.billing.payment-tracking.index', [
-            'rows' => $rows,
+            'rows' => $pagedRows,
             'schoolYears' => SchoolYear::orderByDesc('starts_on')->get(),
             'levels' => Level::orderBy('level_wording')->get(),
             'lateCount' => $lateRows->count(),
             'lateTotal' => (float) $lateRows->sum('balance'),
+            'displayedCount' => $rows->count(),
             'displayedDue' => (float) $rows->sum('due_so_far'),
             'displayedPaid' => (float) $rows->sum('total_paid'),
             'displayedBalance' => (float) $rows->sum('balance'),
+            'scopedToOwn' => $ownerId !== null,
+            'canRecordPayments' => $canRecordPayments,
         ]);
     }
 }

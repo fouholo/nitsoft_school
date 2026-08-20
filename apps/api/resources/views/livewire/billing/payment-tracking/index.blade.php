@@ -3,6 +3,12 @@
         <h1 class="text-2xl font-semibold text-slate-900">Suivi des paiements</h1>
     </div>
 
+    @if ($scopedToOwn)
+        <div class="mt-4 rounded-md border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-sm text-indigo-800">
+            Vue restreinte aux élèves dont vous avez personnellement encaissé un paiement — un élève n'ayant jamais payé peut ne pas apparaître ici.
+        </div>
+    @endif
+
     @if ($lateCount > 0)
         <div class="mt-4 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-800">
             <span class="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">{{ $lateCount }}</span>
@@ -59,22 +65,26 @@
             <table class="min-w-full divide-y divide-slate-200 text-sm">
                 <thead class="bg-slate-50">
                     <tr>
-                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Élève</th>
-                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Classe</th>
-                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Dû à ce jour</th>
-                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Payé</th>
-                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Solde</th>
-                        <th class="whitespace-nowrap px-4 py-2"><span class="sr-only">Actions</span></th>
+                        <th scope="col" class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Élève</th>
+                        <th scope="col" class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Classe</th>
+                        <th scope="col" class="whitespace-nowrap px-4 py-2 text-right font-medium text-slate-500">Dû à ce jour</th>
+                        <th scope="col" class="whitespace-nowrap px-4 py-2 text-right font-medium text-slate-500">Payé</th>
+                        <th scope="col" class="whitespace-nowrap px-4 py-2 text-right font-medium text-slate-500">Solde <span class="font-normal text-slate-400" title="Triés du solde le plus élevé au plus faible">▾</span></th>
+                        @if ($canRecordPayments)
+                            <th scope="col" class="whitespace-nowrap px-4 py-2"><span class="sr-only">Actions</span></th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse ($rows as $row)
                         <tr wire:key="student-{{ $row['student_id'] }}" class="hover:bg-slate-50">
-                            <td class="whitespace-nowrap px-4 py-2 text-slate-900">{{ $row['student']->last_name }} {{ $row['student']->first_name }}</td>
+                            <td class="px-4 py-2 text-slate-900">
+                                <div class="max-w-[14rem] truncate" title="{{ $row['student']->last_name }} {{ $row['student']->first_name }}">{{ $row['student']->last_name }} {{ $row['student']->first_name }}</div>
+                            </td>
                             <td class="whitespace-nowrap px-4 py-2 text-slate-600">{{ $row['classroom']?->name ?? '—' }}</td>
-                            <td class="whitespace-nowrap px-4 py-2 text-slate-600">{{ money($row['due_so_far']) }}</td>
-                            <td class="whitespace-nowrap px-4 py-2 text-slate-600">{{ money($row['total_paid']) }}</td>
-                            <td class="whitespace-nowrap px-4 py-2">
+                            <td class="whitespace-nowrap px-4 py-2 text-right text-slate-600">{{ money($row['due_so_far']) }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-right text-slate-600">{{ money($row['total_paid']) }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-right">
                                 @if ($row['balance'] > 0)
                                     <span class="whitespace-nowrap rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
                                         Retard de {{ money($row['balance']) }}
@@ -89,23 +99,23 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="whitespace-nowrap px-4 py-2 text-right">
-                                @if ($row['enrollment'])
-                                    @can('create', \App\Domain\Billing\Models\Payment::class)
+                            @if ($canRecordPayments)
+                                <td class="whitespace-nowrap px-4 py-2 text-right">
+                                    @if ($row['enrollment'])
                                         <a
                                             href="{{ route('billing.enrollments.show', $row['enrollment']) }}"
                                             wire:navigate
-                                            class="inline-block rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                                            class="inline-flex min-h-11 items-center rounded-md border border-slate-300 px-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
                                         >
                                             Encaisser
                                         </a>
-                                    @endcan
-                                @endif
-                            </td>
+                                    @endif
+                                </td>
+                            @endif
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-6 text-center text-slate-500">
+                            <td colspan="{{ $canRecordPayments ? 6 : 5 }}" class="px-4 py-6 text-center text-slate-500">
                                 @if (! $school_year_id)
                                     Sélectionnez une année scolaire pour afficher le suivi des paiements.
                                 @else
@@ -118,10 +128,10 @@
                 @if ($rows->isNotEmpty())
                     <tfoot class="border-t border-slate-200">
                         <tr>
-                            <td class="whitespace-nowrap px-4 py-2 font-medium text-slate-700" colspan="2">Total</td>
-                            <td class="whitespace-nowrap px-4 py-2 font-medium text-slate-700">{{ money($displayedDue) }}</td>
-                            <td class="whitespace-nowrap px-4 py-2 font-medium text-slate-700">{{ money($displayedPaid) }}</td>
-                            <td class="whitespace-nowrap px-4 py-2 font-medium text-slate-700" colspan="2">
+                            <td class="whitespace-nowrap px-4 py-2 font-medium text-slate-700" colspan="2">Total ({{ $displayedCount }} {{ $displayedCount > 1 ? 'élèves affichés' : 'élève affiché' }})</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-right font-medium text-slate-700">{{ money($displayedDue) }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-right font-medium text-slate-700">{{ money($displayedPaid) }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-right font-medium text-slate-700" colspan="{{ $canRecordPayments ? 2 : 1 }}">
                                 @if ($displayedBalance > 0)
                                     Retard de {{ money($displayedBalance) }}
                                 @elseif ($displayedBalance < 0)
@@ -135,5 +145,11 @@
                 @endif
             </table>
         </div>
+
+        @if ($rows->hasPages())
+            <div class="border-t border-slate-200 px-4 py-3">
+                {{ $rows->links() }}
+            </div>
+        @endif
     </div>
 </div>

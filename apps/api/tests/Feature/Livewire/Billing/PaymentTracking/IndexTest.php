@@ -206,3 +206,91 @@ test('un éducateur ne voit que les inscriptions sur lesquelles il a personnelle
 
     expect($rows->pluck('student_id')->all())->toBe([$studentOwn->id]);
 });
+
+test('un éducateur à portée restreinte voit une bannière explicative, un directeur non', function () {
+    $establishment = Establishment::factory()->create();
+    $educator = createUserWithRole($establishment, 'educateur');
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+
+    test()->actingAs($educator);
+    Livewire::test(Index::class)
+        ->set('school_year_id', $schoolYear->id)
+        ->assertSee('Vue restreinte');
+
+    test()->actingAs($directeur);
+    Livewire::test(Index::class)
+        ->set('school_year_id', $schoolYear->id)
+        ->assertDontSee('Vue restreinte');
+});
+
+test('un caissier sans droit d’encaissement ne voit pas la colonne Actions', function () {
+    $establishment = Establishment::factory()->create();
+    // gestionnaire a finance.access mais pas billing.manage : la colonne
+    // Actions doit être masquée plutôt que rendue vide et muette.
+    $gestionnaire = createUserWithRole($establishment, 'gestionnaire');
+    actingInEstablishment($establishment);
+    test()->actingAs($gestionnaire);
+
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $student = Student::factory()->create(['establishment_id' => $establishment->id]);
+    $enrollment = Enrollment::factory()->create([
+        'establishment_id' => $establishment->id,
+        'school_year_id' => $schoolYear->id,
+        'student_id' => $student->id,
+        'registration_amount' => 1000,
+    ]);
+
+    Livewire::test(Index::class)
+        ->set('school_year_id', $schoolYear->id)
+        ->assertDontSee('Encaisser')
+        ->assertDontSee(route('billing.enrollments.show', $enrollment), false);
+});
+
+test('le pied de tableau indique le nombre d’élèves affichés', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $studentA = Student::factory()->create(['establishment_id' => $establishment->id]);
+    $studentB = Student::factory()->create(['establishment_id' => $establishment->id]);
+
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'student_id' => $studentA->id, 'registration_amount' => 500]);
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'student_id' => $studentB->id, 'registration_amount' => 500]);
+
+    Livewire::test(Index::class)
+        ->set('school_year_id', $schoolYear->id)
+        ->assertSee('2 élèves affichés');
+});
+
+test('la liste est paginée au-delà de 25 élèves et change de page correctement', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+
+    $students = Student::factory()->count(30)->create(['establishment_id' => $establishment->id]);
+    foreach ($students as $index => $student) {
+        Enrollment::factory()->create([
+            'establishment_id' => $establishment->id,
+            'school_year_id' => $schoolYear->id,
+            'student_id' => $student->id,
+            'registration_amount' => 1000 + $index,
+        ]);
+    }
+
+    $component = Livewire::test(Index::class)->set('school_year_id', $schoolYear->id);
+
+    expect($component->viewData('rows'))->toHaveCount(25)
+        ->and($component->viewData('displayedCount'))->toBe(30);
+
+    $component->call('nextPage');
+
+    expect($component->viewData('rows'))->toHaveCount(5);
+});
