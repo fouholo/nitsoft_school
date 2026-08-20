@@ -73,6 +73,22 @@
                 ->values()
                 ->all();
 
+            /**
+             * Tous les écrans ci-dessus (hors Tableau de bord, qui affiche son
+             * propre état vide) supposent un établissement courant lié dans le
+             * container ("currentEstablishmentId") — un administrateur SaaS
+             * sans établissement rattaché n'en a aucun, et ces routes
+             * plantent ou tournent non-scopées sans cette liaison. On les
+             * retire du menu plutôt que de laisser un lien qui ne fonctionne
+             * pas pour ce profil.
+             */
+            if (! app()->bound('currentEstablishmentId')) {
+                $navItems = array_values(array_filter(
+                    $navItems,
+                    fn (array $item) => $item['type'] === 'link' && $item['route'] === 'dashboard'
+                ));
+            }
+
             if (auth()->user()->isSaasAdmin()) {
                 $navItems[] = ['type' => 'link', 'label' => 'Groupes scolaires', 'route' => 'foundations.index', 'active' => 'foundations.*', 'icon' => 'building'];
                 $navItems[] = ['type' => 'link', 'label' => 'Établissements', 'route' => 'establishments.index', 'active' => 'establishments.*', 'icon' => 'building'];
