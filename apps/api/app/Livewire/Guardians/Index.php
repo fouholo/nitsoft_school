@@ -40,9 +40,18 @@ class Index extends Component
 
     public ?string $generatedPasswordFor = null;
 
+    public bool $passwordAcknowledged = false;
+
+    public ?string $unlinkedGuardianNotice = null;
+
     public function mount(): void
     {
         $this->authorize('viewAny', Guardian::class);
+
+        if ($stored = session('guardian_generated_password')) {
+            $this->generatedPassword = $stored['password'];
+            $this->generatedPasswordFor = $stored['email'];
+        }
     }
 
     public function updatingSearch(): void
@@ -55,6 +64,7 @@ class Index extends Component
         $this->authorize('create', Guardian::class);
 
         $this->resetForm();
+        $this->unlinkedGuardianNotice = null;
         $this->showForm = true;
     }
 
@@ -75,14 +85,15 @@ class Index extends Component
 
     public function save(): void
     {
-        $this->generatedPassword = null;
-        $this->generatedPasswordFor = null;
+        $isCreating = ! $this->editingId;
 
         $data = $this->validate([
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:255'],
-            'email' => ['nullable', 'email', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255', 'required_if:createPortalAccount,true'],
+        ], [
+            'email.required_if' => 'Une adresse e-mail est requise pour créer un compte portail.',
         ]);
 
         foreach (['phone', 'email'] as $optional) {
@@ -100,8 +111,18 @@ class Index extends Component
         $guardian->fill($data);
         $guardian->save();
 
+        $this->editingId = $guardian->id;
+
         if ($this->createPortalAccount && ! $guardian->user_id) {
             $this->createPortalAccountFor($guardian);
+
+            if ($this->getErrorBag()->isNotEmpty()) {
+                return;
+            }
+        }
+
+        if ($isCreating) {
+            $this->unlinkedGuardianNotice = trim("{$guardian->last_name} {$guardian->first_name}");
         }
 
         $this->resetForm();
@@ -131,8 +152,23 @@ class Index extends Component
 
         $guardian->update(['user_id' => $user->id]);
 
+        $this->passwordAcknowledged = false;
         $this->generatedPassword = $password;
         $this->generatedPasswordFor = $guardian->email;
+
+        session(['guardian_generated_password' => [
+            'password' => $password,
+            'email' => $guardian->email,
+        ]]);
+    }
+
+    public function dismissGeneratedPassword(): void
+    {
+        $this->generatedPassword = null;
+        $this->generatedPasswordFor = null;
+        $this->passwordAcknowledged = false;
+
+        session()->forget('guardian_generated_password');
     }
 
     public function delete(int $guardianId): void

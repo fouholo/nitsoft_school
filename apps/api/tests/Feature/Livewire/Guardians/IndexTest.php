@@ -33,3 +33,68 @@ test('la liste des tuteurs se charge sans erreur et ne montre que les liens appr
     expect($guardians->pluck('id'))->toContain($approvedGuardian->id)
         ->not->toContain($pendingGuardian->id);
 });
+
+test('cocher le compte portail sans e-mail bloque l’enregistrement avec une erreur visible plutôt que de fermer le formulaire silencieusement', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    Livewire::test(Index::class)
+        ->call('create')
+        ->set('first_name', 'Awa')
+        ->set('last_name', 'Koné')
+        ->set('createPortalAccount', true)
+        ->call('save')
+        ->assertHasErrors(['email' => 'required_if'])
+        ->assertSet('showForm', true);
+
+    expect(Guardian::where('first_name', 'Awa')->exists())->toBeFalse();
+});
+
+test('créer un tuteur sans lien élève affiche une notice explicative plutôt que de disparaître silencieusement de la liste', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    Livewire::test(Index::class)
+        ->call('create')
+        ->set('first_name', 'Awa')
+        ->set('last_name', 'Koné')
+        ->call('save')
+        ->assertSee('Koné Awa')
+        ->assertSee('a été créé');
+
+    expect(Guardian::where('first_name', 'Awa')->exists())->toBeTrue();
+});
+
+test('le mot de passe temporaire survit à un rechargement de page jusqu’à confirmation, puis disparaît après fermeture', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    $student = Student::factory()->create(['establishment_id' => $establishment->id]);
+    $guardian = Guardian::factory()->create(['email' => 'parent@example.test']);
+    $student->guardians()->attach($guardian->id, [
+        'establishment_id' => $establishment->id,
+        'status' => GuardianLinkStatus::Approved,
+    ]);
+
+    Livewire::test(Index::class)
+        ->call('edit', $guardian->id)
+        ->set('createPortalAccount', true)
+        ->call('save')
+        ->assertHasNoErrors();
+
+    // Nouvelle instance du composant : simule un rechargement de page — le
+    // mot de passe doit rester visible tant qu'il n'a pas été confirmé.
+    Livewire::test(Index::class)
+        ->assertSet('generatedPasswordFor', 'parent@example.test')
+        ->set('passwordAcknowledged', true)
+        ->call('dismissGeneratedPassword')
+        ->assertSet('generatedPassword', null);
+
+    Livewire::test(Index::class)->assertSet('generatedPassword', null);
+});

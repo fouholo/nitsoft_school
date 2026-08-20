@@ -18,11 +18,39 @@
         >
     </div>
 
+    @if ($unlinkedGuardianNotice)
+        <div class="mt-4 flex items-start justify-between gap-4 rounded-md border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-800">
+            <p><strong>{{ $unlinkedGuardianNotice }}</strong> a été créé. Il n'apparaîtra dans cette liste qu'une fois lié à un élève — depuis la fiche de l'élève, utilisez « Ajouter un tuteur » pour le rechercher et le rattacher.</p>
+            <button type="button" wire:click="$set('unlinkedGuardianNotice', null)" class="inline-flex min-h-11 shrink-0 items-center text-indigo-600 hover:text-indigo-800">
+                Fermer
+            </button>
+        </div>
+    @endif
+
     @if ($generatedPassword)
-        <div class="mt-4 rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            Compte portail créé pour <strong>{{ $generatedPasswordFor }}</strong>. Mot de passe temporaire
-            (à communiquer au tuteur, ne sera plus affiché) :
-            <code class="rounded bg-amber-100 px-1.5 py-0.5 font-mono">{{ $generatedPassword }}</code>
+        <div class="mt-4 rounded-md border border-amber-200 bg-amber-100 px-4 py-3 text-sm text-amber-900" role="alert" aria-live="assertive">
+            <p class="font-semibold">Compte portail créé pour {{ $generatedPasswordFor }}</p>
+            <p class="mt-1">Mot de passe temporaire à communiquer au tuteur — il ne sera plus jamais affiché :</p>
+            <div class="mt-2 flex flex-wrap items-center gap-2">
+                <code class="rounded bg-amber-200 px-2 py-1 font-mono text-base">{{ $generatedPassword }}</code>
+                <button
+                    type="button"
+                    x-data
+                    x-on:click="navigator.clipboard.writeText(@js($generatedPassword))"
+                    class="inline-flex min-h-11 items-center rounded-md border border-amber-300 bg-white px-3 text-xs font-medium text-amber-800 hover:bg-amber-50"
+                >
+                    Copier
+                </button>
+            </div>
+            <label class="mt-3 flex min-h-11 items-center gap-2">
+                <input type="checkbox" wire:model="passwordAcknowledged" class="rounded border-amber-300">
+                J'ai noté ce mot de passe
+            </label>
+            @if ($passwordAcknowledged)
+                <button type="button" wire:click="dismissGeneratedPassword" class="mt-1 inline-flex min-h-11 items-center text-sm font-medium text-amber-800 underline">
+                    Fermer
+                </button>
+            @endif
         </div>
     @endif
 
@@ -69,51 +97,53 @@
     @endif
 
     <div class="mt-6 overflow-hidden rounded-md border border-slate-200 bg-white">
-        <table class="min-w-full divide-y divide-slate-200 text-sm">
-            <thead class="bg-slate-50">
-                <tr>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">Nom</th>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">Téléphone</th>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">E-mail</th>
-                    <th class="px-4 py-2 text-left font-medium text-slate-500">Portail</th>
-                    <th class="px-4 py-2"></th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-                @forelse ($guardians as $guardian)
-                    <tr wire:key="guardian-{{ $guardian->id }}">
-                        <td class="px-4 py-2 text-slate-900">{{ $guardian->last_name }} {{ $guardian->first_name }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ $guardian->phone }}</td>
-                        <td class="px-4 py-2 text-slate-600">{{ $guardian->email }}</td>
-                        <td class="px-4 py-2">
-                            @if ($guardian->user_id)
-                                <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">Actif</span>
-                            @else
-                                <span class="text-xs text-slate-400">—</span>
-                            @endif
-                        </td>
-                        <td class="px-4 py-2 text-right">
-                            @can('update', $guardian)
-                                <button wire:click="edit({{ $guardian->id }})" class="text-slate-500 hover:text-slate-900">Modifier</button>
-                            @endcan
-                            @can('delete', $guardian)
-                                <button
-                                    wire:click="delete({{ $guardian->id }})"
-                                    wire:confirm="Supprimer ce tuteur ?"
-                                    class="ml-3 text-red-500 hover:text-red-700"
-                                >
-                                    Supprimer
-                                </button>
-                            @endcan
-                        </td>
-                    </tr>
-                @empty
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200 text-sm">
+                <thead class="bg-slate-50">
                     <tr>
-                        <td colspan="5" class="px-4 py-6 text-center text-slate-500">Aucun tuteur.</td>
+                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Nom</th>
+                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Téléphone</th>
+                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">E-mail</th>
+                        <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-500">Portail</th>
+                        <th class="whitespace-nowrap px-4 py-2"></th>
                     </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @forelse ($guardians as $guardian)
+                        <tr wire:key="guardian-{{ $guardian->id }}">
+                            <td class="whitespace-nowrap px-4 py-2 text-slate-900">{{ $guardian->last_name }} {{ $guardian->first_name }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-slate-600">{{ $guardian->phone }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-slate-600">{{ $guardian->email }}</td>
+                            <td class="whitespace-nowrap px-4 py-2">
+                                @if ($guardian->user_id)
+                                    <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">Actif</span>
+                                @else
+                                    <span class="text-xs text-slate-400">—</span>
+                                @endif
+                            </td>
+                            <td class="whitespace-nowrap px-4 py-2 text-right">
+                                @can('update', $guardian)
+                                    <button wire:click="edit({{ $guardian->id }})" class="inline-flex min-h-11 items-center text-slate-500 hover:text-slate-900">Modifier</button>
+                                @endcan
+                                @can('delete', $guardian)
+                                    <button
+                                        wire:click="delete({{ $guardian->id }})"
+                                        wire:confirm="Supprimer ce tuteur ?"
+                                        class="ml-3 inline-flex min-h-11 items-center text-red-600 hover:text-red-700"
+                                    >
+                                        Supprimer
+                                    </button>
+                                @endcan
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="px-4 py-6 text-center text-slate-500">Aucun tuteur.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
 
         <div class="border-t border-slate-200 px-4 py-3">
             {{ $guardians->links() }}
