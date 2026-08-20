@@ -10,13 +10,13 @@
 
         @livewireStyles
     </head>
-    <body class="min-h-screen bg-slate-100 antialiased">
+    <body class="min-h-screen bg-stone-100 antialiased">
         <div class="flex min-h-screen flex-col items-center justify-center px-4">
-            <div class="mb-8 text-xl font-semibold text-slate-800">
+            <div class="mb-8 text-xl font-semibold text-stone-800">
                 {{ config('app.name') }}
             </div>
 
-            <div class="w-full max-w-sm rounded-lg bg-white p-8 shadow">
+            <div class="w-full max-w-sm rounded-xl bg-white p-8 shadow">
                 {{ $slot }}
             </div>
         </div>
