@@ -111,3 +111,116 @@ test('rejeter une demande ne provisionne aucun accès', function () {
     expect($link->status)->toBe(GuardianLinkStatus::Rejected)
         ->and($guardian->user->establishments()->count())->toBe(0);
 });
+
+test('approuver ou rejeter affiche un message de confirmation visible', function () {
+    $admin = createUserWithRole($this->establishment, 'directeur');
+    $this->actingAs($admin);
+
+    $guardian = pendingLink($this->establishment, $this->student);
+    $link = $guardian->students()->where('students.id', $this->student->id)->first()->pivot;
+
+    Livewire::test(Index::class)
+        ->call('approve', $link->id)
+        ->assertSet('errorMessage', null)
+        ->assertSee('Demande approuvée');
+
+    $otherGuardian = pendingLink($this->establishment, $this->student, 'pere');
+    $otherLink = $otherGuardian->students()->where('students.id', $this->student->id)->first()->pivot;
+
+    Livewire::test(Index::class)
+        ->call('reject', $otherLink->id)
+        ->assertSee('Demande rejetée');
+});
+
+test('un tuteur sans compte utilisateur ne peut pas être approuvé et affiche une explication', function () {
+    $admin = createUserWithRole($this->establishment, 'directeur');
+    $this->actingAs($admin);
+
+    $guardian = Guardian::factory()->create(['user_id' => null]);
+    $guardian->students()->attach($this->student->id, [
+        'establishment_id' => $this->establishment->id,
+        'status' => GuardianLinkStatus::Pending,
+        'relationship' => 'mere',
+    ]);
+    $link = $guardian->students()->where('students.id', $this->student->id)->first()->pivot;
+
+    Livewire::test(Index::class)
+        ->assertSee('Compte manquant')
+        ->call('approve', $link->id)
+        ->assertSee("n'a pas de compte utilisateur");
+
+    $link->refresh();
+    expect($link->status)->toBe(GuardianLinkStatus::Pending);
+});
+
+test('la vérification signale une correspondance, une non-correspondance et une référence absente', function () {
+    $admin = createUserWithRole($this->establishment, 'directeur');
+    $this->actingAs($admin);
+
+    $matchingStudent = Student::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'mother_name' => 'Aya Kouassi',
+        'mother_phone' => '0700000099',
+    ]);
+    $mismatchStudent = Student::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'mother_name' => 'Fatou Diarra',
+        'mother_phone' => '0711111111',
+    ]);
+    $missingStudent = Student::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'mother_name' => null,
+        'mother_phone' => null,
+    ]);
+
+    $matchingGuardian = Guardian::factory()->create(['first_name' => 'Aya', 'last_name' => 'Kouassi', 'phone' => '0700000099']);
+    $matchingGuardian->students()->attach($matchingStudent->id, [
+        'establishment_id' => $this->establishment->id,
+        'status' => GuardianLinkStatus::Pending,
+        'relationship' => 'mere',
+    ]);
+
+    $mismatchGuardian = Guardian::factory()->create(['first_name' => 'Awa', 'last_name' => 'Traore', 'phone' => '0799999999']);
+    $mismatchGuardian->students()->attach($mismatchStudent->id, [
+        'establishment_id' => $this->establishment->id,
+        'status' => GuardianLinkStatus::Pending,
+        'relationship' => 'mere',
+    ]);
+
+    $missingGuardian = Guardian::factory()->create();
+    $missingGuardian->students()->attach($missingStudent->id, [
+        'establishment_id' => $this->establishment->id,
+        'status' => GuardianLinkStatus::Pending,
+        'relationship' => 'mere',
+    ]);
+
+    $component = Livewire::test(Index::class);
+    $references = $component->viewData('references');
+
+    $matchingLink = $matchingGuardian->students()->where('students.id', $matchingStudent->id)->first()->pivot;
+    $mismatchLink = $mismatchGuardian->students()->where('students.id', $mismatchStudent->id)->first()->pivot;
+    $missingLink = $missingGuardian->students()->where('students.id', $missingStudent->id)->first()->pivot;
+
+    expect($references[$matchingLink->id]['match'])->toBe('match')
+        ->and($references[$mismatchLink->id]['match'])->toBe('mismatch')
+        ->and($references[$missingLink->id]['match'])->toBe('missing');
+
+    $component->assertSee('Correspond')->assertSee('Ne correspond pas')->assertSee('Invérifiable');
+});
+
+test('réexaminer une demande rejetée la remet en attente', function () {
+    $admin = createUserWithRole($this->establishment, 'directeur');
+    $this->actingAs($admin);
+
+    $guardian = pendingLink($this->establishment, $this->student);
+    $link = $guardian->students()->where('students.id', $this->student->id)->first()->pivot;
+    $link->update(['status' => GuardianLinkStatus::Rejected]);
+
+    Livewire::test(Index::class)
+        ->assertSee('Rejetées récemment')
+        ->call('reconsider', $link->id)
+        ->assertSee('remise en attente');
+
+    $link->refresh();
+    expect($link->status)->toBe(GuardianLinkStatus::Pending);
+});
