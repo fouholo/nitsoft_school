@@ -29,6 +29,14 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable, Syncable;
 
     /**
+     * Mot de passe attribué par défaut à tout compte créé par un tiers
+     * (staff, tuteur, admin...) plutôt qu'un mot de passe aléatoire affiché
+     * une seule fois — la personne le change ensuite elle-même depuis son
+     * profil (voir App\Livewire\Account\ChangePassword).
+     */
+    public const DEFAULT_PASSWORD = 'azerty';
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>

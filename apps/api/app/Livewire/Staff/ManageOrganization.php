@@ -108,12 +108,10 @@ class ManageOrganization extends Component
             'staff_establishment_id' => ['required', Rule::in($establishmentIds)],
         ]);
 
-        $password = Str::password(12);
-
         $user = User::create([
             'name' => $data['staff_name'],
             'email' => $data['staff_email'],
-            'password' => $password,
+            'password' => User::DEFAULT_PASSWORD,
         ]);
 
         EstablishmentUserPivot::create([
@@ -123,7 +121,7 @@ class ManageOrganization extends Component
             'is_active' => true,
         ]);
 
-        $this->generatedPassword = $password;
+        $this->generatedPassword = User::DEFAULT_PASSWORD;
         $this->generatedPasswordFor = $user->email;
         $this->reset(['staff_name', 'staff_email', 'staff_establishment_id']);
     }

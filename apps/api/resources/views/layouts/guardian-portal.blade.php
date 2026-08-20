@@ -24,6 +24,10 @@
                         Lier un enfant
                     </a>
 
+                    <a href="{{ route('account.password.edit') }}" wire:navigate class="text-sm text-stone-500 hover:text-stone-900">
+                        Mot de passe
+                    </a>
+
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="text-sm text-stone-500 hover:text-stone-900">

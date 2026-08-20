@@ -69,7 +69,7 @@ test('créer un tuteur sans lien élève affiche une notice explicative plutôt 
     expect(Guardian::where('first_name', 'Awa')->exists())->toBeTrue();
 });
 
-test('le mot de passe temporaire survit à un rechargement de page jusqu’à confirmation, puis disparaît après fermeture', function () {
+test('le compte portail créé reçoit le mot de passe par défaut, affiché jusqu’à fermeture manuelle', function () {
     $establishment = Establishment::factory()->create();
     $directeur = createUserWithRole($establishment, 'directeur');
     actingInEstablishment($establishment);
@@ -82,19 +82,17 @@ test('le mot de passe temporaire survit à un rechargement de page jusqu’à co
         'status' => GuardianLinkStatus::Approved,
     ]);
 
-    Livewire::test(Index::class)
+    $component = Livewire::test(Index::class)
         ->call('edit', $guardian->id)
         ->set('createPortalAccount', true)
         ->call('save')
-        ->assertHasNoErrors();
-
-    // Nouvelle instance du composant : simule un rechargement de page — le
-    // mot de passe doit rester visible tant qu'il n'a pas été confirmé.
-    Livewire::test(Index::class)
+        ->assertHasNoErrors()
         ->assertSet('generatedPasswordFor', 'parent@example.test')
-        ->set('passwordAcknowledged', true)
-        ->call('dismissGeneratedPassword')
-        ->assertSet('generatedPassword', null);
+        ->assertSet('generatedPassword', \App\Models\User::DEFAULT_PASSWORD);
 
-    Livewire::test(Index::class)->assertSet('generatedPassword', null);
+    $guardian->refresh();
+    $user = \App\Models\User::findOrFail($guardian->user_id);
+    expect(\Illuminate\Support\Facades\Hash::check(\App\Models\User::DEFAULT_PASSWORD, $user->password))->toBeTrue();
+
+    $component->call('dismissGeneratedPassword')->assertSet('generatedPassword', null);
 });

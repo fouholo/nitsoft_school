@@ -25,6 +25,7 @@
                     'chat' => '<path d="M4 5h16v11H8l-4 4z" />',
                     'logout' => '<path d="M9 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3" /><path d="m16 17 5-5-5-5" /><path d="M21 12H9" />',
                     'building' => '<rect x="4" y="3" width="16" height="18" rx="1" /><path d="M8 7h2M14 7h2M8 11h2M14 11h2M8 15h2M14 15h2" />',
+                    'lock' => '<rect x="5" y="10" width="14" height="10" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" />',
                     default => '',
                 };
             };
@@ -201,6 +202,11 @@
                             <p class="truncate text-sm font-medium text-stone-900" title="{{ auth()->user()->name }}">{{ auth()->user()->name }}</p>
                             <p class="truncate text-xs text-stone-500">{{ auth()->user()->currentRoleLabel() }}</p>
                         </div>
+                        <a href="{{ route('account.password.edit') }}" wire:navigate title="Mot de passe" aria-label="Mot de passe" class="rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                                {!! $icon('lock') !!}
+                            </svg>
+                        </a>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit" title="Déconnexion" aria-label="Déconnexion" class="rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700">

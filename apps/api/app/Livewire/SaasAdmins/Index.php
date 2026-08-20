@@ -8,7 +8,6 @@ use App\Domain\Establishments\Enums\SaasAdminType;
 use App\Domain\Establishments\Models\SaasAdmin;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -42,12 +41,10 @@ class Index extends Component
             'admin_email' => ['required', 'email', 'max:255', 'unique:users,email'],
         ]);
 
-        $password = Str::password(12);
-
         $user = User::create([
             'name' => $data['admin_name'],
             'email' => $data['admin_email'],
-            'password' => $password,
+            'password' => User::DEFAULT_PASSWORD,
         ]);
 
         SaasAdmin::create([
@@ -56,7 +53,7 @@ class Index extends Component
             'is_active' => true,
         ]);
 
-        $this->generatedPassword = $password;
+        $this->generatedPassword = User::DEFAULT_PASSWORD;
         $this->generatedPasswordFor = $user->email;
         $this->reset(['admin_name', 'admin_email']);
     }

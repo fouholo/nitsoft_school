@@ -30,7 +30,7 @@
     @if ($generatedPassword)
         <div class="mt-4 rounded-lg border border-amber-200 bg-amber-100 px-4 py-3 text-sm text-amber-900" role="alert" aria-live="assertive">
             <p class="font-semibold">Compte portail créé pour {{ $generatedPasswordFor }}</p>
-            <p class="mt-1">Mot de passe temporaire à communiquer au tuteur — il ne sera plus jamais affiché :</p>
+            <p class="mt-1">Mot de passe par défaut à communiquer au tuteur — invitez-le à le changer dès sa première connexion (menu de son profil) :</p>
             <div class="mt-2 flex flex-wrap items-center gap-2">
                 <code class="rounded bg-amber-200 px-2 py-1 font-mono text-base">{{ $generatedPassword }}</code>
                 <button
@@ -42,15 +42,9 @@
                     Copier
                 </button>
             </div>
-            <label class="mt-3 flex min-h-11 items-center gap-2">
-                <input type="checkbox" wire:model="passwordAcknowledged" class="rounded border-amber-300">
-                J'ai noté ce mot de passe
-            </label>
-            @if ($passwordAcknowledged)
-                <button type="button" wire:click="dismissGeneratedPassword" class="mt-1 inline-flex min-h-11 items-center text-sm font-medium text-amber-800 underline">
-                    Fermer
-                </button>
-            @endif
+            <button type="button" wire:click="dismissGeneratedPassword" class="mt-3 inline-flex min-h-11 items-center text-sm font-medium text-amber-800 underline">
+                Fermer
+            </button>
         </div>
     @endif
 

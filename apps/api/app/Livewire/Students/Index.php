@@ -13,7 +13,6 @@ use App\Domain\Establishments\Models\Establishment;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -91,15 +90,13 @@ class Index extends Component
     public string $tutorEmail = '';
 
     /**
-     * Comptes portail créés lors du dernier enregistrement — affichés une
-     * fois pour que l'administrateur puisse copier les mots de passe
-     * générés avant qu'ils ne disparaissent.
+     * Comptes portail créés lors du dernier enregistrement — affichés pour
+     * que l'administrateur communique le mot de passe par défaut aux
+     * parents concernés.
      *
      * @var list<array{name: string, email: string, password: string}>
      */
     public array $generatedAccounts = [];
-
-    public bool $passwordsAcknowledged = false;
 
     public string $birth_place = '';
 
@@ -120,10 +117,6 @@ class Index extends Component
     public function mount(): void
     {
         $this->authorize('viewAny', Student::class);
-
-        if ($stored = session('student_guardian_generated_accounts')) {
-            $this->generatedAccounts = $stored;
-        }
     }
 
     public function updatingSearch(): void
@@ -247,8 +240,6 @@ class Index extends Component
 
         if ($accounts !== []) {
             $this->generatedAccounts = $accounts;
-            $this->passwordsAcknowledged = false;
-            session(['student_guardian_generated_accounts' => $accounts]);
         }
 
         $this->resetForm();
@@ -289,19 +280,18 @@ class Index extends Component
         }
 
         if (! $guardian->user_id) {
-            $password = Str::password(12);
             $fullName = trim("{$guardian->first_name} {$guardian->last_name}");
 
             $user = User::create([
                 'name' => $fullName,
                 'email' => $guardian->email,
                 'phone' => $guardian->phone,
-                'password' => $password,
+                'password' => User::DEFAULT_PASSWORD,
             ]);
 
             $guardian->update(['user_id' => $user->id]);
 
-            $generated = ['name' => $fullName, 'email' => $guardian->email, 'password' => $password];
+            $generated = ['name' => $fullName, 'email' => $guardian->email, 'password' => User::DEFAULT_PASSWORD];
         }
 
         /** @var Establishment $establishment */
@@ -330,9 +320,6 @@ class Index extends Component
     public function dismissGeneratedAccounts(): void
     {
         $this->generatedAccounts = [];
-        $this->passwordsAcknowledged = false;
-
-        session()->forget('student_guardian_generated_accounts');
     }
 
     public function delete(int $studentId): void

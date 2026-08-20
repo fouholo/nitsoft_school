@@ -8,7 +8,6 @@ use App\Domain\Enrollment\Enums\GuardianLinkStatus;
 use App\Domain\Enrollment\Models\Guardian;
 use App\Domain\Establishments\Models\Establishment;
 use App\Models\User;
-use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -40,18 +39,11 @@ class Index extends Component
 
     public ?string $generatedPasswordFor = null;
 
-    public bool $passwordAcknowledged = false;
-
     public ?string $unlinkedGuardianNotice = null;
 
     public function mount(): void
     {
         $this->authorize('viewAny', Guardian::class);
-
-        if ($stored = session('guardian_generated_password')) {
-            $this->generatedPassword = $stored['password'];
-            $this->generatedPasswordFor = $stored['email'];
-        }
     }
 
     public function updatingSearch(): void
@@ -137,13 +129,11 @@ class Index extends Component
             return;
         }
 
-        $password = Str::password(12);
-
         $user = User::create([
             'name' => trim("{$guardian->first_name} {$guardian->last_name}"),
             'email' => $guardian->email,
             'phone' => $guardian->phone,
-            'password' => $password,
+            'password' => User::DEFAULT_PASSWORD,
         ]);
 
         /** @var Establishment $establishment */
@@ -152,23 +142,14 @@ class Index extends Component
 
         $guardian->update(['user_id' => $user->id]);
 
-        $this->passwordAcknowledged = false;
-        $this->generatedPassword = $password;
+        $this->generatedPassword = User::DEFAULT_PASSWORD;
         $this->generatedPasswordFor = $guardian->email;
-
-        session(['guardian_generated_password' => [
-            'password' => $password,
-            'email' => $guardian->email,
-        ]]);
     }
 
     public function dismissGeneratedPassword(): void
     {
         $this->generatedPassword = null;
         $this->generatedPasswordFor = null;
-        $this->passwordAcknowledged = false;
-
-        session()->forget('guardian_generated_password');
     }
 
     public function delete(int $guardianId): void

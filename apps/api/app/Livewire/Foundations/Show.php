@@ -9,7 +9,6 @@ use App\Domain\Establishments\Models\EstablishmentUserPivot;
 use App\Domain\Establishments\Models\Foundation;
 use App\Domain\Establishments\Models\FoundationUserPivot;
 use App\Models\User;
-use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -83,15 +82,13 @@ class Show extends Component
         $user = User::where('email', $data['founder_email'])->first();
 
         if ($user === null) {
-            $password = Str::password(12);
-
             $user = User::create([
                 'name' => $data['founder_name'],
                 'email' => $data['founder_email'],
-                'password' => $password,
+                'password' => User::DEFAULT_PASSWORD,
             ]);
 
-            $this->generatedPassword = $password;
+            $this->generatedPassword = User::DEFAULT_PASSWORD;
             $this->generatedPasswordFor = $user->email;
         }
 

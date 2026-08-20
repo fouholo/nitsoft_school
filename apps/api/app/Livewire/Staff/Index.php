@@ -10,7 +10,6 @@ use App\Domain\Establishments\Models\EstablishmentUserPivot;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -52,13 +51,11 @@ class Index extends Component
             'staff_role' => ['required', Rule::in(['gestionnaire', 'enseignant', 'caissier', 'educateur'])],
         ]);
 
-        $password = Str::password(12);
-
-        $user = DB::transaction(function () use ($data, $password): User {
+        $user = DB::transaction(function () use ($data): User {
             $user = User::create([
                 'name' => $data['staff_name'],
                 'email' => $data['staff_email'],
-                'password' => $password,
+                'password' => User::DEFAULT_PASSWORD,
             ]);
 
             EstablishmentUserPivot::create([
@@ -79,7 +76,7 @@ class Index extends Component
             return $user;
         });
 
-        $this->generatedPassword = $password;
+        $this->generatedPassword = User::DEFAULT_PASSWORD;
         $this->generatedPasswordFor = $user->email;
         $this->reset(['staff_name', 'staff_email']);
     }

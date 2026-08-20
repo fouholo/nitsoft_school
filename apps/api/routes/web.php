@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Auth\LogoutController;
+use App\Livewire\Account\ChangePassword;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Dashboard;
@@ -37,6 +38,7 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/logout', LogoutController::class)->name('logout');
 
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
+    Route::get('/mon-compte/mot-de-passe', ChangePassword::class)->name('account.password.edit');
 
     require __DIR__.'/academics.php';
     require __DIR__.'/enrollment.php';

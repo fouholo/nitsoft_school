@@ -12,7 +12,7 @@
     @if (! empty($generatedAccounts))
         <div class="mt-4 rounded-lg border border-amber-200 bg-amber-100 px-4 py-3 text-sm text-amber-900" role="alert" aria-live="assertive">
             <p class="font-semibold">{{ count($generatedAccounts) > 1 ? 'Comptes portail créés' : 'Compte portail créé' }}</p>
-            <p class="mt-1">Mots de passe temporaires à communiquer aux parents — ils ne seront plus jamais affichés :</p>
+            <p class="mt-1">Mot de passe par défaut à communiquer aux parents — invitez-les à le changer dès leur première connexion (menu de leur profil) :</p>
 
             <ul class="mt-2 space-y-2">
                 @foreach ($generatedAccounts as $account)
@@ -32,15 +32,9 @@
                 @endforeach
             </ul>
 
-            <label class="mt-3 flex min-h-11 items-center gap-2">
-                <input type="checkbox" wire:model="passwordsAcknowledged" class="rounded border-amber-300">
-                J'ai noté {{ count($generatedAccounts) > 1 ? 'ces mots de passe' : 'ce mot de passe' }}
-            </label>
-            @if ($passwordsAcknowledged)
-                <button type="button" wire:click="dismissGeneratedAccounts" class="mt-1 inline-flex min-h-11 items-center text-sm font-medium text-amber-800 underline">
-                    Fermer
-                </button>
-            @endif
+            <button type="button" wire:click="dismissGeneratedAccounts" class="mt-3 inline-flex min-h-11 items-center text-sm font-medium text-amber-800 underline">
+                Fermer
+            </button>
         </div>
     @endif
 

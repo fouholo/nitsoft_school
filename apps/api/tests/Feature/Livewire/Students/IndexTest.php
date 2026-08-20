@@ -10,6 +10,7 @@ use App\Domain\Establishments\Models\Establishment;
 use App\Livewire\Students\Index;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
@@ -276,7 +277,8 @@ test('créer un élève avec un compte parent lié crée le tuteur, son compte p
 
     $user = User::findOrFail($guardian->user_id);
     expect($user->email)->toBe('koffi.traore@example.test')
-        ->and($user->establishments()->wherePivot('role', 'parent')->count())->toBe(1);
+        ->and($user->establishments()->wherePivot('role', 'parent')->count())->toBe(1)
+        ->and(Hash::check(User::DEFAULT_PASSWORD, $user->password))->toBeTrue();
 
     $pivot = $student->guardians()->sole()->pivot;
     expect($pivot->relationship->value)->toBe('pere')

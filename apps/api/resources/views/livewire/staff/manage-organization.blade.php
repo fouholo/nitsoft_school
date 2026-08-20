@@ -16,8 +16,8 @@
     @else
         @if ($generatedPassword)
             <div class="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-                Compte créé pour <span class="font-medium">{{ $generatedPasswordFor }}</span>. Mot de passe temporaire (affiché une seule fois) :
-                <span class="font-mono font-semibold">{{ $generatedPassword }}</span>
+                Compte créé pour <span class="font-medium">{{ $generatedPasswordFor }}</span> avec le mot de passe par défaut :
+                <span class="font-mono font-semibold">{{ $generatedPassword }}</span> — invitez la personne à le changer dès sa première connexion (menu de son profil).
             </div>
         @endif
 
