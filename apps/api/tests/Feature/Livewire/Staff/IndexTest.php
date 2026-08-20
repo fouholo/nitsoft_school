@@ -52,6 +52,40 @@ test('un LOCAL_ADMIN qui crée un caissier ne crée aucune fiche Teacher', funct
     expect(Teacher::where('user_id', $user->id)->exists())->toBeFalse();
 });
 
+test('un LOCAL_ADMIN peut créer un gestionnaire', function () {
+    $establishment = Establishment::factory()->create();
+    $localAdmin = createLocalAdmin($establishment);
+    test()->actingAs($localAdmin);
+
+    Livewire::test(Index::class, ['establishment' => $establishment])
+        ->set('staff_name', 'Gestionnaire Test')
+        ->set('staff_email', 'gestionnaire.test@nitsoft.test')
+        ->set('staff_role', 'gestionnaire')
+        ->call('create')
+        ->assertHasNoErrors();
+
+    $user = User::where('email', 'gestionnaire.test@nitsoft.test')->sole();
+    $pivot = EstablishmentUserPivot::where('establishment_id', $establishment->id)->where('user_id', $user->id)->sole();
+
+    expect($pivot->role)->toBe('gestionnaire')
+        ->and(Teacher::where('user_id', $user->id)->exists())->toBeFalse();
+});
+
+test('un LOCAL_ADMIN ne peut pas créer un directeur depuis cet écran', function () {
+    $establishment = Establishment::factory()->create();
+    $localAdmin = createLocalAdmin($establishment);
+    test()->actingAs($localAdmin);
+
+    Livewire::test(Index::class, ['establishment' => $establishment])
+        ->set('staff_name', 'Directeur Test')
+        ->set('staff_email', 'directeur.test@nitsoft.test')
+        ->set('staff_role', 'directeur')
+        ->call('create')
+        ->assertHasErrors(['staff_role']);
+
+    expect(User::where('email', 'directeur.test@nitsoft.test')->exists())->toBeFalse();
+});
+
 test('un LOCAL_ADMIN peut activer et désactiver un compte', function () {
     $establishment = Establishment::factory()->create();
     $localAdmin = createLocalAdmin($establishment);
