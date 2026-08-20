@@ -179,7 +179,7 @@ Le système est **plat par défaut** : aucune ombre sur les cartes, tableaux ou 
 
 ## Shapes
 
-Les coins sont ouverts et accueillants, sans devenir enfantins : `rounded-lg` (8px) domine très largement pour boutons, champs, cartes de liste et conteneurs de formulaire — un cran plus ouvert que le `rounded-md` (6px) d'origine, qui sert désormais de repli mineur plutôt que de défaut. `rounded-xl` (12px) est réservé aux éléments de navigation interactifs (liens de sidebar, monogramme de marque, menu déroulant). `rounded-2xl` (16px) marque les cartes du tableau de bord (statistiques, accès rapides) — un cran plus doux pour les distinguer des écrans de gestion CRUD. `rounded-full` habille systématiquement badges de statut et avatars.
+Les coins sont ouverts et accueillants, sans devenir enfantins : `rounded-lg` (8px) domine très largement pour boutons, champs, cartes de liste, conteneurs de formulaire et liens de sidebar — un cran plus ouvert que le `rounded-md` (6px) d'origine, qui sert désormais de repli mineur plutôt que de défaut. `rounded-xl` (12px) marque les éléments de chrome (monogramme de marque, menu déroulant du sélecteur d'établissement). `rounded-2xl` (16px) marque les cartes du tableau de bord (statistiques, accès rapides) — un cran plus doux pour les distinguer des écrans de gestion CRUD. `rounded-full` habille systématiquement badges de statut et avatars.
 
 ### Named Rules
 **La règle du Cran Supplémentaire.** Le tableau de bord (`rounded-2xl`) est visuellement un cran plus doux que les écrans de gestion (`rounded-lg`) — cette différence marque intentionnellement la bascule entre « vue d'ensemble » et « outil de travail ».
@@ -211,7 +211,8 @@ Les coins sont ouverts et accueillants, sans devenir enfantins : `rounded-lg` (8
 - **Error:** message `text-sm text-red-600` sous le champ.
 
 ### Navigation
-- **Sidebar (écran interne) :** liens `text-sm font-medium`, gris pierre corps au repos, hover fond gris pierre fond-alt ; état actif = fond terracotta institutionnel teinte + texte terracotta institutionnel, coins `rounded-xl`. Groupes de section précédés d'une icône et d'un libellé `text-xs uppercase tracking-wide` gris pierre passif.
+- **Sidebar (écran interne) :** liens `text-sm font-medium`, gris pierre corps au repos, hover fond gris pierre fond-alt ; état actif = fond terracotta institutionnel doux (`orange-100`) + texte terracotta institutionnel + `font-semibold`, coins `rounded-lg` (aligné sur le rayon par défaut des écrans de gestion, plus resserré que le `rounded-xl` du monogramme/menu déroulant). Groupes de section précédés d'une icône et d'un libellé `text-xs uppercase tracking-wide` gris pierre passif.
+- **Groupes repliables :** chaque groupe de section est un `<details>`/`<summary>` natif (pas de JS) — replié par défaut, déplié automatiquement quand la route courante appartient au groupe (calculé côté serveur via le pattern `active` du groupe), avec un chevron `group-open:rotate-90`. Réduit la densité par défaut (≈10 lignes visibles au lieu de ≈24) tout en gardant la section courante repérable sans clic.
 - **Icônes :** trait fin (`stroke-width: 1.6`), tracé inline SVG fait main (pas de bibliothèque d'icônes chargée), toujours 20×20 (liens) ou 16×16 (en-têtes de groupe).
 - **Barre du portail parents :** navigation horizontale simple, pas d'icônes, liens texte `text-sm`.
 

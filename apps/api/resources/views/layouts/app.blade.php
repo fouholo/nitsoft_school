@@ -138,7 +138,7 @@
                                 href="{{ route($item['route'], $item['params'] ?? []) }}"
                                 wire:navigate
                                 @click="sidebarOpen = false"
-                                class="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium {{ $isActive ? 'bg-orange-50 text-orange-800' : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900' }}"
+                                class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium {{ $isActive ? 'bg-orange-100 font-semibold text-orange-800' : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900' }}"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 shrink-0">
                                     {!! $icon($item['icon']) !!}
@@ -146,27 +146,31 @@
                                 {{ $item['label'] }}
                             </a>
                         @else
-                            <div class="pt-4 first:pt-0">
-                                <div class="flex items-center gap-2 px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-stone-500">
+                            @php $groupActive = request()->routeIs($item['active']); @endphp
+                            <details {{ $groupActive ? 'open' : '' }} class="group pt-3 first:pt-0">
+                                <summary class="flex cursor-pointer list-none items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wide text-stone-500 hover:bg-stone-100 hover:text-stone-700 [&::-webkit-details-marker]:hidden">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 shrink-0">
                                         {!! $icon($item['icon']) !!}
                                     </svg>
-                                    {{ $item['label'] }}
-                                </div>
-                                <div class="space-y-1">
+                                    <span class="flex-1">{{ $item['label'] }}</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5 shrink-0 text-stone-400 transition-transform duration-150 group-open:rotate-90">
+                                        <path d="m9 6 6 6-6 6" />
+                                    </svg>
+                                </summary>
+                                <div class="mt-1 space-y-1 pb-1">
                                     @foreach ($item['children'] as $child)
                                         @php $childActive = request()->routeIs($child['route']); @endphp
                                         <a
                                             href="{{ route($child['route']) }}"
                                             wire:navigate
                                             @click="sidebarOpen = false"
-                                            class="block rounded-xl py-1.5 pl-10 pr-3 text-sm {{ $childActive ? 'bg-orange-50 font-medium text-orange-800' : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900' }}"
+                                            class="block rounded-lg py-1.5 pl-10 pr-3 text-sm {{ $childActive ? 'bg-orange-100 font-semibold text-orange-800' : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900' }}"
                                         >
                                             {{ $child['label'] }}
                                         </a>
                                     @endforeach
                                 </div>
-                            </div>
+                            </details>
                         @endif
                     @endforeach
                 </nav>
