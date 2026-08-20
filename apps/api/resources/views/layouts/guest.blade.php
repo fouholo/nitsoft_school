@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
         <title>{{ $title ?? config('app.name') }}</title>
+        <link rel="icon" type="image/png" href="{{ asset('branding/nitsoft-school-logo.png') }}">
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -12,8 +13,9 @@
     </head>
     <body class="min-h-screen bg-stone-100 antialiased">
         <div class="flex min-h-screen flex-col items-center justify-center px-4">
-            <div class="mb-8 text-xl font-semibold text-stone-800">
-                {{ config('app.name') }}
+            <div class="mb-8 flex flex-col items-center gap-2">
+                <img src="{{ asset('branding/nitsoft-school-logo.png') }}" alt="{{ config('app.name') }}" class="h-16 w-16 object-contain">
+                <div class="text-xl font-semibold text-stone-800">{{ config('app.name') }}</div>
             </div>
 
             <div class="w-full max-w-sm rounded-xl bg-white p-8 shadow">

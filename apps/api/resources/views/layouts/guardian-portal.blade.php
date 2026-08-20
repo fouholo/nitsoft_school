@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
         <title>{{ $title ?? config('app.name') }}</title>
+        <link rel="icon" type="image/png" href="{{ asset('branding/nitsoft-school-logo.png') }}">
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -13,7 +14,8 @@
     <body class="min-h-screen bg-stone-50 antialiased">
         <nav class="border-b border-stone-200 bg-white">
             <div class="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
-                <a href="{{ route('guardian-portal.dashboard') }}" class="text-sm font-semibold text-stone-900">
+                <a href="{{ route('guardian-portal.dashboard') }}" class="flex items-center gap-2 text-sm font-semibold text-stone-900">
+                    <img src="{{ asset('branding/nitsoft-school-logo.png') }}" alt="" class="h-7 w-7 object-contain">
                     {{ config('app.name') }}<span class="hidden sm:inline"> — Espace parents</span>
                 </a>
 

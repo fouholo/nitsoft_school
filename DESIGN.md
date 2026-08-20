@@ -108,7 +108,9 @@ components:
 
 Nitsoft School emprunte le langage visuel du bureau d'un chef d'établissement sérieux mais accessible : des documents propres, une hiérarchie claire, une seule couleur d'accent utilisée avec parcimonie pour signaler l'action, et un fond largement neutre qui laisse la donnée — élèves, notes, factures — occuper l'écran. L'identité a délibérément quitté le registre froid d'un accent bleu-indigo et de gris ardoise bleutés : l'accent est aujourd'hui un terracotta chaud et les neutres sont des gris pierre, pour qu'un directeur, un caissier ou un parent qui s'y connecte pour la première fois ressente un outil humain plutôt qu'un back-office générique — sans jamais verser dans l'exubérance ou le ludique.
 
-Le système est aujourd'hui entièrement porté par la palette par défaut de Tailwind CSS v4 (aucune personnalisation de couleur dans `@theme`, seulement des classes `orange-*` et `stone-*` du référentiel standard) — seule la police (Instrument Sans) a été substituée à la pile système par défaut. Il n'y a pas de logo dessiné : la marque sidebar est aujourd'hui un simple monogramme « N » sur fond terracotta institutionnel, à traiter comme un placeholder plutôt que comme un choix d'identité définitif.
+Le système est aujourd'hui entièrement porté par la palette par défaut de Tailwind CSS v4 (aucune personnalisation de couleur dans `@theme`, seulement des classes `orange-*` et `stone-*` du référentiel standard) — seule la police (Instrument Sans) a été substituée à la pile système par défaut.
+
+Un logo dessiné existe désormais (`public/branding/nitsoft-school-logo.png` — capuchon de diplômé et ruban en « N », orange/bleu marine/vert) et remplace le monogramme « N » en sidebar, connexion/inscription, portail parents et favicon. Ses couleurs sont propres à la marque et n'entraînent pas de changement de l'accent UI (toujours terracotta institutionnel) : une marque peut porter sa propre palette sans dicter celle de l'interface qui l'entoure — pratique volontaire, pas un oubli.
 
 **Key Characteristics:**
 - Une seule couleur d'accent (terracotta institutionnel), jamais en fond de page, réservée à l'action et à l'état actif.
