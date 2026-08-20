@@ -55,6 +55,25 @@ test('le matricule doit être unique au sein d’un même établissement', funct
         ->assertHasErrors('student_number');
 });
 
+test('un élève peut être créé sans matricule, plusieurs élèves peuvent en manquer un', function () {
+    Livewire::test(Index::class)
+        ->call('create')
+        ->set('first_name', 'Awa')
+        ->set('last_name', 'Traoré')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    Livewire::test(Index::class)
+        ->call('create')
+        ->set('first_name', 'Yao')
+        ->set('last_name', 'Koné')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect(Student::count())->toBe(2)
+        ->and(Student::pluck('student_number')->filter()->isEmpty())->toBeTrue();
+});
+
 test('les contacts familiaux de référence sont enregistrés et normalisés', function () {
     Livewire::test(Index::class)
         ->call('create')
@@ -171,7 +190,8 @@ test('avancer à l’étape 2 sans les champs obligatoires de l’étape 1 écho
         ->call('create')
         ->assertSet('currentStep', 1)
         ->call('nextStep')
-        ->assertHasErrors(['last_name', 'first_name', 'student_number'])
+        ->assertHasErrors(['last_name', 'first_name'])
+        ->assertHasNoErrors('student_number')
         ->assertSet('currentStep', 1)
         ->assertSee('Le champ nom est obligatoire');
 });

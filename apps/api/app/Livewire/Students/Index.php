@@ -195,7 +195,7 @@ class Index extends Component
         $data['birth_date'] = $data['birth_date'] !== '' ? $data['birth_date'] : null;
         $data['gender'] = $data['gender'] !== '' ? $data['gender'] : null;
         $data['birth_certificate_date'] = $data['birth_certificate_date'] !== '' ? $data['birth_certificate_date'] : null;
-        foreach (['father_name', 'father_phone', 'mother_name', 'mother_phone', 'tutor_name', 'tutor_phone', 'birth_place', 'nationalite_code', 'birth_certificate_number', 'birth_certificate_place', 'residence'] as $field) {
+        foreach (['student_number', 'father_name', 'father_phone', 'mother_name', 'mother_phone', 'tutor_name', 'tutor_phone', 'birth_place', 'nationalite_code', 'birth_certificate_number', 'birth_certificate_place', 'residence'] as $field) {
             $data[$field] = $data[$field] !== '' ? $data[$field] : null;
         }
 
@@ -367,7 +367,7 @@ class Index extends Component
             'birth_date' => ['nullable', 'date'],
             'birth_place' => ['nullable', 'string', 'max:255'],
             'gender' => ['nullable', 'string', 'in:m,f'],
-            'student_number' => ['required', 'string', 'max:255', $uniqueStudentNumber],
+            'student_number' => ['nullable', 'string', 'max:255', $uniqueStudentNumber],
             'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:100'],
             'nationalite_code' => ['nullable', 'string', 'exists:nationalites,code'],
             'birth_certificate_number' => ['nullable', 'string', 'max:255'],

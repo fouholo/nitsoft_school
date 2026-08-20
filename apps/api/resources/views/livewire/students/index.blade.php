@@ -91,7 +91,7 @@
                         </div>
 
                         <div>
-                            <label for="student_number" class="block text-sm font-medium text-stone-700">Matricule <span class="text-red-600">*</span></label>
+                            <label for="student_number" class="block text-sm font-medium text-stone-700">Matricule</label>
                             <input id="student_number" type="text" wire:model="student_number" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                             @error('student_number') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                         </div>
