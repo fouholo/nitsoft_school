@@ -71,6 +71,7 @@
                     ['label' => 'Périodes', 'route' => 'arabic.terms.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicTerm::class],
                     ['label' => 'Affectations enseignants', 'route' => 'arabic.teacher-assignments.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicTeacherAssignment::class],
                     ['label' => 'Grilles de notes', 'route' => 'arabic.grade-sheets.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicGradeSheet::class],
+                    ['label' => 'Bulletins', 'route' => 'arabic.report-cards.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicReportCard::class],
                 ]],
             ];
 

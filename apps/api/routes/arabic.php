@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Arabic\ArabicReportCardPdfController;
 use App\Livewire\Arabic\GradeSheets\Enter as ArabicGradeSheetsEnter;
 use App\Livewire\Arabic\GradeSheets\Index as ArabicGradeSheetsIndex;
 use App\Livewire\Arabic\Levels\Index as ArabicLevelsIndex;
+use App\Livewire\Arabic\ReportCards\Index as ArabicReportCardsIndex;
 use App\Livewire\Arabic\Series\Index as ArabicSeriesIndex;
 use App\Livewire\Arabic\SubjectCoefficients\Index as ArabicSubjectCoefficientsIndex;
 use App\Livewire\Arabic\Subjects\Index as ArabicSubjectsIndex;
@@ -21,4 +23,6 @@ Route::prefix('arabic')->name('arabic.')->group(function (): void {
     Route::get('/teacher-assignments', ArabicTeacherAssignmentsIndex::class)->name('teacher-assignments.index');
     Route::get('/grade-sheets', ArabicGradeSheetsIndex::class)->name('grade-sheets.index');
     Route::get('/grade-sheets/{gradeSheet}/enter', ArabicGradeSheetsEnter::class)->name('grade-sheets.enter');
+    Route::get('/report-cards', ArabicReportCardsIndex::class)->name('report-cards.index');
+    Route::get('/report-cards/{arabicReportCard}/pdf', ArabicReportCardPdfController::class)->name('report-cards.pdf');
 });

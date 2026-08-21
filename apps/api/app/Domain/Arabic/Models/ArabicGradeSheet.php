@@ -65,6 +65,9 @@ class ArabicGradeSheet extends Model
         return $this->belongsTo(ArabicSerie::class);
     }
 
+    /**
+     * @return BelongsTo<ArabicSubject, $this>
+     */
     public function arabicSubject(): BelongsTo
     {
         return $this->belongsTo(ArabicSubject::class);
