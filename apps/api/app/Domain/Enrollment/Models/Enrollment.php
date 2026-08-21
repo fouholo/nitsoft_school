@@ -12,6 +12,7 @@ use App\Domain\Billing\Models\Installment;
 use App\Domain\Billing\Models\Payment;
 use App\Domain\Establishments\Concerns\TenantScoped;
 use App\Domain\Sync\Concerns\Syncable;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -77,6 +78,9 @@ class Enrollment extends Model
         return '230';
     }
 
+    /**
+     * @return BelongsTo<Student, $this>
+     */
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);
@@ -145,7 +149,7 @@ class Enrollment extends Model
      * installment_N_amount avec les Installment (échéance) configurés pour
      * l'année scolaire de l'inscription.
      *
-     * @return Collection<int, array{position: int<0, max>, amount: float, due_date: \Carbon\Carbon}>
+     * @return Collection<int, array{position: int<0, max>, amount: float, due_date: Carbon}>
      */
     public function tuitionInstallments(): Collection
     {
@@ -173,7 +177,7 @@ class Enrollment extends Model
     }
 
     /**
-     * @return Collection<int, array{position: int<0, max>, amount: float, due_date: \Carbon\Carbon}>
+     * @return Collection<int, array{position: int<0, max>, amount: float, due_date: Carbon}>
      */
     public function tuitionInstallmentsDue(): Collection
     {
@@ -190,7 +194,7 @@ class Enrollment extends Model
      *   passée ou à venir.
      * - `late`/`due` : pas couverte du tout, échéance passée ou à venir.
      *
-     * @return Collection<int, array{position: int, amount: float, due_date: \Carbon\Carbon, status: string, paid: float}>
+     * @return Collection<int, array{position: int, amount: float, due_date: Carbon, status: string, paid: float}>
      */
     public function tuitionInstallmentsWithStatus(): Collection
     {

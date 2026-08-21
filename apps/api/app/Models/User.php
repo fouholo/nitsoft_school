@@ -6,6 +6,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Domain\Academics\Models\TeacherAssignment;
+use App\Domain\Arabic\Models\ArabicTeacherAssignment;
 use App\Domain\Enrollment\Models\Guardian;
 use App\Domain\Establishments\Enums\SaasAdminType;
 use App\Domain\Establishments\Models\Establishment;
@@ -321,6 +322,21 @@ class User extends Authenticatable
             ->where('user_id', $this->id)
             ->where('classroom_id', $classroomId)
             ->when($subjectId !== null, fn ($query) => $query->where('subject_id', $subjectId))
+            ->exists();
+    }
+
+    /**
+     * Équivalent de isAssignedToClassroom() pour la filière arabe : le
+     * groupement se fait par niveau/série arabe, pas par classe française
+     * (voir ArabicTeacherAssignment).
+     */
+    public function isAssignedToArabicGroup(int $arabicLevelId, ?int $arabicSerieId, ?int $arabicSubjectId = null): bool
+    {
+        return ArabicTeacherAssignment::query()
+            ->where('user_id', $this->id)
+            ->where('arabic_level_id', $arabicLevelId)
+            ->where('arabic_serie_id', $arabicSerieId)
+            ->when($arabicSubjectId !== null, fn ($query) => $query->where('arabic_subject_id', $arabicSubjectId))
             ->exists();
     }
 

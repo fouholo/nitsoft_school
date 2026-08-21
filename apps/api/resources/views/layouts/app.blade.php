@@ -66,8 +66,11 @@
                 // besoin de condition PHP supplémentaire ici, le filtrage
                 // par ability ci-dessous suffit à vider (et donc masquer) le
                 // groupe.
-                ['type' => 'group', 'label' => 'Arabe', 'icon' => 'book', 'active' => 'arabic.subject-coefficients.*', 'children' => [
+                ['type' => 'group', 'label' => 'Arabe', 'icon' => 'book', 'active' => 'arabic.*', 'children' => [
                     ['label' => 'Coefficients par matière', 'route' => 'arabic.subject-coefficients.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicSubjectCoefficient::class],
+                    ['label' => 'Périodes', 'route' => 'arabic.terms.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicTerm::class],
+                    ['label' => 'Affectations enseignants', 'route' => 'arabic.teacher-assignments.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicTeacherAssignment::class],
+                    ['label' => 'Grilles de notes', 'route' => 'arabic.grade-sheets.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicGradeSheet::class],
                 ]],
             ];
 
