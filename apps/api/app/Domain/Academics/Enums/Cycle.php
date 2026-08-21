@@ -13,9 +13,9 @@ enum Cycle: string
     public function label(): string
     {
         return match ($this) {
-            self::Prescolaire => 'Préscolaire',
-            self::Primaire => 'Primaire',
-            self::Secondaire => 'Secondaire',
+            self::Prescolaire => __('Préscolaire'),
+            self::Primaire => __('Primaire'),
+            self::Secondaire => __('Secondaire'),
         };
     }
 

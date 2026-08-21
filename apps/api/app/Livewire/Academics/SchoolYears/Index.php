@@ -6,11 +6,9 @@ namespace App\Livewire\Academics\SchoolYears;
 
 use App\Domain\Academics\Models\SchoolYear;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Années scolaires')]
 class Index extends Component
 {
     public bool $showForm = false;
@@ -104,6 +102,6 @@ class Index extends Component
     {
         return view('livewire.academics.school-years.index', [
             'schoolYears' => SchoolYear::orderByDesc('starts_on')->get(),
-        ]);
+        ])->title(__('Années scolaires'));
     }
 }

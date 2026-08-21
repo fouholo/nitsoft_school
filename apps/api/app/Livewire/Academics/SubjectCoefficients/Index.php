@@ -11,11 +11,9 @@ use App\Domain\Academics\Models\Subject;
 use App\Domain\Academics\Models\SubjectCoefficient;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Coefficients par matière')]
 class Index extends Component
 {
     public ?int $level_id = null;
@@ -113,6 +111,6 @@ class Index extends Component
             'levels' => Level::where('cycle', Cycle::Secondaire)->orderBy('level_wording')->get(),
             'series' => Serie::orderBy('serie')->get(),
             'subjects' => $this->subjectsForSelectedLevel(),
-        ]);
+        ])->title(__('Coefficients par matière'));
     }
 }

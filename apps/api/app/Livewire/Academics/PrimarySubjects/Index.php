@@ -6,11 +6,9 @@ namespace App\Livewire\Academics\PrimarySubjects;
 
 use App\Domain\Academics\Models\PrimarySubject;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Matières du primaire')]
 class Index extends Component
 {
     public bool $showForm = false;
@@ -156,6 +154,6 @@ class Index extends Component
     {
         return view('livewire.academics.primary-subjects.index', [
             'primarySubjects' => PrimarySubject::orderBy('name')->get(),
-        ]);
+        ])->title(__('Matières du primaire'));
     }
 }

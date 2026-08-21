@@ -11,11 +11,9 @@ use App\Domain\Academics\Models\Subject;
 use App\Domain\Academics\Models\TeacherAssignment;
 use App\Domain\Establishments\Models\Establishment;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Affectations enseignants')]
 class Index extends Component
 {
     public bool $showForm = false;
@@ -105,6 +103,6 @@ class Index extends Component
             'classrooms' => Classroom::orderBy('name')->get(),
             'subjects' => Subject::orderBy('name')->get(),
             'schoolYears' => SchoolYear::orderByDesc('starts_on')->get(),
-        ]);
+        ])->title(__('Affectations enseignants'));
     }
 }

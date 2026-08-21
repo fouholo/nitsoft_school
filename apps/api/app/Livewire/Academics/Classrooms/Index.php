@@ -13,11 +13,9 @@ use App\Domain\Establishments\Models\Establishment;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Classes')]
 class Index extends Component
 {
     public bool $showForm = false;
@@ -92,7 +90,7 @@ class Index extends Component
 
         if (! in_array($level->cycle, $this->currentEstablishment()->allowedCycles(), true)) {
             throw ValidationException::withMessages([
-                'level_id' => "Ce niveau n'est pas disponible pour ce type d'établissement.",
+                'level_id' => __("Ce niveau n'est pas disponible pour ce type d'établissement."),
             ]);
         }
 
@@ -170,6 +168,6 @@ class Index extends Component
                 ? Level::where('cycle', $this->cycle)->orderBy('level_wording')->get()
                 : collect(),
             'series' => Serie::orderBy('serie')->get(),
-        ]);
+        ])->title(__('Classes'));
     }
 }

@@ -7,11 +7,9 @@ namespace App\Livewire\Academics\Terms;
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Academics\Models\Term;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Périodes')]
 class Index extends Component
 {
     public bool $showForm = false;
@@ -107,6 +105,6 @@ class Index extends Component
         return view('livewire.academics.terms.index', [
             'terms' => Term::with('schoolYear')->orderBy('sequence')->get(),
             'schoolYears' => SchoolYear::orderByDesc('starts_on')->get(),
-        ]);
+        ])->title(__('Périodes'));
     }
 }

@@ -8,11 +8,9 @@ use App\Domain\Academics\Models\Domain;
 use App\Domain\Academics\Models\Subject;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Matières')]
 class Index extends Component
 {
     public bool $showForm = false;
@@ -69,7 +67,7 @@ class Index extends Component
 
         if (! $data['is_prescolaire_primaire'] && ! $data['is_secondaire']) {
             throw ValidationException::withMessages([
-                'is_prescolaire_primaire' => "Sélectionnez au moins un cycle pour cette matière.",
+                'is_prescolaire_primaire' => __('Sélectionnez au moins un cycle pour cette matière.'),
             ]);
         }
 
@@ -115,6 +113,6 @@ class Index extends Component
         return view('livewire.academics.subjects.index', [
             'subjects' => Subject::with('domain')->orderBy('name')->get(),
             'domains' => Domain::orderBy('name')->get(),
-        ]);
+        ])->title(__('Matières'));
     }
 }

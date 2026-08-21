@@ -7,11 +7,9 @@ namespace App\Livewire\Academics\AppreciationScales;
 use App\Domain\Grading\Models\AppreciationScale;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Barème d\'appréciations')]
 class Index extends Component
 {
     public bool $showForm = false;
@@ -123,6 +121,6 @@ class Index extends Component
     {
         return view('livewire.academics.appreciation-scales.index', [
             'appreciationScales' => AppreciationScale::orderByDesc('percentage')->get(),
-        ]);
+        ])->title(__("Barème d'appréciations"));
     }
 }

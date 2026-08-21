@@ -9,12 +9,10 @@ use App\Domain\Enrollment\Models\Guardian;
 use App\Domain\Establishments\Models\Establishment;
 use App\Models\User;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
-#[Title('Tuteurs')]
 class Index extends Component
 {
     use WithPagination;
@@ -85,7 +83,7 @@ class Index extends Component
             'phone' => ['nullable', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255', 'required_if:createPortalAccount,true'],
         ], [
-            'email.required_if' => 'Une adresse e-mail est requise pour créer un compte portail.',
+            'email.required_if' => __('Une adresse e-mail est requise pour créer un compte portail.'),
         ]);
 
         foreach (['phone', 'email'] as $optional) {
@@ -195,6 +193,6 @@ class Index extends Component
 
         return view('livewire.guardians.index', [
             'guardians' => $guardians,
-        ]);
+        ])->title(__('Tuteurs'));
     }
 }

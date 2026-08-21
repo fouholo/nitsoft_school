@@ -13,9 +13,9 @@ enum GuardianRelationship: string
     public function label(): string
     {
         return match ($this) {
-            self::Pere => 'Père',
-            self::Mere => 'Mère',
-            self::Tuteur => 'Tuteur',
+            self::Pere => __('Père'),
+            self::Mere => __('Mère'),
+            self::Tuteur => __('Tuteur'),
         };
     }
 }

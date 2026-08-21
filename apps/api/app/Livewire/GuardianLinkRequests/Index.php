@@ -9,11 +9,9 @@ use App\Domain\Enrollment\Models\GuardianStudentPivot;
 use App\Domain\Establishments\Models\EstablishmentUserPivot;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Demandes de liaison')]
 class Index extends Component
 {
     public ?string $successMessage = null;
@@ -35,7 +33,9 @@ class Index extends Component
         $this->authorize('update', $link);
 
         if ($link->guardian->user_id === null) {
-            $this->errorMessage = "Impossible d'approuver : {$link->guardian->first_name} {$link->guardian->last_name} n'a pas de compte utilisateur. Contactez le support pour résoudre ce blocage.";
+            $this->errorMessage = __("Impossible d'approuver : :name n'a pas de compte utilisateur. Contactez le support pour résoudre ce blocage.", [
+                'name' => "{$link->guardian->first_name} {$link->guardian->last_name}",
+            ]);
 
             return;
         }
@@ -61,7 +61,10 @@ class Index extends Component
             );
         });
 
-        $this->successMessage = "Demande approuvée pour {$link->guardian->first_name} {$link->guardian->last_name} ({$link->student->first_name} {$link->student->last_name}).";
+        $this->successMessage = __('Demande approuvée pour :guardian (:student).', [
+            'guardian' => "{$link->guardian->first_name} {$link->guardian->last_name}",
+            'student' => "{$link->student->first_name} {$link->student->last_name}",
+        ]);
     }
 
     public function reject(int $linkId): void
@@ -75,7 +78,9 @@ class Index extends Component
 
         $link->update(['status' => GuardianLinkStatus::Rejected]);
 
-        $this->successMessage = "Demande rejetée pour {$link->guardian->first_name} {$link->guardian->last_name}.";
+        $this->successMessage = __('Demande rejetée pour :name.', [
+            'name' => "{$link->guardian->first_name} {$link->guardian->last_name}",
+        ]);
     }
 
     public function reconsider(int $linkId): void
@@ -89,7 +94,9 @@ class Index extends Component
 
         $link->update(['status' => GuardianLinkStatus::Pending]);
 
-        $this->successMessage = "Demande remise en attente pour {$link->guardian->first_name} {$link->guardian->last_name}.";
+        $this->successMessage = __('Demande remise en attente pour :name.', [
+            'name' => "{$link->guardian->first_name} {$link->guardian->last_name}",
+        ]);
     }
 
     /**
@@ -164,6 +171,6 @@ class Index extends Component
             'references' => $references,
             'roleAlreadyFilled' => $roleAlreadyFilled,
             'recentlyRejected' => $recentlyRejected,
-        ]);
+        ])->title(__('Demandes de liaison'));
     }
 }

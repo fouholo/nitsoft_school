@@ -15,14 +15,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
-#[Title('Élèves')]
 class Index extends Component
 {
     use WithFileUploads;
@@ -380,27 +378,27 @@ class Index extends Component
     protected function validationAttributes(): array
     {
         return [
-            'last_name' => 'nom',
-            'first_name' => 'prénom',
-            'birth_date' => 'date de naissance',
-            'birth_place' => 'lieu de naissance',
-            'gender' => 'genre',
-            'student_number' => 'matricule',
-            'photo' => 'photo',
-            'nationalite_code' => 'nationalité',
-            'birth_certificate_number' => 'numéro d\'acte de naissance',
-            'birth_certificate_date' => 'date de l\'acte de naissance',
-            'birth_certificate_place' => 'lieu de l\'acte de naissance',
-            'residence' => 'résidence',
-            'father_name' => 'nom du père',
-            'father_phone' => 'téléphone du père',
-            'mother_name' => 'nom de la mère',
-            'mother_phone' => 'téléphone de la mère',
-            'tutor_name' => 'nom du tuteur',
-            'tutor_phone' => 'téléphone du tuteur',
-            'fatherEmail' => 'e-mail du père',
-            'motherEmail' => 'e-mail de la mère',
-            'tutorEmail' => 'e-mail du tuteur',
+            'last_name' => __('nom'),
+            'first_name' => __('prénom'),
+            'birth_date' => __('date de naissance'),
+            'birth_place' => __('lieu de naissance'),
+            'gender' => __('genre'),
+            'student_number' => __('matricule'),
+            'photo' => __('photo'),
+            'nationalite_code' => __('nationalité'),
+            'birth_certificate_number' => __("numéro d'acte de naissance"),
+            'birth_certificate_date' => __("date de l'acte de naissance"),
+            'birth_certificate_place' => __("lieu de l'acte de naissance"),
+            'residence' => __('résidence'),
+            'father_name' => __('nom du père'),
+            'father_phone' => __('téléphone du père'),
+            'mother_name' => __('nom de la mère'),
+            'mother_phone' => __('téléphone de la mère'),
+            'tutor_name' => __('nom du tuteur'),
+            'tutor_phone' => __('téléphone du tuteur'),
+            'fatherEmail' => __('e-mail du père'),
+            'motherEmail' => __('e-mail de la mère'),
+            'tutorEmail' => __('e-mail du tuteur'),
         ];
     }
 
@@ -432,6 +430,6 @@ class Index extends Component
         return view('livewire.students.index', [
             'students' => $students,
             'nationalites' => Nationalite::orderBy('libelle')->get(),
-        ]);
+        ])->title(__('Élèves'));
     }
 }

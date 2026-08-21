@@ -1,10 +1,10 @@
 <div>
     <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-semibold text-stone-900">Affectations enseignants</h1>
+        <h1 class="text-2xl font-semibold text-stone-900">{{ __('Affectations enseignants') }}</h1>
 
         @can('create', \App\Domain\Academics\Models\TeacherAssignment::class)
             <button type="button" wire:click="create" class="rounded-lg bg-orange-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-800">
-                Nouvelle affectation
+                {{ __('Nouvelle affectation') }}
             </button>
         @endcan
     </div>
@@ -12,7 +12,7 @@
     @if ($showForm)
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-4">
             <div>
-                <label class="block text-sm font-medium text-stone-700">Enseignant</label>
+                <label class="block text-sm font-medium text-stone-700">{{ __('Enseignant') }}</label>
                 <select wire:model="user_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
                     @foreach ($teachers as $teacher)
@@ -23,7 +23,7 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">Classe</label>
+                <label class="block text-sm font-medium text-stone-700">{{ __('Classe') }}</label>
                 <select wire:model="classroom_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
                     @foreach ($classrooms as $classroom)
@@ -35,7 +35,7 @@
 
             @if ($this->selectedClassroomCycle() === \App\Domain\Academics\Enums\Cycle::Secondaire)
                 <div>
-                    <label class="block text-sm font-medium text-stone-700">Matière</label>
+                    <label class="block text-sm font-medium text-stone-700">{{ __('Matière') }}</label>
                     <select wire:model="subject_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         <option value="">—</option>
                         @foreach ($subjects as $subject)
@@ -47,7 +47,7 @@
             @endif
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">Année scolaire</label>
+                <label class="block text-sm font-medium text-stone-700">{{ __('Année scolaire') }}</label>
                 <select wire:model="school_year_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
                     @foreach ($schoolYears as $schoolYear)
@@ -59,10 +59,10 @@
 
             <div class="flex gap-2 sm:col-span-4">
                 <button type="submit" class="rounded-lg bg-orange-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-800">
-                    Enregistrer
+                    {{ __('Enregistrer') }}
                 </button>
                 <button type="button" wire:click="cancel" class="rounded-lg border border-stone-300 px-3 py-1.5 text-sm text-stone-700 hover:bg-stone-50">
-                    Annuler
+                    {{ __('Annuler') }}
                 </button>
             </div>
         </form>
@@ -72,10 +72,10 @@
         <table class="min-w-full divide-y divide-stone-200 text-sm">
             <thead class="bg-stone-50">
                 <tr>
-                    <th class="px-4 py-2 text-left font-medium text-stone-500">Enseignant</th>
-                    <th class="px-4 py-2 text-left font-medium text-stone-500">Classe</th>
-                    <th class="px-4 py-2 text-left font-medium text-stone-500">Matière</th>
-                    <th class="px-4 py-2 text-left font-medium text-stone-500">Année scolaire</th>
+                    <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Enseignant') }}</th>
+                    <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Classe') }}</th>
+                    <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Matière') }}</th>
+                    <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Année scolaire') }}</th>
                     <th class="px-4 py-2"></th>
                 </tr>
             </thead>
@@ -86,21 +86,21 @@
                         <td class="px-4 py-2 text-stone-600">{{ $assignment->classroom?->name }}</td>
                         <td class="px-4 py-2 text-stone-600">{{ $assignment->subject?->name ?? '—' }}</td>
                         <td class="px-4 py-2 text-stone-600">{{ $assignment->schoolYear?->label }}</td>
-                        <td class="px-4 py-2 text-right">
+                        <td class="px-4 py-2 text-end">
                             @can('delete', $assignment)
                                 <button
                                     wire:click="delete({{ $assignment->id }})"
-                                    wire:confirm="Retirer cette affectation ?"
+                                    wire:confirm="{{ __('Retirer cette affectation ?') }}"
                                     class="text-red-500 hover:text-red-700"
                                 >
-                                    Retirer
+                                    {{ __('Retirer') }}
                                 </button>
                             @endcan
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-4 py-6 text-center text-stone-500">Aucune affectation.</td>
+                        <td colspan="5" class="px-4 py-6 text-center text-stone-500">{{ __('Aucune affectation.') }}</td>
                     </tr>
                 @endforelse
             </tbody>

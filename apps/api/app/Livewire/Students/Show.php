@@ -20,11 +20,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Fiche élève')]
 class Show extends Component
 {
     public Student $student;
@@ -89,9 +87,9 @@ class Show extends Component
             'is_boarding' => ['boolean'],
             'is_assigned' => ['boolean'],
         ], [], [
-            'classroom_id' => 'classe',
-            'school_year_id' => 'année scolaire',
-            'enrolled_on' => "date d'inscription",
+            'classroom_id' => __('classe'),
+            'school_year_id' => __('année scolaire'),
+            'enrolled_on' => __("date d'inscription"),
         ]);
 
         // Défense en profondeur : ces statuts ne sont proposés que pour le
@@ -148,8 +146,8 @@ class Show extends Component
             'relationship' => ['required', Rule::enum(GuardianRelationship::class)],
             'is_primary_contact' => ['boolean'],
         ], [], [
-            'guardian_id' => 'tuteur',
-            'relationship' => 'rôle',
+            'guardian_id' => __('tuteur'),
+            'relationship' => __('rôle'),
         ]);
 
         DB::transaction(function () use ($data): void {
@@ -219,6 +217,6 @@ class Show extends Component
                 ->orderBy('last_name')
                 ->limit(20)
                 ->get(),
-        ]);
+        ])->title(__('Fiche élève'));
     }
 }
