@@ -60,6 +60,15 @@
                     ['label' => 'Journal', 'route' => 'notifications.sms-messages.index', 'ability' => 'viewAny', 'model' => \App\Domain\Notifications\Models\SmsMessage::class],
                     ['label' => 'Envoyer un SMS', 'route' => 'notifications.sms-messages.create', 'ability' => 'create', 'model' => \App\Domain\Notifications\Models\SmsMessage::class],
                 ]],
+                // Groupe entier invisible sauf établissement is_arabe : son
+                // seul enfant s'appuie sur ArabicSubjectCoefficientPolicy,
+                // qui refuse déjà viewAny hors établissement is_arabe — pas
+                // besoin de condition PHP supplémentaire ici, le filtrage
+                // par ability ci-dessous suffit à vider (et donc masquer) le
+                // groupe.
+                ['type' => 'group', 'label' => 'Arabe', 'icon' => 'book', 'active' => 'arabic.subject-coefficients.*', 'children' => [
+                    ['label' => 'Coefficients par matière', 'route' => 'arabic.subject-coefficients.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicSubjectCoefficient::class],
+                ]],
             ];
 
             $canAccessNavItem = fn (array $item): bool => ! isset($item['ability']) || auth()->user()->can($item['ability'], $item['model']);
@@ -101,6 +110,9 @@
                 $navItems[] = ['type' => 'link', 'label' => 'Matières du primaire', 'route' => 'academics.primary-subjects.index', 'active' => 'academics.primary-subjects.*', 'icon' => 'book'];
                 $navItems[] = ['type' => 'link', 'label' => 'Barème d\'appréciations', 'route' => 'academics.appreciation-scales.index', 'active' => 'academics.appreciation-scales.*', 'icon' => 'book'];
                 $navItems[] = ['type' => 'link', 'label' => 'Domaines', 'route' => 'domains.index', 'active' => 'domains.*', 'icon' => 'book'];
+                $navItems[] = ['type' => 'link', 'label' => 'Niveaux arabes', 'route' => 'arabic.levels.index', 'active' => 'arabic.levels.*', 'icon' => 'book'];
+                $navItems[] = ['type' => 'link', 'label' => 'Séries arabes', 'route' => 'arabic.series.index', 'active' => 'arabic.series.*', 'icon' => 'book'];
+                $navItems[] = ['type' => 'link', 'label' => 'Matières arabes', 'route' => 'arabic.subjects.index', 'active' => 'arabic.subjects.*', 'icon' => 'book'];
                 $navItems[] = ['type' => 'link', 'label' => 'Informations générales', 'route' => 'general-information.edit', 'active' => 'general-information.*', 'icon' => 'building'];
             }
 

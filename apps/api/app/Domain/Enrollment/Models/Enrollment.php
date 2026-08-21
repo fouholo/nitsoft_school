@@ -6,6 +6,8 @@ namespace App\Domain\Enrollment\Models;
 
 use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\SchoolYear;
+use App\Domain\Arabic\Models\ArabicLevel;
+use App\Domain\Arabic\Models\ArabicSerie;
 use App\Domain\Billing\Models\Installment;
 use App\Domain\Billing\Models\Payment;
 use App\Domain\Establishments\Concerns\TenantScoped;
@@ -28,6 +30,8 @@ class Enrollment extends Model
         'establishment_id',
         'student_id',
         'classroom_id',
+        'arabic_level_id',
+        'arabic_serie_id',
         'school_year_id',
         'enrolled_on',
         'status',
@@ -84,6 +88,22 @@ class Enrollment extends Model
     public function classroom(): BelongsTo
     {
         return $this->belongsTo(Classroom::class);
+    }
+
+    /**
+     * @return BelongsTo<ArabicLevel, $this>
+     */
+    public function arabicLevel(): BelongsTo
+    {
+        return $this->belongsTo(ArabicLevel::class);
+    }
+
+    /**
+     * @return BelongsTo<ArabicSerie, $this>
+     */
+    public function arabicSerie(): BelongsTo
+    {
+        return $this->belongsTo(ArabicSerie::class);
     }
 
     public function schoolYear(): BelongsTo

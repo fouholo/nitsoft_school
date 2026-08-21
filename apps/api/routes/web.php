@@ -41,6 +41,7 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/mon-compte/mot-de-passe', ChangePassword::class)->name('account.password.edit');
 
     require __DIR__.'/academics.php';
+    require __DIR__.'/arabic.php';
     require __DIR__.'/enrollment.php';
     require __DIR__.'/reports.php';
     require __DIR__.'/grading.php';
