@@ -21,7 +21,7 @@ beforeEach(function () {
     actingInEstablishment($this->establishment);
     $this->actingAs($this->admin);
 
-    $this->schoolYear = SchoolYear::factory()->create(['establishment_id' => $this->establishment->id]);
+    $this->schoolYear = SchoolYear::factory()->create();
     $this->prescolaireClassroom = Classroom::factory()->prescolaire()->create([
         'establishment_id' => $this->establishment->id,
         'school_year_id' => $this->schoolYear->id,

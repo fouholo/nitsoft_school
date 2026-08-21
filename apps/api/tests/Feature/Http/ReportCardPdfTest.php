@@ -12,7 +12,7 @@ use App\Domain\Grading\Services\ReportCardService;
 
 function makeReportCardIn(Establishment $establishment): ReportCard
 {
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $term = Term::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
@@ -100,7 +100,7 @@ test('aucun logo affiché en en-tête du bulletin quand l’établissement n’e
 
 test('le PDF d’un bulletin primaire affiche "Composition N" au lieu d’une période', function () {
     $establishment = Establishment::factory()->create();
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroom = Classroom::factory()->primaire()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
 

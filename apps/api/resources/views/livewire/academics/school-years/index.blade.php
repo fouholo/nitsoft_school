@@ -13,6 +13,12 @@
         @endcan
     </div>
 
+    @cannot('create', \App\Domain\Academics\Models\SchoolYear::class)
+        <p class="mt-1 text-sm text-stone-500">
+            Ce calendrier est commun à tous les établissements et géré par l'administration de la plateforme.
+        </p>
+    @endcannot
+
     @if ($showForm)
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-4">
             <div class="sm:col-span-2">

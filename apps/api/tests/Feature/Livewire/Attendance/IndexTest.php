@@ -18,7 +18,7 @@ test('une session sans présences saisies affiche le statut à faire, une sessio
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
     Enrollment::factory()->create([

@@ -14,8 +14,8 @@ test('un enseignant peut accéder à l’écran et voit les classes de l’anné
 
     actingInEstablishment($establishment);
 
-    $currentYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
-    $otherYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => false]);
+    $currentYear = SchoolYear::factory()->create(['is_current' => true]);
+    $otherYear = SchoolYear::factory()->create(['is_current' => false]);
     $classroomThisYear = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $currentYear->id]);
     $classroomOtherYear = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $otherYear->id]);
 

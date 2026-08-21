@@ -14,7 +14,7 @@ test('un élève avec une tranche échue impayée et une tranche future payée p
     $establishment = Establishment::factory()->create();
     actingInEstablishment($establishment);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
 
     Installment::create([
@@ -53,7 +53,7 @@ test('un élève ayant soldé sa tranche échue et avancé sur une tranche futur
     $establishment = Establishment::factory()->create();
     actingInEstablishment($establishment);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
 
     Installment::create([
@@ -90,7 +90,7 @@ test('une tranche non configurée (null) n’entre pas dans le dû', function ()
     $establishment = Establishment::factory()->create();
     actingInEstablishment($establishment);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
 
     Installment::create([
@@ -122,7 +122,7 @@ test('ownerId ne compte que les inscriptions sur lesquelles cet utilisateur a pe
     $userA = createUserWithRole($establishment, 'educateur');
     $userB = createUserWithRole($establishment, 'educateur');
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $studentA = Student::factory()->create(['establishment_id' => $establishment->id]);
     $studentB = Student::factory()->create(['establishment_id' => $establishment->id]);
 

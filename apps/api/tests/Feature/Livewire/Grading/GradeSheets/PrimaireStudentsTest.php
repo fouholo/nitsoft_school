@@ -19,7 +19,7 @@ beforeEach(function () {
     actingInEstablishment($this->establishment);
     $this->actingAs($this->directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $this->establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $this->classroomA = Classroom::factory()->primaire()->create([
         'establishment_id' => $this->establishment->id,
         'school_year_id' => $schoolYear->id,

@@ -24,7 +24,7 @@ beforeEach(function () {
     actingInEstablishment($this->establishment);
     $this->actingAs($this->admin);
 
-    $this->schoolYear = SchoolYear::factory()->create(['establishment_id' => $this->establishment->id]);
+    $this->schoolYear = SchoolYear::factory()->create();
     // Niveau fixé à CM2 (échelle /20) pour que les assertions de moyenne de
     // ce fichier soient déterministes — voir Level::compositionAverageScale().
     $this->classroom = Classroom::factory()->primaireLevel('CM2')->create([

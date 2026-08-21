@@ -17,7 +17,7 @@ test('un caissier consulte le détail dû/versé d’une inscription', function 
     actingInEstablishment($establishment);
     test()->actingAs($accountant);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $installment = Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 1, 'due_date' => now()->addMonth()]);
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
 
@@ -41,7 +41,7 @@ test('le détail des montants dus affiche le statut de chaque tranche', function
     actingInEstablishment($establishment);
     test()->actingAs($accountant);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 1, 'due_date' => now()->subMonth()]);
     Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 2, 'due_date' => now()->subDay()]);
     Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 3, 'due_date' => now()->addMonth()]);
@@ -68,7 +68,7 @@ test('le détail des montants dus affiche le montant versé par poste', function
     actingInEstablishment($establishment);
     test()->actingAs($accountant);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 1, 'due_date' => now()->subMonth()]);
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
 

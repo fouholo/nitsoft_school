@@ -18,7 +18,7 @@ beforeEach(function () {
     actingInEstablishment($this->establishment);
     $this->actingAs($this->admin);
 
-    $this->schoolYear = SchoolYear::factory()->create(['establishment_id' => $this->establishment->id]);
+    $this->schoolYear = SchoolYear::factory()->create();
 });
 
 test('une classe peut être créée avec un cycle préscolaire', function () {
@@ -26,7 +26,7 @@ test('une classe peut être créée avec un cycle préscolaire', function () {
     $admin = createUserWithRole($establishment, 'directeur');
     actingInEstablishment($establishment);
     $this->actingAs($admin);
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
 
     $level = Level::factory()->prescolaire()->create(['level_wording' => 'Grande Section']);
 
@@ -49,7 +49,7 @@ test('le numéro n’est pas exigé et le nom de la classe se compose sans lui',
     $admin = createUserWithRole($establishment, 'directeur');
     actingInEstablishment($establishment);
     $this->actingAs($admin);
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
 
     $level = Level::factory()->prescolaire()->create(['level_wording' => 'Grande Section']);
 
@@ -128,7 +128,7 @@ test('un niveau dont le cycle n’est pas autorisé pour ce type d’établissem
     $admin = createUserWithRole($establishment, 'directeur');
     actingInEstablishment($establishment);
     $this->actingAs($admin);
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
 
     $secondaireLevel = Level::factory()->terminale()->create();
 
@@ -149,7 +149,7 @@ test('éditer une classe hydrate correctement son niveau', function () {
     $admin = createUserWithRole($establishment, 'directeur');
     actingInEstablishment($establishment);
     $this->actingAs($admin);
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
 
     $classroom = Classroom::factory()->primaire()->create([
         'establishment_id' => $establishment->id,

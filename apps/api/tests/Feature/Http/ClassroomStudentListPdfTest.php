@@ -17,7 +17,7 @@ test('un membre de l’établissement peut consulter le PDF de la liste des él�
     $teacher = createUserWithRole($establishment, 'enseignant');
 
     actingInEstablishment($establishment);
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
 
     $response = $this->actingAs($teacher)->get(route('reports.classroom-students-pdf', $classroom));
@@ -32,7 +32,7 @@ test('le paramètre download force le téléchargement du PDF', function () {
     $admin = createUserWithRole($establishment, 'directeur');
 
     actingInEstablishment($establishment);
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
 
     $response = $this->actingAs($admin)->get(route('reports.classroom-students-pdf', ['classroom' => $classroom, 'download' => 1]));
@@ -47,7 +47,7 @@ test('un membre d’un autre établissement ne peut même pas résoudre la class
     $adminB = createUserWithRole($establishmentB, 'directeur');
 
     actingInEstablishment($establishmentA);
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishmentA->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroom = Classroom::factory()->create(['establishment_id' => $establishmentA->id, 'school_year_id' => $schoolYear->id]);
 
     actingInEstablishment($establishmentB);
@@ -61,7 +61,7 @@ test('la liste contient les élèves de la classe triés par nom, avec les bonne
     $establishment = Establishment::factory()->create();
     actingInEstablishment($establishment);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $otherClassroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
 

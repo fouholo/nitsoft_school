@@ -18,7 +18,7 @@ test('les statuts secondaire n’apparaissent pas quand la classe sélectionnée
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroom = Classroom::factory()->primaire()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
 
@@ -37,7 +37,7 @@ test('les statuts secondaire apparaissent quand la classe sélectionnée est du 
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
 
@@ -56,7 +56,7 @@ test('les statuts saisis pour une inscription secondaire sont persistés', funct
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
 
@@ -86,7 +86,7 @@ test('les statuts transmis pour une classe primaire sont ignorés côté serveur
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroom = Classroom::factory()->primaire()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
 
@@ -114,7 +114,7 @@ test('le tableau des inscriptions affiche des badges pour les statuts actifs', f
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
 
@@ -141,7 +141,7 @@ test('une inscription reprend les montants du tarif du niveau (élève non affec
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
 
@@ -181,7 +181,7 @@ test('une inscription d’élève affecté reprend le tarif affecté sans aucune
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
 
@@ -217,7 +217,7 @@ test('une inscription sur un niveau sans tarif configuré a des montants à zér
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
 

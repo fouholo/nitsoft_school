@@ -18,7 +18,7 @@ use Illuminate\Support\Str;
 
 function makePrimaireReportCard(Establishment $establishment, array $studentOverrides = [], ?string $level = 'CM2'): ReportCard
 {
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroom = Classroom::factory()->primaireLevel($level)->create([
         'establishment_id' => $establishment->id,
         'school_year_id' => $schoolYear->id,

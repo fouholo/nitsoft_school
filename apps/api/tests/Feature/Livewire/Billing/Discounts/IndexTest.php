@@ -19,7 +19,7 @@ test('un directeur accorde une réduction à un élève', function () {
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
 
     Livewire::test(Index::class)
@@ -47,7 +47,7 @@ test('accorder une nouvelle réduction au même élève/année remplace l’anci
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
 
     Discount::factory()->create([
@@ -80,7 +80,7 @@ test('un directeur supprime une réduction', function () {
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
     $discount = Discount::factory()->create([
         'establishment_id' => $establishment->id,
@@ -110,7 +110,7 @@ test('la recherche filtre la liste des élèves du formulaire sans affecter la l
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    SchoolYear::factory()->create(['is_current' => true]);
     Student::factory()->create(['establishment_id' => $establishment->id, 'last_name' => 'Koné', 'first_name' => 'Yao']);
     Student::factory()->create(['establishment_id' => $establishment->id, 'last_name' => 'Diarra', 'first_name' => 'Fatou']);
 
@@ -129,7 +129,7 @@ test('modifier une réduction affiche le nom de l’élève sans permettre de le
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $student = Student::factory()->create(['establishment_id' => $establishment->id, 'last_name' => 'Bamba', 'first_name' => 'Issa']);
     $discount = Discount::factory()->create([
         'establishment_id' => $establishment->id,
@@ -150,7 +150,7 @@ test('le message de confirmation de suppression mentionne l’effet sur les tran
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $student = Student::factory()->create(['establishment_id' => $establishment->id, 'last_name' => 'Ouattara', 'first_name' => 'Nadège']);
     Discount::factory()->create([
         'establishment_id' => $establishment->id,
@@ -168,7 +168,7 @@ test('le message de confirmation de suppression mentionne l’effet sur les tran
  */
 function enrolledStudentWithLevelFee(Establishment $establishment, array $installmentAmounts, float $registrationAmount = 5000.0): array
 {
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
 

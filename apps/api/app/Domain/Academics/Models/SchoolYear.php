@@ -4,22 +4,25 @@ declare(strict_types=1);
 
 namespace App\Domain\Academics\Models;
 
-use App\Domain\Establishments\Concerns\TenantScoped;
 use App\Domain\Sync\Concerns\Syncable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * Référentiel partagé : une année scolaire est saisie une seule fois (par un
+ * administrateur SaaS, voir SchoolYearPolicy) et vaut pour tous les
+ * établissements — pas de colonne establishment_id ni de scope tenant, voir
+ * migration 2026_08_20_010000_make_school_years_global.
+ */
 class SchoolYear extends Model
 {
     use HasFactory;
     use SoftDeletes;
     use Syncable;
-    use TenantScoped;
 
     protected $fillable = [
-        'establishment_id',
         'label',
         'starts_on',
         'ends_on',

@@ -9,7 +9,7 @@ use App\Domain\Establishments\Models\Establishment;
 
 test('une tranche entièrement couverte par les versements est "paid"', function () {
     $establishment = Establishment::factory()->create();
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 1, 'due_date' => now()->subMonth()]);
 
     $enrollment = Enrollment::factory()->create([
@@ -25,7 +25,7 @@ test('une tranche entièrement couverte par les versements est "paid"', function
 
 test('une tranche partiellement couverte et déjà échue est "partial_late"', function () {
     $establishment = Establishment::factory()->create();
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 1, 'due_date' => now()->subMonth()]);
 
     $enrollment = Enrollment::factory()->create([
@@ -41,7 +41,7 @@ test('une tranche partiellement couverte et déjà échue est "partial_late"', f
 
 test('une tranche partiellement couverte mais pas encore échue est "partial_upcoming"', function () {
     $establishment = Establishment::factory()->create();
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 1, 'due_date' => now()->addMonth()]);
 
     $enrollment = Enrollment::factory()->create([
@@ -57,7 +57,7 @@ test('une tranche partiellement couverte mais pas encore échue est "partial_upc
 
 test('une tranche non couverte et déjà échue est "late"', function () {
     $establishment = Establishment::factory()->create();
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 1, 'due_date' => now()->subMonth()]);
 
     $enrollment = Enrollment::factory()->create([
@@ -73,7 +73,7 @@ test('une tranche non couverte et déjà échue est "late"', function () {
 
 test('une tranche non couverte et pas encore échue est "due"', function () {
     $establishment = Establishment::factory()->create();
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 1, 'due_date' => now()->addMonth()]);
 
     $enrollment = Enrollment::factory()->create([
@@ -89,7 +89,7 @@ test('une tranche non couverte et pas encore échue est "due"', function () {
 
 test('les versements couvrent d’abord l’inscription avant de compter pour le statut des tranches', function () {
     $establishment = Establishment::factory()->create();
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 1, 'due_date' => now()->subMonth()]);
 
     $enrollment = Enrollment::factory()->create([
@@ -106,7 +106,7 @@ test('les versements couvrent d’abord l’inscription avant de compter pour le
 
 test('le montant versé par tranche est déduit de l’imputation cumulative des versements', function () {
     $establishment = Establishment::factory()->create();
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 1, 'due_date' => now()->subMonth()]);
     Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 2, 'due_date' => now()->addMonth()]);
 
@@ -130,7 +130,7 @@ test('le montant versé par tranche est déduit de l’imputation cumulative des
 
 test('le montant versé d’une tranche entièrement couverte est plafonné à son propre montant', function () {
     $establishment = Establishment::factory()->create();
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 1, 'due_date' => now()->subMonth()]);
 
     $enrollment = Enrollment::factory()->create([
@@ -146,7 +146,7 @@ test('le montant versé d’une tranche entièrement couverte est plafonné à s
 
 test('les tranches suivantes restent dues tant que la tranche précédente n’est pas entièrement couverte', function () {
     $establishment = Establishment::factory()->create();
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 1, 'due_date' => now()->subMonth()]);
     Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 2, 'due_date' => now()->addMonth()]);
 

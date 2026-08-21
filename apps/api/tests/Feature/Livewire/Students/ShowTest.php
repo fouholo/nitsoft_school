@@ -16,7 +16,7 @@ test('un directeur voit le bloc situation financière sur la fiche élève', fun
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
 
     Enrollment::factory()->create([
@@ -50,8 +50,8 @@ test('le bandeau résumé affiche la classe de l’inscription active', function
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $previousYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => false]);
-    $currentYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $previousYear = SchoolYear::factory()->create(['is_current' => false]);
+    $currentYear = SchoolYear::factory()->create(['is_current' => true]);
     $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $currentYear->id]);
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
 

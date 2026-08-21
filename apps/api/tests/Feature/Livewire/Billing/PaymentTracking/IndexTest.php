@@ -18,7 +18,7 @@ test('un directeur voit la liste triée par retard décroissant', function () {
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $studentSmallDebt = Student::factory()->create(['establishment_id' => $establishment->id]);
     $studentBigDebt = Student::factory()->create(['establishment_id' => $establishment->id]);
 
@@ -49,7 +49,7 @@ test('le filtre par niveau exclut un élève d’un autre niveau', function () {
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $levelA = Level::factory()->create();
     $levelB = Level::factory()->create();
     $classroomA = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'level_id' => $levelA->id]);
@@ -75,7 +75,7 @@ test('un directeur peut accéder directement à l’encaissement depuis le suivi
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
 
     $enrollment = Enrollment::factory()->create([
@@ -96,7 +96,7 @@ test('le filtre de statut isole les élèves en retard, à jour ou en avance', f
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $late = Student::factory()->create(['establishment_id' => $establishment->id]);
     $onTime = Student::factory()->create(['establishment_id' => $establishment->id]);
     $advance = Student::factory()->create(['establishment_id' => $establishment->id]);
@@ -122,7 +122,7 @@ test('la recherche filtre par nom d’élève', function () {
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $kone = Student::factory()->create(['establishment_id' => $establishment->id, 'first_name' => 'Aïcha', 'last_name' => 'Koné']);
     $traore = Student::factory()->create(['establishment_id' => $establishment->id, 'first_name' => 'Moussa', 'last_name' => 'Traoré']);
 
@@ -148,7 +148,7 @@ test('le message d’état vide distingue l’absence d’année scolaire d’un
         ->assertSee('Sélectionnez une année scolaire')
         ->assertDontSee('Aucun élève ne correspond');
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
 
     Livewire::test(Index::class)
         ->set('school_year_id', $schoolYear->id)
@@ -172,7 +172,7 @@ test('un éducateur ne voit que les inscriptions sur lesquelles il a personnelle
     actingInEstablishment($establishment);
     test()->actingAs($educator);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $studentOwn = Student::factory()->create(['establishment_id' => $establishment->id]);
     $studentOther = Student::factory()->create(['establishment_id' => $establishment->id]);
 
@@ -213,7 +213,7 @@ test('un éducateur à portée restreinte voit une bannière explicative, un dir
     $directeur = createUserWithRole($establishment, 'directeur');
     actingInEstablishment($establishment);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
 
     test()->actingAs($educator);
     Livewire::test(Index::class)
@@ -234,7 +234,7 @@ test('un caissier sans droit d’encaissement ne voit pas la colonne Actions', f
     actingInEstablishment($establishment);
     test()->actingAs($gestionnaire);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
     $enrollment = Enrollment::factory()->create([
         'establishment_id' => $establishment->id,
@@ -255,7 +255,7 @@ test('le pied de tableau indique le nombre d’élèves affichés', function () 
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $studentA = Student::factory()->create(['establishment_id' => $establishment->id]);
     $studentB = Student::factory()->create(['establishment_id' => $establishment->id]);
 
@@ -273,7 +273,7 @@ test('la liste est paginée au-delà de 25 élèves et change de page correcteme
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
 
     $students = Student::factory()->count(30)->create(['establishment_id' => $establishment->id]);
     foreach ($students as $index => $student) {

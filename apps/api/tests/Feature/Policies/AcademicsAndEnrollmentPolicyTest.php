@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Domain\Academics\Models\Classroom;
-use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Models\Establishment;
@@ -18,9 +17,11 @@ use App\Domain\Establishments\Models\Establishment;
  * chantier "primaire sans période" (voir TermsTest) — retiré de ce dataset,
  * car Establishment::factory() tire un type aléatoire et rendrait ces
  * assertions flaky.
+ * SchoolYear n'a plus un admin local capable de tout faire (create réservé
+ * aux administrateurs SaaS, voir SchoolYearPolicyTest) — retiré de ce
+ * dataset.
  */
 dataset('policy_models', [
-    'school_years' => [SchoolYear::class],
     'classrooms' => [Classroom::class],
     'students' => [Student::class],
     'enrollments' => [Enrollment::class],

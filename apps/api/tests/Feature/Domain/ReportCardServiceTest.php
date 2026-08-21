@@ -42,7 +42,7 @@ function makeGradedStudent(Establishment $establishment, Classroom $classroom, T
 
 test('la moyenne pondérée et le rang sont calculés correctement', function () {
     $establishment = Establishment::factory()->create();
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $term = Term::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $subjectA = Subject::factory()->create();
@@ -86,7 +86,7 @@ test('la moyenne pondérée et le rang sont calculés correctement', function ()
 
 test('les élèves ex-aequo partagent le même rang', function () {
     $establishment = Establishment::factory()->create();
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $term = Term::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $subject = Subject::factory()->create();
@@ -117,7 +117,7 @@ test('les élèves ex-aequo partagent le même rang', function () {
 
 test('le détail par matière du bulletin liste chaque matière notée avec sa moyenne', function () {
     $establishment = Establishment::factory()->create();
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $term = Term::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $maths = Subject::factory()->create(['name' => 'Mathématiques']);
@@ -161,7 +161,7 @@ test('le détail par matière du bulletin liste chaque matière notée avec sa m
 
 test('le détail par matière (secondaire) porte le rang par matière, l’appréciation et le professeur', function () {
     $establishment = Establishment::factory()->create();
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $term = Term::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $maths = Subject::factory()->create(['name' => 'Mathématiques']);
@@ -202,7 +202,7 @@ test('le détail par matière (secondaire) porte le rang par matière, l’appr�
 
 test('la moyenne pondérée et le rang sont calculés correctement par composition (primaire)', function () {
     $establishment = Establishment::factory()->create();
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     // Niveau fixé à CM2 (échelle /20) — voir Level::compositionAverageScale().
     $classroom = Classroom::factory()->primaireLevel('CM2')->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $column = PrimarySubject::coefficientColumn($classroom->level);
@@ -252,7 +252,7 @@ test('la moyenne pondérée et le rang sont calculés correctement par compositi
 
 test('generalAverage() ramène la moyenne sur 10 pour CP1/CP2/CE1, sur 20 pour CE2/CM1/CM2', function (string $level, float $expectedAverage) {
     $establishment = Establishment::factory()->create();
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroom = Classroom::factory()->primaireLevel($level)->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $column = PrimarySubject::coefficientColumn($classroom->level);
     $baremeColumn = PrimarySubject::baremeColumn($classroom->level);
@@ -282,7 +282,7 @@ test('generalAverage() ramène la moyenne sur 10 pour CP1/CP2/CE1, sur 20 pour C
 
 test('une composition commune à toutes les classes n’agrège que les élèves de la classe demandée', function () {
     $establishment = Establishment::factory()->create();
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroomA = Classroom::factory()->primaire()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $classroomB = Classroom::factory()->primaire()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $columnA = PrimarySubject::coefficientColumn($classroomA->level);
@@ -315,7 +315,7 @@ test('une composition commune à toutes les classes n’agrège que les élèves
 
 test('le détail par matière (primaire) affiche le nom de la matière du catalogue primaire', function () {
     $establishment = Establishment::factory()->create();
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroom = Classroom::factory()->primaire()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $column = PrimarySubject::coefficientColumn($classroom->level);
     $baremeColumn = PrimarySubject::baremeColumn($classroom->level);
@@ -347,7 +347,7 @@ test('le détail par matière (primaire) affiche le nom de la matière du catalo
 
 test('primaryGradeRows() retourne les notes brutes triées par matière, sans les absences', function () {
     $establishment = Establishment::factory()->create();
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroom = Classroom::factory()->primaire()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $column = PrimarySubject::coefficientColumn($classroom->level);
     $baremeColumn = PrimarySubject::baremeColumn($classroom->level);
@@ -386,7 +386,7 @@ test('generate() calcule l’appréciation depuis le barème pour le secondaire'
     AppreciationScale::factory()->create(['percentage' => 0, 'appreciation' => 'Insuffisant']);
 
     $establishment = Establishment::factory()->create();
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $term = Term::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $subject = Subject::factory()->create();
@@ -415,7 +415,7 @@ test('generate() calcule l’appréciation depuis le barème pour le primaire', 
     AppreciationScale::factory()->create(['percentage' => 0, 'appreciation' => 'Insuffisant']);
 
     $establishment = Establishment::factory()->create();
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroom = Classroom::factory()->primaire()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $column = PrimarySubject::coefficientColumn($classroom->level);
     $baremeColumn = PrimarySubject::baremeColumn($classroom->level);
@@ -442,7 +442,7 @@ test('generate() calcule l’appréciation depuis le barème pour le primaire', 
 
 test('la génération de bulletin est refusée pour une classe préscolaire', function () {
     $establishment = Establishment::factory()->create();
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     $classroom = Classroom::factory()->prescolaire()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $term = Term::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
 

@@ -17,7 +17,7 @@ test('la rubrique "Tarifs par niveau" n’affiche que les niveaux du cycle de l�
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $primaireLevel = Level::factory()->primaire()->create();
     $secondaireLevel = Level::factory()->create();
 
@@ -33,7 +33,7 @@ test('un directeur crée une tranche', function () {
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
 
     Livewire::test(Index::class)
         ->set('school_year_id', $schoolYear->id)
@@ -56,7 +56,7 @@ test('un directeur peut recréer une tranche à la même position après suppres
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $installment = Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 1]);
 
     Livewire::test(Index::class)
@@ -85,7 +85,7 @@ test('un directeur configure les tarifs d’un niveau en laissant une tranche vi
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $level = Level::factory()->create();
     $installment1 = Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 1]);
     $installment2 = Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 2]);
@@ -111,7 +111,7 @@ test('un directeur peut reconfigurer un niveau dont le tarif avait été supprim
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $level = Level::factory()->create();
 
     $trashedLevelFee = LevelFee::factory()->create([
@@ -142,7 +142,7 @@ test('reconfigurer un niveau retire un montant de tranche précédemment saisi',
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $level = Level::factory()->create();
     $installment = Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 1]);
 
@@ -179,7 +179,7 @@ test('le champ frais d’inscription affecté n’apparaît que pour un niveau s
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $secondaireLevel = Level::factory()->create();
 
     Livewire::test(Index::class)
@@ -194,7 +194,7 @@ test('le champ frais d’inscription affecté n’apparaît pas pour un niveau p
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $primaireLevel = Level::factory()->primaire()->create();
 
     Livewire::test(Index::class)
@@ -209,7 +209,7 @@ test('un message confirme l’enregistrement d’une tranche puis d’un tarif d
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $level = Level::factory()->create();
 
     $component = Livewire::test(Index::class)
@@ -237,8 +237,8 @@ test('changer d’année scolaire efface les messages de confirmation affichés'
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYearA = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
-    $schoolYearB = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYearA = SchoolYear::factory()->create(['is_current' => true]);
+    $schoolYearB = SchoolYear::factory()->create();
 
     Livewire::test(Index::class)
         ->set('school_year_id', $schoolYearA->id)
@@ -258,7 +258,7 @@ test('dupliquer les montants depuis un autre niveau déjà configuré pré-rempl
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $installment = Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 1]);
     $sourceLevel = Level::factory()->create();
     $targetLevel = Level::factory()->create();
@@ -296,7 +296,7 @@ test('le sélecteur de duplication n’apparaît pas quand aucun autre niveau n�
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true]);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $level = Level::factory()->create();
 
     Livewire::test(Index::class)

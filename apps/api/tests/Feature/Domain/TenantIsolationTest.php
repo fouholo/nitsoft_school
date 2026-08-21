@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Notifications\Models\SmsTemplate;
@@ -17,11 +16,12 @@ use App\Domain\Notifications\Models\SmsTemplate;
  * docs/superpowers/specs/2026-08-06-parents-autoinscription-design.md.
  * `Subject` n'est plus tenant-aware depuis le catalogue global de matières
  * géré par le SaaS admin — retiré de ce dataset.
+ * `SchoolYear` n'est plus tenant-aware depuis le référentiel partagé entre
+ * établissements (voir SchoolYearPolicyTest) — retiré de ce dataset.
  */
 dataset('tenant_aware_models', [
     'students' => [Student::class],
     'sms_templates' => [SmsTemplate::class],
-    'school_years' => [SchoolYear::class],
 ]);
 
 test('un modèle tenant-aware ne retourne que les données de l’établissement courant', function (string $modelClass) {

@@ -17,7 +17,7 @@ beforeEach(function () {
     actingInEstablishment($this->establishment);
     $this->actingAs($this->admin);
 
-    $this->schoolYear = SchoolYear::factory()->create(['establishment_id' => $this->establishment->id, 'is_current' => true]);
+    $this->schoolYear = SchoolYear::factory()->create(['is_current' => true]);
 });
 
 test('affecter un enseignant à une classe primaire ne demande pas de matière', function () {

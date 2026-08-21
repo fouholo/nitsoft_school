@@ -48,7 +48,7 @@ test('les compteurs à zéro affichent un texte explicatif plutôt qu’un chiff
 test('le badge de cycle et l’année scolaire courante s’affichent quand disponibles', function () {
     $establishment = Establishment::factory()->create(['type' => EstablishmentType::Secondaire]);
     $directeur = createUserWithRole($establishment, 'directeur');
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id, 'is_current' => true, 'label' => '2026-2027']);
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true, 'label' => '2026-2027']);
     actingInEstablishment($establishment);
     test()->actingAs($directeur);
 

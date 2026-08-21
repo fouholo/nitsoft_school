@@ -174,7 +174,7 @@ test('l’instantané du paiement exclut les frais d’inscription déjà couver
     actingInEstablishment($establishment);
 
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
     Installment::create([
         'establishment_id' => $establishment->id,
         'school_year_id' => $schoolYear->id,
@@ -218,7 +218,7 @@ test('la date et la somme du prochain versement affichées sur le reçu correspo
     actingInEstablishment($establishment);
 
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
 
     Installment::create([
         'establishment_id' => $establishment->id,

@@ -96,7 +96,7 @@ test('l’instantané financier reste figé sur un paiement même après un paie
     $establishment = Establishment::factory()->create();
     $accountant = createUserWithRole($establishment, 'caissier');
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
 
     $installment1 = Installment::create([
         'establishment_id' => $establishment->id,
@@ -145,7 +145,7 @@ test('un élève soldé n’a pas de prochain versement dans l’instantané', f
     $establishment = Establishment::factory()->create();
     $accountant = createUserWithRole($establishment, 'caissier');
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
 
     $installment = Installment::create([
         'establishment_id' => $establishment->id,
@@ -175,7 +175,7 @@ test('un paiement qui couvre uniquement les frais d’inscription n’inflate pa
     $establishment = Establishment::factory()->create();
     $accountant = createUserWithRole($establishment, 'caissier');
     $student = Student::factory()->create(['establishment_id' => $establishment->id]);
-    $schoolYear = SchoolYear::factory()->create(['establishment_id' => $establishment->id]);
+    $schoolYear = SchoolYear::factory()->create();
 
     $installment = Installment::create([
         'establishment_id' => $establishment->id,

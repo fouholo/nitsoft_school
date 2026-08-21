@@ -8,6 +8,14 @@ use App\Domain\Academics\Models\SchoolYear;
 use App\Models\User;
 use App\Policies\Concerns\ChecksEstablishmentMembership;
 
+/**
+ * Référentiel partagé entre établissements (voir migration
+ * 2026_08_20_010000_make_school_years_global) : tout membre d'un
+ * établissement peut consulter la liste, mais la saisie (création,
+ * modification, suppression) est réservée aux administrateurs SaaS — qui la
+ * contournent de toute façon via Gate::before, donc ces méthodes renvoient
+ * false pour tout le monde d'autre.
+ */
 class SchoolYearPolicy
 {
     use ChecksEstablishmentMembership;
@@ -19,22 +27,21 @@ class SchoolYearPolicy
 
     public function view(User $user, SchoolYear $schoolYear): bool
     {
-        return $this->belongsToSameEstablishment($user, $schoolYear->establishment_id);
+        return $this->isMemberOfCurrentEstablishment($user);
     }
 
     public function create(User $user): bool
     {
-        return $this->isAdminOfCurrentEstablishment($user);
+        return false;
     }
 
     public function update(User $user, SchoolYear $schoolYear): bool
     {
-        return $this->belongsToSameEstablishment($user, $schoolYear->establishment_id)
-            && $this->isAdminOfCurrentEstablishment($user);
+        return false;
     }
 
     public function delete(User $user, SchoolYear $schoolYear): bool
     {
-        return $this->update($user, $schoolYear);
+        return false;
     }
 }
