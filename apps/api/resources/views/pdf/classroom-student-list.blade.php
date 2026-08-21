@@ -5,7 +5,8 @@
     <title>Liste des élèves</title>
     <style>
         body { font-family: "DejaVu Sans", sans-serif; font-size: 12px; color: #1e293b; }
-        .subtitle { text-align: center; margin-bottom: 20px; font-weight: bold; font-size: 18px; text-decoration: underline; }
+        .subtitle { text-align: center; margin-bottom: 4px; font-weight: bold; font-size: 18px; text-decoration: underline; }
+        .filters-subtitle { text-align: center; margin-bottom: 20px; font-size: 12px; color: #475569; font-style: italic; }
         table.students { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
         table.students th, table.students td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; }
         table.students th { background-color: #f1f5f9; }
@@ -17,6 +18,9 @@
     @include('pdf.partials.reports-header', ['establishment' => $classroom->establishment, 'generalInformation' => $generalInformation])
 
     <p class="subtitle">{{ \Illuminate\Support\Str::upper('Liste des élèves — '.$classroom->name) }}</p>
+    @if (($filterLabels ?? []) !== [])
+        <p class="filters-subtitle">{{ implode(' · ', $filterLabels) }}</p>
+    @endif
 
     <table class="students">
         <thead>

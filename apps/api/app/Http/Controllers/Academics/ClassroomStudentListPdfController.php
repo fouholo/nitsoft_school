@@ -30,6 +30,8 @@ class ClassroomStudentListPdfController extends Controller
         $repeatingFilter = $request->query('repeating');
         $scholarshipFilter = $request->query('scholarship');
 
+        $filterLabels = $this->filterLabels($genderFilter, $assignedFilter, $repeatingFilter, $scholarshipFilter);
+
         $students = $classroom->enrollments()
             ->where('status', 'active')
             ->when($genderFilter, fn ($query) => $query->whereHas('student', fn ($studentQuery) => $studentQuery->where('gender', $genderFilter)))
@@ -46,12 +48,47 @@ class ClassroomStudentListPdfController extends Controller
             'classroom' => $classroom,
             'students' => $students,
             'generalInformation' => GeneralInformation::current(),
+            'filterLabels' => $filterLabels,
         ])->setPaper('a4');
 
-        $filename = Str::slug("liste-eleves-{$classroom->name}").'.pdf';
+        $filename = Str::slug("liste-eleves-{$classroom->name}".($filterLabels ? '-'.implode('-', $filterLabels) : '')).'.pdf';
 
         return $request->boolean('download')
             ? $pdf->download($filename)
             : $pdf->stream($filename);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function filterLabels(?string $gender, ?string $assigned, ?string $repeating, ?string $scholarship): array
+    {
+        $labels = [];
+
+        if ($gender === 'm') {
+            $labels[] = 'Garçons';
+        } elseif ($gender === 'f') {
+            $labels[] = 'Filles';
+        }
+
+        if ($assigned === '1') {
+            $labels[] = 'Affectés';
+        } elseif ($assigned === '0') {
+            $labels[] = 'Non affectés';
+        }
+
+        if ($repeating === '1') {
+            $labels[] = 'Redoublants';
+        } elseif ($repeating === '0') {
+            $labels[] = 'Non redoublants';
+        }
+
+        if ($scholarship === '1') {
+            $labels[] = 'Boursiers';
+        } elseif ($scholarship === '0') {
+            $labels[] = 'Non boursiers';
+        }
+
+        return $labels;
     }
 }

@@ -144,10 +144,24 @@ function renderFilteredClassroomStudentListHtml(Classroom $classroom, array $fil
         ->sortBy([['last_name', 'asc'], ['first_name', 'asc']])
         ->values();
 
+    $filterLabels = [];
+    $labelMap = [
+        'gender' => ['m' => 'Garçons', 'f' => 'Filles'],
+        'assigned' => ['1' => 'Affectés', '0' => 'Non affectés'],
+        'repeating' => ['1' => 'Redoublants', '0' => 'Non redoublants'],
+        'scholarship' => ['1' => 'Boursiers', '0' => 'Non boursiers'],
+    ];
+    foreach ($labelMap as $key => $values) {
+        if (isset($filters[$key], $values[$filters[$key]])) {
+            $filterLabels[] = $values[$filters[$key]];
+        }
+    }
+
     return view('pdf.classroom-student-list', [
         'classroom' => $classroom,
         'students' => $students,
         'generalInformation' => GeneralInformation::current(),
+        'filterLabels' => $filterLabels,
     ])->render();
 }
 
@@ -243,6 +257,33 @@ test('deux filtres combinés se cumulent (intersection)', function () {
     expect($html)->toContain('Correspond')
         ->and($html)->not->toContain('MauvaisSexe')
         ->and($html)->not->toContain('MauvaisRedoublement');
+});
+
+test('le titre affiche les libellés des filtres actifs', function () {
+    $establishment = Establishment::factory()->create(['type' => EstablishmentType::Secondaire]);
+    actingInEstablishment($establishment);
+
+    $schoolYear = SchoolYear::factory()->create();
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+
+    $html = renderFilteredClassroomStudentListHtml($classroom, [
+        'gender' => 'f',
+        'repeating' => '1',
+        'scholarship' => '0',
+    ]);
+
+    expect($html)->toContain('Filles · Redoublants · Non boursiers');
+});
+
+test('aucun libellé de filtre ne s’affiche quand aucun filtre n’est appliqué', function () {
+    $establishment = Establishment::factory()->create();
+    actingInEstablishment($establishment);
+
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id]);
+
+    $html = renderClassroomStudentListHtml($classroom);
+
+    expect($html)->not->toContain('<p class="filters-subtitle">');
 });
 
 test('un filtre sans correspondance affiche le message de classe vide', function () {
