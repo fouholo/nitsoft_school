@@ -53,6 +53,7 @@
                     ['label' => 'Dépenses', 'route' => 'billing.expenses.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Expense::class],
                     ['label' => 'Suivi des paiements', 'route' => 'billing.payment-tracking.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Payment::class],
                     ['label' => 'Réductions', 'route' => 'billing.discounts.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Discount::class],
+                    ['label' => 'Bilan financier', 'route' => 'billing.financial-summary.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Payment::class],
                 ]],
                 ['type' => 'group', 'label' => 'SMS', 'icon' => 'chat', 'active' => 'notifications.*', 'children' => [
                     ['label' => 'Modèles', 'route' => 'notifications.sms-templates.index', 'ability' => 'viewAny', 'model' => \App\Domain\Notifications\Models\SmsTemplate::class],

@@ -194,7 +194,12 @@ class User extends Authenticatable
 
     public function currentRoleLabel(): string
     {
-        return match ($this->currentRole()) {
+        return self::roleLabel($this->currentRole());
+    }
+
+    public static function roleLabel(?string $role): string
+    {
+        return match ($role) {
             'directeur' => 'Directeur',
             'gestionnaire' => 'Gestionnaire',
             'enseignant' => 'Enseignant',

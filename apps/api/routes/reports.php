@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Academics\ClassroomIdCardsPdfController;
 use App\Http\Controllers\Academics\ClassroomStudentListPdfController;
 use App\Http\Controllers\Academics\StudentIdCardPdfController;
+use App\Http\Controllers\Billing\FinancialSummaryPdfController;
 use App\Http\Controllers\Billing\PaymentReminderPdfController;
 use App\Http\Controllers\Billing\PaymentRemindersBatchPdfController;
 use App\Livewire\Reports\Index;
@@ -17,4 +18,5 @@ Route::prefix('rapports')->name('reports.')->group(function (): void {
     Route::get('/eleves/{student}/carte', StudentIdCardPdfController::class)->name('student-id-card-pdf');
     Route::get('/eleves/{student}/relance', PaymentReminderPdfController::class)->name('payment-reminder-pdf');
     Route::get('/relances', PaymentRemindersBatchPdfController::class)->name('payment-reminders-pdf');
+    Route::get('/bilan-financier', FinancialSummaryPdfController::class)->name('financial-summary-pdf');
 });
