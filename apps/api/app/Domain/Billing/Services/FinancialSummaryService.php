@@ -111,6 +111,34 @@ final class FinancialSummaryService
     }
 
     /**
+     * Totaux agrégés (sans ventilation par utilisateur ni par
+     * établissement) sur un ensemble d'établissements — utilisé par le
+     * tableau de bord (santé financière, tendance), qui n'a besoin que
+     * d'une somme, pas du détail rôle/utilisateur de summaryByEstablishments().
+     *
+     * @param  list<int>  $establishmentIds
+     * @return array{collected: float, spent: float, net: float}
+     */
+    public function totalsForEstablishments(CarbonInterface $start, CarbonInterface $end, array $establishmentIds): array
+    {
+        if ($establishmentIds === []) {
+            return ['collected' => 0.0, 'spent' => 0.0, 'net' => 0.0];
+        }
+
+        $collected = (float) Payment::withoutTenant()
+            ->whereIn('establishment_id', $establishmentIds)
+            ->whereBetween('paid_at', [$start, $end])
+            ->sum('amount');
+
+        $spent = (float) Expense::withoutTenant()
+            ->whereIn('establishment_id', $establishmentIds)
+            ->whereBetween('spent_at', [$start, $end])
+            ->sum('amount');
+
+        return ['collected' => $collected, 'spent' => $spent, 'net' => $collected - $spent];
+    }
+
+    /**
      * Regroupe le résultat de summaryByUser() par rôle, dans l'ordre
      * hiérarchique usuel de l'application, les rôles non reconnus ou
      * sans rattachement actif (role === null) toujours en dernier

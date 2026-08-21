@@ -144,6 +144,45 @@ test('groupByRole place les rôles non reconnus ou sans rattachement sous « Aut
         ->and($lastGroup['collected'])->toBe(500.0);
 });
 
+test('totalsForEstablishments agrège les montants sans ventilation', function () {
+    $establishment = Establishment::factory()->create();
+    actingInEstablishment($establishment);
+
+    $caissier = createUserWithRole($establishment, 'caissier');
+
+    Payment::factory()->create(['establishment_id' => $establishment->id, 'received_by' => $caissier->id, 'amount' => 10000, 'paid_at' => now()]);
+    Payment::factory()->create(['establishment_id' => $establishment->id, 'received_by' => $caissier->id, 'amount' => 5000, 'paid_at' => now()]);
+    Expense::factory()->create(['establishment_id' => $establishment->id, 'recorded_by' => $caissier->id, 'amount' => 2000, 'spent_at' => now()->toDateString()]);
+
+    $totals = (new FinancialSummaryService)->totalsForEstablishments(now()->subDay(), now()->addDay(), [$establishment->id]);
+
+    expect($totals)->toBe(['collected' => 15000.0, 'spent' => 2000.0, 'net' => 13000.0]);
+});
+
+test('totalsForEstablishments renvoie des zéros pour une liste d’établissements vide', function () {
+    $totals = (new FinancialSummaryService)->totalsForEstablishments(now()->subDay(), now()->addDay(), []);
+
+    expect($totals)->toBe(['collected' => 0.0, 'spent' => 0.0, 'net' => 0.0]);
+});
+
+test('totalsForEstablishments additionne plusieurs établissements sans les distinguer', function () {
+    $foundation = \App\Domain\Establishments\Models\Foundation::factory()->create();
+    $schoolA = Establishment::factory()->create(['foundation_id' => $foundation->id]);
+    $schoolB = Establishment::factory()->create(['foundation_id' => $foundation->id]);
+
+    actingInEstablishment($schoolA);
+    $directeurA = createUserWithRole($schoolA, 'directeur');
+    Payment::factory()->create(['establishment_id' => $schoolA->id, 'received_by' => $directeurA->id, 'amount' => 1000]);
+
+    actingInEstablishment($schoolB);
+    $directeurB = createUserWithRole($schoolB, 'directeur');
+    Payment::factory()->create(['establishment_id' => $schoolB->id, 'received_by' => $directeurB->id, 'amount' => 4000]);
+
+    $totals = (new FinancialSummaryService)->totalsForEstablishments(now()->subDay(), now()->addDay(), [$schoolA->id, $schoolB->id]);
+
+    expect($totals['collected'])->toBe(5000.0);
+});
+
 test('summaryByEstablishments retourne un bloc par établissement avec ses propres montants', function () {
     $foundation = \App\Domain\Establishments\Models\Foundation::factory()->create();
     $schoolA = Establishment::factory()->create(['foundation_id' => $foundation->id, 'name' => 'École A']);

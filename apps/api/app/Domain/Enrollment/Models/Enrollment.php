@@ -135,7 +135,13 @@ class Enrollment extends Model
             return collect();
         }
 
-        return Installment::where('school_year_id', $this->school_year_id)
+        // Scopage explicite par establishment_id (plutôt que le global
+        // scope implicite de TenantScoped) : nécessaire pour rester correct
+        // quand cette inscription est chargée hors du tenant courant, comme
+        // le fait DashboardAlertsService pour un fondateur multi-écoles.
+        return Installment::withoutTenant()
+            ->where('establishment_id', $this->establishment_id)
+            ->where('school_year_id', $this->school_year_id)
             ->whereIn('position', array_keys($amountsByPosition))
             ->orderBy('due_date')
             ->get()

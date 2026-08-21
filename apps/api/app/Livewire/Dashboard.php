@@ -49,6 +49,8 @@ class Dashboard extends Component
             ? app(PaymentTrackingService::class)->balances($schoolYearId)->where('balance', '>', 0)
             : collect();
 
+        $groupEstablishmentsCount = $user->founderGroupEstablishments()->count();
+
         return view('livewire.dashboard', [
             'noEstablishment' => false,
             'role' => $role,
@@ -65,6 +67,8 @@ class Dashboard extends Component
                 ->whereIn('role', ['directeur', 'gestionnaire', 'enseignant', 'caissier', 'educateur'])
                 ->where('is_active', true)
                 ->count(),
+            'isMultiSchoolFounder' => $groupEstablishmentsCount >= 2,
+            'groupEstablishmentsCount' => $groupEstablishmentsCount,
         ]);
     }
 }

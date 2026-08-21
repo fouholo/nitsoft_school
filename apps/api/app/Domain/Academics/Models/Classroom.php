@@ -83,6 +83,14 @@ class Classroom extends Model
         return $this->hasMany(Enrollment::class);
     }
 
+    /**
+     * @return HasMany<TeacherAssignment, $this>
+     */
+    public function teacherAssignments(): HasMany
+    {
+        return $this->hasMany(TeacherAssignment::class);
+    }
+
     public function isGradable(): bool
     {
         return $this->level->cycle !== Cycle::Prescolaire;

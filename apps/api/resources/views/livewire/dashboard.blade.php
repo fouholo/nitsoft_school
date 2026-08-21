@@ -29,6 +29,13 @@
                     <span class="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-700">Cycle Primaire</span>
                 @endif
             @endif
+
+            @if ($isMultiSchoolFounder)
+                <span class="text-stone-300">·</span>
+                <span class="rounded-full bg-orange-50 px-2 py-0.5 text-xs font-medium text-orange-700">
+                    Fondateur d'un groupe de {{ $groupEstablishmentsCount }} écoles
+                </span>
+            @endif
         </div>
 
         <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -100,11 +107,28 @@
                         <div>
                             <p class="text-2xl font-semibold text-stone-900">{{ $staffCount }}</p>
                             <p class="text-sm text-stone-500">Membres du personnel</p>
+                            @if ($staffCount === 0)
+                                <p class="mt-0.5 text-xs text-stone-500">Aucun membre du personnel enregistré</p>
+                            @endif
                         </div>
                     </div>
                 </div>
             @endif
         </div>
+
+        @if (in_array($role, ['fondateur', 'directeur', 'gestionnaire'], true))
+            @if ($isMultiSchoolFounder)
+                <livewire:dashboard.establishment-filter />
+            @endif
+
+            <livewire:dashboard.financial-health-widget />
+            <livewire:dashboard.trend-widget />
+            <livewire:dashboard.alerts-widget />
+
+            @if ($isMultiSchoolFounder)
+                <livewire:dashboard.establishment-comparison-widget />
+            @endif
+        @endif
 
         @if (
             auth()->user()->can('viewAny', \App\Domain\Enrollment\Models\Student::class)

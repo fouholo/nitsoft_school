@@ -16,7 +16,6 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
@@ -53,7 +52,7 @@ class FinancialSummaryPdfController extends Controller
         }
 
         $service = app(FinancialSummaryService::class);
-        $groupEstablishments = $this->founderGroupEstablishments($user);
+        $groupEstablishments = $user->founderGroupEstablishments();
         $isMultiSchoolFounder = $groupEstablishments->count() >= 2;
 
         $establishment = Establishment::findOrFail((int) app('currentEstablishmentId'));
@@ -106,20 +105,6 @@ class FinancialSummaryPdfController extends Controller
         return $request->boolean('download')
             ? $pdf->download($filename)
             : $pdf->stream($filename);
-    }
-
-    /**
-     * @return Collection<int, Establishment>
-     */
-    private function founderGroupEstablishments(User $user): Collection
-    {
-        $foundationIds = $user->foundations()->wherePivot('is_active', true)->pluck('foundations.id');
-
-        if ($foundationIds->isEmpty()) {
-            return collect();
-        }
-
-        return Establishment::whereIn('foundation_id', $foundationIds)->orderBy('name')->get();
     }
 
     /**

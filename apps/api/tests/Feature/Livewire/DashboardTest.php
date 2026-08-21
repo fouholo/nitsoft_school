@@ -73,3 +73,65 @@ test('un enseignant ne voit pas le raccourci "Suivi des paiements" mais voit les
         ->assertSee('Présences')
         ->assertDontSee('Suivi des paiements');
 });
+
+test('l’absence de personnel affiche un texte explicatif plutôt qu’un simple zéro', function () {
+    // Un fondateur d'établissement indépendant n'a pas de ligne
+    // establishment_user (voir Foundation) : il n'est jamais compté dans
+    // staffCount, contrairement à un directeur/gestionnaire/caissier/
+    // educateur, qui se compte lui-même comme personnel.
+    $establishment = Establishment::factory()->create();
+    $founder = createUserWithRole($establishment, 'fondateur');
+    actingInEstablishment($establishment);
+    test()->actingAs($founder);
+
+    Livewire::test(Dashboard::class)->assertSee('Aucun membre du personnel enregistré');
+});
+
+test('fondateur, directeur et gestionnaire voient les nouvelles sections du tableau de bord', function (string $role) {
+    $establishment = Establishment::factory()->create();
+    $user = createUserWithRole($establishment, $role);
+    actingInEstablishment($establishment);
+    test()->actingAs($user);
+
+    Livewire::test(Dashboard::class)
+        ->assertSee('Santé financière')
+        ->assertSee('Tendance des encaissements')
+        ->assertSee('Alertes');
+})->with(['fondateur', 'directeur', 'gestionnaire']);
+
+test('caissier, éducateur et enseignant ne voient pas les nouvelles sections du tableau de bord', function (string $role) {
+    $establishment = Establishment::factory()->create();
+    $user = createUserWithRole($establishment, $role);
+    actingInEstablishment($establishment);
+    test()->actingAs($user);
+
+    Livewire::test(Dashboard::class)
+        ->assertDontSee('Santé financière')
+        ->assertDontSee('Tendance des encaissements')
+        ->assertDontSee('Alertes');
+})->with(['caissier', 'educateur', 'enseignant']);
+
+test('un fondateur d’un groupe multi-écoles voit un badge et les sections multi-écoles', function () {
+    $foundation = Foundation::factory()->create();
+    $schoolA = Establishment::factory()->create(['foundation_id' => $foundation->id]);
+    Establishment::factory()->create(['foundation_id' => $foundation->id]);
+    $founder = createFounder($foundation);
+    actingInEstablishment($schoolA);
+    test()->actingAs($founder);
+
+    Livewire::test(Dashboard::class)
+        ->assertSee('Fondateur d\'un groupe de 2 écoles', false)
+        ->assertSee('Écoles')
+        ->assertSee('Comparaison entre écoles');
+});
+
+test('un fondateur d’une école indépendante ne voit pas le badge ni les sections multi-écoles', function () {
+    $establishment = Establishment::factory()->create();
+    $founder = createUserWithRole($establishment, 'fondateur');
+    actingInEstablishment($establishment);
+    test()->actingAs($founder);
+
+    Livewire::test(Dashboard::class)
+        ->assertDontSee('groupe de')
+        ->assertDontSee('Comparaison entre écoles');
+});

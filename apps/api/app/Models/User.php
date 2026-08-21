@@ -168,6 +168,26 @@ class User extends Authenticatable
         return $direct->concat($viaFoundations)->unique('id')->values();
     }
 
+    /**
+     * Tous les établissements des Foundation(s) dont l'utilisateur est
+     * fondateur actif — indépendant de l'établissement couramment
+     * sélectionné dans le switcher. Distinct de accessibleEstablishments() :
+     * ne retourne que le volet "groupe", jamais les établissements
+     * rattachés en direct via establishment_user.
+     *
+     * @return Collection<int, Establishment>
+     */
+    public function founderGroupEstablishments(): Collection
+    {
+        $foundationIds = $this->foundations()->wherePivot('is_active', true)->pluck('foundations.id');
+
+        if ($foundationIds->isEmpty()) {
+            return collect();
+        }
+
+        return Establishment::whereIn('foundation_id', $foundationIds)->orderBy('name')->get();
+    }
+
     public function roleFor(int $establishmentId): ?string
     {
         $directRole = EstablishmentUserPivot::query()

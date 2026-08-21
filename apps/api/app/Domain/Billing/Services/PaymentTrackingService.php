@@ -19,9 +19,14 @@ final class PaymentTrackingService
     /**
      * @return Collection<int, array{student_id: int<0, max>, due_so_far: float, total_paid: float, balance: float}>
      */
-    public function balances(int $schoolYearId, ?int $ownerId = null, ?int $studentId = null): Collection
+    public function balances(int $schoolYearId, ?int $ownerId = null, ?int $studentId = null, ?int $establishmentId = null): Collection
     {
         return Enrollment::query()
+            // $establishmentId : requêtage explicite pour un établissement
+            // qui n'est pas forcément le tenant courant (fondateur
+            // multi-écoles, voir DashboardAlertsService) — sans lui, on
+            // retombe sur le global scope implicite habituel.
+            ->when($establishmentId !== null, fn ($query) => $query->withoutTenant()->where('establishment_id', $establishmentId))
             ->where('school_year_id', $schoolYearId)
             ->where('status', 'active')
             // finance.scope_own_only (éducateur) : sans Invoice.created_by,
