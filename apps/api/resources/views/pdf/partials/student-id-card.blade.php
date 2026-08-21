@@ -24,7 +24,12 @@
     <div class="id-card-content">
         <table class="id-card-heading" cellpadding="0" cellspacing="0">
             <tr>
-                <td>
+                @if ($establishment->logo_path)
+                    <td class="id-card-logo-cell">
+                        <img src="{{ public_path('storage/'.$establishment->logo_path) }}" class="id-card-logo">
+                    </td>
+                @endif
+                <td class="id-card-heading-text">
                     <p class="id-card-establishment">{{ \Illuminate\Support\Str::upper($establishment->name) }}</p>
                     <p class="id-card-title">Carte d'identité scolaire</p>
                 </td>

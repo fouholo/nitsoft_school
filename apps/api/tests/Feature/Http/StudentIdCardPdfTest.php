@@ -128,6 +128,29 @@ test('l’image de fond configurée par un administrateur SaaS apparaît sur la 
         ->and(substr_count($html, '<img'))->toBe(1);
 });
 
+test('le logo de l’établissement apparaît à gauche de l’en-tête quand il est renseigné', function () {
+    $establishment = Establishment::factory()->create(['logo_path' => 'establishments/logo.png']);
+    actingInEstablishment($establishment);
+    $student = Student::factory()->create(['establishment_id' => $establishment->id, 'photo_path' => null]);
+
+    $html = renderStudentIdCardHtml($student);
+
+    expect($html)->toContain('class="id-card-logo"')
+        ->and($html)->toContain('establishments/logo.png')
+        ->and(substr_count($html, '<img'))->toBe(1);
+});
+
+test('sans logo d’établissement, l’en-tête reste utilisable sans image cassée', function () {
+    $establishment = Establishment::factory()->create(['logo_path' => null]);
+    actingInEstablishment($establishment);
+    $student = Student::factory()->create(['establishment_id' => $establishment->id, 'photo_path' => null]);
+
+    $html = renderStudentIdCardHtml($student);
+
+    expect($html)->not->toContain('class="id-card-logo"')
+        ->and(substr_count($html, '<img'))->toBe(0);
+});
+
 test('sans image de fond configurée, la carte reste utilisable sans image cassée', function () {
     $establishment = Establishment::factory()->create(['logo_path' => null]);
     actingInEstablishment($establishment);

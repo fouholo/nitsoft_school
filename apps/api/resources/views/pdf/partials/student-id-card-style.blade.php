@@ -33,6 +33,21 @@
         border-collapse: collapse;
     }
 
+    .id-card-logo-cell {
+        width: 8mm;
+        padding-right: 2mm;
+        vertical-align: middle;
+    }
+
+    .id-card-logo {
+        width: 8mm;
+        height: 8mm;
+    }
+
+    .id-card-heading-text {
+        vertical-align: middle;
+    }
+
     .id-card-establishment {
         margin: 0;
         font-size: 7pt;
