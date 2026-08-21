@@ -53,7 +53,7 @@ test('un membre d’un autre établissement ne peut même pas résoudre la class
     $response->assertNotFound();
 });
 
-function renderClassroomIdCardsHtml(Classroom $classroom, $students, ?SchoolYear $schoolYear = null): string
+function renderClassroomIdCardsHtml(Classroom $classroom, $students, ?SchoolYear $schoolYear = null, ?string $cardBackgroundPath = null): string
 {
     $classroom->loadMissing('establishment');
 
@@ -61,6 +61,7 @@ function renderClassroomIdCardsHtml(Classroom $classroom, $students, ?SchoolYear
         'classroom' => $classroom,
         'students' => $students,
         'schoolYear' => $schoolYear,
+        'cardBackgroundPath' => $cardBackgroundPath,
     ])->render();
 }
 
@@ -95,6 +96,17 @@ test('la planche contient une carte par élève actif, triée par nom, et exclut
         ->and($html)->not->toContain('MAT-HORS');
 
     expect(strpos($html, 'MAT-AAAA'))->toBeLessThan(strpos($html, 'MAT-ZZZZ'));
+});
+
+test('l’image de fond configurée apparaît sur chaque carte de la planche', function () {
+    $establishment = Establishment::factory()->create();
+    actingInEstablishment($establishment);
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id]);
+    $student = Student::factory()->create(['establishment_id' => $establishment->id]);
+
+    $html = renderClassroomIdCardsHtml($classroom, collect([$student]), null, 'general-information/card-background.jpg');
+
+    expect(substr_count($html, 'general-information/card-background.jpg'))->toBe(1);
 });
 
 test('une classe sans élève actif affiche un message plutôt qu’une planche vide', function () {

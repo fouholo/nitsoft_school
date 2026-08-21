@@ -7,70 +7,76 @@
      * classroom-id-cards.blade.php. Mise en page en tables (pas flex/float)
      * : c'est le seul modèle de layout fiable dans dompdf, même convention
      * que pdf/partials/reports-header.blade.php.
+     *
+     * L'identité visuelle vient entièrement de l'image de fond choisie par
+     * un administrateur SaaS (Informations générales) — ce partial ne pose
+     * que les informations, sans couleur ni décor propres.
      */
     $classroom = $classroom ?? null;
     $schoolYear = $schoolYear ?? null;
+    $cardBackgroundPath = $cardBackgroundPath ?? null;
 @endphp
 <div class="id-card">
-    <table class="id-card-band" cellpadding="0" cellspacing="0">
-        <tr>
-            @if ($establishment->logo_path)
-                <td class="id-card-logo-cell">
-                    <img src="{{ public_path('storage/'.$establishment->logo_path) }}" class="id-card-logo">
-                </td>
-            @endif
-            <td>
-                <p class="id-card-establishment">{{ \Illuminate\Support\Str::upper($establishment->name) }}</p>
-                <p class="id-card-title">Carte d'identité scolaire</p>
-            </td>
-        </tr>
-    </table>
+    @if ($cardBackgroundPath)
+        <img src="{{ public_path('storage/'.$cardBackgroundPath) }}" class="id-card-bg">
+    @endif
 
-    <table class="id-card-body" cellpadding="0" cellspacing="0">
-        <tr>
-            <td class="id-card-photo-cell">
-                <table class="id-card-photo" cellpadding="0" cellspacing="0">
-                    <tr>
-                        <td>
-                            @if ($student->photo_path)
-                                <img src="{{ public_path('storage/'.$student->photo_path) }}">
-                            @else
-                                Photo
-                            @endif
-                        </td>
-                    </tr>
-                </table>
-            </td>
-            <td>
-                <table class="id-card-info" cellpadding="0" cellspacing="0">
-                    <tr>
-                        <td colspan="2" class="id-card-name">{{ \Illuminate\Support\Str::upper($student->last_name) }} {{ $student->first_name }}</td>
-                    </tr>
-                    <tr>
-                        <td class="id-card-label">Matricule</td>
-                        <td>{{ $student->student_number ?? '—' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="id-card-label">Classe</td>
-                        <td>{{ $classroom?->name ?? '—' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="id-card-label">Année</td>
-                        <td>{{ $schoolYear?->label ?? '—' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="id-card-label">Né(e) le</td>
-                        <td>
-                            {{ $student->birth_date?->format('d/m/Y') ?? '—' }}
-                            @if ($student->birth_place)
-                                à {{ $student->birth_place }}
-                            @endif
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
+    <div class="id-card-content">
+        <table class="id-card-heading" cellpadding="0" cellspacing="0">
+            <tr>
+                <td>
+                    <p class="id-card-establishment">{{ \Illuminate\Support\Str::upper($establishment->name) }}</p>
+                    <p class="id-card-title">Carte d'identité scolaire</p>
+                </td>
+            </tr>
+        </table>
+
+        <table class="id-card-body" cellpadding="0" cellspacing="0">
+            <tr>
+                <td class="id-card-photo-cell">
+                    <table class="id-card-photo" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td>
+                                @if ($student->photo_path)
+                                    <img src="{{ public_path('storage/'.$student->photo_path) }}">
+                                @else
+                                    Photo
+                                @endif
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td class="id-card-info-cell">
+                    <table class="id-card-info" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td colspan="2" class="id-card-name">{{ \Illuminate\Support\Str::upper($student->last_name) }} {{ $student->first_name }}</td>
+                        </tr>
+                        <tr>
+                            <td class="id-card-label">Matricule</td>
+                            <td>{{ $student->student_number ?? '—' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="id-card-label">Classe</td>
+                            <td>{{ $classroom?->name ?? '—' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="id-card-label">Année</td>
+                            <td>{{ $schoolYear?->label ?? '—' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="id-card-label">Né(e) le</td>
+                            <td>
+                                {{ $student->birth_date?->format('d/m/Y') ?? '—' }}
+                                @if ($student->birth_place)
+                                    à {{ $student->birth_place }}
+                                @endif
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
 
     <div class="id-card-footer">
         {{ $establishment->address }}

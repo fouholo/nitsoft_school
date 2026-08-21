@@ -3,8 +3,6 @@
         width: 85.6mm;
         height: 53.98mm;
         box-sizing: border-box;
-        border: 0.3mm solid #cbd5e1;
-        border-radius: 3mm;
         overflow: hidden;
         position: relative;
         background: #ffffff;
@@ -12,25 +10,27 @@
         color: #1e293b;
     }
 
-    .id-card-band {
+    .id-card-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 85.6mm;
+        height: 53.98mm;
+    }
+
+    .id-card-content {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 85.6mm;
+        height: 53.98mm;
+        box-sizing: border-box;
+        padding: 5.5mm 5mm;
+    }
+
+    .id-card-heading {
         width: 100%;
         border-collapse: collapse;
-        background: #c2410c;
-    }
-
-    .id-card-band td {
-        padding: 2mm 3mm;
-        color: #ffffff;
-        vertical-align: middle;
-    }
-
-    .id-card-logo-cell {
-        width: 8mm;
-        padding-right: 0 !important;
-    }
-
-    .id-card-logo {
-        height: 6mm;
     }
 
     .id-card-establishment {
@@ -46,7 +46,7 @@
         line-height: 7pt;
         letter-spacing: 0.3pt;
         text-transform: uppercase;
-        color: #fde4d1;
+        color: #57534e;
     }
 
     .id-card-body {
@@ -55,7 +55,7 @@
     }
 
     .id-card-body td {
-        padding: 2mm 0 0 3mm;
+        padding-top: 2.5mm;
         vertical-align: top;
     }
 
@@ -63,13 +63,16 @@
         width: 19mm;
     }
 
+    .id-card-info-cell {
+        padding-left: 3mm;
+    }
+
     .id-card-photo {
         width: 16mm;
         height: 20mm;
         border-collapse: collapse;
-        border: 0.3mm solid #cbd5e1;
-        border-radius: 1mm;
-        background: #f5f5f4;
+        border: 0.3mm solid #a8a29e;
+        background: rgba(255, 255, 255, 0.6);
         overflow: hidden;
     }
 
@@ -79,7 +82,7 @@
         padding: 0;
         text-align: center;
         vertical-align: middle;
-        color: #a8a29e;
+        color: #78716c;
         font-size: 5.5pt;
     }
 
@@ -111,21 +114,17 @@
     .id-card-label {
         width: 15mm;
         font-weight: bold;
-        color: #78716c;
+        color: #57534e;
     }
 
     .id-card-footer {
         position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: #f5f5f4;
-        border-top: 0.2mm solid #e7e5e4;
-        padding: 1.3mm 3mm;
+        bottom: 3.5mm;
+        left: 5mm;
+        right: 5mm;
         font-size: 5pt;
         line-height: 6.5pt;
         color: #57534e;
         text-align: center;
-        box-sizing: border-box;
     }
 </style>

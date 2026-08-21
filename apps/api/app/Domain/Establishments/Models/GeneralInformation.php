@@ -12,6 +12,7 @@ class GeneralInformation extends Model
         'nom_ministere',
         'annee_scolaire_courante',
         'armoirie_path',
+        'card_background_path',
     ];
 
     public static function current(): self

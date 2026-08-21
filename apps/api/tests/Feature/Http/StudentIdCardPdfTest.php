@@ -50,13 +50,14 @@ test('un membre d’un autre établissement ne peut même pas résoudre l’él�
     $response->assertNotFound();
 });
 
-function renderStudentIdCardHtml(Student $student, ?Classroom $classroom = null, ?SchoolYear $schoolYear = null): string
+function renderStudentIdCardHtml(Student $student, ?Classroom $classroom = null, ?SchoolYear $schoolYear = null, ?string $cardBackgroundPath = null): string
 {
     return view('pdf.student-id-card', [
         'student' => $student,
         'establishment' => $student->establishment,
         'classroom' => $classroom,
         'schoolYear' => $schoolYear,
+        'cardBackgroundPath' => $cardBackgroundPath,
     ])->render();
 }
 
@@ -113,4 +114,26 @@ test('sans photo, un espace réservé s’affiche plutôt qu’une image cassée
 
     expect($html)->toContain('Photo')
         ->and(substr_count($html, '<img'))->toBe(0);
+});
+
+test('l’image de fond configurée par un administrateur SaaS apparaît sur la carte', function () {
+    $establishment = Establishment::factory()->create(['logo_path' => null]);
+    actingInEstablishment($establishment);
+    $student = Student::factory()->create(['establishment_id' => $establishment->id, 'photo_path' => null]);
+
+    $html = renderStudentIdCardHtml($student, cardBackgroundPath: 'general-information/card-background.jpg');
+
+    expect($html)->toContain('class="id-card-bg"')
+        ->and($html)->toContain('general-information/card-background.jpg')
+        ->and(substr_count($html, '<img'))->toBe(1);
+});
+
+test('sans image de fond configurée, la carte reste utilisable sans image cassée', function () {
+    $establishment = Establishment::factory()->create(['logo_path' => null]);
+    actingInEstablishment($establishment);
+    $student = Student::factory()->create(['establishment_id' => $establishment->id, 'photo_path' => null]);
+
+    $html = renderStudentIdCardHtml($student);
+
+    expect(substr_count($html, '<img'))->toBe(0);
 });

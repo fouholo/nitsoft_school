@@ -61,6 +61,37 @@ test('remplacer l’armoirie supprime l’ancienne du stockage', function () {
     Storage::disk('public')->assertExists($info->armoirie_path);
 });
 
+test('un super admin peut téléverser une image de fond pour la carte d’identité scolaire', function () {
+    Storage::fake('public');
+
+    Livewire::test(Edit::class)
+        ->set('cardBackground', UploadedFile::fake()->image('fond.jpg')->size(200))
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $info = GeneralInformation::current();
+
+    expect($info->card_background_path)->not->toBeNull();
+    Storage::disk('public')->assertExists($info->card_background_path);
+});
+
+test('remplacer l’image de fond de la carte supprime l’ancienne du stockage', function () {
+    Storage::fake('public');
+    Storage::disk('public')->put('general-information/old-fond.jpg', 'contenu-factice');
+
+    GeneralInformation::current()->update(['card_background_path' => 'general-information/old-fond.jpg']);
+
+    Livewire::test(Edit::class)
+        ->set('cardBackground', UploadedFile::fake()->image('nouveau-fond.jpg')->size(200))
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $info = GeneralInformation::current();
+
+    Storage::disk('public')->assertMissing('general-information/old-fond.jpg');
+    Storage::disk('public')->assertExists($info->card_background_path);
+});
+
 test('un directeur d’établissement ne peut pas accéder à l’écran', function () {
     $admin = createUserWithRole($this->establishment, 'directeur');
     $this->actingAs($admin);

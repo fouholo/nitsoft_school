@@ -24,6 +24,16 @@
         </div>
 
         <div class="sm:col-span-2">
+            <label class="block text-sm font-medium text-stone-700">Image de fond de la carte d'identité scolaire</label>
+            <p class="mt-1 text-xs text-stone-500">Format carte de crédit (85,6 × 53,98 mm) — prévoyez un espace lisible pour la photo et les informations de l'élève.</p>
+            @if ($existingCardBackgroundPath)
+                <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($existingCardBackgroundPath) }}" alt="Fond de carte actuel" class="mt-2 mb-2 h-24 w-auto rounded-lg border border-stone-200 object-cover">
+            @endif
+            <input type="file" wire:model="cardBackground" class="mt-1 block w-full text-sm">
+            @error('cardBackground') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+        </div>
+
+        <div class="sm:col-span-2">
             <button type="submit" class="rounded-lg bg-orange-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-800">
                 Enregistrer
             </button>

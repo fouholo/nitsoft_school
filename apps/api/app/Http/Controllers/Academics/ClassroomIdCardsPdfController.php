@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Academics;
 
 use App\Domain\Academics\Models\Classroom;
+use App\Domain\Establishments\Models\GeneralInformation;
 use App\Http\Controllers\Controller;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -37,6 +38,7 @@ class ClassroomIdCardsPdfController extends Controller
             'classroom' => $classroom,
             'students' => $students,
             'schoolYear' => $classroom->schoolYear,
+            'cardBackgroundPath' => GeneralInformation::current()->card_background_path,
         ])->setPaper('a4');
 
         $filename = Str::slug("cartes-identite-{$classroom->name}").'.pdf';

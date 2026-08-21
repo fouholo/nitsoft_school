@@ -27,6 +27,7 @@
                                 'establishment' => $classroom->establishment,
                                 'classroom' => $classroom,
                                 'schoolYear' => $schoolYear,
+                                'cardBackgroundPath' => $cardBackgroundPath,
                             ])
                         </td>
                     @endforeach

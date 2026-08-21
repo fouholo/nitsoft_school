@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Academics;
 
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Enrollment\Models\Student;
+use App\Domain\Establishments\Models\GeneralInformation;
 use App\Http\Controllers\Controller;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -40,6 +41,7 @@ class StudentIdCardPdfController extends Controller
             'establishment' => $student->establishment,
             'classroom' => $enrollment?->classroom,
             'schoolYear' => $enrollment !== null ? $enrollment->schoolYear : $currentSchoolYear,
+            'cardBackgroundPath' => GeneralInformation::current()->card_background_path,
         ])->setPaper([0, 0, 242.65, 153.02]);
 
         $filename = Str::slug("carte-identite-{$student->last_name}-{$student->first_name}").'.pdf';

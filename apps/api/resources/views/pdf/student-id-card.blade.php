@@ -15,6 +15,7 @@
         'establishment' => $establishment,
         'classroom' => $classroom,
         'schoolYear' => $schoolYear,
+        'cardBackgroundPath' => $cardBackgroundPath,
     ])
 </body>
 </html>

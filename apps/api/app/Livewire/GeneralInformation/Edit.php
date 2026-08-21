@@ -28,6 +28,10 @@ class Edit extends Component
 
     public string $existingArmoiriePath = '';
 
+    public ?TemporaryUploadedFile $cardBackground = null;
+
+    public string $existingCardBackgroundPath = '';
+
     public function mount(): void
     {
         $this->record = GeneralInformation::current();
@@ -37,6 +41,7 @@ class Edit extends Component
         $this->nom_ministere = (string) $this->record->nom_ministere;
         $this->annee_scolaire_courante = (string) $this->record->annee_scolaire_courante;
         $this->existingArmoiriePath = (string) $this->record->armoirie_path;
+        $this->existingCardBackgroundPath = (string) $this->record->card_background_path;
     }
 
     public function save(): void
@@ -47,13 +52,14 @@ class Edit extends Component
             'nom_ministere' => ['nullable', 'string', 'max:255'],
             'annee_scolaire_courante' => ['nullable', 'string', 'max:255'],
             'armoirie' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:1024'],
+            'cardBackground' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:2048'],
         ]);
 
         foreach (['nom_ministere', 'annee_scolaire_courante'] as $field) {
             $data[$field] = $data[$field] !== '' ? $data[$field] : null;
         }
 
-        unset($data['armoirie']);
+        unset($data['armoirie'], $data['cardBackground']);
 
         if ($this->armoirie) {
             if ($this->record->armoirie_path) {
@@ -63,9 +69,19 @@ class Edit extends Component
             $data['armoirie_path'] = $this->armoirie->store('general-information', 'public');
         }
 
+        if ($this->cardBackground) {
+            if ($this->record->card_background_path) {
+                Storage::disk('public')->delete($this->record->card_background_path);
+            }
+
+            $data['card_background_path'] = $this->cardBackground->store('general-information', 'public');
+        }
+
         $this->record->update($data);
         $this->existingArmoiriePath = (string) $this->record->armoirie_path;
+        $this->existingCardBackgroundPath = (string) $this->record->card_background_path;
         $this->armoirie = null;
+        $this->cardBackground = null;
     }
 
     public function render()
