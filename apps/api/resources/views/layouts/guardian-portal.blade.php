@@ -16,7 +16,7 @@
             <div class="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
                 <a href="{{ route('guardian-portal.dashboard') }}" class="flex items-center gap-2 text-sm font-semibold text-stone-900">
                     <img src="{{ asset('branding/nitsoft-school-logo.png') }}" alt="" class="h-7 w-7 object-contain">
-                    {{ config('app.name') }}<span class="hidden sm:inline"> — Espace parents</span>
+                    <span class="text-blue-700">{{ config('app.name') }}</span><span class="hidden sm:inline"> — Espace parents</span>
                 </a>
 
                 <div class="flex items-center gap-3">
