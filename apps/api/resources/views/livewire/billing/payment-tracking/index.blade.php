@@ -101,15 +101,35 @@
                             </td>
                             @if ($canRecordPayments)
                                 <td class="whitespace-nowrap px-4 py-2 text-right">
-                                    @if ($row['enrollment'])
-                                        <a
-                                            href="{{ route('billing.enrollments.show', $row['enrollment']) }}"
-                                            wire:navigate
-                                            class="inline-flex min-h-11 items-center rounded-lg border border-stone-300 px-3 text-sm font-medium text-stone-700 hover:bg-stone-50"
-                                        >
-                                            Encaisser
-                                        </a>
-                                    @endif
+                                    <div class="inline-flex items-center gap-2">
+                                        @if ($row['enrollment'])
+                                            <a
+                                                href="{{ route('billing.enrollments.show', $row['enrollment']) }}"
+                                                wire:navigate
+                                                class="inline-flex min-h-11 items-center rounded-lg border border-stone-300 px-3 text-sm font-medium text-stone-700 hover:bg-stone-50"
+                                            >
+                                                Encaisser
+                                            </a>
+                                        @endif
+                                        @if ($row['balance'] > 0)
+                                            <a
+                                                href="{{ route('reports.payment-reminder-pdf', $row['student']) }}"
+                                                target="_blank"
+                                                class="inline-flex min-h-11 items-center rounded-lg border border-stone-300 px-3 text-sm font-medium text-stone-700 hover:bg-stone-50"
+                                            >
+                                                Relance
+                                            </a>
+                                        @endif
+                                        @if ($row['hasUpcomingInstallment'])
+                                            <a
+                                                href="{{ route('reports.payment-reminder-pdf', ['student' => $row['student'], 'type' => 'upcoming']) }}"
+                                                target="_blank"
+                                                class="inline-flex min-h-11 items-center rounded-lg border border-stone-300 px-3 text-sm font-medium text-stone-700 hover:bg-stone-50"
+                                            >
+                                                Échéance
+                                            </a>
+                                        @endif
+                                    </div>
                                 </td>
                             @endif
                         </tr>

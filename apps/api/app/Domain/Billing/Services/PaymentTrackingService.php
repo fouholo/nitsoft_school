@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Billing\Services;
 
+use App\Domain\Billing\Models\Installment;
 use App\Domain\Enrollment\Models\Enrollment;
 use Illuminate\Support\Collection;
 
@@ -52,5 +53,48 @@ final class PaymentTrackingService
     public function balanceForStudent(int $studentId, int $schoolYearId, ?int $ownerId = null): ?array
     {
         return $this->balances($schoolYearId, $ownerId, $studentId)->first();
+    }
+
+    /**
+     * La prochaine tranche de scolarité de l'année dont l'échéance n'est
+     * pas encore dépassée — utilisée pour la relance "échéance à venir"
+     * (par opposition à la relance "en retard", basée sur balances()).
+     */
+    public function nextUpcomingInstallment(int $schoolYearId): ?Installment
+    {
+        return Installment::where('school_year_id', $schoolYearId)
+            ->where('due_date', '>=', now()->startOfDay())
+            ->orderBy('due_date')
+            ->first();
+    }
+
+    /**
+     * Élèves dont l'inscription active n'a pas encore soldé la tranche
+     * donnée — qu'ils soient par ailleurs en retard ou non sur des
+     * tranches antérieures.
+     *
+     * @return Collection<int, array{student_id: int<0, max>, enrollment_id: int}>
+     */
+    public function studentsAwaitingInstallment(Installment $installment, ?int $ownerId = null, ?int $studentId = null): Collection
+    {
+        return Enrollment::query()
+            ->where('school_year_id', $installment->school_year_id)
+            ->where('status', 'active')
+            ->when($ownerId, fn ($query) => $query->whereHas(
+                'payments',
+                fn ($paymentsQuery) => $paymentsQuery->where('received_by', $ownerId),
+            ))
+            ->when($studentId, fn ($query) => $query->where('student_id', $studentId))
+            ->get()
+            ->filter(function (Enrollment $enrollment) use ($installment): bool {
+                $row = $enrollment->tuitionInstallmentsWithStatus()->firstWhere('position', $installment->position);
+
+                return $row !== null && $row['status'] !== 'paid';
+            })
+            ->map(fn (Enrollment $enrollment): array => [
+                'student_id' => $enrollment->student_id,
+                'enrollment_id' => $enrollment->id,
+            ])
+            ->values();
     }
 }

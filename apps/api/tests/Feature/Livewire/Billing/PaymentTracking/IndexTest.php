@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\Level;
 use App\Domain\Academics\Models\SchoolYear;
+use App\Domain\Billing\Models\Installment;
 use App\Domain\Billing\Models\Payment;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
@@ -293,4 +294,70 @@ test('la liste est paginée au-delà de 25 élèves et change de page correcteme
     $component->call('nextPage');
 
     expect($component->viewData('rows'))->toHaveCount(5);
+});
+
+test('le lien de relance n’apparaît que pour un élève en retard', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
+    $lateStudent = Student::factory()->create(['establishment_id' => $establishment->id]);
+    $onTimeStudent = Student::factory()->create(['establishment_id' => $establishment->id]);
+
+    Enrollment::factory()->create([
+        'establishment_id' => $establishment->id,
+        'school_year_id' => $schoolYear->id,
+        'student_id' => $lateStudent->id,
+        'registration_amount' => 1000,
+        'total_paid' => 0,
+    ]);
+    Enrollment::factory()->create([
+        'establishment_id' => $establishment->id,
+        'school_year_id' => $schoolYear->id,
+        'student_id' => $onTimeStudent->id,
+        'registration_amount' => 1000,
+        'total_paid' => 1000,
+    ]);
+
+    $component = Livewire::test(Index::class)->set('school_year_id', $schoolYear->id);
+
+    $component->assertSee(route('reports.payment-reminder-pdf', $lateStudent));
+    $component->assertDontSee(route('reports.payment-reminder-pdf', $onTimeStudent));
+});
+
+test('le lien d’échéance n’apparaît que pour un élève n’ayant pas soldé la prochaine tranche', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
+    Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 1, 'due_date' => now()->addDays(20)]);
+
+    $awaitingStudent = Student::factory()->create(['establishment_id' => $establishment->id]);
+    $settledStudent = Student::factory()->create(['establishment_id' => $establishment->id]);
+
+    Enrollment::factory()->create([
+        'establishment_id' => $establishment->id,
+        'school_year_id' => $schoolYear->id,
+        'student_id' => $awaitingStudent->id,
+        'registration_amount' => 5000,
+        'installment_1_amount' => 10000,
+        'total_paid' => 5000,
+    ]);
+    Enrollment::factory()->create([
+        'establishment_id' => $establishment->id,
+        'school_year_id' => $schoolYear->id,
+        'student_id' => $settledStudent->id,
+        'registration_amount' => 5000,
+        'installment_1_amount' => 10000,
+        'total_paid' => 15000,
+    ]);
+
+    $component = Livewire::test(Index::class)->set('school_year_id', $schoolYear->id);
+
+    $component->assertSee(route('reports.payment-reminder-pdf', ['student' => $awaitingStudent, 'type' => 'upcoming']));
+    $component->assertDontSee(route('reports.payment-reminder-pdf', ['student' => $settledStudent, 'type' => 'upcoming']));
 });

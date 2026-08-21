@@ -1,9 +1,11 @@
 <?php
 
+use App\Domain\Billing\Models\Installment;
 use App\Domain\Establishments\Enums\SaasAdminType;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\Foundation;
 use App\Domain\Establishments\Models\SaasAdmin;
+use App\Domain\Enrollment\Models\Enrollment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -128,4 +130,49 @@ function createSaasAdmin(string $type = 'main'): User
     ]);
 
     return $user;
+}
+
+/**
+ * Reconstruit les lignes "reste à payer" d'une inscription — même logique
+ * que App\Http\Controllers\Billing\Concerns\BuildsPaymentReminderRows,
+ * dupliquée ici pour permettre aux tests de rendre la vue PDF directement
+ * sans passer par le contrôleur (voir PaymentReminderPdfTest,
+ * PaymentRemindersBatchPdfTest).
+ *
+ * @return array{rows: list<array{label: string, due_date: ?\Carbon\Carbon, due: float, paid: float, remaining: float}>, total: float}
+ */
+function paymentReminderRowsFor(Enrollment $enrollment): array
+{
+    $rows = [];
+
+    $registrationDue = (float) ($enrollment->registration_amount ?? 0);
+    $registrationPaid = $enrollment->registrationAmountPaid();
+
+    if ($registrationDue > 0 && $registrationPaid < $registrationDue) {
+        $rows[] = [
+            'label' => "Frais d'inscription",
+            'due_date' => null,
+            'due' => $registrationDue,
+            'paid' => $registrationPaid,
+            'remaining' => $registrationDue - $registrationPaid,
+        ];
+    }
+
+    $labels = Installment::where('school_year_id', $enrollment->school_year_id)->pluck('label', 'position');
+
+    foreach ($enrollment->tuitionInstallmentsWithStatus() as $installment) {
+        if ($installment['status'] === 'paid') {
+            continue;
+        }
+
+        $rows[] = [
+            'label' => $labels->get($installment['position'], "Tranche {$installment['position']}"),
+            'due_date' => $installment['due_date'],
+            'due' => $installment['amount'],
+            'paid' => $installment['paid'],
+            'remaining' => $installment['amount'] - $installment['paid'],
+        ];
+    }
+
+    return ['rows' => $rows, 'total' => array_sum(array_column($rows, 'remaining'))];
 }

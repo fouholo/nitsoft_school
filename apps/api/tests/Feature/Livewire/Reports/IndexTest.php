@@ -62,3 +62,29 @@ test('la recherche d’élève filtre par nom, prénom ou matricule et le lien d
     $component->set('card_student_id', $awa->id)
         ->assertSee(route('reports.student-id-card-pdf', $awa));
 });
+
+test('le bloc lettres de relance n’apparaît que pour un utilisateur ayant accès à la facturation', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    $teacher = createUserWithRole($establishment, 'enseignant');
+
+    actingInEstablishment($establishment);
+
+    $this->actingAs($directeur);
+    Livewire::test(Index::class)->assertSee('Lettres de relance');
+
+    $this->actingAs($teacher);
+    Livewire::test(Index::class)->assertDontSee('Lettres de relance');
+});
+
+test('le bouton de rappel d’échéance est présent à côté du bouton de relance', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+
+    actingInEstablishment($establishment);
+    $this->actingAs($directeur);
+
+    Livewire::test(Index::class)
+        ->assertSee('Générer les lettres de relance')
+        ->assertSee("Générer les rappels d'échéance", false);
+});

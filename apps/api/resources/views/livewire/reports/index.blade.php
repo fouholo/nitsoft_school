@@ -85,4 +85,38 @@
             </a>
         @endif
     </div>
+
+    @if ($canGenerateReminders)
+        <div class="mt-4 rounded-lg border border-stone-200 bg-white p-4 sm:max-w-xl">
+            <h2 class="text-base font-medium text-stone-900">Lettres de relance</h2>
+            <p class="mt-1 text-sm text-stone-500">Une lettre par élève en retard de paiement, ou n'ayant pas encore soldé la prochaine échéance, sur l'année scolaire en cours.</p>
+
+            <div class="mt-4">
+                <label class="block text-sm font-medium text-stone-700">Niveau</label>
+                <select wire:model.live="reminderLevelFilter" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                    <option value="">Tous les niveaux</option>
+                    @foreach ($levels as $level)
+                        <option value="{{ $level->id }}">{{ $level->level_wording }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="mt-4 flex flex-wrap gap-2">
+                <a
+                    href="{{ route('reports.payment-reminders-pdf', ['level_id' => $reminderLevelFilter]) }}"
+                    target="_blank"
+                    class="inline-block rounded-lg bg-orange-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-800"
+                >
+                    Générer les lettres de relance
+                </a>
+                <a
+                    href="{{ route('reports.payment-reminders-pdf', ['level_id' => $reminderLevelFilter, 'type' => 'upcoming']) }}"
+                    target="_blank"
+                    class="inline-block rounded-lg border border-orange-700 px-3 py-1.5 text-sm font-medium text-orange-700 hover:bg-orange-50"
+                >
+                    Générer les rappels d'échéance
+                </a>
+            </div>
+        </div>
+    @endif
 </div>

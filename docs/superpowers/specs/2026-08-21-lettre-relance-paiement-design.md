@@ -73,3 +73,13 @@ Les deux vues (`pdf/payment-reminder.blade.php` pour la lettre seule, `pdf/payme
 2. `vendor/bin/phpstan analyse --memory-limit=512M` — clean.
 3. Vérification manuelle (environnement scratch SQLite, jamais la base réelle) : élève avec solde partiellement payé → tableau correct ; élève à jour → 404 en accès direct, pas de bouton "Relance" ; génération groupée par niveau ; rendu visuel A5 (dompdf → PyMuPDF).
 4. Commit puis mise à jour de la mémoire projet.
+
+## Amendement — rappel "prochaine échéance" (2026-08-21)
+
+En plus de la relance "en retard" (`balance > 0`), un second type de relance cible les élèves n'ayant pas encore soldé **la prochaine tranche commune à l'année scolaire** (l'`Installment` dont `due_date` n'est pas encore dépassée, la plus proche) — qu'ils soient par ailleurs en retard ou non. Objectif : rappel proactif avant l'échéance, pas seulement après.
+
+- **`PaymentTrackingService`** gagne deux méthodes : `nextUpcomingInstallment(int $schoolYearId): ?Installment` (la prochaine tranche non échue) et `studentsAwaitingInstallment(Installment $installment, ?int $ownerId = null, ?int $studentId = null): Collection` (élèves dont l'inscription active n'a pas soldé cette tranche précise, via `tuitionInstallmentsWithStatus()`).
+- **Paramètre `type`** (`late` par défaut, ou `upcoming`) ajouté aux deux routes existantes (`reports.payment-reminder-pdf`, `reports.payment-reminders-pdf`) plutôt que de nouvelles routes — la logique de rendu (en-tête, tableau du solde complet, destinataire) est identique dans les deux cas, seuls l'éligibilité et le texte d'introduction changent.
+- **Contenu** : le tableau du solde reste inchangé (toute la situation, retard compris) ; seul le paragraphe d'introduction change de ton — tourné vers l'échéance à venir ("la tranche de scolarité « Label », à échéance le JJ/MM/AAAA, n'est pas encore soldée...") au lieu du solde en retard, avec le libellé et la date de l'`Installment` ciblé.
+- **UI** : même emplacements que la relance retard, lien/bouton séparé — "Échéance" à côté de "Relance" dans le suivi des paiements, "Générer les rappels d'échéance" à côté de "Générer les lettres de relance" dans Listes/Rapports.
+- **Cas limites** : 404 (individuel) / message dédié (groupé) si aucune échéance à venir n'est configurée pour l'année scolaire, ou si l'élève a déjà soldé cette tranche.

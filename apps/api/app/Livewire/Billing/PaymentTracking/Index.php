@@ -82,8 +82,15 @@ class Index extends Component
         $ownerId = RolePermissions::can($user->currentRole(), 'finance.scope_own_only') ? $user->id : null;
         $canRecordPayments = $user->can('create', Payment::class);
 
+        $trackingService = app(PaymentTrackingService::class);
+
         $balances = $this->school_year_id
-            ? app(PaymentTrackingService::class)->balances($this->school_year_id, $ownerId)
+            ? $trackingService->balances($this->school_year_id, $ownerId)
+            : collect();
+
+        $nextInstallment = $this->school_year_id ? $trackingService->nextUpcomingInstallment($this->school_year_id) : null;
+        $awaitingInstallmentStudentIds = $nextInstallment
+            ? $trackingService->studentsAwaitingInstallment($nextInstallment, $ownerId)->pluck('student_id')
             : collect();
 
         if ($this->levelFilter) {
@@ -104,7 +111,7 @@ class Index extends Component
             ->keyBy('id');
 
         $allRows = $balances
-            ->map(function (array $balance) use ($students) {
+            ->map(function (array $balance) use ($students, $awaitingInstallmentStudentIds) {
                 $student = $students->get($balance['student_id']);
                 $enrollment = $student?->enrollments->first();
 
@@ -113,6 +120,7 @@ class Index extends Component
                     'student' => $student,
                     'enrollment' => $enrollment,
                     'classroom' => $enrollment?->classroom,
+                    'hasUpcomingInstallment' => $awaitingInstallmentStudentIds->contains($balance['student_id']),
                 ];
             })
             ->filter(fn (array $row) => $row['student'] !== null)
