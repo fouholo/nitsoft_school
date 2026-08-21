@@ -147,7 +147,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $mixedSchoolYear = SchoolYear::create([
-            'establishment_id' => $mixedEstablishment->id,
             'label' => '2026-2027',
             'starts_on' => '2026-09-01',
             'ends_on' => '2027-06-30',
