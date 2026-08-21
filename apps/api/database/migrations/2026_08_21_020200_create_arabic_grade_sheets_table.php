@@ -30,7 +30,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['establishment_id', 'arabic_level_id', 'arabic_serie_id']);
+            $table->index(['establishment_id', 'arabic_level_id', 'arabic_serie_id'], 'arabic_grade_sheets_establishment_level_serie_index');
         });
     }
 

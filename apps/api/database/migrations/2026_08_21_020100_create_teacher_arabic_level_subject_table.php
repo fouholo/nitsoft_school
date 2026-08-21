@@ -21,7 +21,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique(['user_id', 'arabic_level_id', 'arabic_serie_id', 'arabic_subject_id', 'school_year_id'], 'teacher_arabic_level_subject_unique');
-            $table->index(['establishment_id', 'arabic_level_id']);
+            $table->index(['establishment_id', 'arabic_level_id'], 'teacher_arabic_level_subject_establishment_level_index');
         });
     }
 
