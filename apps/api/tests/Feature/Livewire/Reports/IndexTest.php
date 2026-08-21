@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Enrollment\Models\Student;
+use App\Domain\Establishments\Enums\EstablishmentType;
 use App\Domain\Establishments\Models\Establishment;
 use App\Livewire\Reports\Index;
 use Livewire\Livewire;
@@ -87,4 +88,50 @@ test('le bouton de rappel d’échéance est présent à côté du bouton de rel
     Livewire::test(Index::class)
         ->assertSee('Générer les lettres de relance')
         ->assertSee("Générer les rappels d'échéance", false);
+});
+
+test('les filtres statut et bourse n’apparaissent que pour un établissement secondaire', function () {
+    $secondaire = Establishment::factory()->create(['type' => EstablishmentType::Secondaire]);
+    $primaire = Establishment::factory()->create(['type' => EstablishmentType::PrescolairePrimaire]);
+    $adminSecondaire = createUserWithRole($secondaire, 'directeur');
+    $adminPrimaire = createUserWithRole($primaire, 'directeur');
+
+    actingInEstablishment($secondaire);
+    $this->actingAs($adminSecondaire);
+    Livewire::test(Index::class)
+        ->assertSee('Statut')
+        ->assertSee('Bourse')
+        ->assertSee('Sexe')
+        ->assertSee('Redoublement');
+
+    actingInEstablishment($primaire);
+    $this->actingAs($adminPrimaire);
+    Livewire::test(Index::class)
+        ->assertDontSee('Statut')
+        ->assertDontSee('Bourse')
+        ->assertSee('Sexe')
+        ->assertSee('Redoublement');
+});
+
+test('le lien de la liste des élèves reflète les filtres sélectionnés', function () {
+    $establishment = Establishment::factory()->create();
+    $admin = createUserWithRole($establishment, 'directeur');
+
+    actingInEstablishment($establishment);
+    $this->actingAs($admin);
+
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+
+    Livewire::test(Index::class)
+        ->set('classroom_id', $classroom->id)
+        ->set('genderFilter', 'f')
+        ->set('repeatingFilter', '1')
+        ->assertSee(route('reports.classroom-students-pdf', [
+            'classroom' => $classroom->id,
+            'gender' => 'f',
+            'assigned' => '',
+            'repeating' => '1',
+            'scholarship' => '',
+        ]));
 });

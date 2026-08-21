@@ -9,6 +9,8 @@ use App\Domain\Academics\Models\Level;
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Billing\Models\Payment;
 use App\Domain\Enrollment\Models\Student;
+use App\Domain\Establishments\Enums\EstablishmentType;
+use App\Domain\Establishments\Models\Establishment;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -31,6 +33,16 @@ class Index extends Component
 
     public bool $canGenerateReminders = false;
 
+    public string $genderFilter = '';
+
+    public string $assignedFilter = '';
+
+    public string $repeatingFilter = '';
+
+    public string $scholarshipFilter = '';
+
+    public bool $isSecondaire = false;
+
     public function mount(): void
     {
         $this->authorize('viewAny', Classroom::class);
@@ -38,8 +50,11 @@ class Index extends Component
         /** @var User $user */
         $user = Auth::user();
 
+        $establishment = Establishment::findOrFail((int) app('currentEstablishmentId'));
+
         $this->school_year_id = SchoolYear::where('is_current', true)->value('id');
         $this->canGenerateReminders = $user->can('viewAny', Payment::class);
+        $this->isSecondaire = $establishment->type === EstablishmentType::Secondaire;
     }
 
     public function updatedSchoolYearId(): void

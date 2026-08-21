@@ -25,8 +25,17 @@ class ClassroomStudentListPdfController extends Controller
 
         $classroom->loadMissing(['level', 'serie', 'schoolYear', 'establishment.inspection.direction']);
 
+        $genderFilter = $request->query('gender');
+        $assignedFilter = $request->query('assigned');
+        $repeatingFilter = $request->query('repeating');
+        $scholarshipFilter = $request->query('scholarship');
+
         $students = $classroom->enrollments()
             ->where('status', 'active')
+            ->when($genderFilter, fn ($query) => $query->whereHas('student', fn ($studentQuery) => $studentQuery->where('gender', $genderFilter)))
+            ->when($assignedFilter !== null && $assignedFilter !== '', fn ($query) => $query->where('is_assigned', $assignedFilter === '1'))
+            ->when($repeatingFilter !== null && $repeatingFilter !== '', fn ($query) => $query->where('is_repeating', $repeatingFilter === '1'))
+            ->when($scholarshipFilter !== null && $scholarshipFilter !== '', fn ($query) => $query->where('is_scholarship', $scholarshipFilter === '1'))
             ->with('student')
             ->get()
             ->pluck('student')

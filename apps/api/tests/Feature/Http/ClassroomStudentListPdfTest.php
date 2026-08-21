@@ -116,6 +116,165 @@ test('la liste contient les élèves de la classe triés par nom, avec les bonne
     expect(strpos($html, 'MAT-AAAA'))->toBeLessThan(strpos($html, 'MAT-ZZZZ'));
 });
 
+/**
+ * Reconstruit la requête filtrée telle que ClassroomStudentListPdfController
+ * la construit, pour tester le filtrage sans dépendre du contenu binaire du
+ * PDF réel.
+ *
+ * @param  array{gender?: string, assigned?: string, repeating?: string, scholarship?: string}  $filters
+ */
+function renderFilteredClassroomStudentListHtml(Classroom $classroom, array $filters): string
+{
+    $classroom->loadMissing(['level', 'serie', 'schoolYear', 'establishment.inspection.direction']);
+
+    $genderFilter = $filters['gender'] ?? null;
+    $assignedFilter = $filters['assigned'] ?? null;
+    $repeatingFilter = $filters['repeating'] ?? null;
+    $scholarshipFilter = $filters['scholarship'] ?? null;
+
+    $students = $classroom->enrollments()
+        ->where('status', 'active')
+        ->when($genderFilter, fn ($query) => $query->whereHas('student', fn ($studentQuery) => $studentQuery->where('gender', $genderFilter)))
+        ->when($assignedFilter !== null && $assignedFilter !== '', fn ($query) => $query->where('is_assigned', $assignedFilter === '1'))
+        ->when($repeatingFilter !== null && $repeatingFilter !== '', fn ($query) => $query->where('is_repeating', $repeatingFilter === '1'))
+        ->when($scholarshipFilter !== null && $scholarshipFilter !== '', fn ($query) => $query->where('is_scholarship', $scholarshipFilter === '1'))
+        ->with('student')
+        ->get()
+        ->pluck('student')
+        ->sortBy([['last_name', 'asc'], ['first_name', 'asc']])
+        ->values();
+
+    return view('pdf.classroom-student-list', [
+        'classroom' => $classroom,
+        'students' => $students,
+        'generalInformation' => GeneralInformation::current(),
+    ])->render();
+}
+
+test('le filtre sexe exclut l’autre sexe', function () {
+    $establishment = Establishment::factory()->create();
+    actingInEstablishment($establishment);
+
+    $schoolYear = SchoolYear::factory()->create();
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+
+    $boy = Student::factory()->create(['establishment_id' => $establishment->id, 'last_name' => 'Garcon', 'gender' => 'm']);
+    $girl = Student::factory()->create(['establishment_id' => $establishment->id, 'last_name' => 'Fille', 'gender' => 'f']);
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'classroom_id' => $classroom->id, 'school_year_id' => $schoolYear->id, 'student_id' => $boy->id]);
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'classroom_id' => $classroom->id, 'school_year_id' => $schoolYear->id, 'student_id' => $girl->id]);
+
+    $html = renderFilteredClassroomStudentListHtml($classroom, ['gender' => 'm']);
+
+    expect($html)->toContain('Garcon')
+        ->and($html)->not->toContain('Fille');
+});
+
+test('le filtre statut (affecté) exclut les non affectés', function () {
+    $establishment = Establishment::factory()->create(['type' => EstablishmentType::Secondaire]);
+    actingInEstablishment($establishment);
+
+    $schoolYear = SchoolYear::factory()->create();
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+
+    $assigned = Student::factory()->create(['establishment_id' => $establishment->id, 'last_name' => 'Affecte']);
+    $notAssigned = Student::factory()->create(['establishment_id' => $establishment->id, 'last_name' => 'Nonaffecte']);
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'classroom_id' => $classroom->id, 'school_year_id' => $schoolYear->id, 'student_id' => $assigned->id, 'is_assigned' => true]);
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'classroom_id' => $classroom->id, 'school_year_id' => $schoolYear->id, 'student_id' => $notAssigned->id, 'is_assigned' => false]);
+
+    $html = renderFilteredClassroomStudentListHtml($classroom, ['assigned' => '1']);
+
+    expect($html)->toContain('Affecte')
+        ->and($html)->not->toContain('Nonaffecte');
+});
+
+test('le filtre redoublement exclut les non redoublants', function () {
+    $establishment = Establishment::factory()->create();
+    actingInEstablishment($establishment);
+
+    $schoolYear = SchoolYear::factory()->create();
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+
+    $repeating = Student::factory()->create(['establishment_id' => $establishment->id, 'last_name' => 'Redouble']);
+    $notRepeating = Student::factory()->create(['establishment_id' => $establishment->id, 'last_name' => 'Passe']);
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'classroom_id' => $classroom->id, 'school_year_id' => $schoolYear->id, 'student_id' => $repeating->id, 'is_repeating' => true]);
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'classroom_id' => $classroom->id, 'school_year_id' => $schoolYear->id, 'student_id' => $notRepeating->id, 'is_repeating' => false]);
+
+    $html = renderFilteredClassroomStudentListHtml($classroom, ['repeating' => '1']);
+
+    expect($html)->toContain('Redouble')
+        ->and($html)->not->toContain('Passe');
+});
+
+test('le filtre bourse exclut les non boursiers', function () {
+    $establishment = Establishment::factory()->create(['type' => EstablishmentType::Secondaire]);
+    actingInEstablishment($establishment);
+
+    $schoolYear = SchoolYear::factory()->create();
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+
+    $scholarship = Student::factory()->create(['establishment_id' => $establishment->id, 'last_name' => 'Boursier']);
+    $noScholarship = Student::factory()->create(['establishment_id' => $establishment->id, 'last_name' => 'Nonboursier']);
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'classroom_id' => $classroom->id, 'school_year_id' => $schoolYear->id, 'student_id' => $scholarship->id, 'is_scholarship' => true]);
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'classroom_id' => $classroom->id, 'school_year_id' => $schoolYear->id, 'student_id' => $noScholarship->id, 'is_scholarship' => false]);
+
+    $html = renderFilteredClassroomStudentListHtml($classroom, ['scholarship' => '1']);
+
+    expect($html)->toContain('Boursier')
+        ->and($html)->not->toContain('Nonboursier');
+});
+
+test('deux filtres combinés se cumulent (intersection)', function () {
+    $establishment = Establishment::factory()->create();
+    actingInEstablishment($establishment);
+
+    $schoolYear = SchoolYear::factory()->create();
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+
+    $match = Student::factory()->create(['establishment_id' => $establishment->id, 'last_name' => 'Correspond', 'gender' => 'f']);
+    $wrongGender = Student::factory()->create(['establishment_id' => $establishment->id, 'last_name' => 'MauvaisSexe', 'gender' => 'm']);
+    $wrongRepeating = Student::factory()->create(['establishment_id' => $establishment->id, 'last_name' => 'MauvaisRedoublement', 'gender' => 'f']);
+
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'classroom_id' => $classroom->id, 'school_year_id' => $schoolYear->id, 'student_id' => $match->id, 'is_repeating' => true]);
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'classroom_id' => $classroom->id, 'school_year_id' => $schoolYear->id, 'student_id' => $wrongGender->id, 'is_repeating' => true]);
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'classroom_id' => $classroom->id, 'school_year_id' => $schoolYear->id, 'student_id' => $wrongRepeating->id, 'is_repeating' => false]);
+
+    $html = renderFilteredClassroomStudentListHtml($classroom, ['gender' => 'f', 'repeating' => '1']);
+
+    expect($html)->toContain('Correspond')
+        ->and($html)->not->toContain('MauvaisSexe')
+        ->and($html)->not->toContain('MauvaisRedoublement');
+});
+
+test('un filtre sans correspondance affiche le message de classe vide', function () {
+    $establishment = Establishment::factory()->create();
+    actingInEstablishment($establishment);
+
+    $schoolYear = SchoolYear::factory()->create();
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+    $student = Student::factory()->create(['establishment_id' => $establishment->id, 'gender' => 'm']);
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'classroom_id' => $classroom->id, 'school_year_id' => $schoolYear->id, 'student_id' => $student->id]);
+
+    $html = renderFilteredClassroomStudentListHtml($classroom, ['gender' => 'f']);
+
+    expect($html)->toContain('Aucun élève inscrit dans cette classe.');
+});
+
+test('le filtre appliqué via HTTP renvoie bien un PDF filtré', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+
+    $schoolYear = SchoolYear::factory()->create();
+    $classroom = Classroom::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+    $student = Student::factory()->create(['establishment_id' => $establishment->id, 'gender' => 'm']);
+    Enrollment::factory()->create(['establishment_id' => $establishment->id, 'classroom_id' => $classroom->id, 'school_year_id' => $schoolYear->id, 'student_id' => $student->id]);
+
+    $response = $this->actingAs($directeur)->get(route('reports.classroom-students-pdf', ['classroom' => $classroom, 'gender' => 'f']));
+
+    $response->assertOk();
+    expect($response->headers->get('Content-Type'))->toContain('application/pdf');
+});
+
 function renderClassroomStudentListHtml(Classroom $classroom): string
 {
     $classroom->loadMissing(['level', 'serie', 'schoolYear', 'establishment.inspection.direction']);

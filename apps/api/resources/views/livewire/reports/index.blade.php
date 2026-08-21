@@ -26,10 +26,56 @@
             </div>
         </div>
 
+        <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+                <label class="block text-sm font-medium text-stone-700">Sexe</label>
+                <select wire:model.live="genderFilter" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                    <option value="">Tous</option>
+                    <option value="m">Masculin</option>
+                    <option value="f">Féminin</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-stone-700">Redoublement</label>
+                <select wire:model.live="repeatingFilter" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                    <option value="">Tous</option>
+                    <option value="1">Redoublant</option>
+                    <option value="0">Non redoublant</option>
+                </select>
+            </div>
+
+            @if ($isSecondaire)
+                <div>
+                    <label class="block text-sm font-medium text-stone-700">Statut</label>
+                    <select wire:model.live="assignedFilter" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <option value="">Tous</option>
+                        <option value="1">Affecté</option>
+                        <option value="0">Non affecté</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-stone-700">Bourse</label>
+                    <select wire:model.live="scholarshipFilter" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <option value="">Tous</option>
+                        <option value="1">Boursier</option>
+                        <option value="0">Non boursier</option>
+                    </select>
+                </div>
+            @endif
+        </div>
+
         @if ($classroom_id)
             <div class="mt-4 flex flex-wrap gap-2">
                 <a
-                    href="{{ route('reports.classroom-students-pdf', $classroom_id) }}"
+                    href="{{ route('reports.classroom-students-pdf', [
+                        'classroom' => $classroom_id,
+                        'gender' => $genderFilter,
+                        'assigned' => $assignedFilter,
+                        'repeating' => $repeatingFilter,
+                        'scholarship' => $scholarshipFilter,
+                    ]) }}"
                     target="_blank"
                     class="inline-block rounded-lg bg-orange-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-800"
                 >
