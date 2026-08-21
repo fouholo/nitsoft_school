@@ -16,6 +16,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
@@ -26,7 +27,10 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  * (dupliquée volontairement — voir
  * docs/superpowers/specs/2026-08-21-bilan-financier-par-profil-design.md) :
  * "start_date"/"end_date" pour une plage personnalisée, sinon
- * "school_year_id" (ou l'année scolaire courante par défaut).
+ * "school_year_id" (ou l'année scolaire courante par défaut). Même
+ * logique de détection "fondateur multi-écoles" que le composant Livewire
+ * — voir
+ * docs/superpowers/specs/2026-08-21-bilan-financier-fondateur-multi-etablissements-design.md.
  */
 class FinancialSummaryPdfController extends Controller
 {
@@ -49,27 +53,73 @@ class FinancialSummaryPdfController extends Controller
         }
 
         $service = app(FinancialSummaryService::class);
-        $summary = $service->summaryByUser($start, $end, $ownerId);
-        $groups = $service->groupByRole($summary);
+        $groupEstablishments = $this->founderGroupEstablishments($user);
+        $isMultiSchoolFounder = $groupEstablishments->count() >= 2;
 
         $establishment = Establishment::findOrFail((int) app('currentEstablishmentId'));
         $establishment->loadMissing('inspection.direction');
 
-        $pdf = Pdf::loadView('pdf.financial-summary', [
+        $viewData = [
             'establishment' => $establishment,
             'generalInformation' => GeneralInformation::current(),
-            'groups' => $groups,
-            'totalCollected' => (float) array_sum(array_column($groups, 'collected')),
-            'totalSpent' => (float) array_sum(array_column($groups, 'spent')),
-            'totalNet' => (float) array_sum(array_column($groups, 'net')),
             'periodLabel' => $periodLabel,
-        ])->setPaper('a4');
+            'isMultiSchoolFounder' => $isMultiSchoolFounder,
+        ];
 
-        $filename = Str::slug("bilan-financier-{$periodLabel}").'.pdf';
+        if ($isMultiSchoolFounder) {
+            $requestedIds = array_map('intval', (array) $request->query('establishment_ids', []));
+            $allowedIds = $groupEstablishments->pluck('id');
+            $establishmentIds = $requestedIds === []
+                ? $allowedIds->values()->all()
+                : $allowedIds->intersect($requestedIds)->values()->all();
+
+            if ($establishmentIds === []) {
+                throw new NotFoundHttpException();
+            }
+
+            $establishmentGroups = $service->summaryByEstablishments($start, $end, $establishmentIds, $ownerId);
+
+            $viewData += [
+                'establishmentGroups' => $establishmentGroups,
+                'grandTotalCollected' => (float) array_sum(array_column($establishmentGroups, 'collected')),
+                'grandTotalSpent' => (float) array_sum(array_column($establishmentGroups, 'spent')),
+                'grandTotalNet' => (float) array_sum(array_column($establishmentGroups, 'net')),
+            ];
+
+            $filename = Str::slug("bilan-financier-groupe-{$periodLabel}").'.pdf';
+        } else {
+            $summary = $service->summaryByUser($start, $end, (int) app('currentEstablishmentId'), $ownerId);
+            $groups = $service->groupByRole($summary);
+
+            $viewData += [
+                'groups' => $groups,
+                'totalCollected' => (float) array_sum(array_column($groups, 'collected')),
+                'totalSpent' => (float) array_sum(array_column($groups, 'spent')),
+                'totalNet' => (float) array_sum(array_column($groups, 'net')),
+            ];
+
+            $filename = Str::slug("bilan-financier-{$periodLabel}").'.pdf';
+        }
+
+        $pdf = Pdf::loadView('pdf.financial-summary', $viewData)->setPaper('a4');
 
         return $request->boolean('download')
             ? $pdf->download($filename)
             : $pdf->stream($filename);
+    }
+
+    /**
+     * @return Collection<int, Establishment>
+     */
+    private function founderGroupEstablishments(User $user): Collection
+    {
+        $foundationIds = $user->foundations()->wherePivot('is_active', true)->pluck('foundations.id');
+
+        if ($foundationIds->isEmpty()) {
+            return collect();
+        }
+
+        return Establishment::whereIn('foundation_id', $foundationIds)->orderBy('name')->get();
     }
 
     /**

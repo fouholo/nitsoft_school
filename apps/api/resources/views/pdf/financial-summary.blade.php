@@ -7,6 +7,7 @@
         body { font-family: "DejaVu Sans", sans-serif; font-size: 12px; color: #1e293b; }
         .subtitle { text-align: center; margin-bottom: 4px; font-weight: bold; font-size: 18px; text-decoration: underline; }
         .period-subtitle { text-align: center; margin-bottom: 20px; font-size: 12px; color: #475569; font-style: italic; }
+        .establishment-heading { font-weight: bold; font-size: 14px; margin: 16px 0 6px; }
         table.summary { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
         table.summary th, table.summary td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; }
         table.summary th { background-color: #f1f5f9; }
@@ -14,7 +15,9 @@
         table.summary tr.role-row td { font-weight: bold; background-color: #f8fafc; }
         table.summary tr.user-row td:first-child { padding-left: 20px; color: #475569; }
         table.summary tr.total-row td { font-weight: bold; background-color: #f1f5f9; }
+        table.summary tr.grand-total-row td { font-weight: bold; background-color: #e2e8f0; }
         .empty-state { text-align: center; color: #64748b; margin: 20px 0; }
+        .empty-establishment { color: #64748b; margin: 0 0 10px; font-size: 11px; }
         .footer { margin-top: 40px; font-size: 10px; color: #94a3b8; text-align: center; }
     </style>
 </head>
@@ -24,45 +27,43 @@
     <p class="subtitle">BILAN FINANCIER</p>
     <p class="period-subtitle">Période : {{ $periodLabel }}</p>
 
-    @if (count($groups) === 0)
+    @if ($isMultiSchoolFounder)
+        @foreach ($establishmentGroups as $establishmentGroup)
+            <p class="establishment-heading">{{ $establishmentGroup['establishmentName'] }}</p>
+
+            @if (count($establishmentGroup['groups']) === 0)
+                <p class="empty-establishment">Aucun encaissement ni dépense enregistré pour cette école sur cette période.</p>
+            @else
+                @include('pdf.partials.financial-summary-table', [
+                    'groups' => $establishmentGroup['groups'],
+                    'totalCollected' => $establishmentGroup['collected'],
+                    'totalSpent' => $establishmentGroup['spent'],
+                    'totalNet' => $establishmentGroup['net'],
+                    'totalLabel' => 'Total école',
+                ])
+            @endif
+        @endforeach
+
+        <table class="summary">
+            <tbody>
+                <tr class="grand-total-row">
+                    <td>Total général ({{ count($establishmentGroups) }} {{ count($establishmentGroups) > 1 ? 'écoles' : 'école' }})</td>
+                    <td class="amount">{{ money($grandTotalCollected) }}</td>
+                    <td class="amount">{{ money($grandTotalSpent) }}</td>
+                    <td class="amount">{{ money($grandTotalNet) }}</td>
+                </tr>
+            </tbody>
+        </table>
+    @elseif (count($groups) === 0)
         <p class="empty-state">Aucun encaissement ni dépense enregistré sur cette période.</p>
     @else
-        <table class="summary">
-            <thead>
-                <tr>
-                    <th>Rôle / Utilisateur</th>
-                    <th class="amount">Encaissé</th>
-                    <th class="amount">Dépensé</th>
-                    <th class="amount">Net</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($groups as $group)
-                    <tr class="role-row">
-                        <td>{{ $group['roleLabel'] }}</td>
-                        <td class="amount">{{ money($group['collected']) }}</td>
-                        <td class="amount">{{ money($group['spent']) }}</td>
-                        <td class="amount">{{ money($group['net']) }}</td>
-                    </tr>
-                    @foreach ($group['rows'] as $row)
-                        <tr class="user-row">
-                            <td>{{ $row['user_name'] }}</td>
-                            <td class="amount">{{ money($row['collected']) }}</td>
-                            <td class="amount">{{ money($row['spent']) }}</td>
-                            <td class="amount">{{ money($row['net']) }}</td>
-                        </tr>
-                    @endforeach
-                @endforeach
-            </tbody>
-            <tfoot>
-                <tr class="total-row">
-                    <td>Total général</td>
-                    <td class="amount">{{ money($totalCollected) }}</td>
-                    <td class="amount">{{ money($totalSpent) }}</td>
-                    <td class="amount">{{ money($totalNet) }}</td>
-                </tr>
-            </tfoot>
-        </table>
+        @include('pdf.partials.financial-summary-table', [
+            'groups' => $groups,
+            'totalCollected' => $totalCollected,
+            'totalSpent' => $totalSpent,
+            'totalNet' => $totalNet,
+            'totalLabel' => 'Total général',
+        ])
     @endif
 
     <p class="footer">Généré le {{ now()->locale('fr')->translatedFormat('j F Y à H:i:s') }}</p>

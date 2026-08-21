@@ -6,6 +6,7 @@ use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Billing\Models\Expense;
 use App\Domain\Billing\Models\Payment;
 use App\Domain\Establishments\Models\Establishment;
+use App\Domain\Establishments\Models\Foundation;
 use App\Livewire\Billing\FinancialSummary\Index;
 use Livewire\Livewire;
 
@@ -123,4 +124,115 @@ test('le lien PDF reflète la sélection d’année scolaire', function () {
     Livewire::test(Index::class)
         ->set('school_year_id', $schoolYear->id)
         ->assertSee(route('reports.financial-summary-pdf', ['school_year_id' => $schoolYear->id, 'start_date' => null, 'end_date' => null]));
+});
+
+test('un directeur ne voit jamais le filtre multi-écoles', function () {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+
+    Livewire::test(Index::class)->assertDontSee('Écoles');
+});
+
+test('un fondateur d’une école indépendante (sans groupe) ne voit pas le filtre multi-écoles', function () {
+    $establishment = Establishment::factory()->create();
+    $founder = createUserWithRole($establishment, 'fondateur');
+    actingInEstablishment($establishment);
+    test()->actingAs($founder);
+
+    Livewire::test(Index::class)->assertDontSee('Écoles');
+});
+
+test('un fondateur d’un groupe à une seule école ne voit pas le filtre multi-écoles', function () {
+    $foundation = Foundation::factory()->create();
+    $school = Establishment::factory()->create(['foundation_id' => $foundation->id]);
+    $founder = createFounder($foundation);
+    actingInEstablishment($school);
+    test()->actingAs($founder);
+
+    Livewire::test(Index::class)->assertDontSee('Écoles');
+});
+
+test('un fondateur d’un groupe multi-écoles voit le filtre avec toutes les écoles cochées par défaut', function () {
+    $foundation = Foundation::factory()->create();
+    $schoolA = Establishment::factory()->create(['foundation_id' => $foundation->id, 'name' => 'École A']);
+    $schoolB = Establishment::factory()->create(['foundation_id' => $foundation->id, 'name' => 'École B']);
+    $founder = createFounder($foundation);
+    actingInEstablishment($schoolA);
+    test()->actingAs($founder);
+
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
+
+    Payment::factory()->create(['establishment_id' => $schoolA->id, 'received_by' => $founder->id, 'amount' => 1000, 'paid_at' => '2026-10-01']);
+    Payment::factory()->create(['establishment_id' => $schoolB->id, 'received_by' => $founder->id, 'amount' => 2000, 'paid_at' => '2026-10-01']);
+
+    $component = Livewire::test(Index::class)->set('school_year_id', $schoolYear->id);
+
+    $component->assertSee('Écoles')
+        ->assertSee('École A')
+        ->assertSee('École B');
+
+    expect($component->get('establishmentFilter'))->toEqualCanonicalizing([$schoolA->id, $schoolB->id]);
+
+    $groups = $component->viewData('establishmentGroups');
+    expect($groups)->toHaveCount(2)
+        ->and($groups[0]['collected'])->toBe(1000.0)
+        ->and($groups[1]['collected'])->toBe(2000.0)
+        ->and($component->viewData('grandTotalCollected'))->toBe(3000.0);
+});
+
+test('une sélection partielle d’écoles n’affiche que le bloc de l’école cochée', function () {
+    $foundation = Foundation::factory()->create();
+    $schoolA = Establishment::factory()->create(['foundation_id' => $foundation->id]);
+    $schoolB = Establishment::factory()->create(['foundation_id' => $foundation->id]);
+    $founder = createFounder($foundation);
+    actingInEstablishment($schoolA);
+    test()->actingAs($founder);
+
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
+
+    $component = Livewire::test(Index::class)
+        ->set('school_year_id', $schoolYear->id)
+        ->set('establishmentFilter', [$schoolA->id]);
+
+    $groups = $component->viewData('establishmentGroups');
+    expect($groups)->toHaveCount(1)
+        ->and($groups[0]['establishment_id'])->toBe($schoolA->id);
+});
+
+test('aucune école cochée affiche un message plutôt qu’une requête', function () {
+    $foundation = Foundation::factory()->create();
+    $schoolA = Establishment::factory()->create(['foundation_id' => $foundation->id]);
+    $schoolB = Establishment::factory()->create(['foundation_id' => $foundation->id]);
+    $founder = createFounder($foundation);
+    actingInEstablishment($schoolA);
+    test()->actingAs($founder);
+
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
+
+    Livewire::test(Index::class)
+        ->set('school_year_id', $schoolYear->id)
+        ->set('establishmentFilter', [])
+        ->assertSee('Sélectionnez au moins une école.');
+});
+
+test('un establishment_id hors du groupe du fondateur injecté manuellement est silencieusement ignoré', function () {
+    $foundation = Foundation::factory()->create();
+    $schoolA = Establishment::factory()->create(['foundation_id' => $foundation->id]);
+    $schoolB = Establishment::factory()->create(['foundation_id' => $foundation->id]);
+    $outsider = Establishment::factory()->create();
+    $founder = createFounder($foundation);
+    actingInEstablishment($schoolA);
+    test()->actingAs($founder);
+
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
+
+    $component = Livewire::test(Index::class)
+        ->set('school_year_id', $schoolYear->id)
+        ->set('establishmentFilter', [$schoolA->id, $outsider->id]);
+
+    $groups = $component->viewData('establishmentGroups');
+    expect(array_column($groups, 'establishment_id'))->toBe([$schoolA->id])
+        ->and(array_column($groups, 'establishment_id'))->not->toContain($outsider->id);
 });

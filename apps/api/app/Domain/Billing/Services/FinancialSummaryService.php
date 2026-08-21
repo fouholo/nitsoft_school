@@ -6,6 +6,7 @@ namespace App\Domain\Billing\Services;
 
 use App\Domain\Billing\Models\Expense;
 use App\Domain\Billing\Models\Payment;
+use App\Domain\Establishments\Models\Establishment;
 use App\Models\User;
 use Carbon\CarbonInterface;
 
@@ -28,11 +29,10 @@ final class FinancialSummaryService
     /**
      * @return list<array{user_id: int, user_name: string, role: string|null, collected: float, spent: float, net: float}>
      */
-    public function summaryByUser(CarbonInterface $start, CarbonInterface $end, ?int $ownerId = null, ?int $establishmentId = null): array
+    public function summaryByUser(CarbonInterface $start, CarbonInterface $end, int $establishmentId, ?int $ownerId = null): array
     {
-        $establishmentId ??= (int) app('currentEstablishmentId');
-
-        $collected = Payment::query()
+        $collected = Payment::withoutTenant()
+            ->where('establishment_id', $establishmentId)
             ->whereBetween('paid_at', [$start, $end])
             ->when($ownerId, fn ($query) => $query->where('received_by', $ownerId))
             ->selectRaw('received_by as user_id, SUM(amount) as total')
@@ -40,7 +40,8 @@ final class FinancialSummaryService
             ->pluck('total', 'user_id')
             ->all();
 
-        $spent = Expense::query()
+        $spent = Expense::withoutTenant()
+            ->where('establishment_id', $establishmentId)
             ->whereBetween('spent_at', [$start, $end])
             ->when($ownerId, fn ($query) => $query->where('recorded_by', $ownerId))
             ->selectRaw('recorded_by as user_id, SUM(amount) as total')
@@ -71,6 +72,42 @@ final class FinancialSummaryService
         }
 
         return $rows;
+    }
+
+    /**
+     * Même agrégation que summaryByUser(), un établissement à la fois,
+     * pour un fondateur consultant plusieurs écoles de son groupe — voir
+     * docs/superpowers/specs/2026-08-21-bilan-financier-fondateur-multi-etablissements-design.md.
+     * Une petite requête par établissement plutôt qu'un whereIn unique :
+     * le nombre d'écoles d'un groupe reste toujours faible, et cette
+     * approche réutilise intégralement summaryByUser()/groupByRole() déjà
+     * testés au lieu de dupliquer leur logique dans un regroupement à
+     * trois niveaux en un seul passage.
+     *
+     * @param  list<int>  $establishmentIds
+     * @return list<array{establishment_id: int, establishmentName: string, groups: list<array{role: string|null, roleLabel: string, rows: list<array{user_id: int, user_name: string, role: string|null, collected: float, spent: float, net: float}>, collected: float, spent: float, net: float}>, collected: float, spent: float, net: float}>
+     */
+    public function summaryByEstablishments(CarbonInterface $start, CarbonInterface $end, array $establishmentIds, ?int $ownerId = null): array
+    {
+        $establishments = Establishment::whereIn('id', $establishmentIds)->get()->keyBy('id');
+
+        $result = [];
+
+        foreach ($establishmentIds as $establishmentId) {
+            $summary = $this->summaryByUser($start, $end, $establishmentId, $ownerId);
+            $groups = $this->groupByRole($summary);
+
+            $result[] = [
+                'establishment_id' => $establishmentId,
+                'establishmentName' => $establishments->get($establishmentId)->name,
+                'groups' => $groups,
+                'collected' => (float) array_sum(array_column($groups, 'collected')),
+                'spent' => (float) array_sum(array_column($groups, 'spent')),
+                'net' => (float) array_sum(array_column($groups, 'net')),
+            ];
+        }
+
+        return $result;
     }
 
     /**
