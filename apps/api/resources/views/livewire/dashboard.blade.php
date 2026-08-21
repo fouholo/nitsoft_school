@@ -1,20 +1,20 @@
 <div>
-    <h1 class="text-2xl font-semibold text-stone-900">Tableau de bord</h1>
+    <h1 class="text-2xl font-semibold text-stone-900">{{ __('Tableau de bord') }}</h1>
 
     @if ($noEstablishment)
         <div class="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
-            Aucun établissement ne vous est actuellement accessible. Contactez votre administrateur.
+            {{ __('Aucun établissement ne vous est actuellement accessible. Contactez votre administrateur.') }}
         </div>
     @else
         <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-stone-500">
-            <span>Connecté en tant que <span class="font-medium text-stone-700">{{ $roleLabel }}</span> sur cet établissement.</span>
+            <span>{!! __('Connecté en tant que :role sur cet établissement.', ['role' => '<span class="font-medium text-stone-700">'.e($roleLabel).'</span>']) !!}</span>
 
             @if ($currentSchoolYear || $currentEstablishment)
                 <span class="text-stone-300">·</span>
             @endif
 
             @if ($currentSchoolYear)
-                <span>Année scolaire <span class="font-medium text-stone-700">{{ $currentSchoolYear->label }}</span></span>
+                <span>{!! __('Année scolaire :year', ['year' => '<span class="font-medium text-stone-700">'.e($currentSchoolYear->label).'</span>']) !!}</span>
             @endif
 
             @if ($currentTerm)
@@ -24,16 +24,16 @@
 
             @if ($currentEstablishment)
                 @if ($currentEstablishment->isSecondaire())
-                    <span class="rounded-full bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-600">Secondaire</span>
+                    <span class="rounded-full bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-600">{{ __('Secondaire') }}</span>
                 @else
-                    <span class="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-700">Cycle Primaire</span>
+                    <span class="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-700">{{ __('Cycle Primaire') }}</span>
                 @endif
             @endif
 
             @if ($isMultiSchoolFounder)
                 <span class="text-stone-300">·</span>
                 <span class="rounded-full bg-orange-50 px-2 py-0.5 text-xs font-medium text-orange-700">
-                    Fondateur d'un groupe de {{ $groupEstablishmentsCount }} écoles
+                    {{ __("Fondateur d'un groupe de :count écoles", ['count' => $groupEstablishmentsCount]) }}
                 </span>
             @endif
         </div>
@@ -48,9 +48,9 @@
                     </span>
                     <div>
                         <p class="text-2xl font-semibold text-stone-900">{{ $studentsCount }}</p>
-                        <p class="text-sm text-stone-500">Élèves actifs</p>
+                        <p class="text-sm text-stone-500">{{ __('Élèves actifs') }}</p>
                         @if ($studentsCount === 0)
-                            <p class="mt-0.5 text-xs text-stone-500">Aucun élève inscrit pour l'instant</p>
+                            <p class="mt-0.5 text-xs text-stone-500">{{ __("Aucun élève inscrit pour l'instant") }}</p>
                         @endif
                     </div>
                 </div>
@@ -65,10 +65,10 @@
                     </span>
                     <div>
                         <p class="text-2xl font-semibold text-stone-900">{{ $classroomsCount }}</p>
-                        <p class="text-sm text-stone-500">Classes (année en cours)</p>
+                        <p class="text-sm text-stone-500">{{ __('Classes (année en cours)') }}</p>
                         @if ($classroomsCount === 0)
                             <p class="mt-0.5 text-xs text-stone-500">
-                                {{ $currentSchoolYear ? "Aucune classe créée pour {$currentSchoolYear->label}" : "Aucune année scolaire en cours" }}
+                                {{ $currentSchoolYear ? __('Aucune classe créée pour :year', ['year' => $currentSchoolYear->label]) : __('Aucune année scolaire en cours') }}
                             </p>
                         @endif
                     </div>
@@ -85,11 +85,11 @@
                         </span>
                         <div>
                             <p class="text-2xl font-semibold text-stone-900">{{ $pendingInvoicesCount }}</p>
-                            <p class="text-sm text-stone-500">Factures en attente</p>
+                            <p class="text-sm text-stone-500">{{ __('Factures en attente') }}</p>
                             @if ($pendingInvoicesCount === 0)
-                                <p class="mt-0.5 text-xs text-stone-500">Aucun solde restant à percevoir</p>
+                                <p class="mt-0.5 text-xs text-stone-500">{{ __('Aucun solde restant à percevoir') }}</p>
                             @else
-                                <p class="text-xs text-stone-500">{{ money($pendingInvoicesBalance) }} restant à percevoir</p>
+                                <p class="text-xs text-stone-500">{{ __(':amount restant à percevoir', ['amount' => money($pendingInvoicesBalance)]) }}</p>
                             @endif
                         </div>
                     </div>
@@ -106,9 +106,9 @@
                         </span>
                         <div>
                             <p class="text-2xl font-semibold text-stone-900">{{ $staffCount }}</p>
-                            <p class="text-sm text-stone-500">Membres du personnel</p>
+                            <p class="text-sm text-stone-500">{{ __('Membres du personnel') }}</p>
                             @if ($staffCount === 0)
-                                <p class="mt-0.5 text-xs text-stone-500">Aucun membre du personnel enregistré</p>
+                                <p class="mt-0.5 text-xs text-stone-500">{{ __('Aucun membre du personnel enregistré') }}</p>
                             @endif
                         </div>
                     </div>
@@ -136,34 +136,34 @@
             || auth()->user()->can('viewAny', \App\Domain\Attendance\Models\AttendanceSession::class)
             || auth()->user()->can('viewAny', \App\Domain\Billing\Models\Payment::class)
         )
-            <h2 class="mt-10 text-sm font-semibold uppercase tracking-wide text-stone-500">Accès rapides</h2>
+            <h2 class="mt-10 text-sm font-semibold uppercase tracking-wide text-stone-500">{{ __('Accès rapides') }}</h2>
 
             <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 @can('viewAny', \App\Domain\Enrollment\Models\Student::class)
                     <a href="{{ route('students.index') }}" wire:navigate class="rounded-2xl border border-stone-200 bg-white p-5 hover:border-orange-200 hover:bg-orange-50/40">
-                        <p class="text-sm font-medium text-stone-900">Élèves</p>
-                        <p class="mt-1 text-xs text-stone-500">Gérer les fiches et inscriptions</p>
+                        <p class="text-sm font-medium text-stone-900">{{ __('Élèves') }}</p>
+                        <p class="mt-1 text-xs text-stone-500">{{ __('Gérer les fiches et inscriptions') }}</p>
                     </a>
                 @endcan
 
                 @can('viewAny', \App\Domain\Grading\Models\ReportCard::class)
                     <a href="{{ route('grading.report-cards.index') }}" wire:navigate class="rounded-2xl border border-stone-200 bg-white p-5 hover:border-orange-200 hover:bg-orange-50/40">
-                        <p class="text-sm font-medium text-stone-900">Bulletins</p>
-                        <p class="mt-1 text-xs text-stone-500">Générer et consulter les bulletins</p>
+                        <p class="text-sm font-medium text-stone-900">{{ __('Bulletins') }}</p>
+                        <p class="mt-1 text-xs text-stone-500">{{ __('Générer et consulter les bulletins') }}</p>
                     </a>
                 @endcan
 
                 @can('viewAny', \App\Domain\Attendance\Models\AttendanceSession::class)
                     <a href="{{ route('attendance.sessions.index') }}" wire:navigate class="rounded-2xl border border-stone-200 bg-white p-5 hover:border-orange-200 hover:bg-orange-50/40">
-                        <p class="text-sm font-medium text-stone-900">Présences</p>
-                        <p class="mt-1 text-xs text-stone-500">Faire l'appel du jour</p>
+                        <p class="text-sm font-medium text-stone-900">{{ __('Présences') }}</p>
+                        <p class="mt-1 text-xs text-stone-500">{{ __("Faire l'appel du jour") }}</p>
                     </a>
                 @endcan
 
                 @can('viewAny', \App\Domain\Billing\Models\Payment::class)
                     <a href="{{ route('billing.payment-tracking.index') }}" wire:navigate class="rounded-2xl border border-stone-200 bg-white p-5 hover:border-orange-200 hover:bg-orange-50/40">
-                        <p class="text-sm font-medium text-stone-900">Suivi des paiements</p>
-                        <p class="mt-1 text-xs text-stone-500">Suivre les paiements</p>
+                        <p class="text-sm font-medium text-stone-900">{{ __('Suivi des paiements') }}</p>
+                        <p class="mt-1 text-xs text-stone-500">{{ __('Suivre les paiements') }}</p>
                     </a>
                 @endcan
             </div>

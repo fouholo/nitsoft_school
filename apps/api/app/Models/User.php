@@ -47,6 +47,7 @@ class User extends Authenticatable
         'email',
         'phone',
         'password',
+        'locale',
         'uid_local',
         'uid_serveur',
         'device_id',
@@ -221,14 +222,14 @@ class User extends Authenticatable
     public static function roleLabel(?string $role): string
     {
         return match ($role) {
-            'directeur' => 'Directeur',
-            'gestionnaire' => 'Gestionnaire',
-            'enseignant' => 'Enseignant',
-            'caissier' => 'Caissier',
-            'educateur' => 'Éducateur',
-            'parent' => 'Parent',
-            'fondateur' => 'Fondateur',
-            default => 'Aucun rôle',
+            'directeur' => __('Directeur'),
+            'gestionnaire' => __('Gestionnaire'),
+            'enseignant' => __('Enseignant'),
+            'caissier' => __('Caissier'),
+            'educateur' => __('Éducateur'),
+            'parent' => __('Parent'),
+            'fondateur' => __('Fondateur'),
+            default => __('Aucun rôle'),
         };
     }
 

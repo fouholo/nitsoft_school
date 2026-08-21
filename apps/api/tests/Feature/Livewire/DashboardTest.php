@@ -120,7 +120,7 @@ test('un fondateur d’un groupe multi-écoles voit un badge et les sections mul
     test()->actingAs($founder);
 
     Livewire::test(Dashboard::class)
-        ->assertSee('Fondateur d\'un groupe de 2 écoles', false)
+        ->assertSee('Fondateur d\'un groupe de 2 écoles')
         ->assertSee('Écoles')
         ->assertSee('Comparaison entre écoles');
 });
@@ -135,3 +135,13 @@ test('un fondateur d’une école indépendante ne voit pas le badge ni les sect
         ->assertDontSee('groupe de')
         ->assertDontSee('Comparaison entre écoles');
 });
+
+test('le tableau de bord s’affiche sans erreur dans chacune des locales prises en charge', function (string $locale) {
+    $establishment = Establishment::factory()->create();
+    $directeur = createUserWithRole($establishment, 'directeur');
+    actingInEstablishment($establishment);
+    test()->actingAs($directeur);
+    app()->setLocale($locale);
+
+    Livewire::test(Dashboard::class)->assertOk();
+})->with(['fr', 'en', 'ar']);

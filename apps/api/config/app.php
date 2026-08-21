@@ -86,6 +86,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Supported Locales
+    |--------------------------------------------------------------------------
+    |
+    | Locales that a user or a guest is allowed to select for the interface.
+    | Referenced by App\Http\Middleware\SetLocale and the locale.switch route.
+    |
+    */
+
+    'supported_locales' => ['fr', 'en', 'ar'],
+
+    /*
+    |--------------------------------------------------------------------------
     | Encryption Key
     |--------------------------------------------------------------------------
     |

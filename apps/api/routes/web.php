@@ -27,6 +27,18 @@ Route::get('/', function () {
     return redirect()->route($user->guardianProfile ? 'guardian-portal.dashboard' : 'dashboard');
 })->name('home');
 
+Route::get('/locale/{locale}', function (string $locale) {
+    abort_unless(in_array($locale, config('app.supported_locales'), true), 404);
+
+    if (auth()->check()) {
+        auth()->user()->update(['locale' => $locale]);
+    } else {
+        session(['locale' => $locale]);
+    }
+
+    return redirect()->back();
+})->name('locale.switch');
+
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', Login::class)->name('login');
     Route::get('/register', Register::class)->name('register');

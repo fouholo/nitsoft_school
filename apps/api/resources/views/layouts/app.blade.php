@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,34 +31,34 @@
             };
 
             $navItems = [
-                ['type' => 'link', 'label' => 'Tableau de bord', 'route' => 'dashboard', 'active' => 'dashboard', 'icon' => 'home'],
-                ['type' => 'group', 'label' => 'Académique', 'icon' => 'book', 'active' => 'academics.*', 'children' => [
-                    ['label' => 'Années scolaires', 'route' => 'academics.school-years.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\SchoolYear::class],
-                    ['label' => 'Périodes', 'route' => 'academics.terms.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\Term::class],
-                    ['label' => 'Classes', 'route' => 'academics.classrooms.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\Classroom::class],
-                    ['label' => 'Coefficients par matière', 'route' => 'academics.subject-coefficients.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\SubjectCoefficient::class],
-                    ['label' => 'Affectations', 'route' => 'academics.teacher-assignments.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\TeacherAssignment::class],
+                ['type' => 'link', 'label' => __('Tableau de bord'), 'route' => 'dashboard', 'active' => 'dashboard', 'icon' => 'home'],
+                ['type' => 'group', 'label' => __('Académique'), 'icon' => 'book', 'active' => 'academics.*', 'children' => [
+                    ['label' => __('Années scolaires'), 'route' => 'academics.school-years.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\SchoolYear::class],
+                    ['label' => __('Périodes'), 'route' => 'academics.terms.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\Term::class],
+                    ['label' => __('Classes'), 'route' => 'academics.classrooms.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\Classroom::class],
+                    ['label' => __('Coefficients par matière'), 'route' => 'academics.subject-coefficients.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\SubjectCoefficient::class],
+                    ['label' => __('Affectations'), 'route' => 'academics.teacher-assignments.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\TeacherAssignment::class],
                 ]],
-                ['type' => 'link', 'label' => 'Élèves', 'route' => 'students.index', 'active' => 'students.*', 'icon' => 'users', 'ability' => 'viewAny', 'model' => \App\Domain\Enrollment\Models\Student::class],
-                ['type' => 'link', 'label' => 'Tuteurs', 'route' => 'guardians.index', 'active' => 'guardians.*', 'icon' => 'identification', 'ability' => 'viewAny', 'model' => \App\Domain\Enrollment\Models\Guardian::class],
-                ['type' => 'link', 'label' => 'Demandes de liaison', 'route' => 'guardian-link-requests.index', 'active' => 'guardian-link-requests.*', 'icon' => 'identification', 'ability' => 'viewAny', 'model' => \App\Domain\Enrollment\Models\GuardianStudentPivot::class],
-                ['type' => 'group', 'label' => 'Notes', 'icon' => 'document-text', 'active' => 'grading.*', 'children' => [
-                    ['label' => 'Évaluations', 'route' => 'grading.grade-sheets.index', 'ability' => 'viewAny', 'model' => \App\Domain\Grading\Models\GradeSheet::class],
-                    ['label' => 'Bulletins', 'route' => 'grading.report-cards.index', 'ability' => 'viewAny', 'model' => \App\Domain\Grading\Models\ReportCard::class],
+                ['type' => 'link', 'label' => __('Élèves'), 'route' => 'students.index', 'active' => 'students.*', 'icon' => 'users', 'ability' => 'viewAny', 'model' => \App\Domain\Enrollment\Models\Student::class],
+                ['type' => 'link', 'label' => __('Tuteurs'), 'route' => 'guardians.index', 'active' => 'guardians.*', 'icon' => 'identification', 'ability' => 'viewAny', 'model' => \App\Domain\Enrollment\Models\Guardian::class],
+                ['type' => 'link', 'label' => __('Demandes de liaison'), 'route' => 'guardian-link-requests.index', 'active' => 'guardian-link-requests.*', 'icon' => 'identification', 'ability' => 'viewAny', 'model' => \App\Domain\Enrollment\Models\GuardianStudentPivot::class],
+                ['type' => 'group', 'label' => __('Notes'), 'icon' => 'document-text', 'active' => 'grading.*', 'children' => [
+                    ['label' => __('Évaluations'), 'route' => 'grading.grade-sheets.index', 'ability' => 'viewAny', 'model' => \App\Domain\Grading\Models\GradeSheet::class],
+                    ['label' => __('Bulletins'), 'route' => 'grading.report-cards.index', 'ability' => 'viewAny', 'model' => \App\Domain\Grading\Models\ReportCard::class],
                 ]],
-                ['type' => 'link', 'label' => 'Présences', 'route' => 'attendance.sessions.index', 'active' => 'attendance.*', 'icon' => 'calendar-check', 'ability' => 'viewAny', 'model' => \App\Domain\Attendance\Models\AttendanceSession::class],
-                ['type' => 'link', 'label' => 'Listes/Rapports', 'route' => 'reports.index', 'active' => 'reports.*', 'icon' => 'document-text', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\Classroom::class],
-                ['type' => 'group', 'label' => 'Facturation', 'icon' => 'banknote', 'active' => 'billing.*', 'children' => [
-                    ['label' => 'Tarifs', 'route' => 'billing.tuition-fees.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Installment::class],
-                    ['label' => 'Dépenses', 'route' => 'billing.expenses.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Expense::class],
-                    ['label' => 'Suivi des paiements', 'route' => 'billing.payment-tracking.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Payment::class],
-                    ['label' => 'Réductions', 'route' => 'billing.discounts.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Discount::class],
-                    ['label' => 'Bilan financier', 'route' => 'billing.financial-summary.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Payment::class],
+                ['type' => 'link', 'label' => __('Présences'), 'route' => 'attendance.sessions.index', 'active' => 'attendance.*', 'icon' => 'calendar-check', 'ability' => 'viewAny', 'model' => \App\Domain\Attendance\Models\AttendanceSession::class],
+                ['type' => 'link', 'label' => __('Listes/Rapports'), 'route' => 'reports.index', 'active' => 'reports.*', 'icon' => 'document-text', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\Classroom::class],
+                ['type' => 'group', 'label' => __('Facturation'), 'icon' => 'banknote', 'active' => 'billing.*', 'children' => [
+                    ['label' => __('Tarifs'), 'route' => 'billing.tuition-fees.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Installment::class],
+                    ['label' => __('Dépenses'), 'route' => 'billing.expenses.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Expense::class],
+                    ['label' => __('Suivi des paiements'), 'route' => 'billing.payment-tracking.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Payment::class],
+                    ['label' => __('Réductions'), 'route' => 'billing.discounts.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Discount::class],
+                    ['label' => __('Bilan financier'), 'route' => 'billing.financial-summary.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Payment::class],
                 ]],
-                ['type' => 'group', 'label' => 'SMS', 'icon' => 'chat', 'active' => 'notifications.*', 'children' => [
-                    ['label' => 'Modèles', 'route' => 'notifications.sms-templates.index', 'ability' => 'viewAny', 'model' => \App\Domain\Notifications\Models\SmsTemplate::class],
-                    ['label' => 'Journal', 'route' => 'notifications.sms-messages.index', 'ability' => 'viewAny', 'model' => \App\Domain\Notifications\Models\SmsMessage::class],
-                    ['label' => 'Envoyer un SMS', 'route' => 'notifications.sms-messages.create', 'ability' => 'create', 'model' => \App\Domain\Notifications\Models\SmsMessage::class],
+                ['type' => 'group', 'label' => __('SMS'), 'icon' => 'chat', 'active' => 'notifications.*', 'children' => [
+                    ['label' => __('Modèles'), 'route' => 'notifications.sms-templates.index', 'ability' => 'viewAny', 'model' => \App\Domain\Notifications\Models\SmsTemplate::class],
+                    ['label' => __('Journal'), 'route' => 'notifications.sms-messages.index', 'ability' => 'viewAny', 'model' => \App\Domain\Notifications\Models\SmsMessage::class],
+                    ['label' => __('Envoyer un SMS'), 'route' => 'notifications.sms-messages.create', 'ability' => 'create', 'model' => \App\Domain\Notifications\Models\SmsMessage::class],
                 ]],
                 // Groupe entier invisible sauf établissement is_arabe : son
                 // seul enfant s'appuie sur ArabicSubjectCoefficientPolicy,
@@ -66,12 +66,12 @@
                 // besoin de condition PHP supplémentaire ici, le filtrage
                 // par ability ci-dessous suffit à vider (et donc masquer) le
                 // groupe.
-                ['type' => 'group', 'label' => 'Arabe', 'icon' => 'book', 'active' => 'arabic.*', 'children' => [
-                    ['label' => 'Coefficients par matière', 'route' => 'arabic.subject-coefficients.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicSubjectCoefficient::class],
-                    ['label' => 'Périodes', 'route' => 'arabic.terms.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicTerm::class],
-                    ['label' => 'Affectations enseignants', 'route' => 'arabic.teacher-assignments.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicTeacherAssignment::class],
-                    ['label' => 'Grilles de notes', 'route' => 'arabic.grade-sheets.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicGradeSheet::class],
-                    ['label' => 'Bulletins', 'route' => 'arabic.report-cards.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicReportCard::class],
+                ['type' => 'group', 'label' => __('Arabe'), 'icon' => 'book', 'active' => 'arabic.*', 'children' => [
+                    ['label' => __('Coefficients par matière'), 'route' => 'arabic.subject-coefficients.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicSubjectCoefficient::class],
+                    ['label' => __('Périodes'), 'route' => 'arabic.terms.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicTerm::class],
+                    ['label' => __('Affectations enseignants'), 'route' => 'arabic.teacher-assignments.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicTeacherAssignment::class],
+                    ['label' => __('Grilles de notes'), 'route' => 'arabic.grade-sheets.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicGradeSheet::class],
+                    ['label' => __('Bulletins'), 'route' => 'arabic.report-cards.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicReportCard::class],
                 ]],
             ];
 
@@ -106,34 +106,34 @@
             }
 
             if (auth()->user()->isSaasAdmin()) {
-                $navItems[] = ['type' => 'link', 'label' => 'Groupes scolaires', 'route' => 'foundations.index', 'active' => 'foundations.*', 'icon' => 'building'];
-                $navItems[] = ['type' => 'link', 'label' => 'Établissements', 'route' => 'establishments.index', 'active' => 'establishments.*', 'icon' => 'building'];
-                $navItems[] = ['type' => 'link', 'label' => 'Inspections', 'route' => 'inspections.index', 'active' => 'inspections.*', 'icon' => 'building'];
-                $navItems[] = ['type' => 'link', 'label' => 'Directions', 'route' => 'directions.index', 'active' => 'directions.*', 'icon' => 'building'];
-                $navItems[] = ['type' => 'link', 'label' => 'Matières', 'route' => 'academics.subjects.index', 'active' => 'academics.subjects.*', 'icon' => 'book'];
-                $navItems[] = ['type' => 'link', 'label' => 'Matières du primaire', 'route' => 'academics.primary-subjects.index', 'active' => 'academics.primary-subjects.*', 'icon' => 'book'];
-                $navItems[] = ['type' => 'link', 'label' => 'Barème d\'appréciations', 'route' => 'academics.appreciation-scales.index', 'active' => 'academics.appreciation-scales.*', 'icon' => 'book'];
-                $navItems[] = ['type' => 'link', 'label' => 'Domaines', 'route' => 'domains.index', 'active' => 'domains.*', 'icon' => 'book'];
-                $navItems[] = ['type' => 'link', 'label' => 'Niveaux arabes', 'route' => 'arabic.levels.index', 'active' => 'arabic.levels.*', 'icon' => 'book'];
-                $navItems[] = ['type' => 'link', 'label' => 'Séries arabes', 'route' => 'arabic.series.index', 'active' => 'arabic.series.*', 'icon' => 'book'];
-                $navItems[] = ['type' => 'link', 'label' => 'Matières arabes', 'route' => 'arabic.subjects.index', 'active' => 'arabic.subjects.*', 'icon' => 'book'];
-                $navItems[] = ['type' => 'link', 'label' => 'Informations générales', 'route' => 'general-information.edit', 'active' => 'general-information.*', 'icon' => 'building'];
+                $navItems[] = ['type' => 'link', 'label' => __('Groupes scolaires'), 'route' => 'foundations.index', 'active' => 'foundations.*', 'icon' => 'building'];
+                $navItems[] = ['type' => 'link', 'label' => __('Établissements'), 'route' => 'establishments.index', 'active' => 'establishments.*', 'icon' => 'building'];
+                $navItems[] = ['type' => 'link', 'label' => __('Inspections'), 'route' => 'inspections.index', 'active' => 'inspections.*', 'icon' => 'building'];
+                $navItems[] = ['type' => 'link', 'label' => __('Directions'), 'route' => 'directions.index', 'active' => 'directions.*', 'icon' => 'building'];
+                $navItems[] = ['type' => 'link', 'label' => __('Matières'), 'route' => 'academics.subjects.index', 'active' => 'academics.subjects.*', 'icon' => 'book'];
+                $navItems[] = ['type' => 'link', 'label' => __('Matières du primaire'), 'route' => 'academics.primary-subjects.index', 'active' => 'academics.primary-subjects.*', 'icon' => 'book'];
+                $navItems[] = ['type' => 'link', 'label' => __("Barème d'appréciations"), 'route' => 'academics.appreciation-scales.index', 'active' => 'academics.appreciation-scales.*', 'icon' => 'book'];
+                $navItems[] = ['type' => 'link', 'label' => __('Domaines'), 'route' => 'domains.index', 'active' => 'domains.*', 'icon' => 'book'];
+                $navItems[] = ['type' => 'link', 'label' => __('Niveaux arabes'), 'route' => 'arabic.levels.index', 'active' => 'arabic.levels.*', 'icon' => 'book'];
+                $navItems[] = ['type' => 'link', 'label' => __('Séries arabes'), 'route' => 'arabic.series.index', 'active' => 'arabic.series.*', 'icon' => 'book'];
+                $navItems[] = ['type' => 'link', 'label' => __('Matières arabes'), 'route' => 'arabic.subjects.index', 'active' => 'arabic.subjects.*', 'icon' => 'book'];
+                $navItems[] = ['type' => 'link', 'label' => __('Informations générales'), 'route' => 'general-information.edit', 'active' => 'general-information.*', 'icon' => 'building'];
             }
 
             if (auth()->user()->isMainSaasAdmin()) {
-                $navItems[] = ['type' => 'link', 'label' => 'Administrateurs SaaS', 'route' => 'saas-admins.index', 'active' => 'saas-admins.*', 'icon' => 'users'];
+                $navItems[] = ['type' => 'link', 'label' => __('Administrateurs SaaS'), 'route' => 'saas-admins.index', 'active' => 'saas-admins.*', 'icon' => 'users'];
             }
 
             if (app()->bound('currentEstablishmentId')) {
                 $currentEstablishment = \App\Domain\Establishments\Models\Establishment::find(app('currentEstablishmentId'));
 
                 if ($currentEstablishment !== null && auth()->user()->isLocalAdminOf($currentEstablishment)) {
-                    $navItems[] = ['type' => 'link', 'label' => 'Mon établissement', 'route' => 'staff.index', 'active' => 'staff.index', 'icon' => 'users', 'params' => ['establishment' => $currentEstablishment->id]];
+                    $navItems[] = ['type' => 'link', 'label' => __('Mon établissement'), 'route' => 'staff.index', 'active' => 'staff.index', 'icon' => 'users', 'params' => ['establishment' => $currentEstablishment->id]];
                 }
             }
 
             if (auth()->user()->isFondateurSomewhere()) {
-                $navItems[] = ['type' => 'link', 'label' => 'Mon organisation', 'route' => 'staff.organization', 'active' => 'staff.organization', 'icon' => 'building'];
+                $navItems[] = ['type' => 'link', 'label' => __('Mon organisation'), 'route' => 'staff.organization', 'active' => 'staff.organization', 'icon' => 'building'];
             }
 
             $initials = collect(explode(' ', auth()->user()->name))
@@ -152,13 +152,13 @@
             ></div>
 
             <aside
-                class="fixed inset-y-0 left-0 z-40 flex w-64 shrink-0 -translate-x-full transform flex-col border-r border-stone-200 bg-white transition-transform duration-200 ease-out lg:static lg:translate-x-0"
+                class="fixed inset-y-0 start-0 z-40 flex w-64 shrink-0 -translate-x-full max-lg:rtl:translate-x-full transform flex-col border-e border-stone-200 bg-white transition-transform duration-200 ease-out lg:static lg:translate-x-0"
                 :class="sidebarOpen && '!translate-x-0'"
             >
                 <div class="flex h-16 items-center gap-2 border-b border-stone-200 px-5">
                     <img src="{{ asset('branding/nitsoft-school-logo.png') }}" alt="{{ config('app.name') }}" class="h-9 w-9 shrink-0 object-contain">
                     <span class="text-xl font-semibold leading-none text-blue-700 whitespace-nowrap">{{ config('app.name') }}</span>
-                    <button type="button" class="ml-auto rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700 lg:hidden" aria-label="Fermer le menu" @click="sidebarOpen = false">
+                    <button type="button" class="ms-auto rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700 lg:hidden" aria-label="{{ __('Fermer le menu') }}" @click="sidebarOpen = false">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
                             <path d="M6 6l12 12M18 6 6 18" />
                         </svg>
@@ -199,7 +199,7 @@
                                             href="{{ route($child['route']) }}"
                                             wire:navigate
                                             @click="sidebarOpen = false"
-                                            class="block rounded-lg py-1.5 pl-10 pr-3 text-sm {{ $childActive ? 'bg-orange-100 font-semibold text-orange-800' : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900' }}"
+                                            class="block rounded-lg py-1.5 ps-10 pe-3 text-sm {{ $childActive ? 'bg-orange-100 font-semibold text-orange-800' : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900' }}"
                                         >
                                             {{ $child['label'] }}
                                         </a>
@@ -219,14 +219,14 @@
                             <p class="truncate text-sm font-medium text-stone-900" title="{{ auth()->user()->name }}">{{ auth()->user()->name }}</p>
                             <p class="truncate text-xs text-stone-500">{{ auth()->user()->currentRoleLabel() }}</p>
                         </div>
-                        <a href="{{ route('account.password.edit') }}" wire:navigate title="Mot de passe" aria-label="Mot de passe" class="rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700">
+                        <a href="{{ route('account.password.edit') }}" wire:navigate title="{{ __('Mot de passe') }}" aria-label="{{ __('Mot de passe') }}" class="rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
                                 {!! $icon('lock') !!}
                             </svg>
                         </a>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" title="Déconnexion" aria-label="Déconnexion" class="rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700">
+                            <button type="submit" title="{{ __('Déconnexion') }}" aria-label="{{ __('Déconnexion') }}" class="rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
                                     {!! $icon('logout') !!}
                                 </svg>
@@ -238,12 +238,20 @@
 
             <div class="flex min-w-0 flex-1 flex-col">
                 <header class="flex h-16 items-center justify-between gap-3 border-b border-stone-200 bg-white px-4 sm:px-6">
-                    <button type="button" class="rounded-lg p-2 text-stone-500 hover:bg-stone-100 hover:text-stone-700 lg:hidden" aria-label="Ouvrir le menu" @click="sidebarOpen = true">
+                    <button type="button" class="rounded-lg p-2 text-stone-500 hover:bg-stone-100 hover:text-stone-700 lg:hidden" aria-label="{{ __('Ouvrir le menu') }}" @click="sidebarOpen = true">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6">
                             <path d="M4 7h16M4 12h16M4 17h16" />
                         </svg>
                     </button>
-                    <div class="ml-auto">
+                    <div class="ms-auto flex items-center gap-3">
+                        <div class="flex items-center gap-1 text-xs font-medium text-stone-500">
+                            @foreach (config('app.supported_locales') as $localeOption)
+                                <a
+                                    href="{{ route('locale.switch', $localeOption) }}"
+                                    class="rounded px-1.5 py-1 uppercase {{ app()->getLocale() === $localeOption ? 'bg-stone-100 text-stone-900' : 'hover:text-stone-700' }}"
+                                >{{ $localeOption }}</a>
+                            @endforeach
+                        </div>
                         @livewire('establishments.switcher')
                     </div>
                 </header>

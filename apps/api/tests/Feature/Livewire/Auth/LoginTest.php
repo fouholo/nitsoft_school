@@ -29,3 +29,9 @@ test('la connexion échoue avec un mauvais mot de passe', function () {
 
     $this->assertGuest();
 });
+
+test('l’écran de connexion s’affiche sans erreur dans chacune des locales prises en charge', function (string $locale) {
+    app()->setLocale($locale);
+
+    Livewire::test(Login::class)->assertOk();
+})->with(['fr', 'en', 'ar']);
