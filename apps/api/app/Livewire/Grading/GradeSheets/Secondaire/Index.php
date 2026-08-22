@@ -91,17 +91,17 @@ class Index extends Component
 
         if ($classroom->level->cycle !== Cycle::Secondaire) {
             throw ValidationException::withMessages([
-                'classroom_id' => "Cette classe n'est pas une classe secondaire.",
+                'classroom_id' => __("Cette classe n'est pas une classe secondaire."),
             ]);
         }
 
         if (! $this->hasBroadGradeAccess($user) && ! $user->isAssignedToClassroom($classroom->id, (int) $data['subject_id'])) {
-            abort(403, "Vous n'êtes pas affecté à cette classe pour cette matière.");
+            abort(403, __("Vous n'êtes pas affecté à cette classe pour cette matière."));
         }
 
         if (! $classroom->isGradable()) {
             throw ValidationException::withMessages([
-                'classroom_id' => "Ce niveau n'a pas de notation.",
+                'classroom_id' => __("Ce niveau n'a pas de notation."),
             ]);
         }
 
@@ -109,7 +109,7 @@ class Index extends Component
 
         if (! $subject->is_secondaire) {
             throw ValidationException::withMessages([
-                'subject_id' => "Cette matière n'est pas disponible pour ce cycle.",
+                'subject_id' => __("Cette matière n'est pas disponible pour ce cycle."),
             ]);
         }
 

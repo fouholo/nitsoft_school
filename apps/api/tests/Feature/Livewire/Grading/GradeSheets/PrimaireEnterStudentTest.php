@@ -178,7 +178,7 @@ test('cocher « absent à la composition » marque toutes les matières absentes
         ->set('absentGenerale', true);
 
     expect($component->get('absences'))->toEqualCanonicalizing([$this->maths->id => true, $this->francais->id => true])
-        ->and($component->viewData('preview')['result'])->toBe('Absence');
+        ->and($component->viewData('preview')['result'])->toBe('absent');
 
     $component->call('save')->assertHasNoErrors();
 
@@ -237,7 +237,7 @@ test('pour un niveau CP1/CP2/CE1, la moyenne, le seuil de réussite et l’appr�
     $preview = $component->viewData('preview');
 
     expect($preview['average'])->toBe(8.0)
-        ->and($preview['result'])->toBe('Admis(e)')
+        ->and($preview['result'])->toBe('passed')
         ->and($preview['appreciation'])->toBe('Très bien')
         ->and($component->viewData('scale'))->toBe(10.0);
 
@@ -277,10 +277,10 @@ test('le résultat affiche « Admis(e) » si la moyenne atteint 10/20, « Refus�
         ->set("scores.{$this->maths->id}", '10')
         ->set("scores.{$this->francais->id}", '5');
 
-    expect($component->viewData('preview')['result'])->toBe('Admis(e)');
+    expect($component->viewData('preview')['result'])->toBe('passed');
 
     $component->set("scores.{$this->maths->id}", '9')
         ->set("scores.{$this->francais->id}", '4');
 
-    expect($component->viewData('preview')['result'])->toBe('Refusé(e)');
+    expect($component->viewData('preview')['result'])->toBe('failed');
 });

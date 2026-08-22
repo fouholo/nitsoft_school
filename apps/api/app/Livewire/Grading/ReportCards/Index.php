@@ -7,11 +7,9 @@ namespace App\Livewire\Grading\ReportCards;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Grading\Models\ReportCard;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Bulletins')]
 class Index extends Component
 {
     public function mount(): void
@@ -25,6 +23,6 @@ class Index extends Component
 
         return view('livewire.grading.report-cards.index', [
             'isPrimaire' => $establishment?->isPrescolairePrimaire() ?? false,
-        ]);
+        ])->title(__('Bulletins'));
     }
 }

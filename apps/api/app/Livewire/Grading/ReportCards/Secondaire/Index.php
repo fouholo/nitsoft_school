@@ -37,8 +37,8 @@ class Index extends Component
             'classroom_id' => ['required', 'exists:classrooms,id'],
             'term_id' => ['required', 'exists:terms,id'],
         ], [], [
-            'classroom_id' => 'classe',
-            'term_id' => 'période',
+            'classroom_id' => __('classe'),
+            'term_id' => __('période'),
         ]);
 
         $classroom = Classroom::findOrFail($data['classroom_id']);

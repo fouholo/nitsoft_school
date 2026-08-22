@@ -10,11 +10,9 @@ use App\Domain\Grading\Models\GradeSheet;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Saisie des notes')]
 class Enter extends Component
 {
     public GradeSheet $gradeSheet;
@@ -92,6 +90,6 @@ class Enter extends Component
             'students' => $students,
             'scoredCount' => $scoredCount,
             'totalCount' => $students->count(),
-        ]);
+        ])->title(__('Saisie des notes'));
     }
 }

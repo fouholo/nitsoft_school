@@ -17,11 +17,9 @@ use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Saisie des notes')]
 class EnterStudent extends Component
 {
     public GradeSheet $gradeSheet;
@@ -150,7 +148,7 @@ class EnterStudent extends Component
 
         foreach ($this->subjects() as $subject) {
             $bareme = $subject->bareme($level) ?? 20.0;
-            $messages["scores.{$subject->id}.max"] = "La note dépasse le barème de la matière (maximum {$bareme}).";
+            $messages["scores.{$subject->id}.max"] = __('La note dépasse le barème de la matière (maximum :max).', ['max' => $bareme]);
         }
 
         return $messages;
@@ -243,10 +241,13 @@ class EnterStudent extends Component
             'totalPoints' => round($totalPoints, 2),
             'totalCoefficient' => $totalCoefficient,
             'average' => $average,
+            // Code interne stable (pas la chaîne affichée, qui est traduite
+            // dans la vue) — voir Grading\GradeSheets\Primaire\EnterStudentTest
+            // pour les assertions sur ce code.
             'result' => match (true) {
-                $average === null => 'Absence',
-                $average >= $passingAverage => 'Admis(e)',
-                default => 'Refusé(e)',
+                $average === null => 'absent',
+                $average >= $passingAverage => 'passed',
+                default => 'failed',
             },
             'appreciation' => $average !== null ? AppreciationScale::forAverage($average, $scale)?->appreciation : null,
         ];
@@ -258,6 +259,6 @@ class EnterStudent extends Component
             'subjects' => $this->subjects(),
             'preview' => $this->preview(),
             'scale' => $this->classroom->level->compositionAverageScale(),
-        ]);
+        ])->title(__('Saisie des notes'));
     }
 }

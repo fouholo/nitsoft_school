@@ -7,11 +7,9 @@ namespace App\Livewire\Grading\GradeSheets;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Grading\Models\GradeSheet;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Évaluations')]
 class Index extends Component
 {
     public function mount(): void
@@ -25,6 +23,6 @@ class Index extends Component
 
         return view('livewire.grading.grade-sheets.index', [
             'isPrimaire' => $establishment?->isPrescolairePrimaire() ?? false,
-        ]);
+        ])->title(__('Évaluations'));
     }
 }

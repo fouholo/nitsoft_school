@@ -13,11 +13,9 @@ use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Élèves — saisie des notes')]
 class Students extends Component
 {
     public GradeSheet $gradeSheet;
@@ -73,6 +71,6 @@ class Students extends Component
     {
         return view('livewire.grading.grade-sheets.primaire.students', [
             'students' => $this->students(),
-        ]);
+        ])->title(__('Élèves — saisie des notes'));
     }
 }
