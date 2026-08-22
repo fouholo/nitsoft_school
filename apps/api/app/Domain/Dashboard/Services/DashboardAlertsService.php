@@ -54,11 +54,10 @@ final class DashboardAlertsService
 
             $items[] = [
                 'type' => 'overdue_invoices',
-                'label' => sprintf(
-                    '%d facture(s) en retard — %s restant à percevoir',
-                    $overdue->count(),
-                    money((float) $overdue->sum('balance')),
-                ),
+                'label' => __(':count facture(s) en retard — :amount restant à percevoir', [
+                    'count' => $overdue->count(),
+                    'amount' => money((float) $overdue->sum('balance')),
+                ]),
                 'establishment_id' => $establishmentId,
                 'establishmentName' => $establishmentNames->get($establishmentId, '—'),
                 'link' => $this->linkForCurrentEstablishmentOnly($establishmentId, 'billing.payment-tracking.index'),
@@ -95,7 +94,7 @@ final class DashboardAlertsService
 
         return $classrooms->map(fn (Classroom $classroom): array => [
             'type' => 'classroom_without_teacher',
-            'label' => "{$classroom->name} : aucun enseignant affecté",
+            'label' => __(':name : aucun enseignant affecté', ['name' => $classroom->name]),
             'establishment_id' => $classroom->establishment_id,
             'establishmentName' => $establishmentNames->get($classroom->establishment_id, '—'),
             'link' => $this->linkForCurrentEstablishmentOnly($classroom->establishment_id, 'academics.teacher-assignments.index'),
@@ -128,7 +127,11 @@ final class DashboardAlertsService
 
         return $classrooms->map(fn (Classroom $classroom): array => [
             'type' => 'classroom_over_capacity',
-            'label' => "{$classroom->name} : {$classroom->enrollments_count}/{$classroom->capacity} élèves",
+            'label' => __(':name : :count/:capacity élèves', [
+                'name' => $classroom->name,
+                'count' => $classroom->enrollments_count,
+                'capacity' => $classroom->capacity,
+            ]),
             'establishment_id' => $classroom->establishment_id,
             'establishmentName' => $establishmentNames->get($classroom->establishment_id, '—'),
             'link' => $this->linkForCurrentEstablishmentOnly($classroom->establishment_id, 'academics.classrooms.index'),
@@ -208,7 +211,11 @@ final class DashboardAlertsService
 
                 $items[] = [
                     'type' => 'unfinalized_report_cards',
-                    'label' => "{$classroom->name} — {$term->label} : {$missingCount} bulletin(s) non finalisé(s)",
+                    'label' => __(':name — :term : :count bulletin(s) non finalisé(s)', [
+                        'name' => $classroom->name,
+                        'term' => $term->label,
+                        'count' => $missingCount,
+                    ]),
                     'establishment_id' => $term->establishment_id,
                     'establishmentName' => $establishmentNames->get($term->establishment_id, '—'),
                     'link' => $this->linkForCurrentEstablishmentOnly($term->establishment_id, 'grading.report-cards.index'),
