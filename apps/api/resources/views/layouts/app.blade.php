@@ -47,6 +47,7 @@
                     ['label' => __('Bulletins'), 'route' => 'grading.report-cards.index', 'ability' => 'viewAny', 'model' => \App\Domain\Grading\Models\ReportCard::class],
                 ]],
                 ['type' => 'link', 'label' => __('Présences'), 'route' => 'attendance.sessions.index', 'active' => 'attendance.*', 'icon' => 'calendar-check', 'ability' => 'viewAny', 'model' => \App\Domain\Attendance\Models\AttendanceSession::class],
+                ['type' => 'link', 'label' => __('Messagerie'), 'route' => 'messaging.index', 'active' => 'messaging.*', 'icon' => 'chat'],
                 ['type' => 'link', 'label' => __('Listes/Rapports'), 'route' => 'reports.index', 'active' => 'reports.*', 'icon' => 'document-text', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\Classroom::class],
                 ['type' => 'group', 'label' => __('Facturation'), 'icon' => 'banknote', 'active' => 'billing.*', 'children' => [
                     ['label' => __('Tarifs'), 'route' => 'billing.tuition-fees.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Installment::class],
@@ -179,6 +180,9 @@
                                     {!! $icon($item['icon']) !!}
                                 </svg>
                                 {{ $item['label'] }}
+                                @if ($item['route'] === 'messaging.index')
+                                    @livewire('messaging.unread-badge')
+                                @endif
                             </a>
                         @else
                             @php $groupActive = request()->routeIs($item['active']); @endphp

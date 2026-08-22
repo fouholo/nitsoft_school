@@ -15,6 +15,7 @@ use App\Domain\Establishments\Models\EstablishmentUserPivot;
 use App\Domain\Establishments\Models\Foundation;
 use App\Domain\Establishments\Models\FoundationUserPivot;
 use App\Domain\Establishments\Models\SaasAdmin;
+use App\Domain\Messaging\Models\Conversation;
 use App\Domain\Sync\Concerns\Syncable;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -348,5 +349,15 @@ class User extends Authenticatable
     public function guardianProfile(): HasOne
     {
         return $this->hasOne(Guardian::class, 'user_id');
+    }
+
+    /**
+     * @return BelongsToMany<Conversation, $this>
+     */
+    public function conversations(): BelongsToMany
+    {
+        return $this->belongsToMany(Conversation::class, 'conversation_user')
+            ->withPivot('last_read_at')
+            ->withTimestamps();
     }
 }
