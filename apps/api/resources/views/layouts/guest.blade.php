@@ -24,7 +24,7 @@
 
             <div class="mb-8 flex flex-col items-center gap-2">
                 <img src="{{ asset('branding/nitsoft-school-logo.png') }}" alt="{{ config('app.name') }}" class="h-16 w-16 object-contain">
-                <div class="text-[2.5rem] font-semibold leading-none text-blue-700">{{ config('app.name') }}</div>
+                <div class="text-[2.5rem] font-semibold leading-none text-blue-900">{{ config('app.name') }}</div>
             </div>
 
             <div class="w-full max-w-sm rounded-xl bg-white p-8 shadow">

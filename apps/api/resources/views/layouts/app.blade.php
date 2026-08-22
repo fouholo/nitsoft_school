@@ -157,7 +157,7 @@
             >
                 <div class="flex h-16 items-center gap-2 border-b border-stone-200 px-5">
                     <img src="{{ asset('branding/nitsoft-school-logo.png') }}" alt="{{ config('app.name') }}" class="h-9 w-9 shrink-0 object-contain">
-                    <span class="text-xl font-semibold leading-none text-blue-700 whitespace-nowrap">{{ config('app.name') }}</span>
+                    <span class="text-xl font-semibold leading-none text-blue-900 whitespace-nowrap">{{ config('app.name') }}</span>
                     <button type="button" class="ms-auto rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700 lg:hidden" aria-label="{{ __('Fermer le menu') }}" @click="sidebarOpen = false">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
                             <path d="M6 6l12 12M18 6 6 18" />
