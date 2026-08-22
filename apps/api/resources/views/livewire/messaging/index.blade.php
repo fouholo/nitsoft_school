@@ -1,8 +1,8 @@
 <div class="flex h-[calc(100vh-8rem)] gap-4">
     <div class="flex w-80 shrink-0 flex-col rounded-lg border border-stone-200 bg-white">
-        <div class="flex items-center justify-between border-b border-stone-200 p-3">
+        <div class="border-b border-stone-200 p-4">
             <h1 class="text-sm font-semibold uppercase tracking-wide text-stone-500">{{ __('Messagerie') }}</h1>
-            <button type="button" wire:click="toggleNewConversationForm" class="rounded-lg bg-orange-700 px-2 py-1 text-xs font-medium text-white hover:bg-orange-800">
+            <button type="button" wire:click="toggleNewConversationForm" class="mt-3 w-full rounded-lg bg-orange-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-800">
                 {{ $showNewConversationForm ? __('Annuler') : __('Nouvelle conversation') }}
             </button>
         </div>
