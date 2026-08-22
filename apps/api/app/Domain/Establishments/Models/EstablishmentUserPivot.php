@@ -24,6 +24,7 @@ class EstablishmentUserPivot extends Pivot
         'is_active' => 'boolean',
         'is_general_admin' => 'boolean',
         'is_local_admin' => 'boolean',
+        'hired_at' => 'date',
     ];
 
     /**

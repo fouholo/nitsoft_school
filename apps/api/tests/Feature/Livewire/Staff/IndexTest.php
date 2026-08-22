@@ -122,3 +122,16 @@ test('un GENERAL_ADMIN de l’établissement indépendant peut aussi accéder à
 
     Livewire::test(Index::class, ['establishment' => $establishment])->assertOk();
 });
+
+test('le nom d’un membre du tableau est un lien vers sa fiche', function () {
+    $establishment = Establishment::factory()->create();
+    $localAdmin = createLocalAdmin($establishment);
+    test()->actingAs($localAdmin);
+
+    $teacher = User::factory()->create();
+    $establishment->users()->attach($teacher->id, ['role' => 'enseignant', 'is_active' => true]);
+    $pivot = EstablishmentUserPivot::where('user_id', $teacher->id)->sole();
+
+    Livewire::test(Index::class, ['establishment' => $establishment])
+        ->assertSeeHtml(route('staff.show', [$establishment, $pivot]));
+});

@@ -22,6 +22,18 @@ use App\Models\User;
  */
 class EstablishmentUserPivotPolicy
 {
+    /**
+     * Accès à la fiche personnel : le membre concerné (lecture/édition de
+     * son identité) OU un admin ayant les droits staff.update (édition
+     * complète, y compris les données professionnelles).
+     */
+    public function view(User $user, EstablishmentUserPivot $target): bool
+    {
+        return $target->user_id === $user->id
+            || ($user->isLocalAdminOf($target->establishment)
+                && RolePermissions::can($user->roleFor($target->establishment_id), 'staff.update'));
+    }
+
     public function update(User $user, EstablishmentUserPivot $target): bool
     {
         return $user->isLocalAdminOf($target->establishment)

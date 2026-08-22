@@ -24,7 +24,9 @@
                 @forelse ($staffMembers as $member)
                     <tr wire:key="staff-{{ $member->id }}">
                         <td class="px-4 py-2 text-stone-900">
-                            {{ $member->user->name }}
+                            <a href="{{ route('staff.show', [$establishment, $member]) }}" wire:navigate class="font-medium text-orange-700 hover:underline">
+                                {{ $member->user->name }}
+                            </a>
                             <span class="block text-xs text-stone-500">{{ $member->user->email }}</span>
                         </td>
                         <td class="px-4 py-2 text-stone-600">{{ \App\Models\User::roleLabel($member->role) }}</td>

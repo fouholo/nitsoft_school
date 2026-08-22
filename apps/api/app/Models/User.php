@@ -8,6 +8,7 @@ namespace App\Models;
 use App\Domain\Academics\Models\TeacherAssignment;
 use App\Domain\Arabic\Models\ArabicTeacherAssignment;
 use App\Domain\Enrollment\Models\Guardian;
+use App\Domain\Establishments\Enums\Gender;
 use App\Domain\Establishments\Enums\SaasAdminType;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\EstablishmentUserPivot;
@@ -48,6 +49,12 @@ class User extends Authenticatable
         'phone',
         'password',
         'locale',
+        'gender',
+        'birth_date',
+        'birth_place',
+        'nationality',
+        'city',
+        'photo_path',
         'uid_local',
         'uid_serveur',
         'device_id',
@@ -64,19 +71,13 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'client_updated_at' => 'datetime',
-        ];
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'client_updated_at' => 'datetime',
+        'gender' => Gender::class,
+        'birth_date' => 'date',
+    ];
 
     protected static function uidPrefix(): string
     {
