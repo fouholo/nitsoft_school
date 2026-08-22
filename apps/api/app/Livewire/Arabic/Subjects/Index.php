@@ -6,11 +6,9 @@ namespace App\Livewire\Arabic\Subjects;
 
 use App\Domain\Arabic\Models\ArabicSubject;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Matières arabes')]
 class Index extends Component
 {
     public bool $showForm = false;
@@ -92,6 +90,6 @@ class Index extends Component
     {
         return view('livewire.arabic.subjects.index', [
             'arabicSubjects' => ArabicSubject::orderBy('name')->get(),
-        ]);
+        ])->title(__('Matières arabes'));
     }
 }

@@ -10,11 +10,9 @@ use App\Domain\Enrollment\Models\Enrollment;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Saisie des notes arabes')]
 class Enter extends Component
 {
     public ArabicGradeSheet $gradeSheet;
@@ -94,6 +92,6 @@ class Enter extends Component
             'enrollments' => $enrollments,
             'scoredCount' => $scoredCount,
             'totalCount' => $enrollments->count(),
-        ]);
+        ])->title(__('Saisie des notes arabes'));
     }
 }

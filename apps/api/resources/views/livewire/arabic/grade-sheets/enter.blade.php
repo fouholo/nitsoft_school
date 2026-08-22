@@ -1,21 +1,21 @@
 <div>
-    <a href="{{ route('arabic.grade-sheets.index') }}" class="text-sm text-stone-500 hover:text-stone-900">&larr; Retour aux évaluations</a>
+    <a href="{{ route('arabic.grade-sheets.index') }}" class="text-sm text-stone-500 hover:text-stone-900">&larr; {{ __('Retour aux évaluations') }}</a>
 
     <div class="mt-2">
         <h1 class="text-2xl font-semibold text-stone-900">{{ $gradeSheet->title }}</h1>
         <p class="text-sm text-stone-500">
             <span dir="rtl">{{ $gradeSheet->arabicLevel?->wording }}</span>
             — <span dir="rtl">{{ $gradeSheet->arabicSubject?->name }}</span>
-            — Barème {{ $gradeSheet->max_score }} — {{ $gradeSheet->arabicTerm?->label }}
+            — {{ __('Barème :max', ['max' => $gradeSheet->max_score]) }} — {{ $gradeSheet->arabicTerm?->label }}
             @if ($totalCount > 0)
-                — {{ $scoredCount }}/{{ $totalCount }} notées
+                — {{ __(':scored/:total notées', ['scored' => $scoredCount, 'total' => $totalCount]) }}
             @endif
         </p>
     </div>
 
     @if ($justSaved)
         <div class="mt-4 rounded-lg bg-emerald-50 px-4 py-2 text-sm text-emerald-700">
-            Notes enregistrées.
+            {{ __('Notes enregistrées.') }}
         </div>
     @endif
 
@@ -33,9 +33,9 @@
                 <table class="min-w-full divide-y divide-stone-200 text-sm">
                     <thead class="sticky top-0 z-10 bg-stone-50">
                         <tr>
-                            <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-stone-500">Élève</th>
-                            <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-stone-500">Note / {{ $gradeSheet->max_score }}</th>
-                            <th class="whitespace-nowrap px-4 py-2 text-left font-medium text-stone-500">Commentaire</th>
+                            <th class="whitespace-nowrap px-4 py-2 text-start font-medium text-stone-500">{{ __('Élève') }}</th>
+                            <th class="whitespace-nowrap px-4 py-2 text-start font-medium text-stone-500">{{ __('Note / :max', ['max' => $gradeSheet->max_score]) }}</th>
+                            <th class="whitespace-nowrap px-4 py-2 text-start font-medium text-stone-500">{{ __('Commentaire') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-stone-100">
@@ -55,7 +55,7 @@
                                         :class="invalid ? 'border-red-400' : 'border-stone-300'"
                                         class="block w-24 rounded-lg text-sm"
                                     >
-                                    <p x-show="invalid" x-cloak class="mt-1 text-sm text-red-600">Doit être compris entre 0 et {{ $gradeSheet->max_score }}.</p>
+                                    <p x-show="invalid" x-cloak class="mt-1 text-sm text-red-600">{{ __('Doit être compris entre 0 et :max.', ['max' => $gradeSheet->max_score]) }}</p>
                                     @error('scores.'.$enrollment->id) <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                                 </td>
                                 <td class="whitespace-nowrap px-4 py-2">
@@ -68,7 +68,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="3" class="px-4 py-6 text-center text-stone-500">Aucun élève inscrit dans ce groupe.</td>
+                                <td colspan="3" class="px-4 py-6 text-center text-stone-500">{{ __('Aucun élève inscrit dans ce groupe.') }}</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -77,7 +77,7 @@
         </div>
 
         <button type="submit" class="mt-4 rounded-lg bg-orange-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-800">
-            Enregistrer les notes
+            {{ __('Enregistrer les notes') }}
         </button>
     </form>
 </div>

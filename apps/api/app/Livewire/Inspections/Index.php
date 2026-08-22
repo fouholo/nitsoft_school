@@ -8,11 +8,9 @@ use App\Domain\Establishments\Models\Direction;
 use App\Domain\Establishments\Models\Inspection;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Inspections')]
 class Index extends Component
 {
     public bool $showForm = false;
@@ -117,6 +115,6 @@ class Index extends Component
         return view('livewire.inspections.index', [
             'inspections' => Inspection::orderBy('inspection_name')->get(),
             'directions' => Direction::orderBy('direction_name')->get(),
-        ]);
+        ])->title(__('Inspections'));
     }
 }

@@ -7,13 +7,11 @@ namespace App\Livewire\GeneralInformation;
 use App\Domain\Establishments\Models\GeneralInformation;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
 #[Layout('layouts.app')]
-#[Title('Informations générales')]
 class Edit extends Component
 {
     use WithFileUploads;
@@ -86,6 +84,6 @@ class Edit extends Component
 
     public function render()
     {
-        return view('livewire.general-information.edit');
+        return view('livewire.general-information.edit')->title(__('Informations générales'));
     }
 }

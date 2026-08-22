@@ -11,11 +11,9 @@ use App\Domain\Arabic\Models\ArabicSubject;
 use App\Domain\Arabic\Models\ArabicTeacherAssignment;
 use App\Domain\Establishments\Models\Establishment;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Affectations enseignants arabes')]
 class Index extends Component
 {
     public bool $showForm = false;
@@ -107,6 +105,6 @@ class Index extends Component
             'arabicSeries' => ArabicSerie::orderBy('serie')->get(),
             'arabicSubjects' => ArabicSubject::orderBy('name')->get(),
             'schoolYears' => SchoolYear::orderByDesc('starts_on')->get(),
-        ]);
+        ])->title(__('Affectations enseignants arabes'));
     }
 }

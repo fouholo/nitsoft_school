@@ -11,11 +11,9 @@ use App\Domain\Enrollment\Models\Student;
 use App\Livewire\GuardianPortal\Concerns\EnsuresGuardianAccess;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.guardian-portal')]
-#[Title('Mes enfants')]
 class Dashboard extends Component
 {
     use EnsuresGuardianAccess;
@@ -45,7 +43,7 @@ class Dashboard extends Component
             'students' => $students,
             'pendingCount' => $pendingCount,
             'alerts' => $this->alertsFor($students),
-        ]);
+        ])->title(__('Mes enfants'));
     }
 
     /**

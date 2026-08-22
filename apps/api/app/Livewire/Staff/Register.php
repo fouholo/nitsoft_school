@@ -46,7 +46,7 @@ class Register extends Component
         $establishment = Establishment::where('uid_serveur', $data['uid'])->first();
 
         if ($establishment === null) {
-            $this->addError('uid', "Aucun établissement ne correspond à cet identifiant.");
+            $this->addError('uid', __('Aucun établissement ne correspond à cet identifiant.'));
 
             return;
         }

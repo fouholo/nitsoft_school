@@ -1,29 +1,28 @@
 <div>
-    <a href="{{ route('dashboard') }}" wire:navigate class="text-sm text-stone-500 hover:text-stone-900">&larr; Retour au tableau de bord</a>
+    <a href="{{ route('dashboard') }}" wire:navigate class="text-sm text-stone-500 hover:text-stone-900">&larr; {{ __('Retour au tableau de bord') }}</a>
 
     <h1 class="mt-2 text-2xl font-semibold text-stone-900">
-        {{ $organization instanceof \App\Domain\Establishments\Models\Foundation ? $organization->name : $organization->name }}
-        — Organisation
+        {{ __(':name — Organisation', ['name' => $organization instanceof \App\Domain\Establishments\Models\Foundation ? $organization->name : $organization->name]) }}
     </h1>
 
     @unless ($isGeneralAdmin)
         <div class="mt-4 rounded-lg border border-stone-200 bg-white p-4 text-sm text-stone-600">
-            Vous n'êtes pas administrateur général de cette organisation actuellement.
-            <button wire:click="reclaim" wire:confirm="Réclamer le statut d'administrateur général ?" class="ml-2 font-medium text-orange-700 hover:text-orange-900">
-                Réclamer le statut
+            {{ __("Vous n'êtes pas administrateur général de cette organisation actuellement.") }}
+            <button wire:click="reclaim" wire:confirm="{{ __("Réclamer le statut d'administrateur général ?") }}" class="ms-2 font-medium text-orange-700 hover:text-orange-900">
+                {{ __('Réclamer le statut') }}
             </button>
         </div>
     @else
         @if ($generatedPassword)
             <div class="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-                Compte créé pour <span class="font-medium">{{ $generatedPasswordFor }}</span> avec le mot de passe par défaut :
-                <span class="font-mono font-semibold">{{ $generatedPassword }}</span> — invitez la personne à le changer dès sa première connexion (menu de son profil).
+                {{ __('Compte créé pour :name avec le mot de passe par défaut :', ['name' => $generatedPasswordFor]) }}
+                <span class="font-mono font-semibold">{{ $generatedPassword }}</span> — {{ __('invitez la personne à le changer dès sa première connexion (menu de son profil).') }}
             </div>
         @endif
 
         @if ($organization instanceof \App\Domain\Establishments\Models\Foundation)
             <section class="mt-6">
-                <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500">Établissements du groupe</h2>
+                <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500">{{ __('Établissements du groupe') }}</h2>
                 <div class="mt-2 overflow-hidden rounded-lg border border-stone-200 bg-white">
                     <table class="min-w-full divide-y divide-stone-200 text-sm">
                         <tbody class="divide-y divide-stone-100">
@@ -33,21 +32,21 @@
                                     <td class="px-4 py-2 text-stone-600">{{ $groupEstablishment->type?->label() ?? '—' }}</td>
                                 </tr>
                             @empty
-                                <tr><td class="px-4 py-6 text-center text-stone-500">Aucun établissement.</td></tr>
+                                <tr><td class="px-4 py-6 text-center text-stone-500">{{ __('Aucun établissement.') }}</td></tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
 
                 <form wire:submit="createEstablishment" class="mt-3 space-y-2 rounded-lg border border-stone-200 bg-white p-3">
-                    <h3 class="text-xs font-semibold uppercase tracking-wide text-stone-500">Créer un établissement</h3>
+                    <h3 class="text-xs font-semibold uppercase tracking-wide text-stone-500">{{ __('Créer un établissement') }}</h3>
                     <div>
-                        <label class="block text-xs font-medium text-stone-700">Nom</label>
+                        <label class="block text-xs font-medium text-stone-700">{{ __('Nom') }}</label>
                         <input type="text" wire:model="new_establishment_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         @error('new_establishment_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-stone-700">Type</label>
+                        <label class="block text-xs font-medium text-stone-700">{{ __('Type') }}</label>
                         <select wire:model="new_establishment_type" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                             <option value="">—</option>
                             @foreach ($establishmentTypes as $type)
@@ -57,22 +56,22 @@
                         @error('new_establishment_type') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-stone-700">Adresse</label>
+                        <label class="block text-xs font-medium text-stone-700">{{ __('Adresse') }}</label>
                         <input type="text" wire:model="new_establishment_address" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         @error('new_establishment_address') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-stone-700">Téléphone</label>
+                        <label class="block text-xs font-medium text-stone-700">{{ __('Téléphone') }}</label>
                         <input type="text" wire:model="new_establishment_phone" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         @error('new_establishment_phone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-stone-700">E-mail</label>
+                        <label class="block text-xs font-medium text-stone-700">{{ __('E-mail') }}</label>
                         <input type="email" wire:model="new_establishment_email" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         @error('new_establishment_email') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-stone-700">Inspection</label>
+                        <label class="block text-xs font-medium text-stone-700">{{ __('Inspection') }}</label>
                         <select wire:model="new_establishment_inspection_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                             <option value="">—</option>
                             @foreach ($inspections as $inspection)
@@ -82,42 +81,42 @@
                         @error('new_establishment_inspection_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-stone-700">Code d'ouverture</label>
+                        <label class="block text-xs font-medium text-stone-700">{{ __("Code d'ouverture") }}</label>
                         <input type="text" wire:model="new_establishment_opening_code" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         @error('new_establishment_opening_code') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-stone-700">Code DSPS</label>
+                        <label class="block text-xs font-medium text-stone-700">{{ __('Code DSPS') }}</label>
                         <input type="text" wire:model="new_establishment_dsps_code" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         @error('new_establishment_dsps_code') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-stone-700">Latitude</label>
+                        <label class="block text-xs font-medium text-stone-700">{{ __('Latitude') }}</label>
                         <input type="text" wire:model="new_establishment_latitude" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         @error('new_establishment_latitude') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-stone-700">Longitude</label>
+                        <label class="block text-xs font-medium text-stone-700">{{ __('Longitude') }}</label>
                         <input type="text" wire:model="new_establishment_longitude" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         @error('new_establishment_longitude') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-stone-700">Logo</label>
+                        <label class="block text-xs font-medium text-stone-700">{{ __('Logo') }}</label>
                         <input type="file" wire:model="new_establishment_logo" class="mt-1 block w-full text-sm">
                         @error('new_establishment_logo') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <label class="flex items-center gap-2 text-sm text-stone-600">
                         <input type="checkbox" wire:model="new_establishment_is_arabe" class="rounded border-stone-300">
-                        École arabe
+                        {{ __('École arabe') }}
                     </label>
                     <button type="submit" class="rounded-lg bg-orange-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-800">
-                        Créer l'établissement
+                        {{ __("Créer l'établissement") }}
                     </button>
                 </form>
             </section>
 
             <section class="mt-6">
-                <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500">Fondateurs</h2>
+                <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500">{{ __('Fondateurs') }}</h2>
                 <div class="mt-2 overflow-hidden rounded-lg border border-stone-200 bg-white">
                     <table class="min-w-full divide-y divide-stone-200 text-sm">
                         <tbody class="divide-y divide-stone-100">
@@ -127,28 +126,28 @@
                                         {{ $fondateur->user->name }}
                                         <span class="block text-xs text-stone-500">{{ $fondateur->user->email }}</span>
                                         @if ($fondateur->is_general_admin)
-                                            <span class="ml-1 inline-flex rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-800">Administrateur général</span>
+                                            <span class="ms-1 inline-flex rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-800">{{ __('Administrateur général') }}</span>
                                         @endif
                                     </td>
                                     <td class="px-4 py-2">
                                         <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium {{ $fondateur->is_active ? 'bg-green-100 text-green-700' : 'bg-stone-100 text-stone-500' }}">
-                                            {{ $fondateur->is_active ? 'Actif' : 'En attente / Inactif' }}
+                                            {{ $fondateur->is_active ? __('Actif') : __('En attente / Inactif') }}
                                         </span>
                                     </td>
-                                    <td class="px-4 py-2 text-right">
+                                    <td class="px-4 py-2 text-end">
                                         @if ($fondateur->user_id !== auth()->id())
                                             @if ($fondateur->is_active)
-                                                <button wire:click="deactivateFondateur({{ $fondateur->id }})" wire:confirm="Désactiver ce fondateur ?" class="text-stone-500 hover:text-stone-700">Désactiver</button>
+                                                <button wire:click="deactivateFondateur({{ $fondateur->id }})" wire:confirm="{{ __('Désactiver ce fondateur ?') }}" class="text-stone-500 hover:text-stone-700">{{ __('Désactiver') }}</button>
                                             @else
-                                                <button wire:click="activateFondateur({{ $fondateur->id }})" class="text-orange-700 hover:text-orange-900">Activer</button>
+                                                <button wire:click="activateFondateur({{ $fondateur->id }})" class="text-orange-700 hover:text-orange-900">{{ __('Activer') }}</button>
                                             @endif
                                         @else
-                                            <span class="text-xs text-stone-400">Vous</span>
+                                            <span class="text-xs text-stone-400">{{ __('Vous') }}</span>
                                         @endif
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td class="px-4 py-6 text-center text-stone-500">Aucun fondateur.</td></tr>
+                                <tr><td class="px-4 py-6 text-center text-stone-500">{{ __('Aucun fondateur.') }}</td></tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -157,16 +156,16 @@
         @endif
 
         <section class="mt-6">
-            <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500">Utilisateurs</h2>
+            <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500">{{ __('Utilisateurs') }}</h2>
             <div class="mt-2 overflow-hidden rounded-lg border border-stone-200 bg-white">
                 <table class="min-w-full divide-y divide-stone-200 text-sm">
                     <thead class="bg-stone-50">
                         <tr>
-                            <th class="px-4 py-2 text-left font-medium text-stone-500">Nom</th>
-                            <th class="px-4 py-2 text-left font-medium text-stone-500">Établissement</th>
-                            <th class="px-4 py-2 text-left font-medium text-stone-500">Rôle</th>
-                            <th class="px-4 py-2 text-left font-medium text-stone-500">Statut</th>
-                            <th class="px-4 py-2 text-right font-medium text-stone-500">Actions</th>
+                            <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Nom') }}</th>
+                            <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Établissement') }}</th>
+                            <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Rôle') }}</th>
+                            <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Statut') }}</th>
+                            <th class="px-4 py-2 text-end font-medium text-stone-500">{{ __('Actions') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-stone-100">
@@ -178,38 +177,38 @@
                                 </td>
                                 <td class="px-4 py-2 text-stone-600">{{ $member->establishment->name }}</td>
                                 <td class="px-4 py-2 text-stone-600">
-                                    {{ ucfirst($member->role) }}
+                                    {{ \App\Models\User::roleLabel($member->role) }}
                                     @if ($member->is_local_admin)
-                                        <span class="ml-1 inline-flex rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-800">Admin local</span>
+                                        <span class="ms-1 inline-flex rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-800">{{ __('Admin local') }}</span>
                                     @endif
                                 </td>
                                 <td class="px-4 py-2">
                                     <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium {{ $member->is_active ? 'bg-green-100 text-green-700' : 'bg-stone-100 text-stone-500' }}">
-                                        {{ $member->is_active ? 'Actif' : 'En attente / Inactif' }}
+                                        {{ $member->is_active ? __('Actif') : __('En attente / Inactif') }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-2 text-right space-x-2">
+                                <td class="px-4 py-2 text-end space-x-2">
                                     @if ($member->user_id !== auth()->id())
                                         @if ($member->is_active)
-                                            <button wire:click="deactivate({{ $member->id }})" wire:confirm="Désactiver ce compte ?" class="text-stone-500 hover:text-stone-700">Désactiver</button>
+                                            <button wire:click="deactivate({{ $member->id }})" wire:confirm="{{ __('Désactiver ce compte ?') }}" class="text-stone-500 hover:text-stone-700">{{ __('Désactiver') }}</button>
                                         @else
-                                            <button wire:click="activate({{ $member->id }})" class="text-orange-700 hover:text-orange-900">Activer</button>
+                                            <button wire:click="activate({{ $member->id }})" class="text-orange-700 hover:text-orange-900">{{ __('Activer') }}</button>
                                         @endif
 
                                         @if ($member->is_local_admin)
-                                            <button wire:click="dismissLocalAdmin({{ $member->establishment_id }})" wire:confirm="Démettre cet administrateur local ?" class="text-stone-500 hover:text-stone-700">Démettre admin local</button>
+                                            <button wire:click="dismissLocalAdmin({{ $member->establishment_id }})" wire:confirm="{{ __('Démettre cet administrateur local ?') }}" class="text-stone-500 hover:text-stone-700">{{ __('Démettre admin local') }}</button>
                                         @else
-                                            <button wire:click="nominateLocalAdmin({{ $member->id }})" class="text-orange-700 hover:text-orange-900">Nommer admin local</button>
+                                            <button wire:click="nominateLocalAdmin({{ $member->id }})" class="text-orange-700 hover:text-orange-900">{{ __('Nommer admin local') }}</button>
                                         @endif
 
-                                        <button wire:click="delete({{ $member->id }})" wire:confirm="Supprimer ce compte ? Cette action est irréversible." class="text-red-500 hover:text-red-700">Supprimer</button>
+                                        <button wire:click="delete({{ $member->id }})" wire:confirm="{{ __('Supprimer ce compte ? Cette action est irréversible.') }}" class="text-red-500 hover:text-red-700">{{ __('Supprimer') }}</button>
                                     @else
-                                        <span class="text-xs text-stone-400">Vous</span>
+                                        <span class="text-xs text-stone-400">{{ __('Vous') }}</span>
                                     @endif
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="5" class="px-4 py-6 text-center text-stone-500">Aucun utilisateur.</td></tr>
+                            <tr><td colspan="5" class="px-4 py-6 text-center text-stone-500">{{ __('Aucun utilisateur.') }}</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -217,13 +216,13 @@
         </section>
 
         <form wire:submit="create" class="mt-6 max-w-md space-y-3 rounded-lg border border-stone-200 bg-white p-4">
-            <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500">Créer un compte</h2>
+            <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500">{{ __('Créer un compte') }}</h2>
 
             @if ($establishments->count() > 1)
                 <div>
-                    <label class="block text-xs font-medium text-stone-700">Établissement</label>
+                    <label class="block text-xs font-medium text-stone-700">{{ __('Établissement') }}</label>
                     <select wire:model="staff_establishment_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
-                        <option value="">Sélectionner…</option>
+                        <option value="">{{ __('Sélectionner…') }}</option>
                         @foreach ($establishments as $establishment)
                             <option value="{{ $establishment->id }}">{{ $establishment->name }}</option>
                         @endforeach
@@ -233,17 +232,17 @@
             @endif
 
             <div>
-                <label class="block text-xs font-medium text-stone-700">Nom</label>
+                <label class="block text-xs font-medium text-stone-700">{{ __('Nom') }}</label>
                 <input type="text" wire:model="staff_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('staff_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
             <div>
-                <label class="block text-xs font-medium text-stone-700">E-mail</label>
+                <label class="block text-xs font-medium text-stone-700">{{ __('E-mail') }}</label>
                 <input type="email" wire:model="staff_email" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('staff_email') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
             <div>
-                <label class="block text-xs font-medium text-stone-700">Rôle</label>
+                <label class="block text-xs font-medium text-stone-700">{{ __('Rôle') }}</label>
                 <select wire:model="staff_role" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     @foreach ($assignableRoles as $role)
                         <option value="{{ $role->code }}">{{ $role->wording }}</option>
@@ -251,19 +250,19 @@
                 </select>
             </div>
             <button type="submit" class="rounded-lg bg-orange-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-800">
-                Créer le compte
+                {{ __('Créer le compte') }}
             </button>
         </form>
 
         @if ($eligibleGeneralAdminTargets->isNotEmpty())
             <section class="mt-6 max-w-md rounded-lg border border-stone-200 bg-white p-4">
-                <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500">Céder l'administration générale</h2>
+                <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500">{{ __("Céder l'administration générale") }}</h2>
                 <div class="mt-2 space-y-2">
                     @foreach ($eligibleGeneralAdminTargets as $target)
                         <div class="flex items-center justify-between">
-                            <span class="text-sm text-stone-700">{{ $target->user->name }} ({{ $target->role }})</span>
-                            <button wire:click="cedeGeneralAdmin({{ $target->id }})" wire:confirm="Céder l'administration générale à {{ $target->user->name }} ?" class="text-sm font-medium text-orange-700 hover:text-orange-900">
-                                Céder
+                            <span class="text-sm text-stone-700">{{ $target->user->name }} ({{ \App\Models\User::roleLabel($target->role) }})</span>
+                            <button wire:click="cedeGeneralAdmin({{ $target->id }})" wire:confirm="{{ __("Céder l'administration générale à :name ?", ['name' => $target->user->name]) }}" class="text-sm font-medium text-orange-700 hover:text-orange-900">
+                                {{ __('Céder') }}
                             </button>
                         </div>
                     @endforeach

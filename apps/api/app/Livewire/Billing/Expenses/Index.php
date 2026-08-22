@@ -9,12 +9,10 @@ use App\Domain\Establishments\Support\RolePermissions;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
-#[Title('Dépenses')]
 class Index extends Component
 {
     use WithPagination;
@@ -105,6 +103,6 @@ class Index extends Component
         return view('livewire.billing.expenses.index', [
             'expenses' => $query->paginate(15),
             'total' => $total,
-        ]);
+        ])->title(__('Dépenses'));
     }
 }

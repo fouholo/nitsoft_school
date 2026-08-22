@@ -7,11 +7,9 @@ namespace App\Livewire\GuardianPortal;
 use App\Domain\Enrollment\Models\Student;
 use App\Livewire\GuardianPortal\Concerns\EnsuresGuardianAccess;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.guardian-portal')]
-#[Title('Facturation')]
 class StudentBilling extends Component
 {
     use EnsuresGuardianAccess;
@@ -45,6 +43,6 @@ class StudentBilling extends Component
             'totalPaid' => $totalPaid,
             'balance' => $totalDue - $totalPaid,
             'payments' => $enrollment?->payments()->latest('paid_at')->get() ?? collect(),
-        ]);
+        ])->title(__('Facturation'));
     }
 }

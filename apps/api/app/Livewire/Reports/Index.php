@@ -14,11 +14,9 @@ use App\Domain\Establishments\Models\Establishment;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Listes/Rapports')]
 class Index extends Component
 {
     public ?int $school_year_id = null;
@@ -84,6 +82,6 @@ class Index extends Component
                 ->limit(50)
                 ->get(),
             'levels' => Level::orderBy('level_wording')->get(),
-        ]);
+        ])->title(__('Listes/Rapports'));
     }
 }

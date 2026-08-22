@@ -93,7 +93,7 @@ test('une bannière signale le nombre d’appels à faire aujourd’hui', functi
     ]);
 
     Livewire::test(Index::class)
-        ->assertSee('2 appels à faire aujourd\'hui');
+        ->assertSee('2 appel(s) à faire aujourd\'hui');
 });
 
 test('une bannière positive confirme que tout est fait quand les appels du jour sont complétés', function () {
@@ -118,6 +118,6 @@ test('une bannière positive confirme que tout est fait quand les appels du jour
     ]);
 
     Livewire::test(Index::class)
-        ->assertSee('Tout est fait pour aujourd\'hui', false)
+        ->assertSee('Tout est fait pour aujourd\'hui')
         ->assertDontSee('à faire aujourd\'hui', false);
 });

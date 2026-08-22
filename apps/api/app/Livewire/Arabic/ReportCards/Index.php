@@ -12,11 +12,9 @@ use App\Domain\Arabic\Services\ArabicReportCardService;
 use App\Domain\Enrollment\Models\Enrollment;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Bulletins arabes')]
 class Index extends Component
 {
     public ?int $arabic_level_id = null;
@@ -49,9 +47,9 @@ class Index extends Component
             'arabic_serie_id' => $this->selectedLevelRequiresSeries() ? ['required', 'exists:arabic_series,id'] : ['nullable'],
             'arabic_term_id' => ['required', 'exists:arabic_terms,id'],
         ], [], [
-            'arabic_level_id' => 'niveau arabe',
-            'arabic_serie_id' => 'série arabe',
-            'arabic_term_id' => 'période',
+            'arabic_level_id' => __('niveau arabe'),
+            'arabic_serie_id' => __('série arabe'),
+            'arabic_term_id' => __('période'),
         ]);
 
         $level = ArabicLevel::findOrFail($data['arabic_level_id']);
@@ -93,6 +91,6 @@ class Index extends Component
             'arabicTerms' => ArabicTerm::orderBy('sequence')->get(),
             'totalStudents' => $totalStudents,
             'generatedAt' => $reportCards->max('generated_at'),
-        ]);
+        ])->title(__('Bulletins arabes'));
     }
 }

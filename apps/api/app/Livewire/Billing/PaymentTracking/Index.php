@@ -15,12 +15,10 @@ use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
-#[Title('Suivi des paiements')]
 class Index extends Component
 {
     use WithPagination;
@@ -166,6 +164,6 @@ class Index extends Component
             'displayedBalance' => (float) $rows->sum('balance'),
             'scopedToOwn' => $ownerId !== null,
             'canRecordPayments' => $canRecordPayments,
-        ]);
+        ])->title(__('Suivi des paiements'));
     }
 }

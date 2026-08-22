@@ -9,11 +9,9 @@ use App\Domain\Establishments\Models\SaasAdmin;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Administrateurs SaaS')]
 class Index extends Component
 {
     public string $admin_name = '';
@@ -70,7 +68,7 @@ class Index extends Component
     {
         $saasAdmin = SaasAdmin::findOrFail($saasAdminId);
         $this->authorize('update', $saasAdmin);
-        abort_if($saasAdmin->user_id === Auth::id(), 422, 'Vous ne pouvez pas vous désactiver vous-même.');
+        abort_if($saasAdmin->user_id === Auth::id(), 422, __('Vous ne pouvez pas vous désactiver vous-même.'));
 
         $saasAdmin->update(['is_active' => false]);
     }
@@ -79,7 +77,7 @@ class Index extends Component
     {
         $saasAdmin = SaasAdmin::findOrFail($saasAdminId);
         $this->authorize('delete', $saasAdmin);
-        abort_if($saasAdmin->user_id === Auth::id(), 422, 'Vous ne pouvez pas vous supprimer vous-même.');
+        abort_if($saasAdmin->user_id === Auth::id(), 422, __('Vous ne pouvez pas vous supprimer vous-même.'));
 
         $saasAdmin->delete();
     }
@@ -88,6 +86,6 @@ class Index extends Component
     {
         return view('livewire.saas-admins.index', [
             'admins' => SaasAdmin::with('user')->orderByDesc('type')->orderBy('created_at')->get(),
-        ]);
+        ])->title(__('Administrateurs SaaS'));
     }
 }

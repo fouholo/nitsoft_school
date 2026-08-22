@@ -16,22 +16,22 @@
             <div class="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
                 <a href="{{ route('guardian-portal.dashboard') }}" class="flex items-center gap-2 text-sm font-semibold text-stone-900">
                     <img src="{{ asset('branding/nitsoft-school-logo.png') }}" alt="" class="h-7 w-7 object-contain">
-                    <span class="text-[1.75rem] leading-none text-blue-700">{{ config('app.name') }}</span><span class="hidden sm:inline"> — Espace parents</span>
+                    <span class="text-[1.75rem] leading-none text-blue-700">{{ config('app.name') }}</span><span class="hidden sm:inline"> — {{ __('Espace parents') }}</span>
                 </a>
 
                 <div class="flex items-center gap-3">
                     <a href="{{ route('guardian-portal.link-child') }}" wire:navigate class="rounded-lg bg-orange-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-800">
-                        Lier un enfant
+                        {{ __('Lier un enfant') }}
                     </a>
 
                     <a href="{{ route('account.password.edit') }}" wire:navigate class="text-sm text-stone-500 hover:text-stone-900">
-                        Mot de passe
+                        {{ __('Mot de passe') }}
                     </a>
 
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="text-sm text-stone-500 hover:text-stone-900">
-                            Déconnexion
+                            {{ __('Déconnexion') }}
                         </button>
                     </form>
                 </div>

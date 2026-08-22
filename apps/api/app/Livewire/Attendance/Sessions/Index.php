@@ -11,11 +11,9 @@ use App\Domain\Attendance\Models\AttendanceSession;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Présences')]
 class Index extends Component
 {
     public bool $showForm = false;
@@ -58,7 +56,7 @@ class Index extends Component
         $user = Auth::user();
 
         if (! $user->hasAdminRightsOnCurrentEstablishment() && ! $user->isAssignedToClassroom((int) $data['classroom_id'])) {
-            abort(403, "Vous n'êtes pas affecté à cette classe.");
+            abort(403, __("Vous n'êtes pas affecté à cette classe."));
         }
 
         $session = AttendanceSession::create([...$data, 'teacher_id' => $user->id]);
@@ -102,6 +100,6 @@ class Index extends Component
             'todayTotal' => $todaySessions->count(),
             'classrooms' => $isAdmin ? Classroom::orderBy('name')->get() : $assignments->pluck('classroom')->unique('id'),
             'subjects' => $isAdmin ? Subject::orderBy('name')->get() : $assignments->pluck('subject')->unique('id'),
-        ]);
+        ])->title(__('Présences'));
     }
 }

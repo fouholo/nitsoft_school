@@ -10,11 +10,9 @@ use App\Domain\Establishments\Models\Foundation;
 use App\Domain\Establishments\Models\FoundationUserPivot;
 use App\Models\User;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Groupe scolaire')]
 class Show extends Component
 {
     public Foundation $foundation;
@@ -118,6 +116,6 @@ class Show extends Component
                 ->where('role', 'fondateur')
                 ->with('user')
                 ->get(),
-        ]);
+        ])->title(__('Groupe scolaire'));
     }
 }

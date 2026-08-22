@@ -10,11 +10,9 @@ use App\Domain\Attendance\Models\AttendanceSession;
 use App\Domain\Enrollment\Models\Student;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title("Faire l'appel")]
 class Mark extends Component
 {
     public AttendanceSession $session;
@@ -102,6 +100,6 @@ class Mark extends Component
     {
         return view('livewire.attendance.sessions.mark', [
             'students' => $this->students(),
-        ]);
+        ])->title(__("Faire l'appel"));
     }
 }

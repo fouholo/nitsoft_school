@@ -265,7 +265,7 @@ test('le pied de tableau indique le nombre d’élèves affichés', function () 
 
     Livewire::test(Index::class)
         ->set('school_year_id', $schoolYear->id)
-        ->assertSee('2 élèves affichés');
+        ->assertSee('2 élève(s) affiché(s)');
 });
 
 test('la liste est paginée au-delà de 25 élèves et change de page correctement', function () {

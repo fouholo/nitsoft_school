@@ -10,11 +10,9 @@ use App\Domain\Notifications\Jobs\SendSmsJob;
 use App\Domain\Notifications\Models\SmsMessage;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Envoyer un SMS')]
 class Send extends Component
 {
     public ?int $student_id = null;
@@ -79,8 +77,8 @@ class Send extends Component
         }
 
         $this->confirmation = $guardians->isEmpty()
-            ? "Aucun tuteur approuvé avec numéro de téléphone pour cet élève."
-            : "SMS envoyé à {$guardians->count()} tuteur(s).";
+            ? __('Aucun tuteur approuvé avec numéro de téléphone pour cet élève.')
+            : __('SMS envoyé à :count tuteur(s).', ['count' => $guardians->count()]);
 
         $this->reset(['student_id', 'body']);
     }
@@ -89,6 +87,6 @@ class Send extends Component
     {
         return view('livewire.notifications.sms-messages.send', [
             'students' => Student::orderBy('last_name')->orderBy('first_name')->get(),
-        ]);
+        ])->title(__('Envoyer un SMS'));
     }
 }

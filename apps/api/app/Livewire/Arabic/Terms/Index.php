@@ -8,11 +8,9 @@ use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Arabic\Models\ArabicTerm;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Périodes arabes')]
 class Index extends Component
 {
     public bool $showForm = false;
@@ -73,7 +71,7 @@ class Index extends Component
 
         if ($data['starts_on'] !== null && $data['ends_on'] !== null && $data['ends_on'] <= $data['starts_on']) {
             throw ValidationException::withMessages([
-                'ends_on' => 'La date de fin doit être postérieure à la date de début.',
+                'ends_on' => __('La date de fin doit être postérieure à la date de début.'),
             ]);
         }
 
@@ -117,6 +115,6 @@ class Index extends Component
         return view('livewire.arabic.terms.index', [
             'arabicTerms' => ArabicTerm::with('schoolYear')->orderBy('sequence')->get(),
             'schoolYears' => SchoolYear::orderByDesc('starts_on')->get(),
-        ]);
+        ])->title(__('Périodes arabes'));
     }
 }

@@ -7,11 +7,9 @@ namespace App\Livewire\Domains;
 use App\Domain\Academics\Models\Domain;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Domaines')]
 class Index extends Component
 {
     public bool $showForm = false;
@@ -87,6 +85,6 @@ class Index extends Component
     {
         return view('livewire.domains.index', [
             'domains' => Domain::orderBy('name')->get(),
-        ]);
+        ])->title(__('Domaines'));
     }
 }

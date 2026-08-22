@@ -6,11 +6,9 @@ namespace App\Livewire\Notifications\SmsTemplates;
 
 use App\Domain\Notifications\Models\SmsTemplate;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Modèles SMS')]
 class Index extends Component
 {
     public bool $showForm = false;
@@ -97,6 +95,6 @@ class Index extends Component
     {
         return view('livewire.notifications.sms-templates.index', [
             'smsTemplates' => SmsTemplate::orderBy('code')->get(),
-        ]);
+        ])->title(__('Modèles SMS'));
     }
 }

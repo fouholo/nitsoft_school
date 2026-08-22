@@ -87,7 +87,7 @@ test('le bouton de rappel d’échéance est présent à côté du bouton de rel
 
     Livewire::test(Index::class)
         ->assertSee('Générer les lettres de relance')
-        ->assertSee("Générer les rappels d'échéance", false);
+        ->assertSee("Générer les rappels d'échéance");
 });
 
 test('les filtres statut et bourse n’apparaissent que pour un établissement secondaire', function () {

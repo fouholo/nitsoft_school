@@ -7,11 +7,9 @@ namespace App\Livewire\Foundations;
 use App\Domain\Establishments\Models\Foundation;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Groupes scolaires')]
 class Index extends Component
 {
     public bool $showForm = false;
@@ -109,6 +107,6 @@ class Index extends Component
     {
         return view('livewire.foundations.index', [
             'foundations' => Foundation::withCount('establishments')->orderBy('name')->get(),
-        ]);
+        ])->title(__('Groupes scolaires'));
     }
 }

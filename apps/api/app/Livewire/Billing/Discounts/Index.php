@@ -9,13 +9,12 @@ use App\Domain\Billing\Models\Discount;
 use App\Domain\Billing\Services\DiscountService;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Réductions')]
 class Index extends Component
 {
     public ?int $school_year_id = null;
@@ -79,7 +78,7 @@ class Index extends Component
                 'min:0',
                 function (string $attribute, mixed $value, \Closure $fail): void {
                     if ($this->type === 'percentage' && (float) $value > 100) {
-                        $fail('Le pourcentage ne peut pas dépasser 100.');
+                        $fail(__('Le pourcentage ne peut pas dépasser 100.'));
                     }
                 },
             ],
@@ -146,9 +145,9 @@ class Index extends Component
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, Student>
+     * @return Collection<int, Student>
      */
-    protected function studentOptions(): \Illuminate\Support\Collection
+    protected function studentOptions(): Collection
     {
         return Student::query()
             ->when($this->studentSearch !== '', function ($query): void {
@@ -182,6 +181,6 @@ class Index extends Component
             'discounts' => $discounts,
             'students' => $this->studentOptions(),
             'schoolYears' => SchoolYear::orderByDesc('starts_on')->get(),
-        ]);
+        ])->title(__('Réductions'));
     }
 }

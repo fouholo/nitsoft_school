@@ -10,11 +10,9 @@ use App\Domain\Arabic\Models\ArabicSubject;
 use App\Domain\Arabic\Models\ArabicSubjectCoefficient;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Coefficients par matière arabe')]
 class Index extends Component
 {
     public ?int $arabic_level_id = null;
@@ -112,6 +110,6 @@ class Index extends Component
             'arabicLevels' => ArabicLevel::orderBy('wording')->get(),
             'arabicSeries' => ArabicSerie::orderBy('serie')->get(),
             'arabicSubjects' => $this->arabicSubjects(),
-        ]);
+        ])->title(__('Coefficients par matière arabe'));
     }
 }

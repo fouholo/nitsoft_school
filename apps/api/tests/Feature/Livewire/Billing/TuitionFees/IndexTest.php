@@ -185,7 +185,7 @@ test('le champ frais d’inscription affecté n’apparaît que pour un niveau s
     Livewire::test(Index::class)
         ->set('school_year_id', $schoolYear->id)
         ->call('configureLevel', $secondaireLevel->id)
-        ->assertSee('Frais d\'inscription (affecté)', false);
+        ->assertSee('Frais d\'inscription (affecté)');
 });
 
 test('le champ frais d’inscription affecté n’apparaît pas pour un niveau primaire', function () {

@@ -1,18 +1,18 @@
 <div>
-    <h1 class="mb-6 text-lg font-semibold text-stone-900">Inscription établissement</h1>
+    <h1 class="mb-6 text-lg font-semibold text-stone-900">{{ __('Inscription établissement') }}</h1>
 
     @if ($pendingApproval)
         <div class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-            Votre compte a été créé. Il est en attente d'activation par l'administrateur de votre organisation.
+            {{ __("Votre compte a été créé. Il est en attente d'activation par l'administrateur de votre organisation.") }}
         </div>
 
         <p class="mt-4 text-center text-sm text-stone-500">
-            <a href="{{ route('login') }}" wire:navigate class="text-orange-700 hover:underline">Retour à la connexion</a>
+            <a href="{{ route('login') }}" wire:navigate class="text-orange-700 hover:underline">{{ __('Retour à la connexion') }}</a>
         </p>
     @else
         <form wire:submit="register" class="space-y-4">
             <div>
-                <label for="name" class="block text-sm font-medium text-stone-700">Nom</label>
+                <label for="name" class="block text-sm font-medium text-stone-700">{{ __('Nom') }}</label>
                 <input
                     type="text"
                     id="name"
@@ -26,7 +26,7 @@
             </div>
 
             <div>
-                <label for="email" class="block text-sm font-medium text-stone-700">Adresse e-mail</label>
+                <label for="email" class="block text-sm font-medium text-stone-700">{{ __('Adresse e-mail') }}</label>
                 <input
                     type="email"
                     id="email"
@@ -40,12 +40,12 @@
             </div>
 
             <div>
-                <label for="uid" class="block text-sm font-medium text-stone-700">Identifiant de l'établissement</label>
+                <label for="uid" class="block text-sm font-medium text-stone-700">{{ __("Identifiant de l'établissement") }}</label>
                 <input
                     type="text"
                     id="uid"
                     wire:model="uid"
-                    placeholder="Ex : 000000001046"
+                    placeholder="{{ __('Ex : 000000001046') }}"
                     class="mt-1 block w-full rounded-lg border-stone-300 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm"
                 >
                 @error('uid')
@@ -54,16 +54,16 @@
             </div>
 
             <div>
-                <label for="role" class="block text-sm font-medium text-stone-700">Rôle</label>
+                <label for="role" class="block text-sm font-medium text-stone-700">{{ __('Rôle') }}</label>
                 <select
                     id="role"
                     wire:model="role"
                     class="mt-1 block w-full rounded-lg border-stone-300 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm"
                 >
-                    <option value="">Sélectionner…</option>
-                    <option value="fondateur">Fondateur</option>
-                    <option value="directeur">Directeur</option>
-                    <option value="gestionnaire">Gestionnaire</option>
+                    <option value="">{{ __('Sélectionner…') }}</option>
+                    <option value="fondateur">{{ __('Fondateur') }}</option>
+                    <option value="directeur">{{ __('Directeur') }}</option>
+                    <option value="gestionnaire">{{ __('Gestionnaire') }}</option>
                 </select>
                 @error('role')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -71,7 +71,7 @@
             </div>
 
             <div>
-                <label for="password" class="block text-sm font-medium text-stone-700">Mot de passe</label>
+                <label for="password" class="block text-sm font-medium text-stone-700">{{ __('Mot de passe') }}</label>
                 <input
                     type="password"
                     id="password"
@@ -85,7 +85,7 @@
             </div>
 
             <div>
-                <label for="password_confirmation" class="block text-sm font-medium text-stone-700">Confirmer le mot de passe</label>
+                <label for="password_confirmation" class="block text-sm font-medium text-stone-700">{{ __('Confirmer le mot de passe') }}</label>
                 <input
                     type="password"
                     id="password_confirmation"
@@ -100,11 +100,11 @@
                 class="w-full rounded-lg bg-orange-700 px-4 py-2 text-sm font-medium text-white hover:bg-orange-800"
                 wire:loading.attr="disabled"
             >
-                S'inscrire
+                {{ __("S'inscrire") }}
             </button>
 
             <p class="text-center text-sm text-stone-500">
-                Déjà un compte ? <a href="{{ route('login') }}" wire:navigate class="text-orange-700 hover:underline">Se connecter</a>
+                {{ __('Déjà un compte ?') }} <a href="{{ route('login') }}" wire:navigate class="text-orange-700 hover:underline">{{ __('Se connecter') }}</a>
             </p>
         </form>
     @endif

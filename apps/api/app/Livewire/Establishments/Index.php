@@ -12,13 +12,11 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
 #[Layout('layouts.app')]
-#[Title('Établissements')]
 class Index extends Component
 {
     use WithFileUploads;
@@ -189,6 +187,6 @@ class Index extends Component
             'foundations' => Foundation::orderBy('name')->get(),
             'types' => EstablishmentType::cases(),
             'inspections' => Inspection::orderBy('inspection_name')->get(),
-        ]);
+        ])->title(__('Établissements'));
     }
 }

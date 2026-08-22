@@ -12,11 +12,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Mon établissement')]
 class Index extends Component
 {
     public Establishment $establishment;
@@ -93,7 +91,7 @@ class Index extends Component
     {
         $pivot = EstablishmentUserPivot::where('establishment_id', $this->establishment->id)->findOrFail($pivotId);
         $this->authorize('update', $pivot);
-        abort_if($pivot->user_id === Auth::id(), 422, 'Vous ne pouvez pas vous désactiver vous-même.');
+        abort_if($pivot->user_id === Auth::id(), 422, __('Vous ne pouvez pas vous désactiver vous-même.'));
 
         $pivot->update(['is_active' => false]);
     }
@@ -105,6 +103,6 @@ class Index extends Component
                 ->with('user')
                 ->orderBy('role')
                 ->get(),
-        ]);
+        ])->title(__('Mon établissement'));
     }
 }

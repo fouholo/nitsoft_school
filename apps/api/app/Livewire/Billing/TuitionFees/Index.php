@@ -12,11 +12,9 @@ use App\Domain\Billing\Models\LevelFee;
 use App\Domain\Establishments\Models\Establishment;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Tarifs')]
 class Index extends Component
 {
     public ?int $school_year_id = null;
@@ -310,6 +308,6 @@ class Index extends Component
             'installments' => $installments,
             'levels' => Level::whereIn('cycle', $allowedCycles)->orderBy('level_wording')->get(),
             'levelFees' => $levelFees,
-        ]);
+        ])->title(__('Tarifs'));
     }
 }

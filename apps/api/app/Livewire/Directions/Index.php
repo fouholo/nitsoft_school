@@ -8,13 +8,11 @@ use App\Domain\Establishments\Models\Direction;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
 #[Layout('layouts.app')]
-#[Title('Directions')]
 class Index extends Component
 {
     use WithFileUploads;
@@ -134,6 +132,6 @@ class Index extends Component
     {
         return view('livewire.directions.index', [
             'directions' => Direction::orderBy('direction_name')->get(),
-        ]);
+        ])->title(__('Directions'));
     }
 }

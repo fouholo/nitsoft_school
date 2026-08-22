@@ -10,11 +10,9 @@ use App\Domain\Enrollment\Models\Enrollment;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Situation financière')]
 class Show extends Component
 {
     public Enrollment $enrollment;
@@ -141,6 +139,6 @@ class Show extends Component
             'registrationAmountPaid' => $this->enrollment->registrationAmountPaid(),
             'totalDue' => $totalDue,
             'balance' => $totalDue - (float) $this->enrollment->total_paid,
-        ]);
+        ])->title(__('Situation financière'));
     }
 }

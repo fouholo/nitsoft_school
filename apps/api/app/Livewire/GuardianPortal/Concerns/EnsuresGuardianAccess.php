@@ -25,7 +25,7 @@ trait EnsuresGuardianAccess
 
         $guardian = $user->guardianProfile;
 
-        abort_if($guardian === null, 403, 'Aucun profil tuteur associé à ce compte.');
+        abort_if($guardian === null, 403, __('Aucun profil tuteur associé à ce compte.'));
 
         return $guardian;
     }
@@ -40,7 +40,7 @@ trait EnsuresGuardianAccess
                 ->wherePivot('status', GuardianLinkStatus::Approved)
                 ->exists(),
             403,
-            "Cet élève n'est pas rattaché à votre compte."
+            __("Cet élève n'est pas rattaché à votre compte.")
         );
 
         return $guardian;

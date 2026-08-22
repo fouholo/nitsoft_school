@@ -96,7 +96,7 @@ class Index extends Component
         $user = Auth::user();
 
         if (! $this->hasBroadAccess($user) && ! $user->isAssignedToArabicGroup((int) $data['arabic_level_id'], $data['arabic_serie_id'], (int) $data['arabic_subject_id'])) {
-            abort(403, "Vous n'êtes pas affecté à ce groupe pour cette matière.");
+            abort(403, __("Vous n'êtes pas affecté à ce groupe pour cette matière."));
         }
 
         ArabicGradeSheet::create([...$data, 'teacher_id' => $user->id]);
@@ -141,6 +141,6 @@ class Index extends Component
                 ? ArabicSubject::orderBy('name')->get()
                 : $assignments->pluck('arabicSubject')->filter()->unique('id')->values(),
             'arabicTerms' => ArabicTerm::orderBy('sequence')->get(),
-        ]);
+        ])->title(__('Évaluations arabes'));
     }
 }

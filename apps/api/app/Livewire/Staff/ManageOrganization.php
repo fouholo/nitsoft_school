@@ -18,13 +18,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
 #[Layout('layouts.app')]
-#[Title('Mon organisation')]
 class ManageOrganization extends Component
 {
     use WithFileUploads;
@@ -204,7 +202,7 @@ class ManageOrganization extends Component
     {
         $pivot = $this->findStaffPivot($pivotId);
         $this->authorize('update', $pivot);
-        abort_if($pivot->user_id === Auth::id(), 422, 'Vous ne pouvez pas vous désactiver vous-même.');
+        abort_if($pivot->user_id === Auth::id(), 422, __('Vous ne pouvez pas vous désactiver vous-même.'));
 
         $pivot->update(['is_active' => false]);
     }
@@ -213,7 +211,7 @@ class ManageOrganization extends Component
     {
         $pivot = $this->findStaffPivot($pivotId);
         $this->authorize('delete', $pivot);
-        abort_if($pivot->user_id === Auth::id(), 422, 'Vous ne pouvez pas vous supprimer vous-même.');
+        abort_if($pivot->user_id === Auth::id(), 422, __('Vous ne pouvez pas vous supprimer vous-même.'));
 
         $pivot->delete();
     }
@@ -234,7 +232,7 @@ class ManageOrganization extends Component
         abort_unless($this->organization instanceof Foundation, 404);
 
         $pivot = FoundationUserPivot::where('foundation_id', $this->organization->id)->findOrFail($pivotId);
-        abort_if($pivot->user_id === Auth::id(), 422, 'Vous ne pouvez pas vous désactiver vous-même.');
+        abort_if($pivot->user_id === Auth::id(), 422, __('Vous ne pouvez pas vous désactiver vous-même.'));
 
         $pivot->update(['is_active' => false]);
     }
@@ -345,7 +343,7 @@ class ManageOrganization extends Component
             'assignableRoles' => Role::whereIn('code', self::ASSIGNABLE_ROLES)
                 ->get()
                 ->sortBy(fn (Role $role): int => array_search($role->code, self::ASSIGNABLE_ROLES, true)),
-        ]);
+        ])->title(__('Mon organisation'));
     }
 
     /**

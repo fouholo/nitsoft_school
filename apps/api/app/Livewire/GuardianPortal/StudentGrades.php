@@ -9,11 +9,9 @@ use App\Domain\Grading\Models\Grade;
 use App\Domain\Grading\Models\PrimaryGrade;
 use App\Livewire\GuardianPortal\Concerns\EnsuresGuardianAccess;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.guardian-portal')]
-#[Title('Notes')]
 class StudentGrades extends Component
 {
     use EnsuresGuardianAccess;
@@ -43,6 +41,6 @@ class StudentGrades extends Component
 
         return view('livewire.guardian-portal.student-grades', [
             'grades' => $grades->concat($primaryGrades),
-        ]);
+        ])->title(__('Notes'));
     }
 }

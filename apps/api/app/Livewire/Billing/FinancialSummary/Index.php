@@ -12,11 +12,9 @@ use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Bilan financier')]
 class Index extends Component
 {
     public ?int $school_year_id = null;
@@ -133,6 +131,6 @@ class Index extends Component
             'grandTotalCollected' => (float) array_sum(array_column($establishmentGroups, 'collected')),
             'grandTotalSpent' => (float) array_sum(array_column($establishmentGroups, 'spent')),
             'grandTotalNet' => (float) array_sum(array_column($establishmentGroups, 'net')),
-        ]);
+        ])->title(__('Bilan financier'));
     }
 }

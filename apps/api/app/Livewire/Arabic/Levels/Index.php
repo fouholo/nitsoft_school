@@ -8,11 +8,9 @@ use App\Domain\Academics\Enums\Cycle;
 use App\Domain\Arabic\Models\ArabicLevel;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-#[Title('Niveaux arabes')]
 class Index extends Component
 {
     public bool $showForm = false;
@@ -104,6 +102,6 @@ class Index extends Component
         return view('livewire.arabic.levels.index', [
             'arabicLevels' => ArabicLevel::orderBy('wording')->get(),
             'cycles' => Cycle::cases(),
-        ]);
+        ])->title(__('Niveaux arabes'));
     }
 }

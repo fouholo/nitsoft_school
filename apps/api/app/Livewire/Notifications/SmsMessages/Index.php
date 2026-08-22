@@ -6,12 +6,10 @@ namespace App\Livewire\Notifications\SmsMessages;
 
 use App\Domain\Notifications\Models\SmsMessage;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
-#[Title('Journal SMS')]
 class Index extends Component
 {
     use WithPagination;
@@ -25,6 +23,6 @@ class Index extends Component
     {
         return view('livewire.notifications.sms-messages.index', [
             'smsMessages' => SmsMessage::with('guardian')->latest()->paginate(20),
-        ]);
+        ])->title(__('Journal SMS'));
     }
 }

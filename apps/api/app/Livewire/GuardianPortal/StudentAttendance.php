@@ -8,11 +8,9 @@ use App\Domain\Attendance\Models\AttendanceRecord;
 use App\Domain\Enrollment\Models\Student;
 use App\Livewire\GuardianPortal\Concerns\EnsuresGuardianAccess;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.guardian-portal')]
-#[Title('Présences')]
 class StudentAttendance extends Component
 {
     use EnsuresGuardianAccess;
@@ -34,6 +32,6 @@ class StudentAttendance extends Component
                 ->with('session')
                 ->get()
                 ->sortByDesc(fn (AttendanceRecord $record) => $record->session?->session_date),
-        ]);
+        ])->title(__('Présences'));
     }
 }
