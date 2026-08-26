@@ -38,6 +38,8 @@
             @endif
         </div>
 
+        <livewire:dashboard.uid-search-widget />
+
         <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div class="rounded-2xl border border-stone-200 bg-white p-5">
                 <div class="flex items-center gap-3">
