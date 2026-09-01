@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Models\Establishment;
+use App\Domain\Establishments\Models\EstablishmentUserPivot;
 use App\Livewire\Dashboard\UidSearchWidget;
 use Livewire\Livewire;
 
@@ -49,6 +50,50 @@ test('un UID d’un élève d’un autre établissement est traité comme introu
         ->call('search')
         ->assertNoRedirect()
         ->assertSet('errorMessage', 'Aucun élève trouvé avec ce code.');
+});
+
+test('un UID personnel valide et actif dans l’établissement courant redirige vers sa fiche', function () {
+    $establishment = Establishment::factory()->create();
+    $admin = createLocalAdmin($establishment);
+    test()->actingAs($admin);
+    actingInEstablishment($establishment);
+
+    $teacher = createUserWithRole($establishment, 'enseignant');
+    $pivot = EstablishmentUserPivot::where('establishment_id', $establishment->id)->where('user_id', $teacher->id)->sole();
+
+    Livewire::test(UidSearchWidget::class)
+        ->set('uid', $teacher->uid_serveur)
+        ->call('search')
+        ->assertRedirect(route('staff.show', [$establishment, $pivot]));
+});
+
+test('un UID personnel d’un membre affecté à un autre établissement est traité comme introuvable', function () {
+    $establishmentA = Establishment::factory()->create();
+    $establishmentB = Establishment::factory()->create();
+    $admin = createLocalAdmin($establishmentA);
+    test()->actingAs($admin);
+    actingInEstablishment($establishmentA);
+
+    $teacherB = createUserWithRole($establishmentB, 'enseignant');
+
+    Livewire::test(UidSearchWidget::class)
+        ->set('uid', $teacherB->uid_serveur)
+        ->call('search')
+        ->assertNoRedirect()
+        ->assertSet('errorMessage', 'Aucun membre du personnel trouvé avec ce code dans cet établissement.');
+});
+
+test('un UID personnel inexistant affiche une erreur sans rediriger', function () {
+    $establishment = Establishment::factory()->create();
+    $admin = createLocalAdmin($establishment);
+    test()->actingAs($admin);
+    actingInEstablishment($establishment);
+
+    Livewire::test(UidSearchWidget::class)
+        ->set('uid', '220999999999')
+        ->call('search')
+        ->assertNoRedirect()
+        ->assertSet('errorMessage', 'Aucun membre du personnel trouvé avec ce code dans cet établissement.');
 });
 
 test('un UID mal formé affiche une erreur générique', function () {

@@ -10,6 +10,12 @@ Chaque enregistrement synchronisable porte un `uid_serveur` (12 caractères : pr
 
 Élèves uniquement pour ce chantier (préfixe `221` → `students.show`). Le personnel (`220`) et les tuteurs (`223`) sont explicitement hors périmètre : le personnel n'a pas de résolution triviale (une fiche `staff.show` exige un établissement + une ligne `establishment_user`, pas juste l'utilisateur), et les tuteurs n'ont aujourd'hui aucune page de détail (juste une liste). La logique de dispatch reste néanmoins écrite de façon extensible (`match` sur le préfixe) pour accueillir ces types plus tard sans réécriture.
 
+## Extension personnel (préfixe `220`, ajoutée le 2026-08-26)
+
+Le module `staff.show` existant depuis entre-temps (fiche personnel enrichie) permet désormais une cible de redirection. Un `User` peut être affecté à plusieurs établissements (`establishment_user`) : pas de fiche unique sans désambiguïsation. Choix retenu (validé avec l'utilisateur) : cloisonnement par **établissement courant**, exactement comme `searchStudent()` — on ne cherche une ligne `establishment_user` active pour ce `User` que dans `app('currentEstablishmentId')` ; si absente (personne inexistante, ou affectée uniquement à une autre école), message « Aucun membre du personnel trouvé avec ce code dans cet établissement. », qu'elle existe ailleurs ou pas du tout. Pas de vérification d'autorisation supplémentaire dans le widget : la redirection amène vers `staff.show`, qui applique déjà `EstablishmentUserPivotPolicy::view()` (le membre lui-même ou un admin) — un 403 sur la page de destination est un comportement correct, pas un bug du widget.
+
+Les tuteurs (`223`) restent hors périmètre (toujours aucune fiche de détail).
+
 ## Composant
 
 Nouveau `App\Livewire\Dashboard\UidSearchWidget`, intégré au tableau de bord via `<livewire:dashboard.uid-search-widget />`, juste sous la ligne d'en-tête (« Connecté en tant que... ») et au-dessus de la grille de cartes de statistiques — uniquement dans la branche où un établissement courant est lié (même condition que le reste du contenu du tableau de bord).
