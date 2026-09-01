@@ -21,6 +21,18 @@ test('un utilisateur sans établissement accessible voit un message au lieu d’
         ->assertSee('Aucun établissement ne vous est actuellement accessible.');
 });
 
+test('un administrateur SaaS sans établissement sélectionné voit le lien Années scolaires dans le menu', function () {
+    $main = createSaasAdmin('main');
+    test()->actingAs($main);
+
+    // Livewire::test() ne rend que le fragment du composant, pas le layout
+    // (donc pas le menu latéral) — une requête HTTP réelle est nécessaire
+    // pour vérifier le contenu du menu.
+    test()->get(route('dashboard'))
+        ->assertOk()
+        ->assertSee(__('Années scolaires'));
+});
+
 test('un directeur avec un établissement accessible voit le tableau de bord normal', function () {
     $establishment = Establishment::factory()->create();
     $directeur = createUserWithRole($establishment, 'directeur');

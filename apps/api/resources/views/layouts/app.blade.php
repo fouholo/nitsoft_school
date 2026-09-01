@@ -33,7 +33,6 @@
             $navItems = [
                 ['type' => 'link', 'label' => __('Tableau de bord'), 'route' => 'dashboard', 'active' => 'dashboard', 'icon' => 'home'],
                 ['type' => 'group', 'label' => __('Académique'), 'icon' => 'book', 'active' => 'academics.*', 'children' => [
-                    ['label' => __('Années scolaires'), 'route' => 'academics.school-years.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\SchoolYear::class],
                     ['label' => __('Périodes'), 'route' => 'academics.terms.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\Term::class],
                     ['label' => __('Classes'), 'route' => 'academics.classrooms.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\Classroom::class],
                     ['label' => __('Coefficients par matière'), 'route' => 'academics.subject-coefficients.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\SubjectCoefficient::class],
@@ -114,6 +113,7 @@
                 $navItems[] = ['type' => 'link', 'label' => __('Établissements'), 'route' => 'establishments.index', 'active' => 'establishments.*', 'icon' => 'building'];
                 $navItems[] = ['type' => 'link', 'label' => __('Inspections'), 'route' => 'inspections.index', 'active' => 'inspections.*', 'icon' => 'building'];
                 $navItems[] = ['type' => 'link', 'label' => __('Directions'), 'route' => 'directions.index', 'active' => 'directions.*', 'icon' => 'building'];
+                $navItems[] = ['type' => 'link', 'label' => __('Années scolaires'), 'route' => 'academics.school-years.index', 'active' => 'academics.school-years.*', 'icon' => 'book'];
                 $navItems[] = ['type' => 'link', 'label' => __('Matières'), 'route' => 'academics.subjects.index', 'active' => 'academics.subjects.*', 'icon' => 'book'];
                 $navItems[] = ['type' => 'link', 'label' => __('Matières du primaire'), 'route' => 'academics.primary-subjects.index', 'active' => 'academics.primary-subjects.*', 'icon' => 'book'];
                 $navItems[] = ['type' => 'link', 'label' => __("Barème d'appréciations"), 'route' => 'academics.appreciation-scales.index', 'active' => 'academics.appreciation-scales.*', 'icon' => 'book'];
