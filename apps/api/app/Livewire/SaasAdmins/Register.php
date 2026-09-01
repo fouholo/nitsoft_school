@@ -18,7 +18,11 @@ class Register extends Component
 {
     public string $name = '';
 
+    public string $first_name = '';
+
     public string $email = '';
+
+    public string $pseudo = '';
 
     public string $password = '';
 
@@ -35,7 +39,9 @@ class Register extends Component
     {
         $data = $this->validate([
             'name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'pseudo' => User::pseudoRules(),
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
@@ -43,7 +49,9 @@ class Register extends Component
             $mainAdmin = DB::transaction(function () use ($data): SaasAdmin {
                 $user = User::create([
                     'name' => $data['name'],
+                    'first_name' => $data['first_name'],
                     'email' => $data['email'],
+                    'pseudo' => $data['pseudo'],
                     'password' => $data['password'],
                 ]);
 

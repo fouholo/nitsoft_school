@@ -123,7 +123,7 @@
                             @forelse ($fondateurs as $fondateur)
                                 <tr wire:key="fondateur-{{ $fondateur->id }}">
                                     <td class="px-4 py-2 text-stone-900">
-                                        {{ $fondateur->user->name }}
+                                        {{ $fondateur->user->fullName() }}
                                         <span class="block text-xs text-stone-500">{{ $fondateur->user->email }}</span>
                                         @if ($fondateur->is_general_admin)
                                             <span class="ms-1 inline-flex rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-800">{{ __('Administrateur général') }}</span>
@@ -172,7 +172,7 @@
                         @forelse ($staffMembers as $member)
                             <tr wire:key="member-{{ $member->id }}">
                                 <td class="px-4 py-2 text-stone-900">
-                                    {{ $member->user->name }}
+                                    {{ $member->user->fullName() }}
                                     <span class="block text-xs text-stone-500">{{ $member->user->email }}</span>
                                 </td>
                                 <td class="px-4 py-2 text-stone-600">{{ $member->establishment->name }}</td>
@@ -260,8 +260,8 @@
                 <div class="mt-2 space-y-2">
                     @foreach ($eligibleGeneralAdminTargets as $target)
                         <div class="flex items-center justify-between">
-                            <span class="text-sm text-stone-700">{{ $target->user->name }} ({{ \App\Models\User::roleLabel($target->role) }})</span>
-                            <button wire:click="cedeGeneralAdmin({{ $target->id }})" wire:confirm="{{ __("Céder l'administration générale à :name ?", ['name' => $target->user->name]) }}" class="text-sm font-medium text-orange-700 hover:text-orange-900">
+                            <span class="text-sm text-stone-700">{{ $target->user->fullName() }} ({{ \App\Models\User::roleLabel($target->role) }})</span>
+                            <button wire:click="cedeGeneralAdmin({{ $target->id }})" wire:confirm="{{ __("Céder l'administration générale à :name ?", ['name' => $target->user->fullName()]) }}" class="text-sm font-medium text-orange-700 hover:text-orange-900">
                                 {{ __('Céder') }}
                             </button>
                         </div>

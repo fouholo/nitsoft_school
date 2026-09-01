@@ -21,7 +21,11 @@ class Register extends Component
 {
     public string $name = '';
 
+    public string $first_name = '';
+
     public string $email = '';
+
+    public string $pseudo = '';
 
     public string $password = '';
 
@@ -37,7 +41,9 @@ class Register extends Component
     {
         $data = $this->validate([
             'name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'pseudo' => User::pseudoRules(),
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'uid' => ['required', 'string'],
             'role' => ['required', Rule::in(['fondateur', 'directeur', 'gestionnaire'])],
@@ -76,7 +82,7 @@ class Register extends Component
     }
 
     /**
-     * @param array{name: string, email: string, password: string, role: string} $data
+     * @param  array{name: string, first_name: string, email: string, pseudo: string, password: string, role: string}  $data
      * @return array{0: User, 1: bool}
      */
     private function registerOnEstablishment(array $data, Establishment $establishment, string $flagColumn): array
@@ -88,7 +94,9 @@ class Register extends Component
 
         $user = User::create([
             'name' => $data['name'],
+            'first_name' => $data['first_name'],
             'email' => $data['email'],
+            'pseudo' => $data['pseudo'],
             'password' => $data['password'],
         ]);
 
@@ -119,7 +127,7 @@ class Register extends Component
     }
 
     /**
-     * @param array{name: string, email: string, password: string, role: string} $data
+     * @param  array{name: string, first_name: string, email: string, pseudo: string, password: string, role: string}  $data
      * @return array{0: User, 1: bool}
      */
     private function registerOnFoundation(array $data, Foundation $foundation): array
@@ -131,7 +139,9 @@ class Register extends Component
 
         $user = User::create([
             'name' => $data['name'],
+            'first_name' => $data['first_name'],
             'email' => $data['email'],
+            'pseudo' => $data['pseudo'],
             'password' => $data['password'],
         ]);
 

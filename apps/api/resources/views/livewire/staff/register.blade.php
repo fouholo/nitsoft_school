@@ -12,12 +12,25 @@
     @else
         <form wire:submit="register" class="space-y-4">
             <div>
+                <label for="first_name" class="block text-sm font-medium text-stone-700">{{ __('Prénom') }}</label>
+                <input
+                    type="text"
+                    id="first_name"
+                    wire:model="first_name"
+                    autofocus
+                    class="mt-1 block w-full rounded-lg border-stone-300 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm"
+                >
+                @error('first_name')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div>
                 <label for="name" class="block text-sm font-medium text-stone-700">{{ __('Nom') }}</label>
                 <input
                     type="text"
                     id="name"
                     wire:model="name"
-                    autofocus
                     class="mt-1 block w-full rounded-lg border-stone-300 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm"
                 >
                 @error('name')
@@ -35,6 +48,20 @@
                     class="mt-1 block w-full rounded-lg border-stone-300 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm"
                 >
                 @error('email')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div>
+                <label for="pseudo" class="block text-sm font-medium text-stone-700">{{ __('Pseudo') }}</label>
+                <input
+                    type="text"
+                    id="pseudo"
+                    wire:model="pseudo"
+                    autocomplete="username"
+                    class="mt-1 block w-full rounded-lg border-stone-300 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm"
+                >
+                @error('pseudo')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>

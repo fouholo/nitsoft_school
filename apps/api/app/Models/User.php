@@ -46,6 +46,8 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'first_name',
+        'pseudo',
         'email',
         'phone',
         'password',
@@ -83,6 +85,29 @@ class User extends Authenticatable
     protected static function uidPrefix(): string
     {
         return '220';
+    }
+
+    /**
+     * Nom complet pour affichage — compose prénom + nom quand le prénom est
+     * renseigné (personnel/admins SaaS créés après ce chantier), retombe sur
+     * `name` seul sinon (comptes existants, parents).
+     */
+    public function fullName(): string
+    {
+        return $this->first_name !== null && $this->first_name !== ''
+            ? trim("{$this->first_name} {$this->name}")
+            : $this->name;
+    }
+
+    /**
+     * Règles de validation du pseudo, partagées par les écrans de création
+     * de personnel/administrateurs SaaS.
+     *
+     * @return list<string>
+     */
+    public static function pseudoRules(): array
+    {
+        return ['required', 'string', 'min:3', 'max:30', 'regex:/^[a-z0-9._-]+$/i', 'unique:users,pseudo'];
     }
 
     public function establishments(): BelongsToMany

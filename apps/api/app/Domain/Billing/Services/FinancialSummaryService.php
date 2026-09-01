@@ -63,7 +63,7 @@ final class FinancialSummaryService
 
             $rows[] = [
                 'user_id' => $userId,
-                'user_name' => $user->name,
+                'user_name' => $user->fullName(),
                 'role' => $user->roleFor($establishmentId),
                 'collected' => $collectedAmount,
                 'spent' => $spentAmount,

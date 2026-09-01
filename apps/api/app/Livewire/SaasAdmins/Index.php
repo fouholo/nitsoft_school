@@ -16,7 +16,11 @@ class Index extends Component
 {
     public string $admin_name = '';
 
+    public string $admin_first_name = '';
+
     public string $admin_email = '';
+
+    public string $admin_pseudo = '';
 
     public ?string $generatedPassword = null;
 
@@ -36,12 +40,16 @@ class Index extends Component
 
         $data = $this->validate([
             'admin_name' => ['required', 'string', 'max:255'],
+            'admin_first_name' => ['required', 'string', 'max:255'],
             'admin_email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'admin_pseudo' => User::pseudoRules(),
         ]);
 
         $user = User::create([
             'name' => $data['admin_name'],
+            'first_name' => $data['admin_first_name'],
             'email' => $data['admin_email'],
+            'pseudo' => $data['admin_pseudo'],
             'password' => User::DEFAULT_PASSWORD,
         ]);
 
@@ -53,7 +61,7 @@ class Index extends Component
 
         $this->generatedPassword = User::DEFAULT_PASSWORD;
         $this->generatedPasswordFor = $user->email;
-        $this->reset(['admin_name', 'admin_email']);
+        $this->reset(['admin_name', 'admin_first_name', 'admin_email', 'admin_pseudo']);
     }
 
     public function activate(int $saasAdminId): void

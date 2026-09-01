@@ -16,7 +16,9 @@ test('un LOCAL_ADMIN peut créer un enseignant avec mot de passe généré, et u
 
     Livewire::test(Index::class, ['establishment' => $establishment])
         ->set('staff_name', 'Enseignant Test')
+        ->set('staff_first_name', 'Jean')
         ->set('staff_email', 'enseignant.test@nitsoft.test')
+        ->set('staff_pseudo', 'jenseignant')
         ->set('staff_role', 'enseignant')
         ->call('create')
         ->assertHasNoErrors()
@@ -26,7 +28,9 @@ test('un LOCAL_ADMIN peut créer un enseignant avec mot de passe généré, et u
     $pivot = EstablishmentUserPivot::where('establishment_id', $establishment->id)->where('user_id', $user->id)->sole();
 
     expect($pivot->role)->toBe('enseignant')
-        ->and($pivot->is_active)->toBeTrue();
+        ->and($pivot->is_active)->toBeTrue()
+        ->and($user->first_name)->toBe('Jean')
+        ->and($user->pseudo)->toBe('jenseignant');
 
     $teacher = Teacher::where('user_id', $user->id)->sole();
 
@@ -42,7 +46,9 @@ test('un LOCAL_ADMIN qui crée un caissier ne crée aucune fiche Teacher', funct
 
     Livewire::test(Index::class, ['establishment' => $establishment])
         ->set('staff_name', 'Caissier Test')
+        ->set('staff_first_name', 'Marie')
         ->set('staff_email', 'caissier.test@nitsoft.test')
+        ->set('staff_pseudo', 'mcaissier')
         ->set('staff_role', 'caissier')
         ->call('create')
         ->assertHasNoErrors();
@@ -59,7 +65,9 @@ test('un LOCAL_ADMIN peut créer un gestionnaire', function () {
 
     Livewire::test(Index::class, ['establishment' => $establishment])
         ->set('staff_name', 'Gestionnaire Test')
+        ->set('staff_first_name', 'Paul')
         ->set('staff_email', 'gestionnaire.test@nitsoft.test')
+        ->set('staff_pseudo', 'pgestionnaire')
         ->set('staff_role', 'gestionnaire')
         ->call('create')
         ->assertHasNoErrors();
@@ -78,7 +86,9 @@ test('un LOCAL_ADMIN ne peut pas créer un directeur depuis cet écran', functio
 
     Livewire::test(Index::class, ['establishment' => $establishment])
         ->set('staff_name', 'Directeur Test')
+        ->set('staff_first_name', 'Éric')
         ->set('staff_email', 'directeur.test@nitsoft.test')
+        ->set('staff_pseudo', 'edirecteur')
         ->set('staff_role', 'directeur')
         ->call('create')
         ->assertHasErrors(['staff_role']);
@@ -134,4 +144,60 @@ test('le nom d’un membre du tableau est un lien vers sa fiche', function () {
 
     Livewire::test(Index::class, ['establishment' => $establishment])
         ->assertSeeHtml(route('staff.show', [$establishment, $pivot]));
+});
+
+test('le prénom d’un membre est affiché dans le tableau', function () {
+    $establishment = Establishment::factory()->create();
+    $localAdmin = createLocalAdmin($establishment);
+    test()->actingAs($localAdmin);
+
+    $teacher = User::factory()->create(['name' => 'Dupont', 'first_name' => 'Jean']);
+    $establishment->users()->attach($teacher->id, ['role' => 'enseignant', 'is_active' => true]);
+
+    Livewire::test(Index::class, ['establishment' => $establishment])
+        ->assertSee('Jean Dupont');
+});
+
+test('prénom et pseudo sont obligatoires à la création', function () {
+    $establishment = Establishment::factory()->create();
+    $localAdmin = createLocalAdmin($establishment);
+    test()->actingAs($localAdmin);
+
+    Livewire::test(Index::class, ['establishment' => $establishment])
+        ->set('staff_name', 'Sans Prénom')
+        ->set('staff_email', 'sans.prenom@nitsoft.test')
+        ->set('staff_role', 'enseignant')
+        ->call('create')
+        ->assertHasErrors(['staff_first_name', 'staff_pseudo']);
+});
+
+test('un pseudo au mauvais format est rejeté', function () {
+    $establishment = Establishment::factory()->create();
+    $localAdmin = createLocalAdmin($establishment);
+    test()->actingAs($localAdmin);
+
+    Livewire::test(Index::class, ['establishment' => $establishment])
+        ->set('staff_name', 'Format Test')
+        ->set('staff_first_name', 'Jean')
+        ->set('staff_email', 'format.test@nitsoft.test')
+        ->set('staff_pseudo', 'pseudo invalide !')
+        ->set('staff_role', 'enseignant')
+        ->call('create')
+        ->assertHasErrors(['staff_pseudo']);
+});
+
+test('un pseudo déjà pris est rejeté', function () {
+    $establishment = Establishment::factory()->create();
+    $localAdmin = createLocalAdmin($establishment);
+    test()->actingAs($localAdmin);
+    User::factory()->create(['pseudo' => 'dejapris']);
+
+    Livewire::test(Index::class, ['establishment' => $establishment])
+        ->set('staff_name', 'Doublon Test')
+        ->set('staff_first_name', 'Jean')
+        ->set('staff_email', 'doublon.test@nitsoft.test')
+        ->set('staff_pseudo', 'dejapris')
+        ->set('staff_role', 'enseignant')
+        ->call('create')
+        ->assertHasErrors(['staff_pseudo']);
 });

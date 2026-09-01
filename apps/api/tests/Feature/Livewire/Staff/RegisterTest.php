@@ -16,7 +16,9 @@ test('un fondateur qui s’inscrit sur une école indépendante sans GENERAL_ADM
 
     Livewire::test(Register::class)
         ->set('name', 'Premier Fondateur')
+        ->set('first_name', 'Jean')
         ->set('email', 'fondateur1@nitsoft.test')
+        ->set('pseudo', 'jfondateur1')
         ->set('password', 'password123')
         ->set('password_confirmation', 'password123')
         ->set('uid', $establishment->uid_serveur)
@@ -40,7 +42,9 @@ test('un deuxième fondateur sur la même école indépendante reste en attente'
 
     Livewire::test(Register::class)
         ->set('name', 'Second Fondateur')
+        ->set('first_name', 'Marie')
         ->set('email', 'fondateur2@nitsoft.test')
+        ->set('pseudo', 'mfondateur2')
         ->set('password', 'password123')
         ->set('password_confirmation', 'password123')
         ->set('uid', $establishment->uid_serveur)
@@ -63,7 +67,9 @@ test('un fondateur qui s’inscrit sur une école d’un groupe devient GENERAL_
 
     Livewire::test(Register::class)
         ->set('name', 'Fondateur Groupe')
+        ->set('first_name', 'Paul')
         ->set('email', 'fondateur.groupe@nitsoft.test')
+        ->set('pseudo', 'pfondateurgroupe')
         ->set('password', 'password123')
         ->set('password_confirmation', 'password123')
         ->set('uid', $establishment->uid_serveur)
@@ -85,7 +91,9 @@ test('un directeur qui s’inscrit sur une école sans LOCAL_ADMIN le devient et
 
     Livewire::test(Register::class)
         ->set('name', 'Premier Directeur')
+        ->set('first_name', 'Éric')
         ->set('email', 'directeur1@nitsoft.test')
+        ->set('pseudo', 'edirecteur1')
         ->set('password', 'password123')
         ->set('password_confirmation', 'password123')
         ->set('uid', $establishment->uid_serveur)
@@ -107,7 +115,9 @@ test('un deuxième directeur sur la même école reste en attente', function () 
 
     Livewire::test(Register::class)
         ->set('name', 'Second Directeur')
+        ->set('first_name', 'Sophie')
         ->set('email', 'directeur2@nitsoft.test')
+        ->set('pseudo', 'sdirecteur2')
         ->set('password', 'password123')
         ->set('password_confirmation', 'password123')
         ->set('uid', $establishment->uid_serveur)
@@ -126,7 +136,9 @@ test('un deuxième directeur sur la même école reste en attente', function () 
 test('un uid inconnu est rejeté sans créer de compte', function () {
     Livewire::test(Register::class)
         ->set('name', 'Peu Importe')
+        ->set('first_name', 'Peu')
         ->set('email', 'peu.importe@nitsoft.test')
+        ->set('pseudo', 'peuimporte')
         ->set('password', 'password123')
         ->set('password_confirmation', 'password123')
         ->set('uid', '000000009999')
@@ -135,6 +147,37 @@ test('un uid inconnu est rejeté sans créer de compte', function () {
         ->assertHasErrors('uid');
 
     expect(User::where('email', 'peu.importe@nitsoft.test')->exists())->toBeFalse();
+});
+
+test('prénom et pseudo sont obligatoires à l’inscription', function () {
+    $establishment = Establishment::factory()->create();
+
+    Livewire::test(Register::class)
+        ->set('name', 'Sans Prénom')
+        ->set('email', 'sans.prenom@nitsoft.test')
+        ->set('password', 'password123')
+        ->set('password_confirmation', 'password123')
+        ->set('uid', $establishment->uid_serveur)
+        ->set('role', 'directeur')
+        ->call('register')
+        ->assertHasErrors(['first_name', 'pseudo']);
+});
+
+test('un pseudo déjà pris est rejeté à l’inscription', function () {
+    $establishment = Establishment::factory()->create();
+    User::factory()->create(['pseudo' => 'dejapris']);
+
+    Livewire::test(Register::class)
+        ->set('name', 'Doublon')
+        ->set('first_name', 'Jean')
+        ->set('email', 'doublon@nitsoft.test')
+        ->set('pseudo', 'dejapris')
+        ->set('password', 'password123')
+        ->set('password_confirmation', 'password123')
+        ->set('uid', $establishment->uid_serveur)
+        ->set('role', 'directeur')
+        ->call('register')
+        ->assertHasErrors(['pseudo']);
 });
 
 test('la contrainte unique is_general_admin empêche un deuxième GENERAL_ADMIN au niveau base', function () {

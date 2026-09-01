@@ -21,7 +21,11 @@ class Index extends Component
 
     public string $staff_name = '';
 
+    public string $staff_first_name = '';
+
     public string $staff_email = '';
+
+    public string $staff_pseudo = '';
 
     public string $staff_role = 'enseignant';
 
@@ -45,14 +49,18 @@ class Index extends Component
 
         $data = $this->validate([
             'staff_name' => ['required', 'string', 'max:255'],
+            'staff_first_name' => ['required', 'string', 'max:255'],
             'staff_email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'staff_pseudo' => User::pseudoRules(),
             'staff_role' => ['required', Rule::in(['gestionnaire', 'enseignant', 'caissier', 'educateur'])],
         ]);
 
         $user = DB::transaction(function () use ($data): User {
             $user = User::create([
                 'name' => $data['staff_name'],
+                'first_name' => $data['staff_first_name'],
                 'email' => $data['staff_email'],
+                'pseudo' => $data['staff_pseudo'],
                 'password' => User::DEFAULT_PASSWORD,
             ]);
 
@@ -76,7 +84,7 @@ class Index extends Component
 
         $this->generatedPassword = User::DEFAULT_PASSWORD;
         $this->generatedPasswordFor = $user->email;
-        $this->reset(['staff_name', 'staff_email']);
+        $this->reset(['staff_name', 'staff_first_name', 'staff_email', 'staff_pseudo']);
     }
 
     public function activate(int $pivotId): void

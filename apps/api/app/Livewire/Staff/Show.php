@@ -124,6 +124,6 @@ class Show extends Component
 
     public function render()
     {
-        return view('livewire.staff.show')->title(__(':name — Fiche personnel', ['name' => $this->pivot->user->name]));
+        return view('livewire.staff.show')->title(__(':name — Fiche personnel', ['name' => $this->pivot->user->fullName()]));
     }
 }

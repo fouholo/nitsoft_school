@@ -3,16 +3,16 @@
 
     <form wire:submit="login" class="space-y-4">
         <div>
-            <label for="email" class="block text-sm font-medium text-stone-700">{{ __('Adresse e-mail') }}</label>
+            <label for="identifiant" class="block text-sm font-medium text-stone-700">{{ __('Email ou pseudo') }}</label>
             <input
-                type="email"
-                id="email"
-                wire:model="email"
+                type="text"
+                id="identifiant"
+                wire:model="identifiant"
                 autofocus
                 autocomplete="username"
                 class="mt-1 block w-full rounded-lg border-stone-300 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm"
             >
-            @error('email')
+            @error('identifiant')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
         </div>

@@ -3,14 +3,14 @@
 
     <div class="mt-2 flex items-center gap-4">
         @if ($existingPhotoPath)
-            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($existingPhotoPath) }}" alt="{{ $pivot->user->name }}" class="h-16 w-16 rounded-full object-cover">
+            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($existingPhotoPath) }}" alt="{{ $pivot->user->fullName() }}" class="h-16 w-16 rounded-full object-cover">
         @else
             <div class="flex h-16 w-16 items-center justify-center rounded-full bg-stone-200 text-lg font-semibold text-stone-500">
-                {{ mb_strtoupper(mb_substr($pivot->user->name, 0, 1)) }}
+                {{ mb_strtoupper(mb_substr($pivot->user->fullName(), 0, 1)) }}
             </div>
         @endif
         <div>
-            <h1 class="text-2xl font-semibold text-stone-900">{{ $pivot->user->name }}</h1>
+            <h1 class="text-2xl font-semibold text-stone-900">{{ $pivot->user->fullName() }}</h1>
             <p class="text-sm text-stone-500">
                 {{ \App\Models\User::roleLabel($pivot->role) }}
                 <span class="mx-1">&middot;</span>

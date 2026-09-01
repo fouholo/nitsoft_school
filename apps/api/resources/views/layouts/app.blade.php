@@ -141,7 +141,7 @@
                 $navItems[] = ['type' => 'link', 'label' => __('Mon organisation'), 'route' => 'staff.organization', 'active' => 'staff.organization', 'icon' => 'building'];
             }
 
-            $initials = collect(explode(' ', auth()->user()->name))
+            $initials = collect(explode(' ', auth()->user()->fullName()))
                 ->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))
                 ->take(2)
                 ->implode('');
@@ -224,7 +224,7 @@
                             {{ $initials }}
                         </span>
                         <div class="min-w-0 flex-1">
-                            <p class="truncate text-sm font-medium text-stone-900" title="{{ auth()->user()->name }}">{{ auth()->user()->name }}</p>
+                            <p class="truncate text-sm font-medium text-stone-900" title="{{ auth()->user()->fullName() }}">{{ auth()->user()->fullName() }}</p>
                             <p class="truncate text-xs text-stone-500">{{ auth()->user()->currentRoleLabel() }}</p>
                         </div>
                         <a href="{{ route('account.password.edit') }}" wire:navigate title="{{ __('Mot de passe') }}" aria-label="{{ __('Mot de passe') }}" class="rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700">

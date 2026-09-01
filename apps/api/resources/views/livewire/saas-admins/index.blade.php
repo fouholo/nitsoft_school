@@ -23,7 +23,7 @@
                 @forelse ($admins as $admin)
                     <tr wire:key="admin-{{ $admin->id }}">
                         <td class="px-4 py-2 text-stone-900">
-                            {{ $admin->user->name }}
+                            {{ $admin->user->fullName() }}
                             <span class="block text-xs text-stone-500">{{ $admin->user->email }}</span>
                         </td>
                         <td class="px-4 py-2 text-stone-600">{{ $admin->type->label() }}</td>
@@ -65,6 +65,11 @@
         <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500">{{ __('Créer un administrateur secondaire') }}</h2>
 
         <div>
+            <label class="block text-xs font-medium text-stone-700">{{ __('Prénom') }}</label>
+            <input type="text" wire:model="admin_first_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+            @error('admin_first_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+        </div>
+        <div>
             <label class="block text-xs font-medium text-stone-700">{{ __('Nom') }}</label>
             <input type="text" wire:model="admin_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
             @error('admin_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
@@ -73,6 +78,11 @@
             <label class="block text-xs font-medium text-stone-700">{{ __('E-mail') }}</label>
             <input type="email" wire:model="admin_email" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
             @error('admin_email') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-stone-700">{{ __('Pseudo') }}</label>
+            <input type="text" wire:model="admin_pseudo" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+            @error('admin_pseudo') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
         </div>
         <button type="submit" class="rounded-lg bg-orange-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-800">
             {{ __("Créer l'administrateur") }}

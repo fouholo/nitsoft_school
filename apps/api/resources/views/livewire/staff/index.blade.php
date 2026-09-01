@@ -25,7 +25,7 @@
                     <tr wire:key="staff-{{ $member->id }}">
                         <td class="px-4 py-2 text-stone-900">
                             <a href="{{ route('staff.show', [$establishment, $member]) }}" wire:navigate class="font-medium text-orange-700 hover:underline">
-                                {{ $member->user->name }}
+                                {{ $member->user->fullName() }}
                             </a>
                             <span class="block text-xs text-stone-500">{{ $member->user->email }}</span>
                         </td>
@@ -64,6 +64,11 @@
         <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500">{{ __('Créer un compte') }}</h2>
 
         <div>
+            <label class="block text-xs font-medium text-stone-700">{{ __('Prénom') }}</label>
+            <input type="text" wire:model="staff_first_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+            @error('staff_first_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+        </div>
+        <div>
             <label class="block text-xs font-medium text-stone-700">{{ __('Nom') }}</label>
             <input type="text" wire:model="staff_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
             @error('staff_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
@@ -72,6 +77,11 @@
             <label class="block text-xs font-medium text-stone-700">{{ __('E-mail') }}</label>
             <input type="email" wire:model="staff_email" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
             @error('staff_email') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-stone-700">{{ __('Pseudo') }}</label>
+            <input type="text" wire:model="staff_pseudo" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+            @error('staff_pseudo') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
         </div>
         <div>
             <label class="block text-xs font-medium text-stone-700">{{ __('Rôle') }}</label>

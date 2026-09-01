@@ -48,7 +48,7 @@ test('la connexion complète d’un fondateur avec plusieurs écoles dans son gr
     $foundation->users()->attach($user->id, ['role' => 'fondateur', 'is_active' => true]);
 
     Livewire::test(Login::class)
-        ->set('email', $user->email)
+        ->set('identifiant', $user->email)
         ->set('password', 'secret-password')
         ->call('login')
         ->assertRedirect(route('home'));

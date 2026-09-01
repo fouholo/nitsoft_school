@@ -65,7 +65,7 @@
                         @forelse ($founders as $founder)
                             <tr wire:key="founder-{{ $founder->id }}">
                                 <td class="px-4 py-2 text-stone-900">
-                                    {{ $founder->user->name }}
+                                    {{ $founder->user->fullName() }}
                                     <span class="block text-xs text-stone-500">{{ $founder->user->email }}</span>
                                 </td>
                                 <td class="px-4 py-2 text-end">

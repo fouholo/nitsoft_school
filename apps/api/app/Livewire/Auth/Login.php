@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Auth;
 
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
@@ -12,7 +13,7 @@ use Livewire\Component;
 #[Layout('layouts.guest')]
 class Login extends Component
 {
-    public string $email = '';
+    public string $identifiant = '';
 
     public string $password = '';
 
@@ -21,13 +22,17 @@ class Login extends Component
     public function login(): void
     {
         $this->validate([
-            'email' => ['required', 'email'],
+            'identifiant' => ['required', 'string'],
             'password' => ['required', 'string'],
         ]);
 
-        if (! Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
+        $user = filter_var($this->identifiant, FILTER_VALIDATE_EMAIL) !== false
+            ? User::where('email', $this->identifiant)->first()
+            : User::whereRaw('LOWER(pseudo) = ?', [mb_strtolower($this->identifiant)])->first();
+
+        if ($user === null || ! Auth::attempt(['email' => $user->email, 'password' => $this->password], $this->remember)) {
             throw ValidationException::withMessages([
-                'email' => __('Ces identifiants ne correspondent à aucun compte.'),
+                'identifiant' => __('Ces identifiants ne correspondent à aucun compte.'),
             ]);
         }
 

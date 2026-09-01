@@ -34,7 +34,7 @@ class TimetableTeacherPdfController extends Controller
             ->keyBy(fn (TimetableSession $session) => $session->day_of_week->value.'-'.$session->timetable_slot_id);
 
         $pdf = Pdf::loadView('pdf.timetable', [
-            'title' => __('Emploi du temps').' — '.$user->name,
+            'title' => __('Emploi du temps').' — '.$user->fullName(),
             'establishment' => $establishment,
             'generalInformation' => GeneralInformation::current(),
             'days' => DayOfWeek::cases(),
@@ -43,7 +43,7 @@ class TimetableTeacherPdfController extends Controller
             'showClassroom' => true,
         ])->setPaper('a4', 'landscape');
 
-        $filename = Str::slug('emploi-du-temps-'.$user->name).'.pdf';
+        $filename = Str::slug('emploi-du-temps-'.$user->fullName()).'.pdf';
 
         return $request->boolean('download')
             ? $pdf->download($filename)

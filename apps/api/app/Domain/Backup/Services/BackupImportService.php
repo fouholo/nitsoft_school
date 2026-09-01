@@ -151,12 +151,15 @@ class BackupImportService
                 foreach (array_chunk($rows, (int) config('backup.insert_chunk_size')) as $chunk) {
                     DB::table($table)->insert($chunk);
                 }
-
-                if (DB::getDriverName() === 'mysql' && in_array('id', Schema::getColumnListing($table), true)) {
-                    $nextId = (int) DB::table($table)->max('id') + 1;
-                    DB::statement("ALTER TABLE `{$table}` AUTO_INCREMENT = {$nextId}");
-                }
             });
+
+            // Hors transaction : une DDL (ALTER TABLE) commet implicitement
+            // toute transaction MySQL en cours, ce qui désynchronise le
+            // compteur de transactions de PDO si elle est exécutée dedans.
+            if (DB::getDriverName() === 'mysql' && in_array('id', Schema::getColumnListing($table), true)) {
+                $nextId = (int) DB::table($table)->max('id') + 1;
+                DB::statement("ALTER TABLE `{$table}` AUTO_INCREMENT = {$nextId}");
+            }
 
             Log::info('backup.import.table', ['table' => $table, 'rows' => $rowCount, 'author' => $author]);
 
