@@ -23,6 +23,12 @@
                 @error('wording') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
+            <div class="sm:col-span-2">
+                <label class="block text-sm font-medium text-stone-700">{{ __('Libellé (français)') }}</label>
+                <input type="text" wire:model="wording_fr" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                @error('wording_fr') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
             <div>
                 <label class="block text-sm font-medium text-stone-700">{{ __('Cycle') }}</label>
                 <select wire:model="cycle" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
@@ -58,6 +64,7 @@
                 <tr>
                     <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Code') }}</th>
                     <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Libellé') }}</th>
+                    <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Français') }}</th>
                     <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Cycle') }}</th>
                     <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Série requise') }}</th>
                     <th class="px-4 py-2"></th>
@@ -68,6 +75,7 @@
                     <tr wire:key="arabic-level-{{ $arabicLevel->id }}">
                         <td class="px-4 py-2 text-stone-900">{{ $arabicLevel->code }}</td>
                         <td class="px-4 py-2 text-stone-900" dir="rtl">{{ $arabicLevel->wording }}</td>
+                        <td class="px-4 py-2 text-stone-600">{{ $arabicLevel->wording_fr }}</td>
                         <td class="px-4 py-2 text-stone-600">{{ $arabicLevel->cycle->label() }}</td>
                         <td class="px-4 py-2 text-stone-600">{{ $arabicLevel->requires_series ? __('Oui') : __('Non') }}</td>
                         <td class="px-4 py-2 text-end whitespace-nowrap">
@@ -87,7 +95,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-4 py-6 text-center text-stone-500">{{ __('Aucun niveau arabe.') }}</td>
+                        <td colspan="6" class="px-4 py-6 text-center text-stone-500">{{ __('Aucun niveau arabe.') }}</td>
                     </tr>
                 @endforelse
             </tbody>

@@ -17,6 +17,8 @@ class Index extends Component
 
     public string $name = '';
 
+    public string $name_fr = '';
+
     public string $abbreviation = '';
 
     public function mount(): void
@@ -40,6 +42,7 @@ class Index extends Component
 
         $this->editingId = $arabicSubject->id;
         $this->name = $arabicSubject->name;
+        $this->name_fr = (string) $arabicSubject->name_fr;
         $this->abbreviation = (string) $arabicSubject->abbreviation;
         $this->showForm = true;
     }
@@ -48,6 +51,7 @@ class Index extends Component
     {
         $data = $this->validate([
             'name' => ['required', 'string', 'max:100'],
+            'name_fr' => ['nullable', 'string', 'max:100'],
             'abbreviation' => ['nullable', 'string', 'max:20'],
         ]);
 
@@ -83,7 +87,7 @@ class Index extends Component
 
     protected function resetForm(): void
     {
-        $this->reset(['editingId', 'name', 'abbreviation']);
+        $this->reset(['editingId', 'name', 'name_fr', 'abbreviation']);
     }
 
     public function render()

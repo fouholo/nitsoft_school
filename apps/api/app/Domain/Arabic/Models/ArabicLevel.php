@@ -20,6 +20,7 @@ class ArabicLevel extends Model
     protected $fillable = [
         'code',
         'wording',
+        'wording_fr',
         'cycle',
         'requires_series',
     ];

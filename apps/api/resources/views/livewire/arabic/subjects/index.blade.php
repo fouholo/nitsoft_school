@@ -23,6 +23,12 @@
                 @error('abbreviation') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
+            <div class="sm:col-span-2">
+                <label class="block text-sm font-medium text-stone-700">{{ __('Nom (français)') }}</label>
+                <input type="text" wire:model="name_fr" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                @error('name_fr') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
             <div class="flex gap-2 sm:col-span-3">
                 <button type="submit" class="rounded-lg bg-orange-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-800">
                     {{ __('Enregistrer') }}
@@ -39,6 +45,7 @@
             <thead class="bg-stone-50">
                 <tr>
                     <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Nom') }}</th>
+                    <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Français') }}</th>
                     <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Abréviation') }}</th>
                     <th class="px-4 py-2"></th>
                 </tr>
@@ -47,6 +54,7 @@
                 @forelse ($arabicSubjects as $arabicSubject)
                     <tr wire:key="arabic-subject-{{ $arabicSubject->id }}">
                         <td class="px-4 py-2 text-stone-900" dir="rtl">{{ $arabicSubject->name }}</td>
+                        <td class="px-4 py-2 text-stone-600">{{ $arabicSubject->name_fr }}</td>
                         <td class="px-4 py-2 text-stone-600">{{ $arabicSubject->abbreviation }}</td>
                         <td class="px-4 py-2 text-end whitespace-nowrap">
                             @can('update', $arabicSubject)
@@ -65,7 +73,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="3" class="px-4 py-6 text-center text-stone-500">{{ __('Aucune matière arabe.') }}</td>
+                        <td colspan="4" class="px-4 py-6 text-center text-stone-500">{{ __('Aucune matière arabe.') }}</td>
                     </tr>
                 @endforelse
             </tbody>

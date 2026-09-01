@@ -21,6 +21,7 @@ class ArabicSubject extends Model
 
     protected $fillable = [
         'name',
+        'name_fr',
         'abbreviation',
     ];
 }

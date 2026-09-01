@@ -21,6 +21,7 @@ test('un super admin peut créer un niveau arabe', function () {
         ->call('create')
         ->set('code', 'N1')
         ->set('wording', 'المستوى الأول')
+        ->set('wording_fr', 'Premier niveau')
         ->set('cycle', Cycle::Primaire->value)
         ->set('requires_series', false)
         ->call('save')
@@ -29,8 +30,23 @@ test('un super admin peut créer un niveau arabe', function () {
     $arabicLevel = ArabicLevel::where('code', 'N1')->sole();
 
     expect($arabicLevel->wording)->toBe('المستوى الأول')
+        ->and($arabicLevel->wording_fr)->toBe('Premier niveau')
         ->and($arabicLevel->cycle)->toBe(Cycle::Primaire)
         ->and($arabicLevel->requires_series)->toBeFalse();
+});
+
+test('le libellé français est optionnel', function () {
+    Livewire::test(Index::class)
+        ->call('create')
+        ->set('code', 'N2')
+        ->set('wording', 'المستوى الثاني')
+        ->set('cycle', Cycle::Primaire->value)
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $arabicLevel = ArabicLevel::where('code', 'N2')->sole();
+
+    expect($arabicLevel->wording_fr)->toBe('');
 });
 
 test('le code est obligatoire', function () {

@@ -21,6 +21,8 @@ class Index extends Component
 
     public string $wording = '';
 
+    public string $wording_fr = '';
+
     public string $cycle = '';
 
     public bool $requires_series = false;
@@ -47,6 +49,7 @@ class Index extends Component
         $this->editingId = $arabicLevel->id;
         $this->code = $arabicLevel->code;
         $this->wording = $arabicLevel->wording;
+        $this->wording_fr = (string) $arabicLevel->wording_fr;
         $this->cycle = $arabicLevel->cycle->value;
         $this->requires_series = $arabicLevel->requires_series;
         $this->showForm = true;
@@ -57,6 +60,7 @@ class Index extends Component
         $data = $this->validate([
             'code' => ['required', 'string', 'max:20'],
             'wording' => ['required', 'string', 'max:100'],
+            'wording_fr' => ['nullable', 'string', 'max:100'],
             'cycle' => ['required', Rule::enum(Cycle::class)],
             'requires_series' => ['boolean'],
         ]);
@@ -93,7 +97,7 @@ class Index extends Component
 
     protected function resetForm(): void
     {
-        $this->reset(['editingId', 'code', 'wording', 'cycle']);
+        $this->reset(['editingId', 'code', 'wording', 'wording_fr', 'cycle']);
         $this->requires_series = false;
     }
 

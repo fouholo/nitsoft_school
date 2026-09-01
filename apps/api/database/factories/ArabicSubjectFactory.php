@@ -18,6 +18,7 @@ class ArabicSubjectFactory extends Factory
     {
         return [
             'name' => fake()->unique()->words(2, true),
+            'name_fr' => fake()->words(2, true),
             'abbreviation' => strtoupper(fake()->unique()->lexify('???')),
         ];
     }

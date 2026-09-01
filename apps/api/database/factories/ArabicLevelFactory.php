@@ -20,6 +20,7 @@ class ArabicLevelFactory extends Factory
         return [
             'code' => strtoupper(fake()->unique()->lexify('AR??')),
             'wording' => fake()->unique()->words(2, true),
+            'wording_fr' => fake()->words(2, true),
             'cycle' => Cycle::Secondaire->value,
             'requires_series' => false,
         ];

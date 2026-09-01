@@ -19,13 +19,27 @@ test('un super admin peut créer une matière arabe', function () {
     Livewire::test(Index::class)
         ->call('create')
         ->set('name', 'القرآن الكريم')
+        ->set('name_fr', 'Coran')
         ->set('abbreviation', 'COR')
         ->call('save')
         ->assertHasNoErrors();
 
     $arabicSubject = ArabicSubject::where('name', 'القرآن الكريم')->sole();
 
-    expect($arabicSubject->abbreviation)->toBe('COR');
+    expect($arabicSubject->abbreviation)->toBe('COR')
+        ->and($arabicSubject->name_fr)->toBe('Coran');
+});
+
+test('le nom français est optionnel', function () {
+    Livewire::test(Index::class)
+        ->call('create')
+        ->set('name', 'اللغة العربية')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $arabicSubject = ArabicSubject::where('name', 'اللغة العربية')->sole();
+
+    expect($arabicSubject->name_fr)->toBe('');
 });
 
 test('le nom est obligatoire', function () {
