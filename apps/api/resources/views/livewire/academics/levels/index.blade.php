@@ -64,23 +64,23 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-stone-100">
-                @forelse ($levels as $level)
-                    <tr wire:key="level-{{ $level->id }}">
-                        <td class="px-4 py-2 text-stone-900">{{ $level->level }}</td>
-                        <td class="px-4 py-2 text-stone-600">{{ $level->level_wording }}</td>
+                @forelse ($levels as $levelRow)
+                    <tr wire:key="level-{{ $levelRow->id }}">
+                        <td class="px-4 py-2 text-stone-900">{{ $levelRow->level }}</td>
+                        <td class="px-4 py-2 text-stone-600">{{ $levelRow->level_wording }}</td>
                         <td class="px-4 py-2">
-                            <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $level->cycle->badgeClass() }}">
-                                {{ $level->cycle->label() }}
+                            <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $levelRow->cycle->badgeClass() }}">
+                                {{ $levelRow->cycle->label() }}
                             </span>
                         </td>
-                        <td class="px-4 py-2 text-stone-600">{{ $level->requires_series ? __('Oui') : __('Non') }}</td>
+                        <td class="px-4 py-2 text-stone-600">{{ $levelRow->requires_series ? __('Oui') : __('Non') }}</td>
                         <td class="px-4 py-2 text-end whitespace-nowrap">
-                            @can('update', $level)
-                                <button wire:click="edit({{ $level->id }})" class="text-stone-500 hover:text-stone-900">{{ __('Modifier') }}</button>
+                            @can('update', $levelRow)
+                                <button wire:click="edit({{ $levelRow->id }})" class="text-stone-500 hover:text-stone-900">{{ __('Modifier') }}</button>
                             @endcan
-                            @can('delete', $level)
+                            @can('delete', $levelRow)
                                 <button
-                                    wire:click="delete({{ $level->id }})"
+                                    wire:click="delete({{ $levelRow->id }})"
                                     wire:confirm="{{ __('Supprimer ce niveau ?') }}"
                                     class="ms-3 text-red-500 hover:text-red-700"
                                 >
