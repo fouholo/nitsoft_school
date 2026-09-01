@@ -54,7 +54,7 @@ class Index extends Component
         ], [], ['wipeConfirmationWord' => __('mot de confirmation')]);
 
         $tables = $this->wipeScope === 'all'
-            ? $registry->tables()
+            ? $registry->wipeableTables()
             : array_filter([$this->wipeTable]);
 
         set_time_limit(300);

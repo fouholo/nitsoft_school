@@ -65,6 +65,22 @@ test('un saas admin principal peut vider avec le mot de confirmation exact', fun
     expect(DB::table('establishments')->count())->toBe(0);
 });
 
+test('vider « Toutes les tables » préserve uid_server_counters', function () {
+    $main = createSaasAdmin('main');
+    Establishment::factory()->create();
+    $rowsBefore = DB::table('uid_server_counters')->count();
+
+    Livewire::actingAs($main)
+        ->test(Index::class)
+        ->set('wipeScope', 'all')
+        ->set('wipeConfirmationWord', 'VIDER')
+        ->call('wipe')
+        ->assertHasNoErrors();
+
+    expect(DB::table('establishments')->count())->toBe(0)
+        ->and(DB::table('uid_server_counters')->count())->toBe($rowsBefore);
+});
+
 test('l’upload d’un fichier au mauvais mimetype est rejeté', function () {
     $main = createSaasAdmin('main');
 

@@ -27,6 +27,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Tables exclues du vidage « Toutes les tables »
+    |--------------------------------------------------------------------------
+    |
+    | Restent exportées/restaurées normalement, mais absentes du vidage en
+    | masse — la vider casse la génération d'uid_serveur pour toute nouvelle
+    | donnée (compteurs par préfixe, App\Domain\Sync\Services\
+    | UidServerAssigner) tant qu'elle n'est pas manuellement reseedée. Reste
+    | vidable si explicitement ciblée table par table.
+    |
+    */
+    'wipe_excluded_tables' => [
+        'uid_server_counters',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Disque et dossiers de travail
     |--------------------------------------------------------------------------
     |

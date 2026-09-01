@@ -33,3 +33,11 @@ test('isKnownTable reconnaît une table du périmètre et rejette le reste', fun
         ->and($registry->isKnownTable('sessions'))->toBeFalse()
         ->and($registry->isKnownTable('table_qui_nexiste_pas'))->toBeFalse();
 });
+
+test('wipeableTables exclut uid_server_counters mais tables() et isKnownTable le conservent', function () {
+    $registry = new BackupTableRegistry;
+
+    expect($registry->wipeableTables())->not->toContain('uid_server_counters')
+        ->and($registry->tables())->toContain('uid_server_counters')
+        ->and($registry->isKnownTable('uid_server_counters'))->toBeTrue();
+});

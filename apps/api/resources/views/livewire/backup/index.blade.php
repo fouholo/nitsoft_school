@@ -25,6 +25,9 @@
             <p class="mt-1 text-sm text-red-800">
                 {{ __('Supprime définitivement les données des tables sélectionnées. Action irréversible.') }}
             </p>
+            <p class="mt-1 text-xs text-red-700">
+                {{ __('Le vidage « Toutes les tables » préserve uid_server_counters (compteurs de génération d\'identifiants) — ciblez-la explicitement si nécessaire.') }}
+            </p>
 
             <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div>

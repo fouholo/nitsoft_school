@@ -28,6 +28,24 @@ test('backup:wipe refuse une table inconnue', function () {
         ->assertExitCode(1);
 });
 
+test('backup:wipe --force sans --table préserve uid_server_counters', function () {
+    $rowsBefore = DB::table('uid_server_counters')->count();
+
+    $this->artisan('backup:wipe', ['--force' => true])
+        ->assertExitCode(0);
+
+    expect(DB::table('uid_server_counters')->count())->toBe($rowsBefore);
+});
+
+test('backup:wipe --table=uid_server_counters vide quand même la table ciblée explicitement', function () {
+    expect(DB::table('uid_server_counters')->count())->toBeGreaterThan(0);
+
+    $this->artisan('backup:wipe', ['--table' => 'uid_server_counters', '--force' => true])
+        ->assertExitCode(0);
+
+    expect(DB::table('uid_server_counters')->count())->toBe(0);
+});
+
 test('backup:import --dry-run n’écrit rien', function () {
     Establishment::factory()->create();
 

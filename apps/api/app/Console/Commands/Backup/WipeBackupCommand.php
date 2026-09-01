@@ -24,7 +24,7 @@ class WipeBackupCommand extends Command
             return self::FAILURE;
         }
 
-        $tables = $requestedTable !== null ? [$requestedTable] : $registry->tables();
+        $tables = $requestedTable !== null ? [$requestedTable] : $registry->wipeableTables();
 
         if (! $this->option('force')) {
             $confirmed = $this->confirm(

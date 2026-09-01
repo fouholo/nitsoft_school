@@ -385,6 +385,7 @@
     "Laissez les dates vides pour une période sans dates fixes (utilisée comme simple numéro de composition).": "Leave the dates empty for a term without fixed dates (used as a simple exam number).",
     "Latitude": "Latitude",
     "Le montant « affecté » s'applique une fois l'élève affecté à une série ; « non affecté » s'applique avant cette affectation.": "The \"assigned\" amount applies once the student is assigned to a série; \"unassigned\" applies before that assignment.",
+    "Le vidage « Toutes les tables » préserve uid_server_counters (compteurs de génération d'identifiants) — ciblez-la explicitement si nécessaire.": "The \"All tables\" wipe preserves uid_server_counters (identifier generation counters) — target it explicitly if needed.",
     "Les champs marqués d'un :star sont obligatoires.": "Fields marked with :star are required.",
     "Les montants seront pré-remplis ; vous pourrez les ajuster avant d'enregistrer.": "Amounts will be pre-filled; you can adjust them before saving.",
     "Lettres de relance": "Reminder letters",

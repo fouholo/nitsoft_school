@@ -385,6 +385,7 @@
     "Laissez les dates vides pour une période sans dates fixes (utilisée comme simple numéro de composition).": "اترك التواريخ فارغة لفترة بدون تواريخ ثابتة (تُستخدم كرقم تأليف بسيط).",
     "Latitude": "خط العرض",
     "Le montant « affecté » s'applique une fois l'élève affecté à une série ; « non affecté » s'applique avant cette affectation.": "يُطبَّق المبلغ «المسند» بمجرد إسناد التلميذ إلى شعبة؛ ويُطبَّق «غير المسند» قبل هذا الإسناد.",
+    "Le vidage « Toutes les tables » préserve uid_server_counters (compteurs de génération d'identifiants) — ciblez-la explicitement si nécessaire.": "يحافظ إفراغ \"جميع الجداول\" على uid_server_counters (عدادات توليد المعرفات) — استهدفها صراحةً عند الحاجة.",
     "Les champs marqués d'un :star sont obligatoires.": "الحقول المعلّمة بـ :star إلزامية.",
     "Les montants seront pré-remplis ; vous pourrez les ajuster avant d'enregistrer.": "سيتم ملء المبالغ مسبقًا؛ يمكنك تعديلها قبل الحفظ.",
     "Lettres de relance": "رسائل التذكير",

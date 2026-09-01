@@ -38,4 +38,21 @@ class BackupTableRegistry
     {
         return in_array($table, $this->tables(), true);
     }
+
+    /**
+     * Tables ciblées par un vidage « Toutes les tables » — un sous-ensemble
+     * de tables() qui exclut celles listées dans wipe_excluded_tables
+     * (toujours vidables individuellement via un ciblage explicite).
+     *
+     * @return list<string>
+     */
+    public function wipeableTables(): array
+    {
+        $excluded = array_flip(config('backup.wipe_excluded_tables', []));
+
+        return array_values(array_filter(
+            $this->tables(),
+            static fn (string $table): bool => ! isset($excluded[$table])
+        ));
+    }
 }
