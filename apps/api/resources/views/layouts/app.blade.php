@@ -48,6 +48,7 @@
                     ['label' => __('Bulletins'), 'route' => 'grading.report-cards.index', 'ability' => 'viewAny', 'model' => \App\Domain\Grading\Models\ReportCard::class],
                 ]],
                 ['type' => 'link', 'label' => __('Présences'), 'route' => 'attendance.sessions.index', 'active' => 'attendance.*', 'icon' => 'calendar-check', 'ability' => 'viewAny', 'model' => \App\Domain\Attendance\Models\AttendanceSession::class],
+                ['type' => 'link', 'label' => __('Emplois du temps'), 'route' => 'academics.timetable.browse', 'active' => ['academics.timetable.browse', 'academics.timetable.teachers.*', 'academics.timetable.index'], 'icon' => 'calendar-check', 'ability' => 'browseStaff', 'model' => \App\Domain\Timetable\Models\TimetableSession::class],
                 ['type' => 'link', 'label' => __('Mon emploi du temps'), 'route' => 'academics.timetable.mine', 'active' => 'academics.timetable.mine', 'icon' => 'calendar-check', 'ability' => 'viewAny', 'model' => \App\Domain\Timetable\Models\TimetableSession::class],
                 ['type' => 'link', 'label' => __('Messagerie'), 'route' => 'messaging.index', 'active' => 'messaging.*', 'icon' => 'chat'],
                 ['type' => 'link', 'label' => __('Listes/Rapports'), 'route' => 'reports.index', 'active' => 'reports.*', 'icon' => 'document-text', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\Classroom::class],

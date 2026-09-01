@@ -85,6 +85,26 @@ test('un enseignant peut consulter sa propre séance mais pas celle d’un coll�
         ->and($me->can('view', $colleagueSession))->toBeFalse();
 });
 
+dataset('timetable_browse_staff_allowed_roles', ['fondateur', 'directeur', 'gestionnaire', 'educateur', 'caissier']);
+
+test('un rôle du personnel administratif peut parcourir les emplois du temps par classe/enseignant', function (string $role) {
+    $establishment = Establishment::factory()->create();
+    $user = createUserWithRole($establishment, $role);
+
+    actingInEstablishment($establishment);
+
+    expect($user->can('browseStaff', TimetableSession::class))->toBeTrue();
+})->with('timetable_browse_staff_allowed_roles');
+
+test('un enseignant ne peut pas parcourir les emplois du temps par classe/enseignant', function () {
+    $establishment = Establishment::factory()->create();
+    $teacher = createUserWithRole($establishment, 'enseignant');
+
+    actingInEstablishment($establishment);
+
+    expect($teacher->can('browseStaff', TimetableSession::class))->toBeFalse();
+});
+
 test('un admin d’un autre établissement ne peut ni voir ni gérer une séance', function () {
     $establishmentA = Establishment::factory()->create();
     $establishmentB = Establishment::factory()->create();

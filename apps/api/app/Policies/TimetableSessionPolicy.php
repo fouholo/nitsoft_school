@@ -19,6 +19,18 @@ class TimetableSessionPolicy
     }
 
     /**
+     * Écran de navigation "Emplois du temps" (Classes/Enseignants) et la
+     * grille en lecture seule d'un enseignant tiers — réservés au
+     * personnel administratif, hors périmètre pour un enseignant (qui
+     * garde MySchedule comme unique point d'entrée).
+     */
+    public function browseStaff(User $user): bool
+    {
+        return $this->isMemberOfCurrentEstablishment($user)
+            && $user->currentRole() !== 'enseignant';
+    }
+
+    /**
      * Le personnel administratif (tous rôles hors enseignant) consulte
      * n'importe quelle séance ; un enseignant ne consulte que les siennes —
      * voir spec, périmètre enseignant.
