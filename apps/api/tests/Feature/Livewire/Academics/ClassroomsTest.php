@@ -28,7 +28,7 @@ test('une classe peut être créée avec un cycle préscolaire', function () {
     $this->actingAs($admin);
     $schoolYear = SchoolYear::factory()->create();
 
-    $level = Level::factory()->prescolaire()->create(['level_wording' => 'Grande Section']);
+    $level = Level::factory()->prescolaire()->create(['level' => 'GS', 'level_wording' => 'Grande Section']);
 
     Livewire::test(Index::class)
         ->set('cycle', Cycle::Prescolaire->value)
@@ -41,7 +41,7 @@ test('une classe peut être créée avec un cycle préscolaire', function () {
     $classroom = Classroom::sole();
 
     expect($classroom->level->cycle)->toBe(Cycle::Prescolaire)
-        ->and($classroom->name)->toBe('Grande Section A');
+        ->and($classroom->name)->toBe('GS A');
 });
 
 test('le numéro n’est pas exigé et le nom de la classe se compose sans lui', function () {
@@ -51,7 +51,7 @@ test('le numéro n’est pas exigé et le nom de la classe se compose sans lui',
     $this->actingAs($admin);
     $schoolYear = SchoolYear::factory()->create();
 
-    $level = Level::factory()->prescolaire()->create(['level_wording' => 'Grande Section']);
+    $level = Level::factory()->prescolaire()->create(['level' => 'GS', 'level_wording' => 'Grande Section']);
 
     Livewire::test(Index::class)
         ->set('cycle', Cycle::Prescolaire->value)
@@ -63,7 +63,7 @@ test('le numéro n’est pas exigé et le nom de la classe se compose sans lui',
 
     $classroom = Classroom::sole();
 
-    expect($classroom->name)->toBe('Grande Section');
+    expect($classroom->name)->toBe('GS');
 });
 
 test('le numéro absent n’empêche pas la série de s’afficher dans le nom', function () {
@@ -81,7 +81,7 @@ test('le numéro absent n’empêche pas la série de s’afficher dans le nom',
 
     $classroom = Classroom::sole();
 
-    expect($classroom->name)->toBe('Terminale C');
+    expect($classroom->name)->toBe("{$terminale->level} C");
 });
 
 test('le niveau est requis', function () {
@@ -120,7 +120,7 @@ test('une classe de terminale avec série se compose correctement', function () 
 
     $classroom = Classroom::sole();
 
-    expect($classroom->name)->toBe('Terminale C 1');
+    expect($classroom->name)->toBe("{$terminale->level} C 1");
 });
 
 test('un niveau dont le cycle n’est pas autorisé pour ce type d’établissement est rejeté', function () {

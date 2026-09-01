@@ -50,7 +50,7 @@ class Classroom extends Model
         static::saving(function (Classroom $classroom): void {
             $classroom->name = trim(sprintf(
                 '%s%s %s',
-                $classroom->level->level_wording,
+                $classroom->level->level,
                 $classroom->serie_id ? ' '.$classroom->serie->serie : '',
                 $classroom->numero,
             ));

@@ -24,8 +24,8 @@
                 <label class="block text-sm font-medium text-stone-700">{{ __('Niveau') }}</label>
                 <select wire:model.live="level_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
-                    @foreach ($levels as $level)
-                        <option value="{{ $level->id }}">{{ $level->level_wording }}</option>
+                    @foreach ($levels as $levelOption)
+                        <option value="{{ $levelOption->id }}">{{ $levelOption->level }}</option>
                     @endforeach
                 </select>
                 @error('level_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
@@ -99,7 +99,7 @@
                 @forelse ($classrooms as $classroom)
                     <tr wire:key="classroom-{{ $classroom->id }}">
                         <td class="px-4 py-2 text-stone-900">{{ $classroom->name }}</td>
-                        <td class="px-4 py-2 text-stone-600">{{ $classroom->level->level_wording }}</td>
+                        <td class="px-4 py-2 text-stone-600">{{ $classroom->level->level }}</td>
                         <td class="px-4 py-2">
                             <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $classroom->level->cycle->badgeClass() }}">
                                 {{ $classroom->level->cycle->label() }}

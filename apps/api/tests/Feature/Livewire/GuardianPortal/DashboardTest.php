@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use App\Domain\Attendance\Models\AttendanceRecord;
-use App\Domain\Attendance\Models\AttendanceSession;
 use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\Level;
+use App\Domain\Attendance\Models\AttendanceRecord;
+use App\Domain\Attendance\Models\AttendanceSession;
 use App\Domain\Enrollment\Enums\GuardianLinkStatus;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Guardian;
@@ -75,7 +75,7 @@ test('la classe affichée provient de l’inscription active, pas d’une inscri
 
     $oldClassroom = Classroom::factory()->create([
         'establishment_id' => $establishment->id,
-        'level_id' => Level::factory()->state(['level_wording' => '5ème (ancienne)']),
+        'level_id' => Level::factory()->state(['level' => '5EME-OLD', 'level_wording' => '5ème (ancienne)']),
         'numero' => 'B',
     ]);
     Enrollment::factory()->create([
@@ -88,7 +88,7 @@ test('la classe affichée provient de l’inscription active, pas d’une inscri
 
     $currentClassroom = Classroom::factory()->create([
         'establishment_id' => $establishment->id,
-        'level_id' => Level::factory()->state(['level_wording' => '6ème']),
+        'level_id' => Level::factory()->state(['level' => '6EME', 'level_wording' => '6ème']),
         'numero' => 'A',
     ]);
     Enrollment::factory()->create([
@@ -100,8 +100,8 @@ test('la classe affichée provient de l’inscription active, pas d’une inscri
     ]);
 
     Livewire::test(Dashboard::class)
-        ->assertSee('6ème A')
-        ->assertDontSee('5ème (ancienne)');
+        ->assertSee('6EME A')
+        ->assertDontSee('5EME-OLD');
 });
 
 test('un solde en retard affiche un badge sur le lien Facturation', function () {
