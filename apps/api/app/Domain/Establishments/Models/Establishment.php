@@ -29,6 +29,7 @@ class Establishment extends Model
         'phone',
         'is_active',
         'inspection_id',
+        'direction_id',
         'opening_code',
         'dsps_code',
         'latitude',
@@ -68,6 +69,14 @@ class Establishment extends Model
     public function inspection(): BelongsTo
     {
         return $this->belongsTo(Inspection::class);
+    }
+
+    /**
+     * @return BelongsTo<Direction, $this>
+     */
+    public function direction(): BelongsTo
+    {
+        return $this->belongsTo(Direction::class);
     }
 
     /**

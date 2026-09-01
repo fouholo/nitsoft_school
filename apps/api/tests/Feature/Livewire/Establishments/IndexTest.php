@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Domain\Establishments\Enums\EstablishmentType;
+use App\Domain\Establishments\Models\Direction;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\Foundation;
 use App\Domain\Establishments\Models\Inspection;
@@ -20,10 +21,13 @@ beforeEach(function () {
 });
 
 test('un super admin peut créer un établissement indépendant', function () {
+    $inspection = Inspection::create(['codeiep' => 'IEP-001', 'inspection_name' => 'Inspection 1']);
+
     Livewire::test(Index::class)
         ->call('create')
         ->set('name', 'École Indépendante')
         ->set('type', EstablishmentType::PrescolairePrimaire->value)
+        ->set('inspection_id', (string) $inspection->id)
         ->call('save')
         ->assertHasNoErrors();
 
@@ -36,12 +40,14 @@ test('un super admin peut créer un établissement indépendant', function () {
 
 test('un super admin peut créer un établissement rattaché à une fondation', function () {
     $foundation = Foundation::factory()->create();
+    $direction = Direction::create(['code' => 'DIR-001', 'direction_name' => 'Direction 1']);
 
     Livewire::test(Index::class)
         ->call('create')
         ->set('name', 'École Rattachée')
         ->set('foundation_id', $foundation->id)
         ->set('type', EstablishmentType::Secondaire->value)
+        ->set('direction_id', (string) $direction->id)
         ->call('save')
         ->assertHasNoErrors();
 
@@ -50,8 +56,57 @@ test('un super admin peut créer un établissement rattaché à une fondation', 
     expect($establishment->foundation_id)->toBe($foundation->id);
 });
 
+test('un établissement primaire nécessite une inspection', function () {
+    Livewire::test(Index::class)
+        ->call('create')
+        ->set('name', 'École Sans Inspection')
+        ->set('type', EstablishmentType::PrescolairePrimaire->value)
+        ->call('save')
+        ->assertHasErrors(['inspection_id']);
+
+    expect(Establishment::where('name', 'École Sans Inspection')->exists())->toBeFalse();
+});
+
+test('un établissement secondaire nécessite une direction', function () {
+    Livewire::test(Index::class)
+        ->call('create')
+        ->set('name', 'École Sans Direction')
+        ->set('type', EstablishmentType::Secondaire->value)
+        ->call('save')
+        ->assertHasErrors(['direction_id']);
+
+    expect(Establishment::where('name', 'École Sans Direction')->exists())->toBeFalse();
+});
+
+test('changer le type d’un établissement efface le lien devenu non pertinent', function () {
+    $inspection = Inspection::create(['codeiep' => 'IEP-002', 'inspection_name' => 'Inspection 2']);
+    $direction = Direction::create(['code' => 'DIR-002', 'direction_name' => 'Direction 2']);
+    $establishment = Establishment::factory()->create([
+        'type' => EstablishmentType::PrescolairePrimaire,
+        'inspection_id' => $inspection->id,
+        'direction_id' => null,
+    ]);
+
+    Livewire::test(Index::class)
+        ->call('edit', $establishment->id)
+        ->set('type', EstablishmentType::Secondaire->value)
+        ->set('direction_id', (string) $direction->id)
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $establishment->refresh();
+
+    expect($establishment->direction_id)->toBe($direction->id)
+        ->and($establishment->inspection_id)->toBeNull();
+});
+
 test('un super admin peut modifier et supprimer un établissement', function () {
-    $establishment = Establishment::factory()->create(['foundation_id' => null]);
+    $inspection = Inspection::create(['codeiep' => 'IEP-004', 'inspection_name' => 'Inspection 4']);
+    $establishment = Establishment::factory()->create([
+        'foundation_id' => null,
+        'type' => EstablishmentType::PrescolairePrimaire,
+        'inspection_id' => $inspection->id,
+    ]);
 
     Livewire::test(Index::class)
         ->call('edit', $establishment->id)
@@ -68,11 +123,13 @@ test('un super admin peut modifier et supprimer un établissement', function () 
 
 test('un super admin peut téléverser un logo pour un établissement', function () {
     Storage::fake('public');
+    $direction = Direction::create(['code' => 'DIR-003', 'direction_name' => 'Direction 3']);
 
     Livewire::test(Index::class)
         ->call('create')
         ->set('name', 'École Logo')
         ->set('type', EstablishmentType::Secondaire->value)
+        ->set('direction_id', (string) $direction->id)
         ->set('logo', UploadedFile::fake()->image('logo.jpg')->size(50))
         ->call('save')
         ->assertHasNoErrors();
@@ -86,9 +143,12 @@ test('un super admin peut téléverser un logo pour un établissement', function
 test('remplacer le logo d’un établissement supprime l’ancien du stockage', function () {
     Storage::fake('public');
     Storage::disk('public')->put('establishments-logos/old.jpg', 'contenu-factice');
+    $inspection = Inspection::create(['codeiep' => 'IEP-005', 'inspection_name' => 'Inspection 5']);
 
     $establishment = Establishment::factory()->create([
         'foundation_id' => null,
+        'type' => EstablishmentType::PrescolairePrimaire,
+        'inspection_id' => $inspection->id,
         'logo_path' => 'establishments-logos/old.jpg',
     ]);
 
@@ -110,7 +170,7 @@ test('un super admin peut renseigner les champs administratifs d’un établisse
     Livewire::test(Index::class)
         ->call('create')
         ->set('name', 'École Administrative')
-        ->set('type', EstablishmentType::Secondaire->value)
+        ->set('type', EstablishmentType::PrescolairePrimaire->value)
         ->set('inspection_id', (string) $inspection->id)
         ->set('opening_code', 'OUV-042')
         ->set('dsps_code', 'DSPS-042')

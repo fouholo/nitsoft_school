@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Establishments;
 
 use App\Domain\Establishments\Enums\EstablishmentType;
+use App\Domain\Establishments\Models\Direction;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\Foundation;
 use App\Domain\Establishments\Models\Inspection;
@@ -38,6 +39,8 @@ class Index extends Component
     public bool $is_active = true;
 
     public string $inspection_id = '';
+
+    public string $direction_id = '';
 
     public string $opening_code = '';
 
@@ -82,6 +85,7 @@ class Index extends Component
         $this->phone = (string) $establishment->phone;
         $this->is_active = $establishment->is_active;
         $this->inspection_id = (string) $establishment->inspection_id;
+        $this->direction_id = (string) $establishment->direction_id;
         $this->opening_code = (string) $establishment->opening_code;
         $this->dsps_code = (string) $establishment->dsps_code;
         $this->latitude = (string) $establishment->latitude;
@@ -101,7 +105,14 @@ class Index extends Component
             'address' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
             'is_active' => ['boolean'],
-            'inspection_id' => ['nullable', 'integer', 'exists:inspections,id'],
+            'inspection_id' => [
+                Rule::requiredIf($this->type === EstablishmentType::PrescolairePrimaire->value),
+                'nullable', 'integer', 'exists:inspections,id',
+            ],
+            'direction_id' => [
+                Rule::requiredIf($this->type === EstablishmentType::Secondaire->value),
+                'nullable', 'integer', 'exists:directions,id',
+            ],
             'opening_code' => ['nullable', 'string', 'max:100'],
             'dsps_code' => ['nullable', 'string', 'max:100'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
@@ -111,8 +122,17 @@ class Index extends Component
             'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:1024'],
         ]);
 
-        foreach (['inspection_id', 'opening_code', 'dsps_code', 'latitude', 'longitude', 'email'] as $field) {
+        foreach (['inspection_id', 'direction_id', 'opening_code', 'dsps_code', 'latitude', 'longitude', 'email'] as $field) {
             $data[$field] = $data[$field] !== '' ? $data[$field] : null;
+        }
+
+        // Inspection (primaire) et direction (secondaire) sont exclusives —
+        // un changement de type efface le lien devenu non pertinent, même si
+        // l'ancienne valeur était encore présente dans le formulaire.
+        if ($data['type'] === EstablishmentType::PrescolairePrimaire->value) {
+            $data['direction_id'] = null;
+        } else {
+            $data['inspection_id'] = null;
         }
 
         unset($data['logo']);
@@ -174,7 +194,7 @@ class Index extends Component
     {
         $this->reset([
             'editingId', 'name', 'foundation_id', 'type', 'address', 'phone', 'is_active',
-            'inspection_id', 'opening_code', 'dsps_code', 'latitude', 'longitude', 'email',
+            'inspection_id', 'direction_id', 'opening_code', 'dsps_code', 'latitude', 'longitude', 'email',
             'is_arabe', 'logo', 'existingLogoPath',
         ]);
         $this->is_active = true;
@@ -187,6 +207,7 @@ class Index extends Component
             'foundations' => Foundation::orderBy('name')->get(),
             'types' => EstablishmentType::cases(),
             'inspections' => Inspection::orderBy('inspection_name')->get(),
+            'directions' => Direction::orderBy('direction_name')->get(),
         ])->title(__('Établissements'));
     }
 }

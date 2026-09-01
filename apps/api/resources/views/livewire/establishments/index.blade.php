@@ -34,7 +34,7 @@
 
             <div>
                 <label class="block text-sm font-medium text-stone-700">{{ __('Type') }}</label>
-                <select wire:model="type" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <select wire:model.live="type" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
                     @foreach ($types as $type)
                         <option value="{{ $type->value }}">{{ $type->label() }}</option>
@@ -61,16 +61,29 @@
                 @error('email') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Inspection') }}</label>
-                <select wire:model="inspection_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
-                    <option value="">—</option>
-                    @foreach ($inspections as $inspection)
-                        <option value="{{ $inspection->id }}">{{ $inspection->codeiep }} — {{ $inspection->inspection_name }}</option>
-                    @endforeach
-                </select>
-                @error('inspection_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-            </div>
+            @if ($type === \App\Domain\Establishments\Enums\EstablishmentType::PrescolairePrimaire->value)
+                <div>
+                    <label class="block text-sm font-medium text-stone-700">{{ __('Inspection') }}</label>
+                    <select wire:model="inspection_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <option value="">—</option>
+                        @foreach ($inspections as $inspection)
+                            <option value="{{ $inspection->id }}">{{ $inspection->codeiep }} — {{ $inspection->inspection_name }}</option>
+                        @endforeach
+                    </select>
+                    @error('inspection_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                </div>
+            @elseif ($type === \App\Domain\Establishments\Enums\EstablishmentType::Secondaire->value)
+                <div>
+                    <label class="block text-sm font-medium text-stone-700">{{ __('Direction') }}</label>
+                    <select wire:model="direction_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <option value="">—</option>
+                        @foreach ($directions as $direction)
+                            <option value="{{ $direction->id }}">{{ $direction->code }} — {{ $direction->direction_name }}</option>
+                        @endforeach
+                    </select>
+                    @error('direction_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                </div>
+            @endif
 
             <div>
                 <label class="block text-sm font-medium text-stone-700">{{ __("Code d'ouverture") }}</label>
