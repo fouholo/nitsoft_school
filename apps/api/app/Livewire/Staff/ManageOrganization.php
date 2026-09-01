@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Staff;
 
 use App\Domain\Establishments\Enums\EstablishmentType;
+use App\Domain\Establishments\Models\Direction;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\EstablishmentUserPivot;
 use App\Domain\Establishments\Models\Foundation;
@@ -59,6 +60,8 @@ class ManageOrganization extends Component
     public string $new_establishment_phone = '';
 
     public string $new_establishment_inspection_id = '';
+
+    public string $new_establishment_direction_id = '';
 
     public string $new_establishment_opening_code = '';
 
@@ -135,7 +138,14 @@ class ManageOrganization extends Component
             'new_establishment_type' => ['required', Rule::enum(EstablishmentType::class)],
             'new_establishment_address' => ['nullable', 'string', 'max:255'],
             'new_establishment_phone' => ['nullable', 'string', 'max:50'],
-            'new_establishment_inspection_id' => ['nullable', 'integer', 'exists:inspections,id'],
+            'new_establishment_inspection_id' => [
+                Rule::requiredIf($this->new_establishment_type === EstablishmentType::PrescolairePrimaire->value),
+                'nullable', 'integer', 'exists:inspections,id',
+            ],
+            'new_establishment_direction_id' => [
+                Rule::requiredIf($this->new_establishment_type === EstablishmentType::Secondaire->value),
+                'nullable', 'integer', 'exists:directions,id',
+            ],
             'new_establishment_opening_code' => ['nullable', 'string', 'max:100'],
             'new_establishment_dsps_code' => ['nullable', 'string', 'max:100'],
             'new_establishment_latitude' => ['nullable', 'numeric', 'between:-90,90'],
@@ -145,8 +155,16 @@ class ManageOrganization extends Component
             'new_establishment_logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:1024'],
         ]);
 
-        foreach (['new_establishment_inspection_id', 'new_establishment_opening_code', 'new_establishment_dsps_code', 'new_establishment_latitude', 'new_establishment_longitude', 'new_establishment_email'] as $field) {
+        foreach (['new_establishment_inspection_id', 'new_establishment_direction_id', 'new_establishment_opening_code', 'new_establishment_dsps_code', 'new_establishment_latitude', 'new_establishment_longitude', 'new_establishment_email'] as $field) {
             $data[$field] = $data[$field] !== '' ? $data[$field] : null;
+        }
+
+        // Inspection (primaire) et direction (secondaire) sont exclusives —
+        // voir App\Livewire\Establishments\Index::save() pour la même règle.
+        if ($data['new_establishment_type'] === EstablishmentType::PrescolairePrimaire->value) {
+            $data['new_establishment_direction_id'] = null;
+        } else {
+            $data['new_establishment_inspection_id'] = null;
         }
 
         $logoPath = $this->new_establishment_logo?->store('establishments-logos', 'public');
@@ -159,6 +177,7 @@ class ManageOrganization extends Component
             'address' => $data['new_establishment_address'],
             'phone' => $data['new_establishment_phone'],
             'inspection_id' => $data['new_establishment_inspection_id'],
+            'direction_id' => $data['new_establishment_direction_id'],
             'opening_code' => $data['new_establishment_opening_code'],
             'dsps_code' => $data['new_establishment_dsps_code'],
             'latitude' => $data['new_establishment_latitude'],
@@ -170,7 +189,7 @@ class ManageOrganization extends Component
 
         $this->reset([
             'new_establishment_name', 'new_establishment_type', 'new_establishment_address', 'new_establishment_phone',
-            'new_establishment_inspection_id', 'new_establishment_opening_code', 'new_establishment_dsps_code',
+            'new_establishment_inspection_id', 'new_establishment_direction_id', 'new_establishment_opening_code', 'new_establishment_dsps_code',
             'new_establishment_latitude', 'new_establishment_longitude', 'new_establishment_email',
             'new_establishment_is_arabe', 'new_establishment_logo',
         ]);
@@ -340,6 +359,7 @@ class ManageOrganization extends Component
             'eligibleGeneralAdminTargets' => $isGeneralAdmin ? $this->eligibleGeneralAdminTargets() : collect(),
             'establishmentTypes' => EstablishmentType::cases(),
             'inspections' => Inspection::orderBy('inspection_name')->get(),
+            'directions' => Direction::orderBy('direction_name')->get(),
             'assignableRoles' => Role::whereIn('code', self::ASSIGNABLE_ROLES)
                 ->get()
                 ->sortBy(fn (Role $role): int => array_search($role->code, self::ASSIGNABLE_ROLES, true)),

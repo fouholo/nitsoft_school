@@ -47,10 +47,10 @@
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-stone-700">{{ __('Type') }}</label>
-                        <select wire:model="new_establishment_type" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <select wire:model.live="new_establishment_type" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                             <option value="">—</option>
-                            @foreach ($establishmentTypes as $type)
-                                <option value="{{ $type->value }}">{{ $type->label() }}</option>
+                            @foreach ($establishmentTypes as $typeOption)
+                                <option value="{{ $typeOption->value }}">{{ $typeOption->label() }}</option>
                             @endforeach
                         </select>
                         @error('new_establishment_type') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
@@ -70,16 +70,29 @@
                         <input type="email" wire:model="new_establishment_email" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         @error('new_establishment_email') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
-                    <div>
-                        <label class="block text-xs font-medium text-stone-700">{{ __('Inspection') }}</label>
-                        <select wire:model="new_establishment_inspection_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
-                            <option value="">—</option>
-                            @foreach ($inspections as $inspection)
-                                <option value="{{ $inspection->id }}">{{ $inspection->codeiep }} — {{ $inspection->inspection_name }}</option>
-                            @endforeach
-                        </select>
-                        @error('new_establishment_inspection_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-                    </div>
+                    @if ($new_establishment_type === \App\Domain\Establishments\Enums\EstablishmentType::PrescolairePrimaire->value)
+                        <div>
+                            <label class="block text-xs font-medium text-stone-700">{{ __('Inspection') }}</label>
+                            <select wire:model="new_establishment_inspection_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                                <option value="">—</option>
+                                @foreach ($inspections as $inspection)
+                                    <option value="{{ $inspection->id }}">{{ $inspection->codeiep }} — {{ $inspection->inspection_name }}</option>
+                                @endforeach
+                            </select>
+                            @error('new_establishment_inspection_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        </div>
+                    @elseif ($new_establishment_type === \App\Domain\Establishments\Enums\EstablishmentType::Secondaire->value)
+                        <div>
+                            <label class="block text-xs font-medium text-stone-700">{{ __('Direction') }}</label>
+                            <select wire:model="new_establishment_direction_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                                <option value="">—</option>
+                                @foreach ($directions as $direction)
+                                    <option value="{{ $direction->id }}">{{ $direction->code }} — {{ $direction->direction_name }}</option>
+                                @endforeach
+                            </select>
+                            @error('new_establishment_direction_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        </div>
+                    @endif
                     <div>
                         <label class="block text-xs font-medium text-stone-700">{{ __("Code d'ouverture") }}</label>
                         <input type="text" wire:model="new_establishment_opening_code" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">

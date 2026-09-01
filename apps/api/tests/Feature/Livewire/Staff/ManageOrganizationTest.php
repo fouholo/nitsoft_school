@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 use App\Domain\Establishments\Enums\EstablishmentType;
+use App\Domain\Establishments\Models\Direction;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\EstablishmentUserPivot;
 use App\Domain\Establishments\Models\Foundation;
 use App\Domain\Establishments\Models\FoundationUserPivot;
-use App\Domain\Establishments\Models\Inspection;
 use App\Domain\Establishments\Models\Role;
 use App\Livewire\Staff\ManageOrganization;
 use App\Models\User;
@@ -154,12 +154,12 @@ test('un GENERAL_ADMIN de fondation peut créer un établissement avec les champ
     test()->actingAs($generalAdmin);
     Storage::fake('public');
 
-    $inspection = Inspection::create(['codeiep' => 'IEP-TEST', 'inspection_name' => 'Inspection Test']);
+    $direction = Direction::create(['code' => 'DIR-TEST', 'direction_name' => 'Direction Test']);
 
     Livewire::test(ManageOrganization::class)
         ->set('new_establishment_name', 'École Test')
         ->set('new_establishment_type', EstablishmentType::Secondaire->value)
-        ->set('new_establishment_inspection_id', (string) $inspection->id)
+        ->set('new_establishment_direction_id', (string) $direction->id)
         ->set('new_establishment_opening_code', 'OUV-001')
         ->set('new_establishment_dsps_code', 'DSPS-001')
         ->set('new_establishment_latitude', '5.336400')
@@ -172,7 +172,7 @@ test('un GENERAL_ADMIN de fondation peut créer un établissement avec les champ
 
     $establishment = Establishment::where('name', 'École Test')->sole();
 
-    expect($establishment->inspection_id)->toBe($inspection->id)
+    expect($establishment->direction_id)->toBe($direction->id)
         ->and($establishment->opening_code)->toBe('OUV-001')
         ->and($establishment->dsps_code)->toBe('DSPS-001')
         ->and((float) $establishment->latitude)->toBe(5.3364)
@@ -185,6 +185,50 @@ test('un GENERAL_ADMIN de fondation peut créer un établissement avec les champ
     expect($establishment->foundation_id)->toBe($foundation->id)
         ->and($establishment->type)->toBe(EstablishmentType::Secondaire)
         ->and($establishment->slug)->toBe('ecole-test');
+});
+
+test('le champ inspection ou direction s’affiche selon le type sélectionné pour un nouvel établissement', function () {
+    $foundation = Foundation::factory()->create();
+    $generalAdmin = createGeneralAdmin($foundation);
+    test()->actingAs($generalAdmin);
+
+    Livewire::test(ManageOrganization::class)
+        ->assertDontSee('wire:model="new_establishment_inspection_id"', false)
+        ->assertDontSee('wire:model="new_establishment_direction_id"', false)
+        ->set('new_establishment_type', EstablishmentType::PrescolairePrimaire->value)
+        ->assertSee('wire:model="new_establishment_inspection_id"', false)
+        ->assertDontSee('wire:model="new_establishment_direction_id"', false)
+        ->set('new_establishment_type', EstablishmentType::Secondaire->value)
+        ->assertDontSee('wire:model="new_establishment_inspection_id"', false)
+        ->assertSee('wire:model="new_establishment_direction_id"', false);
+});
+
+test('un établissement primaire créé depuis l’organisation nécessite une inspection', function () {
+    $foundation = Foundation::factory()->create();
+    $generalAdmin = createGeneralAdmin($foundation);
+    test()->actingAs($generalAdmin);
+
+    Livewire::test(ManageOrganization::class)
+        ->set('new_establishment_name', 'École Sans Inspection')
+        ->set('new_establishment_type', EstablishmentType::PrescolairePrimaire->value)
+        ->call('createEstablishment')
+        ->assertHasErrors(['new_establishment_inspection_id']);
+
+    expect(Establishment::where('name', 'École Sans Inspection')->exists())->toBeFalse();
+});
+
+test('un établissement secondaire créé depuis l’organisation nécessite une direction', function () {
+    $foundation = Foundation::factory()->create();
+    $generalAdmin = createGeneralAdmin($foundation);
+    test()->actingAs($generalAdmin);
+
+    Livewire::test(ManageOrganization::class)
+        ->set('new_establishment_name', 'École Sans Direction')
+        ->set('new_establishment_type', EstablishmentType::Secondaire->value)
+        ->call('createEstablishment')
+        ->assertHasErrors(['new_establishment_direction_id']);
+
+    expect(Establishment::where('name', 'École Sans Direction')->exists())->toBeFalse();
 });
 
 test('un fondateur simple (non GENERAL_ADMIN) ne peut pas créer d’établissement', function () {
