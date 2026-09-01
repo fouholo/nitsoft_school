@@ -8,12 +8,17 @@ use App\Domain\Establishments\Concerns\TenantScoped;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * Pas de SoftDeletes : table de configuration (comme TeacherAssignment),
+ * pas un enregistrement historique. Combiné à l'index unique
+ * (establishment_id, sequence), un soft delete laisserait une ligne
+ * "supprimée" bloquer indéfiniment la réutilisation du même numéro de
+ * créneau — piège rencontré en production, voir mémoire projet.
+ */
 class TimetableSlot extends Model
 {
     use HasFactory;
-    use SoftDeletes;
     use TenantScoped;
 
     protected $fillable = [

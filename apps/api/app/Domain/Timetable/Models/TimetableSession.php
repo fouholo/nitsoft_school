@@ -13,12 +13,15 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * Pas de SoftDeletes : voir TimetableSlot, même raisonnement (table
+ * d'affectation comme TeacherAssignment, pas un enregistrement
+ * historique).
+ */
 class TimetableSession extends Model
 {
     use HasFactory;
-    use SoftDeletes;
     use TenantScoped;
 
     protected $fillable = [
