@@ -107,16 +107,16 @@ Deux nouvelles entrées dans `RolePermissions::MATRIX` :
 'timetable.manage' => ['fondateur', 'directeur', 'gestionnaire', 'educateur'],
 ```
 
-`timetable.manage` gate la création/modification/suppression des séances et de la grille de créneaux. Pas d'entrée `timetable.view` dans la matrice : la consultation suit le même schéma que `TeacherAssignmentPolicy::viewAny` (`isAdminOfCurrentEstablishment`, qui couvre déjà `fondateur`/`directeur`/`gestionnaire`/`caissier`/`educateur`), élargi à l'enseignant via `isMemberOfCurrentEstablishment` + rôle `enseignant`.
+`timetable.manage` gate la création/modification/suppression des séances et de la grille de créneaux. Pas d'entrée `timetable.view` dans la matrice : la consultation est ouverte à tout membre actif de l'établissement (`isMemberOfCurrentEstablishment`, basé sur `hasAccessTo` — couvre directeur/gestionnaire/caissier/éducateur/enseignant/fondateur indifféremment). Note : `isAdminOfCurrentEstablishment` (utilisé par `TeacherAssignmentPolicy::viewAny`) ne reconnaît que directeur/gestionnaire/fondateur — trop restrictif pour « tout le personnel administratif » au sens de ce chantier, qui inclut aussi caissier et éducateur ; `isMemberOfCurrentEstablishment` est donc la vérification retenue ici.
 
 `App\Policies\TimetableSlotPolicy` (à plat) :
 ```php
 public function viewAny(User $user): bool
 {
-    return $this->isAdminOfCurrentEstablishment($user);
+    return $this->isMemberOfCurrentEstablishment($user);
 }
 
-public function manage(User $user): bool // create/update/delete
+public function manage(User $user): bool // create/update/delete (implémenté comme update()/delete() distincts)
 {
     return $this->isLocalAdminOfCurrentEstablishment($user)
         && RolePermissions::can($user->currentRole(), 'timetable.manage');
@@ -127,8 +127,7 @@ public function manage(User $user): bool // create/update/delete
 ```php
 public function viewAny(User $user): bool
 {
-    return $this->isAdminOfCurrentEstablishment($user)
-        || $user->currentRole() === 'enseignant';
+    return $this->isMemberOfCurrentEstablishment($user);
 }
 
 public function view(User $user, TimetableSession $session): bool
@@ -137,8 +136,10 @@ public function view(User $user, TimetableSession $session): bool
         return false;
     }
 
-    return $this->isAdminOfCurrentEstablishment($user)
-        || $session->user_id === $user->id;
+    // Personnel administratif (tout rôle hors enseignant) voit toute
+    // séance ; un enseignant ne voit que les siennes.
+    return $session->user_id === $user->id
+        || $user->currentRole() !== 'enseignant';
 }
 
 public function create(User $user): bool
@@ -163,22 +164,26 @@ Namespace `App\Livewire\Academics\Timetable`, routes ajoutées à `routes/academ
 
 ```php
 Route::get('/timetable/slots', SlotsIndex::class)->name('timetable.slots.index');
+Route::get('/timetable/mine', MySchedule::class)->name('timetable.mine');
 Route::get('/timetable/{classroom}', TimetableIndex::class)->name('timetable.index');
-Route::get('/my-timetable', MySchedule::class)->name('timetable.mine');
 ```
+
+(noms complets une fois préfixés par le groupe `academics.` : `academics.timetable.slots.index`, `academics.timetable.mine`, `academics.timetable.index` — les routes fixes `/slots` et `/mine` sont déclarées avant `/{classroom}` pour ne pas être capturées par le paramètre générique.)
 
 - **`SlotsIndex`** : CRUD de la grille de créneaux (`label`, `start_time`, `end_time`, `sequence`, `is_break`), réservé à `timetable.manage`. `mount()` → `$this->authorize('viewAny', TimetableSlot::class)`, actions gatées par `Gate::allows('manage', TimetableSlot::class)`.
 - **`TimetableIndex`** (route paramétrée par classe, `Classroom $classroom` en binding) : `mount()` → `$this->authorize('viewAny', TimetableSession::class)`, puis vérifie `$classroom->level->cycle === Cycle::Secondaire` (sinon `abort(404)` — pas d'emploi du temps hors périmètre). Grille jours (colonnes) × créneaux non-pause (lignes), chaque case affiche la séance existante (matière + enseignant abrégé) ou reste vide. Un utilisateur avec `timetable.manage` clique une case vide pour ouvrir le formulaire d'ajout (`user_id`/`subject_id` limités aux couples de `TeacherAssignment` de cette classe, `day_of_week`/`timetable_slot_id` pré-remplis depuis la case cliquée, `room` libre), ou une case occupée pour modifier/supprimer. Sans `timetable.manage`, la grille est affichée sans interactions (pas de `wire:click` sur les cases).
 - **`MySchedule`** : `mount()` → `$this->authorize('viewAny', TimetableSession::class)`, puis `render()` filtre `TimetableSession::where('user_id', auth()->id())` — un enseignant ne voit que ses propres séances, toutes classes confondues, jamais l'emploi du temps complet d'une classe où il n'intervient pas (choix validé). Même grille visuelle que `TimetableIndex` mais sans sélecteur de classe, purement en lecture.
 
-Navigation : nouvelle entrée "Emplois du temps" dans le groupe "Académique" de `$navItems` (`resources/views/layouts/app.blade.php`), pointant vers `timetable.mine` pour un enseignant et vers la liste des classes (réutilise `academics.classrooms.index`, chaque ligne classe a désormais un lien vers `timetable.index`) pour le personnel administratif — pas de nouvel écran de sélection de classe dédié, cohérent avec l'absence d'écran "liste des emplois du temps" séparé.
+Navigation (`resources/views/layouts/app.blade.php`) : "Grille de créneaux" ajoutée au groupe "Académique" ; "Mon emploi du temps" en lien de premier niveau (comme "Présences"), visible par tout membre ayant `viewAny` sur `TimetableSession` — même lien pour l'enseignant (sa vue personnelle) et pour le personnel administratif (qui y voit ses propres séances, potentiellement aucune). Pas d'écran de sélection de classe dédié pour la grille par classe : chaque ligne secondaire de `academics.classrooms.index` porte désormais un lien "Emploi du temps" vers `academics.timetable.index`.
 
 ## 5. Export PDF
 
-Deux contrôleurs suivant le patron `ClassroomStudentListPdfController` :
+Deux contrôleurs suivant le patron `ClassroomStudentListPdfController`, sous `App\Http\Controllers\Academics`, routés depuis `routes/reports.php` (même fichier que les autres PDF à la demande du projet, préfixe `/rapports`, nom `reports.*`) plutôt que `routes/academics.php` :
 
-- `TimetableClassroomPdfController` (route `academics.timetable.pdf.classroom`) : reçoit `Classroom $classroom`, charge `timetableSessions` avec `subject`/`teacher`/`slot`, rend `pdf.timetable-classroom` (grille jours × créneaux, en-tête via `pdf.partials.reports-header`).
-- `TimetableTeacherPdfController` (route `academics.timetable.pdf.mine`) : reçoit l'utilisateur courant (`auth()->id()`), même gabarit de grille, filtré à ses séances.
+- `TimetableClassroomPdfController` (route `reports.timetable-classroom-pdf`, `/rapports/classes/{classroom}/emploi-du-temps`) : reçoit `Classroom $classroom`, charge les séances avec `subject`/`teacher`, rend `pdf.timetable` (grille jours × créneaux, en-tête via `pdf.partials.reports-header`, format paysage).
+- `TimetableTeacherPdfController` (route `reports.timetable-mine-pdf`, `/rapports/mon-emploi-du-temps`) : reçoit l'utilisateur courant (`Auth::user()`), même gabarit `pdf.timetable`, filtré à ses séances.
+
+Un seul gabarit partagé (`resources/views/pdf/timetable.blade.php`) paramétré par `showClassroom` (affiche la classe pour la vue enseignant, l'enseignant pour la vue classe).
 
 Génération à la demande, aucun stockage — cohérent avec la règle "documents officiels non pré-générés" du projet.
 

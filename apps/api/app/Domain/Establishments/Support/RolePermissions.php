@@ -39,6 +39,8 @@ final class RolePermissions
         'subject_coefficients.write' => ['educateur'],
 
         'guardians.notify' => ['caissier'],
+
+        'timetable.manage' => ['fondateur', 'directeur', 'gestionnaire', 'educateur'],
     ];
 
     public static function can(?string $role, string $ability): bool

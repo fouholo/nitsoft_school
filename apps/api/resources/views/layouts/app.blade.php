@@ -38,6 +38,7 @@
                     ['label' => __('Classes'), 'route' => 'academics.classrooms.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\Classroom::class],
                     ['label' => __('Coefficients par matière'), 'route' => 'academics.subject-coefficients.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\SubjectCoefficient::class],
                     ['label' => __('Affectations'), 'route' => 'academics.teacher-assignments.index', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\TeacherAssignment::class],
+                    ['label' => __('Grille de créneaux'), 'route' => 'academics.timetable.slots.index', 'ability' => 'viewAny', 'model' => \App\Domain\Timetable\Models\TimetableSlot::class],
                 ]],
                 ['type' => 'link', 'label' => __('Élèves'), 'route' => 'students.index', 'active' => 'students.*', 'icon' => 'users', 'ability' => 'viewAny', 'model' => \App\Domain\Enrollment\Models\Student::class],
                 ['type' => 'link', 'label' => __('Tuteurs'), 'route' => 'guardians.index', 'active' => 'guardians.*', 'icon' => 'identification', 'ability' => 'viewAny', 'model' => \App\Domain\Enrollment\Models\Guardian::class],
@@ -47,6 +48,7 @@
                     ['label' => __('Bulletins'), 'route' => 'grading.report-cards.index', 'ability' => 'viewAny', 'model' => \App\Domain\Grading\Models\ReportCard::class],
                 ]],
                 ['type' => 'link', 'label' => __('Présences'), 'route' => 'attendance.sessions.index', 'active' => 'attendance.*', 'icon' => 'calendar-check', 'ability' => 'viewAny', 'model' => \App\Domain\Attendance\Models\AttendanceSession::class],
+                ['type' => 'link', 'label' => __('Mon emploi du temps'), 'route' => 'academics.timetable.mine', 'active' => 'academics.timetable.mine', 'icon' => 'calendar-check', 'ability' => 'viewAny', 'model' => \App\Domain\Timetable\Models\TimetableSession::class],
                 ['type' => 'link', 'label' => __('Messagerie'), 'route' => 'messaging.index', 'active' => 'messaging.*', 'icon' => 'chat'],
                 ['type' => 'link', 'label' => __('Listes/Rapports'), 'route' => 'reports.index', 'active' => 'reports.*', 'icon' => 'document-text', 'ability' => 'viewAny', 'model' => \App\Domain\Academics\Models\Classroom::class],
                 ['type' => 'group', 'label' => __('Facturation'), 'icon' => 'banknote', 'active' => 'billing.*', 'children' => [

@@ -108,8 +108,13 @@
                         <td class="px-4 py-2 text-stone-600">{{ $classroom->capacity }}</td>
                         <td class="px-4 py-2 text-stone-600">{{ $classroom->schoolYear?->label }}</td>
                         <td class="px-4 py-2 text-end">
+                            @if ($classroom->level->cycle === \App\Domain\Academics\Enums\Cycle::Secondaire)
+                                @can('viewAny', \App\Domain\Timetable\Models\TimetableSession::class)
+                                    <a href="{{ route('academics.timetable.index', $classroom) }}" class="text-stone-500 hover:text-stone-900">{{ __('Emploi du temps') }}</a>
+                                @endcan
+                            @endif
                             @can('update', $classroom)
-                                <button wire:click="edit({{ $classroom->id }})" class="text-stone-500 hover:text-stone-900">{{ __('Modifier') }}</button>
+                                <button wire:click="edit({{ $classroom->id }})" class="ms-3 text-stone-500 hover:text-stone-900">{{ __('Modifier') }}</button>
                             @endcan
                             @can('delete', $classroom)
                                 <button
