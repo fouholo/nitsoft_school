@@ -70,4 +70,5 @@ Route::middleware('auth')->group(function (): void {
     require __DIR__.'/general-information.php';
     require __DIR__.'/saas-admins.php';
     require __DIR__.'/staff.php';
+    require __DIR__.'/backup.php';
 });

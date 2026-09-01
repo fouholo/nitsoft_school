@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Domain\Attendance\Events\StudentMarkedAbsent;
+use App\Domain\Backup\Support\BackupOperation;
 use App\Domain\Establishments\Models\SaasAdmin;
 use App\Domain\Notifications\Contracts\SmsProviderInterface;
 use App\Domain\Notifications\Listeners\NotifyGuardiansOfAbsence;
@@ -58,6 +59,14 @@ class AppServiceProvider extends ServiceProvider
             $targetsSaasAdmin = $target === SaasAdmin::class || $target instanceof SaasAdmin;
 
             if ($targetsSaasAdmin && ! in_array($ability, ['viewAny', 'view'], true)) {
+                return null;
+            }
+
+            // Vidage/restauration de la base : réservés au SaaS admin
+            // Principal, on laisse BackupOperationPolicy trancher.
+            $targetsBackupOperation = $target === BackupOperation::class;
+
+            if ($targetsBackupOperation && in_array($ability, ['wipe', 'import'], true)) {
                 return null;
             }
 

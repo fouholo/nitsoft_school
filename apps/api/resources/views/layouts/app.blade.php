@@ -122,6 +122,7 @@
                 $navItems[] = ['type' => 'link', 'label' => __('Séries arabes'), 'route' => 'arabic.series.index', 'active' => 'arabic.series.*', 'icon' => 'book'];
                 $navItems[] = ['type' => 'link', 'label' => __('Matières arabes'), 'route' => 'arabic.subjects.index', 'active' => 'arabic.subjects.*', 'icon' => 'book'];
                 $navItems[] = ['type' => 'link', 'label' => __('Informations générales'), 'route' => 'general-information.edit', 'active' => 'general-information.*', 'icon' => 'building'];
+                $navItems[] = ['type' => 'link', 'label' => __('Sauvegarde'), 'route' => 'backup.index', 'active' => 'backup.*', 'icon' => 'building'];
             }
 
             if (auth()->user()->isMainSaasAdmin()) {
