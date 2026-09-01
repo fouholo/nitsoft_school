@@ -36,8 +36,8 @@
                 <label class="block text-sm font-medium text-stone-700">{{ __('Type') }}</label>
                 <select wire:model.live="type" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
-                    @foreach ($types as $type)
-                        <option value="{{ $type->value }}">{{ $type->label() }}</option>
+                    @foreach ($types as $typeOption)
+                        <option value="{{ $typeOption->value }}">{{ $typeOption->label() }}</option>
                     @endforeach
                 </select>
                 @error('type') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror

@@ -56,6 +56,23 @@ test('un super admin peut créer un établissement rattaché à une fondation', 
     expect($establishment->foundation_id)->toBe($foundation->id);
 });
 
+test('le champ inspection ou direction s’affiche selon le type sélectionné', function () {
+    // Vérifie le rendu réel de la vue (assertSee), pas seulement la
+    // validation — un bug de shadowing de variable Blade (@foreach ($types
+    // as $type) qui écrasait la propriété $type du composant) était
+    // invisible aux tests qui ne vérifient que les erreurs de validation.
+    Livewire::test(Index::class)
+        ->call('create')
+        ->assertDontSee('wire:model="inspection_id"', false)
+        ->assertDontSee('wire:model="direction_id"', false)
+        ->set('type', EstablishmentType::PrescolairePrimaire->value)
+        ->assertSee('wire:model="inspection_id"', false)
+        ->assertDontSee('wire:model="direction_id"', false)
+        ->set('type', EstablishmentType::Secondaire->value)
+        ->assertDontSee('wire:model="inspection_id"', false)
+        ->assertSee('wire:model="direction_id"', false);
+});
+
 test('un établissement primaire nécessite une inspection', function () {
     Livewire::test(Index::class)
         ->call('create')
