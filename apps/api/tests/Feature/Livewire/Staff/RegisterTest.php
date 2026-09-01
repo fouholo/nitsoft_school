@@ -86,6 +86,83 @@ test('un fondateur qui s’inscrit sur une école d’un groupe devient GENERAL_
         ->and(EstablishmentUserPivot::where('user_id', $user->id)->exists())->toBeFalse();
 });
 
+test('un fondateur peut s’inscrire directement avec l’UID de la fondation', function () {
+    $foundation = Foundation::factory()->create();
+    Establishment::factory()->create(['foundation_id' => $foundation->id]);
+
+    Livewire::test(Register::class)
+        ->set('name', 'Fondateur Direct')
+        ->set('first_name', 'Alice')
+        ->set('email', 'fondateur.direct@nitsoft.test')
+        ->set('pseudo', 'afondateurdirect')
+        ->set('password', 'password123')
+        ->set('password_confirmation', 'password123')
+        ->set('uid', $foundation->uid_serveur)
+        ->set('role', 'fondateur')
+        ->call('register')
+        ->assertHasNoErrors()
+        ->assertRedirect(route('home'));
+
+    $user = User::where('email', 'fondateur.direct@nitsoft.test')->sole();
+    $pivot = FoundationUserPivot::where('foundation_id', $foundation->id)->where('user_id', $user->id)->sole();
+
+    expect($pivot->is_active)->toBeTrue()
+        ->and($pivot->is_general_admin)->toBeTrue();
+});
+
+test('un deuxième fondateur avec l’UID de la fondation reste en attente', function () {
+    $foundation = Foundation::factory()->create();
+    $establishment = Establishment::factory()->create(['foundation_id' => $foundation->id]);
+
+    Livewire::test(Register::class)
+        ->set('name', 'Premier')
+        ->set('first_name', 'Alice')
+        ->set('email', 'premier.groupe@nitsoft.test')
+        ->set('pseudo', 'apremiergroupe')
+        ->set('password', 'password123')
+        ->set('password_confirmation', 'password123')
+        ->set('uid', $establishment->uid_serveur)
+        ->set('role', 'fondateur')
+        ->call('register');
+
+    Livewire::test(Register::class)
+        ->set('name', 'Second')
+        ->set('first_name', 'Bob')
+        ->set('email', 'second.groupe@nitsoft.test')
+        ->set('pseudo', 'bsecondgroupe')
+        ->set('password', 'password123')
+        ->set('password_confirmation', 'password123')
+        ->set('uid', $foundation->uid_serveur)
+        ->set('role', 'fondateur')
+        ->call('register')
+        ->assertHasNoErrors()
+        ->assertSet('pendingApproval', true);
+
+    $user = User::where('email', 'second.groupe@nitsoft.test')->sole();
+    $pivot = FoundationUserPivot::where('foundation_id', $foundation->id)->where('user_id', $user->id)->sole();
+
+    expect($pivot->is_active)->toBeFalse()
+        ->and($pivot->is_general_admin)->toBeNull();
+});
+
+test('un directeur qui saisit l’UID d’une fondation est rejeté', function () {
+    $foundation = Foundation::factory()->create();
+
+    Livewire::test(Register::class)
+        ->set('name', 'Peu Importe')
+        ->set('first_name', 'Peu')
+        ->set('email', 'directeur.fondation@nitsoft.test')
+        ->set('pseudo', 'directeurfondation')
+        ->set('password', 'password123')
+        ->set('password_confirmation', 'password123')
+        ->set('uid', $foundation->uid_serveur)
+        ->set('role', 'directeur')
+        ->call('register')
+        ->assertHasErrors('uid');
+
+    expect(User::where('email', 'directeur.fondation@nitsoft.test')->exists())->toBeFalse();
+});
+
 test('un directeur qui s’inscrit sur une école sans LOCAL_ADMIN le devient et est connecté', function () {
     $establishment = Establishment::factory()->create();
 

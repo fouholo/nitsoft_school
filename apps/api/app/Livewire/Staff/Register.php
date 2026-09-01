@@ -49,10 +49,25 @@ class Register extends Component
             'role' => ['required', Rule::in(['fondateur', 'directeur', 'gestionnaire'])],
         ]);
 
+        // Un fondateur qui rejoint un groupe scolaire peut saisir directement
+        // l'UID de la fondation (préfixe 210, distinct du 211 des
+        // établissements) plutôt que celui d'un établissement du groupe.
+        if ($data['role'] === 'fondateur') {
+            $foundation = Foundation::where('uid_serveur', $data['uid'])->first();
+
+            if ($foundation !== null) {
+                [$user, $pendingApproval] = DB::transaction(fn () => $this->registerOnFoundation($data, $foundation));
+
+                $this->finalizeRegistration($user, $pendingApproval);
+
+                return;
+            }
+        }
+
         $establishment = Establishment::where('uid_serveur', $data['uid'])->first();
 
         if ($establishment === null) {
-            $this->addError('uid', __('Aucun établissement ne correspond à cet identifiant.'));
+            $this->addError('uid', __('Aucun établissement ni fondation ne correspond à cet identifiant.'));
 
             return;
         }
@@ -69,6 +84,11 @@ class Register extends Component
             return $this->registerOnEstablishment($data, $establishment, 'is_local_admin');
         });
 
+        $this->finalizeRegistration($user, $pendingApproval);
+    }
+
+    private function finalizeRegistration(User $user, bool $pendingApproval): void
+    {
         if ($pendingApproval) {
             $this->pendingApproval = true;
 

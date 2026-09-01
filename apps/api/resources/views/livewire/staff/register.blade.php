@@ -75,6 +75,9 @@
                     placeholder="{{ __('Ex : 000000001046') }}"
                     class="mt-1 block w-full rounded-lg border-stone-300 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm"
                 >
+                <p class="mt-1 text-xs text-stone-500">
+                    {{ __("Si vous êtes fondateur d'un groupe scolaire, vous pouvez saisir l'identifiant du groupe (fondation) plutôt que celui d'un établissement précis.") }}
+                </p>
                 @error('uid')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
