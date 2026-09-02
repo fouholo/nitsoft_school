@@ -16,6 +16,7 @@ use App\Domain\Grading\Models\Grade;
 use App\Domain\Grading\Models\GradeSheet;
 use App\Domain\Grading\Models\PrimaryGrade;
 use App\Domain\Grading\Services\ReportCardService;
+use Illuminate\Validation\ValidationException;
 
 function makeGradedStudent(Establishment $establishment, Classroom $classroom, Term $term, array $gradesBySheet): Student
 {
@@ -319,7 +320,11 @@ test('le détail par matière (primaire) affiche le nom de la matière du catalo
     $classroom = Classroom::factory()->primaire()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $column = PrimarySubject::coefficientColumn($classroom->level);
     $baremeColumn = PrimarySubject::baremeColumn($classroom->level);
-    $subject = PrimarySubject::factory()->create(['name' => 'Éveil scientifique', $column => 1, $baremeColumn => 20]);
+    $subject = PrimarySubject::factory()->create([
+        'subject_id' => Subject::factory()->create(['name' => 'Éveil scientifique', 'is_prescolaire_primaire' => true])->id,
+        $column => 1,
+        $baremeColumn => 20,
+    ]);
 
     $sheet = GradeSheet::factory()->create([
         'establishment_id' => $establishment->id,
@@ -351,8 +356,16 @@ test('primaryGradeRows() retourne les notes brutes triées par matière, sans le
     $classroom = Classroom::factory()->primaire()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
     $column = PrimarySubject::coefficientColumn($classroom->level);
     $baremeColumn = PrimarySubject::baremeColumn($classroom->level);
-    $maths = PrimarySubject::factory()->create(['name' => 'Mathématiques', $column => 1, $baremeColumn => 20]);
-    $francais = PrimarySubject::factory()->create(['name' => 'Français', $column => 1, $baremeColumn => 20]);
+    $maths = PrimarySubject::factory()->create([
+        'subject_id' => Subject::factory()->create(['name' => 'Mathématiques', 'is_prescolaire_primaire' => true])->id,
+        $column => 1,
+        $baremeColumn => 20,
+    ]);
+    $francais = PrimarySubject::factory()->create([
+        'subject_id' => Subject::factory()->create(['name' => 'Français', 'is_prescolaire_primaire' => true])->id,
+        $column => 1,
+        $baremeColumn => 20,
+    ]);
 
     $sheet = GradeSheet::factory()->create([
         'establishment_id' => $establishment->id,
@@ -368,7 +381,11 @@ test('primaryGradeRows() retourne les notes brutes triées par matière, sans le
     PrimaryGrade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $sheet->id, 'student_id' => $student->id, 'primary_subject_id' => $francais->id, 'score' => 12]);
     PrimaryGrade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $sheet->id, 'student_id' => $student->id, 'primary_subject_id' => $maths->id, 'score' => 18]);
     // Absence : score null, ne doit pas apparaître dans les lignes.
-    $anglais = PrimarySubject::factory()->create(['name' => 'Anglais', $column => 1, $baremeColumn => 20]);
+    $anglais = PrimarySubject::factory()->create([
+        'subject_id' => Subject::factory()->create(['name' => 'Anglais', 'is_prescolaire_primaire' => true])->id,
+        $column => 1,
+        $baremeColumn => 20,
+    ]);
     PrimaryGrade::factory()->create(['establishment_id' => $establishment->id, 'grade_sheet_id' => $sheet->id, 'student_id' => $student->id, 'primary_subject_id' => $anglais->id, 'score' => null, 'is_absent' => true]);
 
     $service = new ReportCardService;
@@ -447,5 +464,5 @@ test('la génération de bulletin est refusée pour une classe préscolaire', fu
     $term = Term::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
 
     expect(fn () => (new ReportCardService)->generateForClassroomAndTerm($classroom, $term))
-        ->toThrow(Illuminate\Validation\ValidationException::class);
+        ->toThrow(ValidationException::class);
 });

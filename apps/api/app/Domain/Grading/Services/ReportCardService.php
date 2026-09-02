@@ -15,6 +15,7 @@ use App\Domain\Grading\Models\Grade;
 use App\Domain\Grading\Models\PrimaryGrade;
 use App\Domain\Grading\Models\ReportCard;
 use App\Domain\Grading\ValueObjects\SubjectAverage;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 
@@ -55,7 +56,7 @@ class ReportCardService
     }
 
     /**
-     * @param  callable(\Illuminate\Contracts\Database\Query\Builder): \Illuminate\Contracts\Database\Query\Builder  $scopeGradeSheets
+     * @param  callable(Builder): Builder  $scopeGradeSheets
      * @param  array<string, int>  $reportCardKey  Clé (hors student_id) passée à updateOrCreate pour identifier le bulletin.
      * @return Collection<int, ReportCard>
      */
@@ -71,7 +72,7 @@ class ReportCardService
         // est commune à toutes les classes) : le filtrage par classe se fait
         // via l'inscription active de l'élève plutôt que via l'évaluation.
         $gradeRows = $classroom->level->cycle === Cycle::Primaire
-            ? PrimaryGrade::query()->with('primarySubject')
+            ? PrimaryGrade::query()->with('primarySubject.subject')
                 ->whereNotNull('score')
                 ->whereHas('gradeSheet', $scopeGradeSheets)
                 ->whereHas('student.enrollments', fn ($query) => $query->where('classroom_id', $classroom->id)->where('status', 'active'))
@@ -143,7 +144,7 @@ class ReportCardService
         // re-filtrer par classe (une composition est commune à toutes les
         // classes, et GradeSheet ne porte plus de classroom_id).
         $gradeRows = $classroom->level->cycle === Cycle::Primaire
-            ? PrimaryGrade::query()->with('primarySubject')
+            ? PrimaryGrade::query()->with('primarySubject.subject')
                 ->where('student_id', $reportCard->student_id)
                 ->whereNotNull('score')
                 ->whereHas('gradeSheet', fn ($query) => $query->where('composition_number', $reportCard->composition_number))
@@ -255,7 +256,7 @@ class ReportCardService
     public function primaryGradeRows(ReportCard $reportCard): Collection
     {
         return PrimaryGrade::query()
-            ->with('primarySubject')
+            ->with('primarySubject.subject')
             ->where('student_id', $reportCard->student_id)
             ->whereNotNull('score')
             ->whereHas('gradeSheet', fn ($query) => $query->where('composition_number', $reportCard->composition_number))
@@ -332,7 +333,7 @@ class ReportCardService
         }
 
         $names = $classroom->level->cycle === Cycle::Primaire
-            ? PrimarySubject::whereIn('id', $missing)->pluck('name')->implode(', ')
+            ? PrimarySubject::whereIn('id', $missing)->with('subject')->get()->pluck('name')->implode(', ')
             : Subject::whereIn('id', $missing)->pluck('name')->implode(', ');
         $serieSuffix = $classroom->serie ? ", série {$classroom->serie->serie_wording}" : '';
 

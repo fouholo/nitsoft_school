@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\PrimarySubject;
 use App\Domain\Academics\Models\SchoolYear;
+use App\Domain\Academics\Models\Subject;
 use App\Domain\Academics\Models\TeacherAssignment;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
@@ -50,8 +51,16 @@ beforeEach(function () {
 
     $column = PrimarySubject::coefficientColumn($this->classroom->level);
     $baremeColumn = PrimarySubject::baremeColumn($this->classroom->level);
-    $this->maths = PrimarySubject::factory()->create(['name' => 'Mathématiques', $column => 4, $baremeColumn => 20]);
-    $this->francais = PrimarySubject::factory()->create(['name' => 'Français', $column => 1, $baremeColumn => 10]);
+    $this->maths = PrimarySubject::factory()->create([
+        'subject_id' => Subject::factory()->create(['name' => 'Mathématiques', 'is_prescolaire_primaire' => true])->id,
+        $column => 4,
+        $baremeColumn => 20,
+    ]);
+    $this->francais = PrimarySubject::factory()->create([
+        'subject_id' => Subject::factory()->create(['name' => 'Français', 'is_prescolaire_primaire' => true])->id,
+        $column => 1,
+        $baremeColumn => 10,
+    ]);
 
     AppreciationScale::factory()->create(['percentage' => 80, 'appreciation' => 'Très bien']);
     AppreciationScale::factory()->create(['percentage' => 0, 'appreciation' => 'Insuffisant']);
@@ -227,7 +236,11 @@ test('pour un niveau CP1/CP2/CE1, la moyenne, le seuil de réussite et l’appr�
 
     $column = PrimarySubject::coefficientColumn($classroom->level);
     $baremeColumn = PrimarySubject::baremeColumn($classroom->level);
-    $maths = PrimarySubject::factory()->create(['name' => 'Mathématiques', $column => 1, $baremeColumn => 20]);
+    $maths = PrimarySubject::factory()->create([
+        'subject_id' => Subject::factory()->create(['name' => 'Mathématiques', 'is_prescolaire_primaire' => true])->id,
+        $column => 1,
+        $baremeColumn => 20,
+    ]);
 
     // AppreciationScale 80 % → « Très bien » déjà créée dans le beforeEach.
     // 16/20 normalisé, ramené sur 10 → moyenne 8/10, 80 % → « Très bien ».
@@ -262,7 +275,11 @@ test('le total affiché n’est pas doublé quand le barème de la matière est 
     $column = PrimarySubject::coefficientColumn($classroom->level);
     $baremeColumn = PrimarySubject::baremeColumn($classroom->level);
     // Barème déjà sur 10, comme l'échelle de la composition à ce niveau.
-    $maths = PrimarySubject::factory()->create(['name' => 'Mathématiques', $column => 1, $baremeColumn => 10]);
+    $maths = PrimarySubject::factory()->create([
+        'subject_id' => Subject::factory()->create(['name' => 'Mathématiques', 'is_prescolaire_primaire' => true])->id,
+        $column => 1,
+        $baremeColumn => 10,
+    ]);
 
     $preview = Livewire::test(EnterStudent::class, ['gradeSheet' => $this->gradeSheet, 'student' => $student])
         ->set("scores.{$maths->id}", '8')

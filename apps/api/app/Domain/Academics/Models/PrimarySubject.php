@@ -5,10 +5,16 @@ declare(strict_types=1);
 namespace App\Domain\Academics\Models;
 
 use App\Domain\Sync\Concerns\Syncable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property-read string $name
+ * @property-read string $abbreviation
+ */
 class PrimarySubject extends Model
 {
     use HasFactory;
@@ -16,8 +22,7 @@ class PrimarySubject extends Model
     use Syncable;
 
     protected $fillable = [
-        'name',
-        'abbreviation',
+        'subject_id',
         'coefficient_cp1',
         'coefficient_cp2',
         'coefficient_ce1',
@@ -55,6 +60,29 @@ class PrimarySubject extends Model
     protected static function uidPrefix(): string
     {
         return '224';
+    }
+
+    /**
+     * @return BelongsTo<Subject, $this>
+     */
+    public function subject(): BelongsTo
+    {
+        return $this->belongsTo(Subject::class);
+    }
+
+    /**
+     * Nom et abréviation ne sont plus saisis directement : ils proviennent
+     * de la matière (subjects) rattachée, sélectionnée dans une liste
+     * déroulante plutôt que retapés en double.
+     */
+    protected function name(): Attribute
+    {
+        return Attribute::make(get: fn (): string => $this->subject->name);
+    }
+
+    protected function abbreviation(): Attribute
+    {
+        return Attribute::make(get: fn (): string => $this->subject->abbreviation);
     }
 
     private static function levelSuffix(Level $level): string

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Livewire\Academics\PrimarySubjects;
 
 use App\Domain\Academics\Models\PrimarySubject;
+use App\Domain\Academics\Models\Subject;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -15,9 +17,7 @@ class Index extends Component
 
     public ?int $editingId = null;
 
-    public string $name = '';
-
-    public string $abbreviation = '';
+    public ?int $subject_id = null;
 
     public ?string $coefficient_cp1 = null;
 
@@ -63,8 +63,7 @@ class Index extends Component
         $this->authorize('update', $primarySubject);
 
         $this->editingId = $primarySubject->id;
-        $this->name = $primarySubject->name;
-        $this->abbreviation = $primarySubject->abbreviation;
+        $this->subject_id = $primarySubject->subject_id;
         $this->coefficient_cp1 = $primarySubject->coefficient_cp1;
         $this->coefficient_cp2 = $primarySubject->coefficient_cp2;
         $this->coefficient_ce1 = $primarySubject->coefficient_ce1;
@@ -83,8 +82,7 @@ class Index extends Component
     public function save(): void
     {
         $data = $this->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'abbreviation' => ['required', 'string', 'max:10'],
+            'subject_id' => ['required', 'integer', 'exists:subjects,id', Rule::unique('primary_subjects', 'subject_id')->ignore($this->editingId)],
             'coefficient_cp1' => ['nullable', 'numeric', 'min:0.5', 'max:20'],
             'coefficient_cp2' => ['nullable', 'numeric', 'min:0.5', 'max:20'],
             'coefficient_ce1' => ['nullable', 'numeric', 'min:0.5', 'max:20'],
@@ -133,8 +131,7 @@ class Index extends Component
     {
         $this->reset([
             'editingId',
-            'name',
-            'abbreviation',
+            'subject_id',
             'coefficient_cp1',
             'coefficient_cp2',
             'coefficient_ce1',
@@ -152,8 +149,15 @@ class Index extends Component
 
     public function render()
     {
+        $usedSubjectIds = PrimarySubject::when($this->editingId, fn ($query) => $query->whereKeyNot($this->editingId))
+            ->pluck('subject_id');
+
         return view('livewire.academics.primary-subjects.index', [
-            'primarySubjects' => PrimarySubject::orderBy('name')->get(),
+            'primarySubjects' => PrimarySubject::with('subject')->get()->sortBy('name')->values(),
+            'subjects' => Subject::where('is_prescolaire_primaire', true)
+                ->whereNotIn('id', $usedSubjectIds)
+                ->orderBy('name')
+                ->get(),
         ])->title(__('Matières du primaire'));
     }
 }

@@ -5,10 +5,12 @@ declare(strict_types=1);
 use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\PrimarySubject;
 use App\Domain\Academics\Models\SchoolYear;
+use App\Domain\Academics\Models\Subject;
 use App\Domain\Academics\Models\TeacherAssignment;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Models\Establishment;
+use App\Domain\Establishments\Models\GeneralInformation;
 use App\Domain\Grading\Models\AppreciationScale;
 use App\Domain\Grading\Models\GradeSheet;
 use App\Domain\Grading\Models\PrimaryGrade;
@@ -33,8 +35,16 @@ function makePrimaireReportCard(Establishment $establishment, array $studentOver
 
     $column = PrimarySubject::coefficientColumn($classroom->level);
     $baremeColumn = PrimarySubject::baremeColumn($classroom->level);
-    $maths = PrimarySubject::factory()->create(['name' => 'Mathématiques', $column => 2.5, $baremeColumn => 50]);
-    $francais = PrimarySubject::factory()->create(['name' => 'Dictée', $column => 1, $baremeColumn => 20]);
+    $maths = PrimarySubject::factory()->create([
+        'subject_id' => Subject::factory()->create(['name' => 'Mathématiques', 'is_prescolaire_primaire' => true])->id,
+        $column => 2.5,
+        $baremeColumn => 50,
+    ]);
+    $francais = PrimarySubject::factory()->create([
+        'subject_id' => Subject::factory()->create(['name' => 'Dictée', 'is_prescolaire_primaire' => true])->id,
+        $column => 1,
+        $baremeColumn => 20,
+    ]);
 
     $gradeSheet = GradeSheet::factory()->create([
         'establishment_id' => $establishment->id,
@@ -89,7 +99,7 @@ test('l’en-tête n’affiche pas de texte République, seulement le logo à ga
     $reportCard = makePrimaireReportCard($establishment);
     $reportCard->loadMissing(['student', 'classroom.level', 'establishment']);
 
-    $generalInformation = \App\Domain\Establishments\Models\GeneralInformation::current();
+    $generalInformation = GeneralInformation::current();
     $generalInformation->update(['armoirie_path' => 'general-information/armoirie.png']);
 
     $html = view('pdf.report-card-primaire', [
@@ -117,7 +127,7 @@ test('la civilité et le résultat s’accordent au genre de l’élève', funct
     $html = view('pdf.report-card-primaire', [
         'reportCard' => $reportCard,
         'rows' => app(ReportCardService::class)->primaryGradeRows($reportCard),
-        'generalInformation' => \App\Domain\Establishments\Models\GeneralInformation::current(),
+        'generalInformation' => GeneralInformation::current(),
     ])->render();
 
     expect($html)->toContain(e($expectedCivilite))
@@ -138,7 +148,7 @@ test('le tableau des notes affiche la note/barème brut et une appréciation par
     $html = view('pdf.report-card-primaire', [
         'reportCard' => $reportCard,
         'rows' => app(ReportCardService::class)->primaryGradeRows($reportCard),
-        'generalInformation' => \App\Domain\Establishments\Models\GeneralInformation::current(),
+        'generalInformation' => GeneralInformation::current(),
     ])->render();
 
     // Mathématiques 46/50 (92 % → Excellent), Dictée 16/20 (80 % → Très bien).
@@ -161,7 +171,7 @@ test('le visa maître(sse) est vide quand aucun enseignant n’est affecté à l
     $html = view('pdf.report-card-primaire', [
         'reportCard' => $reportCard,
         'rows' => app(ReportCardService::class)->primaryGradeRows($reportCard),
-        'generalInformation' => \App\Domain\Establishments\Models\GeneralInformation::current(),
+        'generalInformation' => GeneralInformation::current(),
     ])->render();
 
     expect($html)->toContain('Visa maître(sse)');
@@ -187,7 +197,7 @@ test('le visa maître(sse) affiche l’enseignant affecté à la classe entière
     $html = view('pdf.report-card-primaire', [
         'reportCard' => $reportCard,
         'rows' => app(ReportCardService::class)->primaryGradeRows($reportCard),
-        'generalInformation' => \App\Domain\Establishments\Models\GeneralInformation::current(),
+        'generalInformation' => GeneralInformation::current(),
     ])->render();
 
     expect($html)->toContain(e($teacher->name));
@@ -204,7 +214,7 @@ test('le visa directeur(trice) affiche le nom du directeur de l’établissement
     $html = view('pdf.report-card-primaire', [
         'reportCard' => $reportCard,
         'rows' => app(ReportCardService::class)->primaryGradeRows($reportCard),
-        'generalInformation' => \App\Domain\Establishments\Models\GeneralInformation::current(),
+        'generalInformation' => GeneralInformation::current(),
     ])->render();
 
     expect($html)->toContain(e($director->name));

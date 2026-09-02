@@ -101,7 +101,7 @@ class EnterStudent extends Component
     {
         $column = PrimarySubject::coefficientColumn($this->classroom->level);
 
-        return PrimarySubject::whereNotNull($column)->orderBy('name')->get();
+        return PrimarySubject::whereNotNull($column)->with('subject')->get()->sortBy('name')->values();
     }
 
     /**
