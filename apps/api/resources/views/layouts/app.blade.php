@@ -115,6 +115,7 @@
                 $navItems[] = ['type' => 'link', 'label' => __('Directions'), 'route' => 'directions.index', 'active' => 'directions.*', 'icon' => 'building'];
                 $navItems[] = ['type' => 'link', 'label' => __('Années scolaires'), 'route' => 'academics.school-years.index', 'active' => 'academics.school-years.*', 'icon' => 'book'];
                 $navItems[] = ['type' => 'link', 'label' => __('Niveaux'), 'route' => 'academics.levels.index', 'active' => 'academics.levels.*', 'icon' => 'book'];
+                $navItems[] = ['type' => 'link', 'label' => __('Séries'), 'route' => 'academics.series.index', 'active' => 'academics.series.*', 'icon' => 'book'];
                 $navItems[] = ['type' => 'link', 'label' => __('Matières'), 'route' => 'academics.subjects.index', 'active' => 'academics.subjects.*', 'icon' => 'book'];
                 $navItems[] = ['type' => 'link', 'label' => __('Matières du primaire'), 'route' => 'academics.primary-subjects.index', 'active' => 'academics.primary-subjects.*', 'icon' => 'book'];
                 $navItems[] = ['type' => 'link', 'label' => __("Barème d'appréciations"), 'route' => 'academics.appreciation-scales.index', 'active' => 'academics.appreciation-scales.*', 'icon' => 'book'];
