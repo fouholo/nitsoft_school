@@ -24,7 +24,7 @@
 
             <div>
                 <label class="block text-sm font-medium text-stone-700">{{ __('Classe') }}</label>
-                <select wire:model="classroom_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <select wire:model.live="classroom_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
                     @foreach ($classrooms as $classroom)
                         <option value="{{ $classroom->id }}">{{ $classroom->name }}</option>
