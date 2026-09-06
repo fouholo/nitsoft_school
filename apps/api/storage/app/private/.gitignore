@@ -1,2 +1,8 @@
 *
 !.gitignore
+
+# Manuels d'utilisation : livrables statiques versionnés (pas des uploads
+# utilisateur), nécessaires au fonctionnement de StaffManualPdfController /
+# GuardianManualPdfController — voir docs/superpowers/specs/2026-09-06-acces-manuel-utilisation-design.md
+!manuals
+!manuals/**

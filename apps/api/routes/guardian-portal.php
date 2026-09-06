@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\GuardianManualPdfController;
 use App\Livewire\GuardianPortal\Dashboard as GuardianDashboard;
 use App\Livewire\GuardianPortal\LinkChild;
 use App\Livewire\GuardianPortal\StudentAttendance;
@@ -15,4 +16,5 @@ Route::prefix('portal')->name('guardian-portal.')->group(function (): void {
     Route::get('/students/{student}/grades', StudentGrades::class)->name('students.grades');
     Route::get('/students/{student}/attendance', StudentAttendance::class)->name('students.attendance');
     Route::get('/students/{student}/billing', StudentBilling::class)->name('students.billing');
+    Route::get('/manuel-utilisation', GuardianManualPdfController::class)->name('manual');
 });

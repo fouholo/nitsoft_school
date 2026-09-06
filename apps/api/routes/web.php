@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Auth\LogoutController;
+use App\Http\Controllers\StaffManualPdfController;
 use App\Livewire\Account\ChangePassword;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
@@ -51,6 +52,7 @@ Route::middleware('auth')->group(function (): void {
 
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
     Route::get('/mon-compte/mot-de-passe', ChangePassword::class)->name('account.password.edit');
+    Route::get('/manuel-utilisation', StaffManualPdfController::class)->name('manual.staff');
 
     require __DIR__.'/academics.php';
     require __DIR__.'/arabic.php';

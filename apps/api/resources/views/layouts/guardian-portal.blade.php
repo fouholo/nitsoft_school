@@ -24,6 +24,10 @@
                         {{ __('Lier un enfant') }}
                     </a>
 
+                    <a href="{{ route('guardian-portal.manual') }}" target="_blank" class="text-sm text-stone-500 hover:text-stone-900">
+                        {{ __('Manuel d\'utilisation') }}
+                    </a>
+
                     <a href="{{ route('account.password.edit') }}" wire:navigate class="text-sm text-stone-500 hover:text-stone-900">
                         {{ __('Mot de passe') }}
                     </a>

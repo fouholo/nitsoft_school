@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Manuel d'utilisation du personnel — Nitsoft School</title>
+<style>
+  @page { size: A4; margin: 22mm 18mm 20mm 18mm; }
+
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: #1c1917;
+    font-size: 11pt;
+    line-height: 1.5;
+    margin: 0;
+  }
+  h1, h2, h3 { color: #7c2d12; font-family: Georgia, "Times New Roman", serif; }
+  h1 { font-size: 20pt; border-bottom: 3px solid #c2410c; padding-bottom: 6px; margin-top: 0; page-break-before: always; }
+  h1:first-of-type { page-break-before: avoid; }
+  h2 { font-size: 14pt; margin-top: 22px; border-left: 5px solid #ea580c; padding-left: 10px; }
+  h3 { font-size: 11.5pt; color: #9a3412; margin-bottom: 4px; }
+  p { margin: 6px 0; text-align: justify; }
+  ol, ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 3px 0; }
+  .label { background: #fff7ed; border: 1px solid #fdba74; border-radius: 4px; padding: 0 5px; font-weight: 600; color: #9a3412; font-size: 0.95em; white-space: nowrap; }
+  .role { background: #f0f9ff; border: 1px solid #93c5fd; border-radius: 4px; padding: 0 5px; font-weight: 600; color: #1e40af; font-size: 0.95em; }
+  .note {
+    background: #fffbeb; border-left: 4px solid #f59e0b; padding: 8px 12px; margin: 10px 0; border-radius: 0 4px 4px 0; font-size: 0.95em;
+  }
+  .warn {
+    background: #fef2f2; border-left: 4px solid #dc2626; padding: 8px 12px; margin: 10px 0; border-radius: 0 4px 4px 0; font-size: 0.95em;
+  }
+  .locked {
+    background: #f5f5f4; border-left: 4px solid #78716c; padding: 8px 12px; margin: 10px 0; border-radius: 0 4px 4px 0; font-size: 0.95em; color: #44403c;
+  }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.92em; }
+  th, td { border: 1px solid #d6d3d1; padding: 5px 8px; text-align: left; vertical-align: top; }
+  th { background: #f5f5f4; color: #44403c; }
+  .steps { counter-reset: step; list-style: none; padding-left: 0; }
+  .steps li { counter-increment: step; margin: 8px 0; padding-left: 34px; position: relative; }
+  .steps li::before {
+    content: counter(step); position: absolute; left: 0; top: -1px;
+    background: #c2410c; color: white; width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 0.85em; font-weight: bold;
+  }
+  .toc a { color: #1c1917; text-decoration: none; }
+  .toc-item { display: flex; justify-content: space-between; border-bottom: 1px dotted #d6d3d1; padding: 3px 0; }
+  .cover { page-break-before: avoid; text-align: center; padding-top: 90mm; }
+  .cover h1 { border: none; font-size: 30pt; color: #7c2d12; margin-bottom: 6px; page-break-before: avoid; }
+  .cover .sub { font-size: 13pt; color: #78716c; margin-top: 0; }
+  .cover .tag { margin-top: 60px; font-size: 10pt; color: #a8a29e; }
+  .avatar-legend { font-size: 0.85em; color: #78716c; }
+</style>
+</head>
+<body>
+
+<!-- ============ COUVERTURE ============ -->
+<section class="cover">
+  <h1>Nitsoft&nbsp;School</h1>
+  <p class="sub">Manuel d'utilisation</p>
+  <p class="sub">Personnel d'établissement</p>
+  <p class="tag">Document de référence — à conserver par l'établissement.<br>Les captures d'écran ne figurent pas dans cette version ; les libellés exacts des écrans sont cités entre guillemets.</p>
+</section>
+
+<!-- ============ SOMMAIRE ============ -->
+<h1 id="sommaire">Sommaire</h1>
+<div class="toc">
+  <div class="toc-item"><a href="#ch1">1. Prise en main</a></div>
+  <div class="toc-item"><a href="#ch2">2. Gérer le personnel de l'établissement</a></div>
+  <div class="toc-item"><a href="#ch3">3. Élèves et inscriptions</a></div>
+  <div class="toc-item"><a href="#ch4">4. Tuteurs</a></div>
+  <div class="toc-item"><a href="#ch5">5. Emplois du temps</a></div>
+  <div class="toc-item"><a href="#ch6">6. Présences (l'appel)</a></div>
+  <div class="toc-item"><a href="#ch7">7. Notes et bulletins</a></div>
+  <div class="toc-item"><a href="#ch8">8. Classes, niveaux et années scolaires</a></div>
+  <div class="toc-item"><a href="#ch9">9. Facturation</a></div>
+  <div class="toc-item"><a href="#ch10">10. Communication (SMS et messagerie)</a></div>
+  <div class="toc-item"><a href="#ch11">11. Listes et rapports (documents PDF)</a></div>
+  <div class="toc-item"><a href="#ch12">12. Annexe — qui a le droit de faire quoi ?</a></div>
+</div>
+
+<!-- ============ CHAPITRE 1 ============ -->
+<h1 id="ch1">1. Prise en main</h1>
+
+<h2>1.1 Se connecter</h2>
+<p>Ouvrez la page de connexion de votre établissement. Deux champs sont demandés :</p>
+<ul>
+  <li><span class="label">Email ou pseudo</span> — votre adresse e-mail ou l'identifiant court (pseudo) qui vous a été communiqué.</li>
+  <li><span class="label">Mot de passe</span></li>
+</ul>
+<p>Cochez <span class="label">Se souvenir de moi</span> si vous vous connectez depuis un poste personnel, puis cliquez sur <span class="label">Se connecter</span>. Si vos identifiants sont refusés, vérifiez l'orthographe ou contactez la personne qui a créé votre compte (votre direction) pour réinitialiser votre mot de passe.</p>
+<p>Un compte fraîchement créé reçoit un <strong>mot de passe par défaut</strong>, affiché une seule fois à la création par la personne qui l'a créé. Changez-le dès votre première connexion depuis le menu <span class="label">Mot de passe</span>, visible en bas de l'écran à côté de votre nom.</p>
+
+<h2>1.2 Le tableau de bord et le menu</h2>
+<p>Après connexion, vous arrivez sur le <strong>Tableau de bord</strong> : indicateurs rapides (élèves actifs, classes, factures en attente, encaissements du mois) et raccourcis vers les tâches courantes. Le menu de gauche est organisé en groupes (Académique, Notes, Facturation, SMS, etc.) — son contenu s'adapte automatiquement à votre rôle : un lien que vous ne voyez pas dans votre menu est un lien auquel vous n'avez tout simplement pas accès, ce n'est pas une erreur.</p>
+<p>Un champ de recherche par <strong>code élève</strong> (12 chiffres) est disponible sur le tableau de bord pour retrouver rapidement une fiche.</p>
+
+<h2>1.3 Changer d'établissement</h2>
+<p>Si vous avez accès à plusieurs établissements (cas d'un fondateur de groupe scolaire), un sélecteur apparaît en haut de l'écran avec le nom de l'établissement courant (ou <span class="label">Choisir un établissement</span> si aucun n'est encore sélectionné). Cliquez dessus pour dérouler la liste et choisir l'établissement dans lequel vous voulez travailler — tout ce que vous voyez ensuite (élèves, classes, factures…) se recharge pour cet établissement uniquement.</p>
+
+<h2>1.4 Les rôles du personnel</h2>
+<p>Chaque personne rattachée à un établissement porte un rôle, qui détermine ce qu'elle peut voir et modifier :</p>
+<table>
+  <tr><th>Rôle</th><th>Vue d'ensemble</th></tr>
+  <tr><td class="role">Fondateur</td><td>Accès complet à tous les établissements de son groupe scolaire (fondation). Peut créer des établissements, nommer des directeurs.</td></tr>
+  <tr><td class="role">Directeur</td><td>Accès complet à son établissement : personnel, élèves, notes, présences, facturation.</td></tr>
+  <tr><td class="role">Gestionnaire</td><td>Mêmes droits académiques et administratifs qu'un directeur sur l'établissement, hors gestion fine du personnel dans certains cas.</td></tr>
+  <tr><td class="role">Éducateur</td><td>Droits élargis sur les notes, présences, coefficients et une partie de la facturation — un rôle pédagogique et administratif de terrain.</td></tr>
+  <tr><td class="role">Caissier</td><td>Facturation et paiements ; consultation des tuteurs ; peut envoyer des SMS. Pas d'accès aux notes ni à la gestion des élèves/tuteurs.</td></tr>
+  <tr><td class="role">Enseignant</td><td>Accès limité aux classes et matières qui lui sont affectées : saisie des notes, appel, consultation de son propre emploi du temps.</td></tr>
+  <tr><td class="role">Parent</td><td>Accès à un portail séparé (voir le manuel dédié aux parents), limité aux enfants qui lui sont liés et approuvés.</td></tr>
+</table>
+<p>Le détail complet, écran par écran, figure en annexe (chapitre 12).</p>
+
+<!-- ============ CHAPITRE 2 ============ -->
+<h1 id="ch2">2. Gérer le personnel de l'établissement</h1>
+
+<h2>2.1 « Mon établissement » — un directeur d'un établissement unique</h2>
+<p>Le lien <span class="label">Mon établissement</span> (visible pour un directeur/gestionnaire local) ouvre la liste du personnel : nom, rôle, statut (« Actif » / « En attente / Inactif »), et une action « Désactiver »/« Activer » par ligne (impossible sur votre propre compte).</p>
+<ol class="steps">
+  <li>Cliquez sur <span class="label">Créer un compte</span>.</li>
+  <li>Renseignez Prénom, Nom, E-mail, Pseudo.</li>
+  <li>Choisissez le <span class="label">Rôle</span> : Gestionnaire, Enseignant, Caissier ou Éducateur.</li>
+  <li>Cliquez sur <span class="label">Créer le compte</span> — le mot de passe par défaut s'affiche une seule fois : transmettez-le à la personne concernée et invitez-la à le changer dès sa première connexion.</li>
+</ol>
+<div class="note">Le rôle <strong>Directeur</strong> ne se crée pas depuis cet écran : il est nommé par un fondateur depuis « Mon organisation » (voir 2.2).</div>
+
+<h2>2.2 « Mon organisation » — un fondateur avec plusieurs établissements</h2>
+<p>Un fondateur voit en plus <span class="label">Mon organisation</span>, qui couvre tous les établissements du groupe. En plus des rôles du §2.1, on peut y créer un <strong>Directeur</strong>, activer/désactiver/supprimer un membre, nommer ou révoquer un « directeur local » habilité à gérer le personnel de son école, et créer un nouvel établissement dans le groupe.</p>
+
+<h2>2.3 La fiche personnel</h2>
+<p>Chaque membre du personnel peut compléter ses propres informations civiles (genre, date/lieu de naissance, nationalité, ville, photo) depuis sa fiche. Les informations professionnelles (matricule, poste, date d'embauche, niveau d'études) ne sont modifiables que par un administrateur d'établissement.</p>
+
+<h2>2.4 Affecter un enseignant à une classe et une matière</h2>
+<p>Avant qu'un enseignant puisse saisir des notes ou apparaître dans un emploi du temps, il doit être <strong>affecté</strong> : menu <span class="label">Affectations</span> (groupe Académique).</p>
+<ol class="steps">
+  <li>Cliquez sur <span class="label">Nouvelle affectation</span>.</li>
+  <li>Choisissez l'<span class="label">Enseignant</span>, la <span class="label">Classe</span>, puis la <span class="label">Matière</span> (uniquement demandée pour une classe de secondaire — au primaire un enseignant est généraliste).</li>
+  <li>Vérifiez l'<span class="label">Année scolaire</span> puis <span class="label">Enregistrer</span>.</li>
+</ol>
+<p>Une affectation se retire avec le bouton <span class="label">Retirer</span> de la liste (confirmation demandée).</p>
+
+<!-- ============ CHAPITRE 3 ============ -->
+<h1 id="ch3">3. Élèves et inscriptions</h1>
+
+<h2>3.1 Créer un élève</h2>
+<p>Depuis <span class="label">Élèves</span>, cliquez sur <span class="label">Nouvel élève</span>. Le formulaire se déroule en trois étapes :</p>
+<h3>Étape 1 — Identité</h3>
+<p>Nom, Prénom (obligatoires), Matricule, Genre, Date et lieu de naissance, et une <strong>Photo</strong> (formats jpg/png/webp/gif, 100&nbsp;Ko maximum).</p>
+<h3>Étape 2 — Acte de naissance et nationalité</h3>
+<p>Nationalité, numéro/date/lieu de l'acte de naissance, résidence.</p>
+<h3>Étape 3 — Contacts familiaux</h3>
+<p>Trois blocs Père / Mère / Tuteur (nom, téléphone), avec une case <span class="label">Contact principal</span> (un seul des trois). Cocher <span class="label">Créer et lier un compte</span> crée en plus un accès au portail parents pour cette personne (adresse e-mail alors obligatoire) — voir chapitre 4 pour la différence entre ce contact de référence et un tuteur formellement lié.</p>
+<p>Naviguez avec <span class="label">Suivant</span>/<span class="label">Précédent</span>, puis <span class="label">Enregistrer</span> à la dernière étape.</p>
+
+<h2>3.2 La fiche élève</h2>
+<p>Elle regroupe : la photo et l'identité en en-tête, la classe actuelle et la situation financière résumée, les informations d'identité complètes, les contacts familiaux de référence saisis à la création, et la liste des <strong>tuteurs formellement liés</strong> (bouton <span class="label">Lier un tuteur</span> — voir §4.1).</p>
+<div class="note">Le code à 12 chiffres qui identifie l'élève (utilisé pour la recherche rapide et pour la liaison parent) n'est pas saisi à la main : il est attribué automatiquement par le système.</div>
+
+<h2>3.3 Inscrire un élève dans une classe</h2>
+<p>Depuis la fiche élève, cliquez sur <span class="label">Nouvelle inscription</span>.</p>
+<ol class="steps">
+  <li>Choisissez la <span class="label">Classe</span> et l'<span class="label">Année scolaire</span> (pré-remplie sur l'année en cours).</li>
+  <li>Renseignez la <span class="label">Date d'inscription</span>.</li>
+  <li>Pour une classe de secondaire uniquement : cochez le cas échéant Redoublant, Boursier, Internat, Affecté(e).</li>
+  <li><span class="label">Enregistrer</span> — les frais standards du niveau sont appliqués automatiquement à l'inscription (modifiables ensuite, voir §9.2).</li>
+</ol>
+<p>Une inscription se retire avec <span class="label">Retirer</span> (elle passe au statut « Retiré », rien n'est supprimé).</p>
+
+<!-- ============ CHAPITRE 4 ============ -->
+<h1 id="ch4">4. Tuteurs</h1>
+<p class="note">Le fonctionnement du portail parents (inscription, liaison à un enfant, consultation des notes/présences/facturation) fait l'objet d'un manuel séparé, destiné aux familles — voir le « Manuel d'utilisation — Portail parents ».</p>
+
+<h2>4.1 Créer un tuteur et le lier à un élève</h2>
+<p>Menu <span class="label">Tuteurs</span> → <span class="label">Nouveau tuteur</span> : Prénom, Nom, Téléphone, E-mail. Cocher <span class="label">Créer un compte d'accès au portail parents</span> si vous voulez lui donner immédiatement un accès (nécessite un e-mail).</p>
+<div class="note">Un tuteur qui vient d'être créé <strong>n'apparaît pas encore dans la liste</strong> — il n'y apparaîtra qu'une fois lié à au moins un élève. Pour le lier : ouvrez la <strong>fiche de l'élève concerné</strong> et utilisez <span class="label">Lier un tuteur</span> pour le rechercher, choisir son rôle (Père/Mère/Tuteur) et, si besoin, cocher <span class="label">Contact principal</span> (celui qui reçoit les SMS, un seul par élève et par rôle).</div>
+
+<h2>4.2 Valider les demandes de liaison</h2>
+<p>Menu <span class="label">Demandes de liaison</span> (personnel administratif uniquement) : chaque demande affiche un indicateur de <strong>vérification</strong> qui compare le nom/téléphone déclaré par le parent aux contacts familiaux de référence saisis sur la fiche élève (§3.1, étape 3) — badge « Correspond », « Ne correspond pas » ou « Invérifiable » si aucune référence n'existe. Utilisez ce repère avant de cliquer <span class="label">Approuver</span> ou <span class="label">Rejeter</span>.</p>
+<div class="warn">Si le rôle demandé (ex. « Père ») est déjà occupé par un autre parent approuvé pour cet élève, un badge « Déjà pourvu » s'affiche : approuver la nouvelle demande remplace automatiquement l'ancien titulaire de ce rôle.</div>
+
+<!-- ============ CHAPITRE 5 ============ -->
+<h1 id="ch5">5. Emplois du temps</h1>
+<p class="locked">Fonctionnalité réservée au <strong>secondaire</strong> — le préscolaire/primaire n'a pas d'emploi du temps formel dans l'application (un enseignant y est généraliste sur toute sa classe).</p>
+
+<h2>5.1 Configurer la grille de créneaux</h2>
+<p>Avant toute chose, définissez une fois les créneaux horaires de l'établissement : menu <span class="label">Grille de créneaux</span> (groupe Académique) → <span class="label">Nouveau créneau</span> : Libellé, Heure de début, Heure de fin, Ordre, et une case <span class="label">Pause / récréation</span> pour les créneaux non enseignés (affichés dans la grille mais non sélectionnables pour une séance).</p>
+
+<h2>5.2 Construire l'emploi du temps d'une classe</h2>
+<p>Menu <span class="label">Emplois du temps</span> → onglet <strong>Classes</strong> → choisissez une classe secondaire de l'année en cours. La grille croise les jours (lundi à vendredi) et les créneaux. Cliquez sur une case vide pour y placer une séance : le formulaire ne propose que les couples enseignant/matière déjà <strong>affectés</strong> à cette classe (§2.4). Une salle peut être renseignée librement. Le système refuse automatiquement une séance si la classe, l'enseignant ou la salle est déjà pris sur ce créneau.</p>
+
+<h2>5.3 Consulter les emplois du temps</h2>
+<ul>
+  <li><span class="label">Emplois du temps</span> (onglet <strong>Enseignants</strong>) : pour le personnel administratif, grille en lecture seule de n'importe quel enseignant actif.</li>
+  <li><span class="label">Mon emploi du temps</span> : chacun (y compris un enseignant) y retrouve ses propres séances.</li>
+  <li>Un bouton <span class="label">Télécharger en PDF</span> est disponible sur chaque grille.</li>
+</ul>
+
+<!-- ============ CHAPITRE 6 ============ -->
+<h1 id="ch6">6. Présences (l'appel)</h1>
+
+<h2>6.1 Faire l'appel depuis l'emploi du temps (secondaire)</h2>
+<p>Sur l'écran <span class="label">Présences</span>, un enseignant secondaire voit en tête de page <strong>« Mes séances du jour »</strong> — la liste de ses séances prévues aujourd'hui d'après l'emploi du temps (chapitre 5), classe/matière/heure déjà renseignées. Cliquez sur <span class="label">Faire l'appel</span> pour l'ouvrir directement ; si l'appel a déjà été fait aujourd'hui pour cette séance, le bouton devient <span class="label">Modifier l'appel</span> — pas de doublon possible. Le personnel administratif voit la même liste élargie à tout l'établissement (« Séances du jour »), avec le nom de l'enseignant.</p>
+
+<h2>6.2 Faire un appel « libre »</h2>
+<p>Pour le préscolaire/primaire (pas d'emploi du temps), ou pour un cas exceptionnel au secondaire (rattrapage, remplacement imprévu), le bouton <span class="label">Nouvel appel</span> reste disponible : choisissez Classe, Matière (facultative), Date et Heure à la main.</p>
+<p>Dans l'écran de saisie, chaque élève actif de la classe est listé avec un statut modifiable (Présent/Absent/Retard/Excusé) et une note libre. Enregistrez avec <span class="label">Enregistrer</span> ; marquer un élève « Absent » déclenche automatiquement une notification au tuteur désigné comme contact principal (voir §10.1 pour l'état réel de cet envoi).</p>
+
+<!-- ============ CHAPITRE 7 ============ -->
+<h1 id="ch7">7. Notes et bulletins</h1>
+
+<h2>7.1 Secondaire : évaluations par trimestre</h2>
+<p>Menu <span class="label">Évaluations</span> → <span class="label">Nouvelle évaluation</span> : Titre, Classe, Type (« Devoir » ou « Interrogation », qui pré-remplit un coefficient modifiable), Matière, Période (Trimestre), Barème, Coefficient, Date. Chaque évaluation compte pour sa propre part dans la moyenne du trimestre. Depuis la liste, <span class="label">Saisir les notes</span> ouvre une ligne par élève (note + commentaire).</p>
+
+<h2>7.2 Préscolaire/primaire : compositions</h2>
+<p>Menu <span class="label">Évaluations</span> → <span class="label">Nouvelle composition</span> (réservé au directeur) : Titre, Numéro de composition (1 à 10), Date — une composition est commune à toutes les classes du primaire, sans notion de trimestre. Depuis la liste des élèves d'une composition, <span class="label">Saisir les notes</span> par élève ouvre un tableau Matière/Note avec une case « Absence » par matière et une case globale <span class="label">Absent à la composition</span> ; la moyenne, le résultat (Admis/Refusé/Absence) et l'appréciation se calculent automatiquement à l'écran.</p>
+
+<h2>7.3 Générer les bulletins</h2>
+<p>Menu <span class="label">Bulletins</span> : choisissez Classe + Période (secondaire) ou Classe + N° de composition (primaire), puis <span class="label">Générer les bulletins</span> (ou <span class="label">Régénérer</span> si déjà fait, avec confirmation). Chaque ligne de résultat propose <span class="label">Voir le PDF</span> et <span class="label">Télécharger</span> — le document reflète toujours les données actuelles, il n'est jamais figé tant que vous ne le distribuez pas.</p>
+
+<h2>7.4 Coefficients par matière</h2>
+<p>Menu <span class="label">Coefficients par matière</span> (secondaire uniquement, réservé à fondateur/directeur/gestionnaire/éducateur) : choisissez un Niveau (puis une Série si le niveau l'exige, ex. Terminale) et renseignez le coefficient de chaque matière.</p>
+<div class="locked">Pour le <strong>préscolaire/primaire</strong>, les coefficients et barèmes par matière sont fixés une fois pour toute la plateforme (et non par chaque école) — l'écran correspondant n'est pas accessible au personnel d'établissement.</div>
+
+<!-- ============ CHAPITRE 8 ============ -->
+<h1 id="ch8">8. Classes, niveaux et années scolaires</h1>
+
+<h2>8.1 Créer une classe</h2>
+<p>Menu <span class="label">Classes</span> → <span class="label">Nouvelle classe</span> : Cycle, Niveau (filtré par cycle), Série (uniquement si le niveau l'exige), Numéro, Capacité, Année scolaire.</p>
+
+<h2>8.2 Ce qui est géré par la plateforme, pas par l'établissement</h2>
+<div class="locked">
+<p><strong>Niveaux et séries</strong> (ex. « 6ème », « Terminale C ») sont un référentiel commun à toute la plateforme — vous les choisissez dans une liste déjà fournie, vous ne pouvez pas en créer de nouveaux.</p>
+<p><strong>Années scolaires</strong> : depuis une évolution récente, une seule année scolaire est active à la fois pour <em>toute</em> la plateforme, pas par établissement. L'écran « Années scolaires » reste consultable mais en lecture seule pour un directeur.</p>
+</div>
+
+<h2>8.3 Les périodes (trimestres)</h2>
+<p>Contrairement aux années scolaires, les <strong>Périodes</strong> (Trimestre 1, 2, 3…) se gèrent au niveau de chaque établissement secondaire : menu <span class="label">Périodes</span> → <span class="label">Nouvelle période</span> : Libellé, Ordre, Début, Fin, rattachées à l'année scolaire en cours.</p>
+
+<!-- ============ CHAPITRE 9 ============ -->
+<h1 id="ch9">9. Facturation</h1>
+
+<h2>9.1 Configurer les tarifs</h2>
+<p>Menu <span class="label">Tarifs</span>. Deux blocs : les <strong>échéances</strong> de l'année (Libellé, Ordre, Date) et, pour chaque niveau, le bouton <span class="label">Configurer</span> pour saisir les frais d'inscription et le montant de chaque tranche (en F&nbsp;CFA). L'option <span class="label">Dupliquer les montants depuis un autre niveau</span> évite de tout ressaisir.</p>
+
+<h2>9.2 Situation financière d'un élève et paiement</h2>
+<p>Accessible depuis la fiche élève ou depuis <span class="label">Suivi des paiements</span> (bouton <span class="label">Encaisser</span>). On y trouve :</p>
+<ul>
+  <li><span class="label">Modifier les montants</span> — ajuste les frais/tranches pour cet élève précis (bourse, arrangement particulier).</li>
+  <li><span class="label">Enregistrer un paiement</span> — Montant, Moyen (Espèces/Mobile Money/Virement/Carte), Date, Référence.</li>
+</ul>
+<div class="warn">Un paiement enregistré est <strong>définitif</strong> : il ne se modifie pas, seule sa suppression est possible (réservée à fondateur/directeur) en cas d'erreur de saisie.</div>
+<p>Chaque paiement donne accès à un <strong>reçu PDF</strong> (« Voir le reçu » / « Télécharger »), généré à la demande.</p>
+
+<h2>9.3 Suivi des paiements et relances</h2>
+<p>Menu <span class="label">Suivi des paiements</span> : filtrez par année, niveau ou statut (En retard/À jour/En avance). Le bouton <span class="label">Relance</span> (ou <span class="label">Échéance</span>) génère un courrier PDF individuel pour un élève en retard ou dont l'échéance approche.</p>
+
+<h2>9.4 Réductions et dépenses</h2>
+<p><span class="label">Réductions</span> : appliquez une remise (Pourcentage ou Montant fixe) à un élève, avec un motif facultatif. <span class="label">Dépenses</span> : Libellé, Montant, Date — une dépense mal saisie se supprime et se ressaisit plutôt que de se modifier (suppression réservée à fondateur/directeur).</p>
+
+<h2>9.5 Bilan financier</h2>
+<p>Menu <span class="label">Bilan financier</span> : vue d'ensemble des encaissements et dépenses de l'établissement, exportable en PDF.</p>
+
+<!-- ============ CHAPITRE 10 ============ -->
+<h1 id="ch10">10. Communication</h1>
+
+<h2>10.1 SMS</h2>
+<p>Menu <span class="label">SMS</span> : <span class="label">Modèles</span> (textes réutilisables, réservé aux administrateurs de l'établissement), <span class="label">Envoyer un SMS</span> (choisir un élève et un message, envoyé à tous ses tuteurs approuvés avec téléphone renseigné — réservé au caissier), <span class="label">Journal</span> (historique des envois et de leur statut).</p>
+<div class="warn"><strong>Important, état actuel de la plateforme :</strong> aucun opérateur SMS réel n'est encore branché. Un SMS « envoyé » (manuellement ou automatiquement sur une absence) est aujourd'hui simulé et journalisé, mais n'arrive pas réellement sur le téléphone du destinataire. Ce point sera mis à jour dès qu'un fournisseur SMS sera activé pour votre pays — ne communiquez pas encore aux familles que les SMS sont opérationnels.</div>
+
+<h2>10.2 Messagerie interne</h2>
+<p>Menu <span class="label">Messagerie</span> : discussion directe ou de groupe entre membres du personnel d'un même établissement (elle ne concerne pas les parents). Un badge indique les messages non lus.</p>
+
+<!-- ============ CHAPITRE 11 ============ -->
+<h1 id="ch11">11. Listes et rapports (documents PDF)</h1>
+<p>Menu <span class="label">Listes/Rapports</span> regroupe les documents transversaux, tous générés à la demande (jamais stockés, donc toujours à jour) :</p>
+<ul>
+  <li><strong>Liste des élèves d'une classe</strong> (PDF), filtrable par sexe, redoublement, et pour le secondaire par statut/bourse.</li>
+  <li><strong>Cartes d'identité scolaires</strong> — pour toute une classe ou pour un seul élève recherché par nom/matricule.</li>
+  <li><strong>Lettres de relance / rappels d'échéance</strong> par niveau (visible si vous avez accès à la facturation).</li>
+</ul>
+<p>D'autres documents PDF existent depuis leur propre écran : bulletins (§7.3), reçus de paiement (§9.2), emplois du temps (§5.3).</p>
+
+<!-- ============ CHAPITRE 12 ============ -->
+<h1 id="ch12">12. Annexe — qui a le droit de faire quoi ?</h1>
+<p class="avatar-legend">Vue simplifiée ; certains cas particuliers (cloisonnement multi-établissement, restrictions fines par classe affectée) ne sont pas détaillés ici.</p>
+<table>
+<tr><th>Domaine</th><th>Consultation</th><th>Modification</th></tr>
+<tr><td>Élèves, inscriptions, tuteurs</td><td>Tout le personnel administratif</td><td>Fondateur, Directeur, Gestionnaire</td></tr>
+<tr><td>Emplois du temps (créer une séance)</td><td>Tout le personnel + l'enseignant concerné</td><td>Fondateur, Directeur, Gestionnaire, Éducateur</td></tr>
+<tr><td>Présences (l'appel)</td><td>Tout le personnel</td><td>Fondateur, Directeur, Gestionnaire, Éducateur, ou l'enseignant affecté</td></tr>
+<tr><td>Notes et bulletins</td><td>Tout le personnel sauf Caissier</td><td>Éducateur, ou l'enseignant affecté à la classe/matière</td></tr>
+<tr><td>Coefficients par matière (secondaire)</td><td>Fondateur, Directeur, Gestionnaire, Éducateur</td><td>Fondateur, Directeur, Gestionnaire, Éducateur</td></tr>
+<tr><td>Facturation (tarifs, paiements, réductions)</td><td>Fondateur, Directeur, Gestionnaire, Caissier, Éducateur</td><td>Directeur, Caissier, Éducateur (suppression : Fondateur/Directeur)</td></tr>
+<tr><td>SMS</td><td>Administrateurs d'établissement</td><td>Envoi réservé au Caissier</td></tr>
+<tr><td>Personnel (comptes, rôles)</td><td>Administrateur d'établissement</td><td>Directeur local (un établissement) ou Fondateur (groupe)</td></tr>
+<tr><td>Niveaux, séries, années scolaires</td><td>Tout le personnel (lecture seule)</td><td>Plateforme uniquement</td></tr>
+</table>
+
+<p style="margin-top:30px; font-size:0.85em; color:#a8a29e; text-align:center;">Nitsoft School — manuel généré le 6 septembre 2026. En cas d'écart entre ce document et l'application, l'application fait foi ; signalez tout écart à votre référent technique.</p>
+
+</body>
+</html>

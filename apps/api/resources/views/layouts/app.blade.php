@@ -229,6 +229,11 @@
                             <p class="truncate text-sm font-medium text-stone-900" title="{{ auth()->user()->fullName() }}">{{ auth()->user()->fullName() }}</p>
                             <p class="truncate text-xs text-stone-500">{{ auth()->user()->currentRoleLabel() }}</p>
                         </div>
+                        <a href="{{ route('manual.staff') }}" target="_blank" title="{{ __('Manuel d\'utilisation') }}" aria-label="{{ __('Manuel d\'utilisation') }}" class="rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                                {!! $icon('document-text') !!}
+                            </svg>
+                        </a>
                         <a href="{{ route('account.password.edit') }}" wire:navigate title="{{ __('Mot de passe') }}" aria-label="{{ __('Mot de passe') }}" class="rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
                                 {!! $icon('lock') !!}
