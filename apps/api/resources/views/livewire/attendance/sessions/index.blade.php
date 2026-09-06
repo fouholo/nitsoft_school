@@ -19,6 +19,55 @@
         </div>
     @endif
 
+    <div class="mt-6 overflow-hidden rounded-lg border border-stone-200 bg-white">
+        <div class="border-b border-stone-200 px-4 py-2.5">
+            <h2 class="text-sm font-semibold text-stone-900">{{ $isAdmin ? __('Séances du jour') : __('Mes séances du jour') }}</h2>
+        </div>
+
+        @if ($todaysTimetableSessions->isEmpty())
+            <p class="px-4 py-4 text-sm text-stone-500">{{ __("Aucune séance planifiée aujourd'hui.") }}</p>
+        @else
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-stone-200 text-sm">
+                    <thead class="bg-stone-50">
+                        <tr>
+                            <th class="whitespace-nowrap px-4 py-2 text-start font-medium text-stone-500">{{ __('Créneau') }}</th>
+                            <th class="whitespace-nowrap px-4 py-2 text-start font-medium text-stone-500">{{ __('Classe') }}</th>
+                            <th class="whitespace-nowrap px-4 py-2 text-start font-medium text-stone-500">{{ __('Matière') }}</th>
+                            @if ($isAdmin)
+                                <th class="whitespace-nowrap px-4 py-2 text-start font-medium text-stone-500">{{ __('Enseignant') }}</th>
+                            @endif
+                            <th class="whitespace-nowrap px-4 py-2"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-stone-100">
+                        @foreach ($todaysTimetableSessions as $timetableSession)
+                            <tr wire:key="today-timetable-session-{{ $timetableSession->id }}">
+                                <td class="whitespace-nowrap px-4 py-2 text-stone-600">{{ $timetableSession->slot->label }}</td>
+                                <td class="whitespace-nowrap px-4 py-2 text-stone-900">{{ $timetableSession->classroom?->name }}</td>
+                                <td class="whitespace-nowrap px-4 py-2 text-stone-600">{{ $timetableSession->subject?->name }}</td>
+                                @if ($isAdmin)
+                                    <td class="whitespace-nowrap px-4 py-2 text-stone-600">{{ $timetableSession->teacher?->name }}</td>
+                                @endif
+                                <td class="whitespace-nowrap px-4 py-2 text-end">
+                                    @if ($attendedTimetableSessionIds->has($timetableSession->id))
+                                        <a href="{{ route('attendance.sessions.mark', $attendedTimetableSessionIds[$timetableSession->id]) }}" class="inline-flex min-h-11 items-center text-stone-500 hover:text-stone-900">
+                                            {{ __("Modifier l'appel") }}
+                                        </a>
+                                    @else
+                                        <button type="button" wire:click="startFromTimetable({{ $timetableSession->id }})" class="inline-flex min-h-11 items-center text-orange-700 hover:text-orange-900">
+                                            {{ __("Faire l'appel") }}
+                                        </button>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+    </div>
+
     @if ($showForm)
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-4">
             <div>

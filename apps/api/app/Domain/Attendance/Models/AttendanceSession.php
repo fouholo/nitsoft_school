@@ -8,6 +8,7 @@ use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\Subject;
 use App\Domain\Establishments\Concerns\TenantScoped;
 use App\Domain\Sync\Concerns\Syncable;
+use App\Domain\Timetable\Models\TimetableSession;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -26,6 +27,7 @@ class AttendanceSession extends Model
         'establishment_id',
         'classroom_id',
         'subject_id',
+        'timetable_session_id',
         'teacher_id',
         'session_date',
         'started_at',
@@ -53,6 +55,14 @@ class AttendanceSession extends Model
     public function subject(): BelongsTo
     {
         return $this->belongsTo(Subject::class);
+    }
+
+    /**
+     * @return BelongsTo<TimetableSession, $this>
+     */
+    public function timetableSession(): BelongsTo
+    {
+        return $this->belongsTo(TimetableSession::class);
     }
 
     public function teacher(): BelongsTo

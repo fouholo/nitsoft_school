@@ -54,6 +54,9 @@ class TimetableSession extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    /**
+     * @return BelongsTo<TimetableSlot, $this>
+     */
     public function slot(): BelongsTo
     {
         return $this->belongsTo(TimetableSlot::class, 'timetable_slot_id');

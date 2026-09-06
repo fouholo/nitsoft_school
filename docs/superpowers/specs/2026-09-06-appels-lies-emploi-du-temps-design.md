@@ -82,24 +82,28 @@ public function startFromTimetable(int $timetableSessionId): void
         abort(403);
     }
 
-    $session = AttendanceSession::firstOrCreate(
-        [
+    $session = AttendanceSession::where('timetable_session_id', $timetableSession->id)
+        ->whereDate('session_date', now()->toDateString())
+        ->first();
+
+    if ($session === null) {
+        $session = AttendanceSession::create([
             'timetable_session_id' => $timetableSession->id,
             'session_date' => now()->toDateString(),
-        ],
-        [
             'classroom_id' => $timetableSession->classroom_id,
             'subject_id' => $timetableSession->subject_id,
             'teacher_id' => $timetableSession->user_id,
-            'started_at' => $timetableSession->slot->start_time->format('H:i'),
-        ]
-    );
+            'started_at' => Carbon::parse($timetableSession->slot->start_time)->format('H:i'),
+        ]);
+    }
 
     $this->redirectRoute('attendance.sessions.mark', $session);
 }
 ```
 
 Même schéma d'autorisation à deux niveaux que `save()` existant (policy générique `create` + vérification fine d'appartenance) — ici la vérification fine compare directement `timetable_session_id->user_id`, plus simple que l'actuel `isAssignedToClassroom()` puisque la séance porte déjà l'enseignant assigné.
+
+**Piège rencontré à l'implémentation** : `AttendanceSession::firstOrCreate(['session_date' => now()->toDateString(), ...], [...])` échoue silencieusement à retrouver la ligne existante puis lève une violation de contrainte unique au deuxième clic. Cause : le cast `'session_date' => 'date'` du modèle persiste toujours la colonne avec un suffixe horaire (`'2026-09-06 00:00:00'`, format par défaut `getDateFormat()`), alors que `firstOrCreate` compare la valeur brute du tableau (`'2026-09-06'`, sans heure) dans son `WHERE` — l'égalité stricte échoue. Remplacé par une recherche explicite via `whereDate('session_date', ...)` (qui applique `DATE(...)` côté SQL, insensible au suffixe horaire stocké) suivie d'un `create()` conditionnel. Le même piège existait dans le calcul de `$attendedTimetableSessionIds` (`->where('session_date', now()->toDateString())`), corrigé de la même façon.
 
 ### Vue
 
