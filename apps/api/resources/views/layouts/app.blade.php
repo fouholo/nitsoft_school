@@ -218,6 +218,43 @@
                             </details>
                         @endif
                     @endforeach
+
+                    <div class="mt-4 space-y-1 border-t border-stone-200 pt-3">
+                        <a
+                            href="{{ route('manual.staff') }}"
+                            target="_blank"
+                            @click="sidebarOpen = false"
+                            class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-stone-600 hover:bg-stone-100 hover:text-stone-900"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 shrink-0">
+                                {!! $icon('document-text') !!}
+                            </svg>
+                            {{ __('Manuel d\'utilisation') }}
+                        </a>
+                        <a
+                            href="{{ route('account.password.edit') }}"
+                            wire:navigate
+                            @click="sidebarOpen = false"
+                            class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium {{ request()->routeIs('account.password.edit') ? 'bg-orange-100 font-semibold text-orange-800' : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900' }}"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 shrink-0">
+                                {!! $icon('lock') !!}
+                            </svg>
+                            {{ __('Mot de passe') }}
+                        </a>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button
+                                type="submit"
+                                class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-stone-600 hover:bg-stone-100 hover:text-stone-900"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 shrink-0">
+                                    {!! $icon('logout') !!}
+                                </svg>
+                                {{ __('Déconnexion') }}
+                            </button>
+                        </form>
+                    </div>
                 </nav>
 
                 <div class="border-t border-stone-200 p-3">
@@ -229,24 +266,6 @@
                             <p class="truncate text-sm font-medium text-stone-900" title="{{ auth()->user()->fullName() }}">{{ auth()->user()->fullName() }}</p>
                             <p class="truncate text-xs text-stone-500">{{ auth()->user()->currentRoleLabel() }}</p>
                         </div>
-                        <a href="{{ route('manual.staff') }}" target="_blank" title="{{ __('Manuel d\'utilisation') }}" aria-label="{{ __('Manuel d\'utilisation') }}" class="rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
-                                {!! $icon('document-text') !!}
-                            </svg>
-                        </a>
-                        <a href="{{ route('account.password.edit') }}" wire:navigate title="{{ __('Mot de passe') }}" aria-label="{{ __('Mot de passe') }}" class="rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
-                                {!! $icon('lock') !!}
-                            </svg>
-                        </a>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" title="{{ __('Déconnexion') }}" aria-label="{{ __('Déconnexion') }}" class="rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
-                                    {!! $icon('logout') !!}
-                                </svg>
-                            </button>
-                        </form>
                     </div>
                 </div>
             </aside>
