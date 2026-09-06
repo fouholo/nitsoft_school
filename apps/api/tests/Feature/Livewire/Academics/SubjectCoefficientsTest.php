@@ -133,19 +133,20 @@ test('un éducateur peut configurer un coefficient', function () {
         ->and((float) $coefficient->coefficient)->toBe(3.5);
 });
 
-test('un enseignant peut consulter la grille mais ne peut pas l’enregistrer', function () {
+test('un enseignant n’a pas accès à l’écran', function () {
     $teacher = createUserWithRole($this->establishment, 'enseignant');
     $this->actingAs($teacher);
 
-    $level = Level::factory()->create(['requires_series' => false]);
-
-    Livewire::test(Index::class)
-        ->set('level_id', $level->id)
-        ->set("coefficients.{$this->subject->id}", '2')
-        ->call('save')
-        ->assertForbidden();
+    Livewire::test(Index::class)->assertForbidden();
 
     expect(SubjectCoefficient::count())->toBe(0);
+});
+
+test('un caissier n’a pas accès à l’écran', function () {
+    $caissier = createUserWithRole($this->establishment, 'caissier');
+    $this->actingAs($caissier);
+
+    Livewire::test(Index::class)->assertForbidden();
 });
 
 test('un établissement préscolaire/primaire n’a pas accès à l’écran', function () {

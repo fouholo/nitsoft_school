@@ -56,13 +56,13 @@ class SubjectCoefficientPolicy
 
     private function canManage(User $user): bool
     {
-        return $this->isAdminOfCurrentEstablishment($user)
+        return in_array($user->currentRole(), ['fondateur', 'directeur', 'gestionnaire'], true)
             || RolePermissions::can($user->currentRole(), 'subject_coefficients.write');
     }
 }
 ```
 
-`canManage()` factorise la règle de rôle déjà appliquée à `create()`/`update()` (fondateur/directeur/gestionnaire via `isAdminOfCurrentEstablishment()`, éducateur via la matrice) et l'applique désormais aussi à `viewAny()`. `create()` perd sa vérification d'appartenance à l'établissement courant (elle n'existait pas avant non plus — `isAdminOfCurrentEstablishment`/`currentRole()` opèrent déjà sur le tenant courant, pas de régression). `view()` reste inchangée (hors périmètre).
+`canManage()` factorise la règle de rôle déjà appliquée à `create()`/`update()` et l'applique désormais aussi à `viewAny()`. **Écart par rapport à la version initiale de cette spec** : `isAdminOfCurrentEstablishment()` a été remplacée par une vérification directe de `currentRole()` — trouvé pendant l'implémentation, `isAdminOfCurrentEstablishment()` (`hasAdminRightsOn()`) ne reconnaît un fondateur que via une `Foundation`, jamais un fondateur attaché directement à un établissement indépendant (`establishment_user.role = 'fondateur'`, le cas du seeder `founder@nitsoft.test`/toute école indépendante) — piège déjà documenté en mémoire projet (`has_admin_rights_foundation_only_fondateur_gap`). Sans ce correctif, un fondateur d'école indépendante — pourtant explicitement demandé par l'utilisateur — n'aurait jamais eu accès à l'écran. `view()` reste inchangée (hors périmètre).
 
 ## Tests
 
@@ -71,6 +71,8 @@ Nouveau fichier `tests/Feature/Policies/SubjectCoefficientPolicyTest.php` :
 - `viewAny` refusé pour caissier et enseignant.
 - `viewAny` refusé même pour un directeur si l'établissement courant est préscolaire/primaire (règle de cycle déjà existante, non-régression).
 - Cloisonnement multi-établissement : un directeur d'un autre établissement ne peut pas consulter/gérer les coefficients de celui-ci.
+
+`tests/Feature/Livewire/Academics/SubjectCoefficientsTest.php` (existant, mis à jour) : le test « un enseignant peut consulter la grille mais ne peut pas l'enregistrer » décrivait l'ancien comportement (accès en lecture toléré) — remplacé par « un enseignant n'a pas accès à l'écran » (`assertForbidden()` dès le montage, plus seulement au `save()`), et un test symétrique ajouté pour caissier.
 
 ## Vérification
 
