@@ -11,8 +11,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('subjects', function (Blueprint $table): void {
+            // La FK doit tomber avant l'index : InnoDB refuse de supprimer un index qu'une contrainte utilise.
+            $table->dropForeign(['establishment_id']);
             $table->dropIndex(['establishment_id']);
-            $table->dropConstrainedForeignId('establishment_id');
+            $table->dropColumn('establishment_id');
         });
     }
 

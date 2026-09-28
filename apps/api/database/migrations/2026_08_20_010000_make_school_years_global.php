@@ -43,8 +43,9 @@ return new class extends Migration
         $this->keepOnlyOneCurrentYear();
 
         Schema::table('school_years', function (Blueprint $table): void {
-            $table->dropIndex(['establishment_id', 'is_current']);
+            // La FK doit tomber avant l'index : InnoDB refuse de supprimer un index qu'une contrainte utilise.
             $table->dropForeign(['establishment_id']);
+            $table->dropIndex(['establishment_id', 'is_current']);
             $table->dropColumn('establishment_id');
         });
 
