@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace App\Livewire\Establishments;
 
 use App\Domain\Establishments\Enums\EstablishmentType;
+use App\Domain\Establishments\Exceptions\SchoolRegistrationConflictException;
 use App\Domain\Establishments\Models\Direction;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\Foundation;
 use App\Domain\Establishments\Models\Inspection;
+use App\Domain\Establishments\Models\SchoolRegistration;
+use App\Domain\Establishments\Services\SchoolRegistrationApprover;
+use App\Domain\Establishments\Support\UniqueSlug;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -57,6 +61,9 @@ class Index extends Component
     public ?TemporaryUploadedFile $logo = null;
 
     public string $existingLogoPath = '';
+
+    /** @var array<int, string> Erreur de validation par demande (id => message). */
+    public array $registrationErrors = [];
 
     public function mount(): void
     {
@@ -143,7 +150,7 @@ class Index extends Component
         } else {
             $this->authorize('create', Establishment::class);
             $establishment = new Establishment;
-            $data['slug'] = $this->uniqueSlugFor($data['name']);
+            $data['slug'] = UniqueSlug::for(Establishment::class, $data['name']);
         }
 
         if ($this->logo) {
@@ -161,6 +168,32 @@ class Index extends Component
         $this->showForm = false;
     }
 
+    public function approveRegistration(int $registrationId, SchoolRegistrationApprover $approver): void
+    {
+        $registration = SchoolRegistration::findOrFail($registrationId);
+
+        $this->authorize('approve', $registration);
+
+        unset($this->registrationErrors[$registrationId]);
+
+        try {
+            $approver->approve($registration, Auth::user());
+        } catch (SchoolRegistrationConflictException $e) {
+            $this->registrationErrors[$registrationId] = $e->getMessage();
+        }
+    }
+
+    public function rejectRegistration(int $registrationId, SchoolRegistrationApprover $approver): void
+    {
+        $registration = SchoolRegistration::findOrFail($registrationId);
+
+        $this->authorize('reject', $registration);
+
+        unset($this->registrationErrors[$registrationId]);
+
+        $approver->reject($registration, Auth::user());
+    }
+
     public function delete(int $establishmentId): void
     {
         $establishment = Establishment::findOrFail($establishmentId);
@@ -174,20 +207,6 @@ class Index extends Component
     {
         $this->resetForm();
         $this->showForm = false;
-    }
-
-    private function uniqueSlugFor(string $name): string
-    {
-        $base = Str::slug($name);
-        $slug = $base;
-        $suffix = 1;
-
-        while (Establishment::where('slug', $slug)->exists()) {
-            $slug = "{$base}-{$suffix}";
-            $suffix++;
-        }
-
-        return $slug;
     }
 
     protected function resetForm(): void
@@ -204,6 +223,9 @@ class Index extends Component
     {
         return view('livewire.establishments.index', [
             'establishments' => Establishment::with('foundation')->orderBy('name')->get(),
+            'pendingRegistrations' => Auth::user()?->can('viewAny', SchoolRegistration::class)
+                ? SchoolRegistration::with(['inspection', 'direction'])->oldest()->get()
+                : collect(),
             'foundations' => Foundation::orderBy('name')->get(),
             'types' => EstablishmentType::cases(),
             'inspections' => Inspection::orderBy('inspection_name')->get(),

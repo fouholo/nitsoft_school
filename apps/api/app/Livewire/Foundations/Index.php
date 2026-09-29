@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Foundations;
 
 use App\Domain\Establishments\Models\Foundation;
-use Illuminate\Support\Str;
+use App\Domain\Establishments\Support\UniqueSlug;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -58,7 +58,7 @@ class Index extends Component
         } else {
             $this->authorize('create', Foundation::class);
             $foundation = new Foundation;
-            $data['slug'] = $this->uniqueSlugFor($data['name']);
+            $data['slug'] = UniqueSlug::for(Foundation::class, $data['name']);
         }
 
         $foundation->fill($data);
@@ -81,20 +81,6 @@ class Index extends Component
     {
         $this->resetForm();
         $this->showForm = false;
-    }
-
-    private function uniqueSlugFor(string $name): string
-    {
-        $base = Str::slug($name);
-        $slug = $base;
-        $suffix = 1;
-
-        while (Foundation::where('slug', $slug)->exists()) {
-            $slug = "{$base}-{$suffix}";
-            $suffix++;
-        }
-
-        return $slug;
     }
 
     protected function resetForm(): void

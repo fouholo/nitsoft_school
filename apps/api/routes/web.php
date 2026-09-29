@@ -6,7 +6,9 @@ use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\StaffManualPdfController;
 use App\Livewire\Account\ChangePassword;
 use App\Livewire\Auth\Login;
-use App\Livewire\Auth\Register;
+use App\Livewire\Auth\RegisterChoice;
+use App\Livewire\Auth\RegisterGuardian;
+use App\Livewire\Auth\RegisterSchool;
 use App\Livewire\Dashboard;
 use App\Livewire\SaasAdmins\Register as SaasAdminsRegister;
 use App\Livewire\Staff\Register as StaffRegister;
@@ -42,7 +44,9 @@ Route::get('/locale/{locale}', function (string $locale) {
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', Login::class)->name('login');
-    Route::get('/register', Register::class)->name('register');
+    Route::get('/register', RegisterChoice::class)->name('register');
+    Route::get('/register/parent', RegisterGuardian::class)->name('register.guardian');
+    Route::get('/register/fondateur', RegisterSchool::class)->name('register.school');
     Route::get('/saas-admin/register', SaasAdminsRegister::class)->name('saas-admins.register');
     Route::get('/staff/register', StaffRegister::class)->name('staff.register');
 });

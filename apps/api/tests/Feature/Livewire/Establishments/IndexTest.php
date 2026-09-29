@@ -7,7 +7,9 @@ use App\Domain\Establishments\Models\Direction;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\Foundation;
 use App\Domain\Establishments\Models\Inspection;
+use App\Domain\Establishments\Models\SchoolRegistration;
 use App\Livewire\Establishments\Index;
+use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
@@ -212,4 +214,65 @@ test('un directeur d’établissement ne peut pas accéder à l’écran', funct
     $this->actingAs($admin);
 
     Livewire::test(Index::class)->assertForbidden();
+});
+
+function pendingSchoolRegistration(): SchoolRegistration
+{
+    return SchoolRegistration::create([
+        'name' => 'Yao',
+        'first_name' => 'Kouadio',
+        'email' => 'kouadio.yao@example.test',
+        'pseudo' => 'kyao',
+        'password' => 'password123',
+        'establishment_name' => 'École Les Palmiers',
+        'establishment_type' => EstablishmentType::Secondaire->value,
+        'direction_id' => Direction::create(['code' => 'DR-ABJ', 'direction_name' => 'Abidjan'])->id,
+    ]);
+}
+
+test('les demandes d’inscription en attente sont listées', function () {
+    pendingSchoolRegistration();
+
+    Livewire::test(Index::class)
+        ->assertSee(__('Écoles en attente de validation (:count)', ['count' => 1]))
+        ->assertSee('École Les Palmiers')
+        ->assertSee('Abidjan')
+        ->assertSee('kouadio.yao@example.test');
+});
+
+test('l’encart des demandes est masqué quand il n’y en a aucune', function () {
+    Livewire::test(Index::class)
+        ->assertDontSee(__('Écoles en attente de validation (:count)', ['count' => 0]));
+});
+
+test('valider une demande crée l’école et la retire des demandes', function () {
+    $registration = pendingSchoolRegistration();
+
+    Livewire::test(Index::class)
+        ->call('approveRegistration', $registration->id)
+        ->assertHasNoErrors();
+
+    expect(SchoolRegistration::count())->toBe(0)
+        ->and(Establishment::where('name', 'École Les Palmiers')->exists())->toBeTrue();
+});
+
+test('un conflit d’e-mail à la validation est affiché sur la ligne', function () {
+    $registration = pendingSchoolRegistration();
+    User::factory()->create(['email' => 'kouadio.yao@example.test']);
+
+    Livewire::test(Index::class)
+        ->call('approveRegistration', $registration->id)
+        ->assertSet("registrationErrors.{$registration->id}", __("L'adresse e-mail :email est désormais utilisée par un autre compte.", ['email' => 'kouadio.yao@example.test']));
+
+    expect(SchoolRegistration::count())->toBe(1);
+});
+
+test('refuser une demande la supprime', function () {
+    $registration = pendingSchoolRegistration();
+
+    Livewire::test(Index::class)
+        ->call('rejectRegistration', $registration->id);
+
+    expect(SchoolRegistration::count())->toBe(0)
+        ->and(Establishment::where('name', 'École Les Palmiers')->exists())->toBeFalse();
 });

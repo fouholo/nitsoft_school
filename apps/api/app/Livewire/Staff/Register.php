@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 #[Layout('layouts.guest')]
@@ -33,6 +34,9 @@ class Register extends Component
 
     public string $uid = '';
 
+    // Présélection depuis la page de choix d'inscription (?role=fondateur) ;
+    // la validation de register() reste la seule barrière sur la valeur.
+    #[Url]
     public string $role = '';
 
     public bool $pendingApproval = false;

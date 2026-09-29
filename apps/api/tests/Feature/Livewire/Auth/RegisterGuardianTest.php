@@ -3,12 +3,12 @@
 declare(strict_types=1);
 
 use App\Domain\Enrollment\Models\Guardian;
-use App\Livewire\Auth\Register;
+use App\Livewire\Auth\RegisterGuardian;
 use App\Models\User;
 use Livewire\Livewire;
 
 test('un parent peut s’inscrire et un profil tuteur est créé', function () {
-    Livewire::test(Register::class)
+    Livewire::test(RegisterGuardian::class)
         ->set('first_name', 'Awa')
         ->set('last_name', 'Traoré')
         ->set('email', 'awa.traore@example.test')
@@ -32,7 +32,7 @@ test('un parent peut s’inscrire et un profil tuteur est créé', function () {
 test('l’inscription échoue si l’e-mail est déjà utilisé', function () {
     User::factory()->create(['email' => 'awa.traore@example.test']);
 
-    Livewire::test(Register::class)
+    Livewire::test(RegisterGuardian::class)
         ->set('first_name', 'Awa')
         ->set('last_name', 'Traoré')
         ->set('email', 'awa.traore@example.test')

@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Domain\Establishments\Enums\EstablishmentType;
+use App\Domain\Establishments\Models\SchoolRegistration;
 use App\Livewire\Auth\Login;
 use App\Models\User;
 use Livewire\Livewire;
@@ -81,3 +83,44 @@ test('l’écran de connexion s’affiche sans erreur dans chacune des locales p
 
     Livewire::test(Login::class)->assertOk();
 })->with(['fr', 'en', 'ar']);
+
+test('un fondateur dont la demande est en attente est informé, par e-mail comme par pseudo', function (string $identifiant) {
+    SchoolRegistration::create([
+        'name' => 'Yao',
+        'first_name' => 'Kouadio',
+        'email' => 'kouadio.yao@example.test',
+        'pseudo' => 'kyao',
+        'password' => 'password123',
+        'establishment_name' => 'École Les Palmiers',
+        'establishment_type' => EstablishmentType::Secondaire->value,
+    ]);
+
+    Livewire::test(Login::class)
+        ->set('identifiant', $identifiant)
+        ->set('password', 'password123')
+        ->call('login')
+        ->assertHasErrors('identifiant')
+        ->assertSee(__("Votre inscription est en attente de validation par l'équipe Nitsoft."));
+
+    $this->assertGuest();
+})->with(['kouadio.yao@example.test', 'KYAO']);
+
+test('une demande en attente avec un mauvais mot de passe donne l’erreur habituelle', function () {
+    SchoolRegistration::create([
+        'name' => 'Yao',
+        'first_name' => 'Kouadio',
+        'email' => 'kouadio.yao@example.test',
+        'pseudo' => 'kyao',
+        'password' => 'password123',
+        'establishment_name' => 'École Les Palmiers',
+        'establishment_type' => EstablishmentType::Secondaire->value,
+    ]);
+
+    Livewire::test(Login::class)
+        ->set('identifiant', 'kouadio.yao@example.test')
+        ->set('password', 'wrong-password')
+        ->call('login')
+        ->assertHasErrors('identifiant')
+        ->assertSee(__('Ces identifiants ne correspondent à aucun compte.'))
+        ->assertDontSee(__("Votre inscription est en attente de validation par l'équipe Nitsoft."));
+});

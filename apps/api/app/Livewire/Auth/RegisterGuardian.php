@@ -11,7 +11,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 #[Layout('layouts.guest')]
-class Register extends Component
+class RegisterGuardian extends Component
 {
     public string $first_name = '';
 
@@ -58,6 +58,6 @@ class Register extends Component
 
     public function render()
     {
-        return view('livewire.auth.register');
+        return view('livewire.auth.register-guardian');
     }
 }

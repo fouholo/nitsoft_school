@@ -45,7 +45,7 @@
         </button>
 
         <p class="text-center text-sm text-stone-500">
-            {{ __("Vous êtes parent d'élève ?") }} <a href="{{ route('register') }}" wire:navigate class="text-orange-700 hover:underline">{{ __("S'inscrire") }}</a>
+            {{ __('Pas encore de compte ?') }} <a href="{{ route('register') }}" wire:navigate class="text-orange-700 hover:underline">{{ __("S'inscrire") }}</a>
         </p>
     </form>
 </div>

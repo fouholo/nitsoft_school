@@ -12,11 +12,11 @@ use App\Domain\Establishments\Models\Foundation;
 use App\Domain\Establishments\Models\FoundationUserPivot;
 use App\Domain\Establishments\Models\Inspection;
 use App\Domain\Establishments\Models\Role;
+use App\Domain\Establishments\Support\UniqueSlug;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -172,7 +172,7 @@ class ManageOrganization extends Component
         Establishment::create([
             'foundation_id' => $this->organization->id,
             'name' => $data['new_establishment_name'],
-            'slug' => $this->uniqueSlugFor($data['new_establishment_name']),
+            'slug' => UniqueSlug::for(Establishment::class, $data['new_establishment_name']),
             'type' => $data['new_establishment_type'],
             'address' => $data['new_establishment_address'],
             'phone' => $data['new_establishment_phone'],
@@ -193,20 +193,6 @@ class ManageOrganization extends Component
             'new_establishment_latitude', 'new_establishment_longitude', 'new_establishment_email',
             'new_establishment_is_arabe', 'new_establishment_logo',
         ]);
-    }
-
-    private function uniqueSlugFor(string $name): string
-    {
-        $base = Str::slug($name);
-        $slug = $base;
-        $suffix = 1;
-
-        while (Establishment::where('slug', $slug)->exists()) {
-            $slug = "{$base}-{$suffix}";
-            $suffix++;
-        }
-
-        return $slug;
     }
 
     public function activate(int $pivotId): void

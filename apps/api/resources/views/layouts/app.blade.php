@@ -110,7 +110,7 @@
 
             if (auth()->user()->isSaasAdmin()) {
                 $navItems[] = ['type' => 'link', 'label' => __('Groupes scolaires'), 'route' => 'foundations.index', 'active' => 'foundations.*', 'icon' => 'building'];
-                $navItems[] = ['type' => 'link', 'label' => __('Établissements'), 'route' => 'establishments.index', 'active' => 'establishments.*', 'icon' => 'building'];
+                $navItems[] = ['type' => 'link', 'label' => __('Établissements'), 'route' => 'establishments.index', 'active' => 'establishments.*', 'icon' => 'building', 'badge' => \App\Domain\Establishments\Models\SchoolRegistration::count()];
                 $navItems[] = ['type' => 'link', 'label' => __('Inspections'), 'route' => 'inspections.index', 'active' => 'inspections.*', 'icon' => 'building'];
                 $navItems[] = ['type' => 'link', 'label' => __('Directions'), 'route' => 'directions.index', 'active' => 'directions.*', 'icon' => 'building'];
                 $navItems[] = ['type' => 'link', 'label' => __('Années scolaires'), 'route' => 'academics.school-years.index', 'active' => 'academics.school-years.*', 'icon' => 'book'];
@@ -188,6 +188,11 @@
                                 {{ $item['label'] }}
                                 @if ($item['route'] === 'messaging.index')
                                     @livewire('messaging.unread-badge')
+                                @endif
+                                @if (($item['badge'] ?? 0) > 0)
+                                    <span class="ms-1 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-orange-700 px-1.5 py-0.5 text-[11px] font-semibold text-white">
+                                        {{ $item['badge'] }}
+                                    </span>
                                 @endif
                             </a>
                         @else

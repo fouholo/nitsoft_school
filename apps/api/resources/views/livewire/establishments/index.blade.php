@@ -13,6 +13,61 @@
         @endcan
     </div>
 
+    @if ($pendingRegistrations->isNotEmpty())
+        <section class="mt-4 overflow-hidden rounded-lg border border-amber-200 bg-white">
+            <h2 class="border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-900">
+                {{ __('Écoles en attente de validation (:count)', ['count' => $pendingRegistrations->count()]) }}
+            </h2>
+
+            <table class="min-w-full divide-y divide-stone-200 text-sm">
+                <thead class="bg-stone-50">
+                    <tr>
+                        <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Date') }}</th>
+                        <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('École') }}</th>
+                        <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Inspection / Direction') }}</th>
+                        <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Groupe scolaire') }}</th>
+                        <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Fondateur') }}</th>
+                        <th class="px-4 py-2"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-stone-100">
+                    @foreach ($pendingRegistrations as $registration)
+                        <tr wire:key="registration-{{ $registration->id }}">
+                            <td class="px-4 py-2 whitespace-nowrap text-stone-600">{{ $registration->created_at->format('d/m/Y') }}</td>
+                            <td class="px-4 py-2">
+                                <div class="text-stone-900">{{ $registration->establishment_name }}</div>
+                                <div class="text-xs text-stone-500">{{ __($registration->establishment_type->label()) }}</div>
+                            </td>
+                            <td class="px-4 py-2 text-stone-600">{{ $registration->inspection?->inspection_name ?? $registration->direction?->direction_name ?? '—' }}</td>
+                            <td class="px-4 py-2 text-stone-600">{{ $registration->foundation_name ?? '—' }}</td>
+                            <td class="px-4 py-2">
+                                <div class="text-stone-900">{{ $registration->first_name }} {{ $registration->name }}</div>
+                                <div class="text-xs text-stone-500">{{ $registration->email }}</div>
+                                @if ($registrationErrors[$registration->id] ?? null)
+                                    <p class="mt-1 text-xs text-red-600">{{ $registrationErrors[$registration->id] }}</p>
+                                @endif
+                            </td>
+                            <td class="px-4 py-2 text-end whitespace-nowrap">
+                                @can('approve', $registration)
+                                    <button wire:click="approveRegistration({{ $registration->id }})" class="font-medium text-emerald-700 hover:text-emerald-900">{{ __('Valider') }}</button>
+                                @endcan
+                                @can('reject', $registration)
+                                    <button
+                                        wire:click="rejectRegistration({{ $registration->id }})"
+                                        wire:confirm="{{ __('Refuser et supprimer définitivement cette demande ?') }}"
+                                        class="ms-3 text-red-500 hover:text-red-700"
+                                    >
+                                        {{ __('Refuser') }}
+                                    </button>
+                                @endcan
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </section>
+    @endif
+
     @if ($showForm)
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-4">
             <div class="sm:col-span-2">
