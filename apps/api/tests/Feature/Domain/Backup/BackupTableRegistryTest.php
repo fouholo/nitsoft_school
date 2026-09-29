@@ -41,3 +41,17 @@ test('wipeableTables exclut uid_server_counters mais tables() et isKnownTable le
         ->and($registry->tables())->toContain('uid_server_counters')
         ->and($registry->isKnownTable('uid_server_counters'))->toBeTrue();
 });
+
+test('wipeableTables exclut les données communes à toutes les écoles mais garde les données des écoles', function () {
+    $registry = new BackupTableRegistry;
+    $shared = ['appreciation_scales', 'arabic_levels', 'arabic_series', 'arabic_subjects', 'directions', 'domains', 'general_information', 'inspections', 'levels', 'nationalites', 'primary_subjects', 'roles', 'school_years', 'series', 'subjects'];
+
+    foreach ($shared as $table) {
+        expect($registry->wipeableTables())->not->toContain($table)
+            ->and($registry->isKnownTable($table))->toBeTrue();
+    }
+
+    expect($registry->wipeableTables())->toContain('establishments')
+        ->and($registry->wipeableTables())->toContain('students')
+        ->and($registry->wipeableTables())->toContain('classrooms');
+});

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domain\Academics\Models\Level;
 use App\Domain\Establishments\Models\Establishment;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -35,6 +36,17 @@ test('backup:wipe --force sans --table préserve uid_server_counters', function 
         ->assertExitCode(0);
 
     expect(DB::table('uid_server_counters')->count())->toBe($rowsBefore);
+});
+
+test('backup:wipe --force sans --table préserve les données communes à toutes les écoles', function () {
+    Establishment::factory()->create();
+    Level::factory()->create();
+
+    $this->artisan('backup:wipe', ['--force' => true])
+        ->assertExitCode(0);
+
+    expect(DB::table('establishments')->count())->toBe(0)
+        ->and(DB::table('levels')->count())->toBe(1);
 });
 
 test('backup:wipe --table=uid_server_counters vide quand même la table ciblée explicitement', function () {

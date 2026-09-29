@@ -31,14 +31,34 @@ return [
     |--------------------------------------------------------------------------
     |
     | Restent exportées/restaurées normalement, mais absentes du vidage en
-    | masse — la vider casse la génération d'uid_serveur pour toute nouvelle
-    | donnée (compteurs par préfixe, App\Domain\Sync\Services\
-    | UidServerAssigner) tant qu'elle n'est pas manuellement reseedée. Reste
-    | vidable si explicitement ciblée table par table.
+    | masse. Chacune reste vidable si explicitement ciblée table par table.
+    | Une restauration « Toutes les tables » les laisse intactes (statut
+    | not_empty) puisqu'elles n'ont pas été vidées.
     |
     */
     'wipe_excluded_tables' => [
+        // Compteurs par préfixe d'App\Domain\Sync\Services\UidServerAssigner :
+        // les vider casse la génération d'uid_serveur jusqu'à reseed manuel.
         'uid_server_counters',
+
+        // Données génériques communes à toutes les écoles (référentiels
+        // plateforme, sans establishment_id) : un vidage des données des
+        // écoles ne doit pas les emporter.
+        'appreciation_scales',
+        'arabic_levels',
+        'arabic_series',
+        'arabic_subjects',
+        'directions',
+        'domains',
+        'general_information',
+        'inspections',
+        'levels',
+        'nationalites',
+        'primary_subjects',
+        'roles',
+        'school_years',
+        'series',
+        'subjects',
     ],
 
     /*

@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Domain\Academics\Models\Level;
+use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Establishments\Models\Establishment;
 use App\Livewire\Backup\Index;
 use Illuminate\Http\UploadedFile;
@@ -79,6 +81,42 @@ test('vider « Toutes les tables » préserve uid_server_counters', function () 
 
     expect(DB::table('establishments')->count())->toBe(0)
         ->and(DB::table('uid_server_counters')->count())->toBe($rowsBefore);
+});
+
+test('vider « Toutes les tables » préserve les données communes à toutes les écoles', function () {
+    $main = createSaasAdmin('main');
+    Establishment::factory()->create();
+    Level::factory()->create();
+    SchoolYear::factory()->create();
+    $rolesBefore = DB::table('roles')->count();
+
+    Livewire::actingAs($main)
+        ->test(Index::class)
+        ->set('wipeScope', 'all')
+        ->set('wipeConfirmationWord', 'VIDER')
+        ->call('wipe')
+        ->assertHasNoErrors();
+
+    expect(DB::table('establishments')->count())->toBe(0)
+        ->and(DB::table('levels')->count())->toBe(1)
+        ->and(DB::table('school_years')->count())->toBe(1)
+        ->and(DB::table('roles')->count())->toBe($rolesBefore)
+        ->and($rolesBefore)->toBeGreaterThan(0);
+});
+
+test('vider une table commune reste possible en la ciblant explicitement', function () {
+    $main = createSaasAdmin('main');
+    Level::factory()->create();
+
+    Livewire::actingAs($main)
+        ->test(Index::class)
+        ->set('wipeScope', 'table')
+        ->set('wipeTable', 'levels')
+        ->set('wipeConfirmationWord', 'VIDER')
+        ->call('wipe')
+        ->assertHasNoErrors();
+
+    expect(DB::table('levels')->count())->toBe(0);
 });
 
 test('l’upload d’un fichier au mauvais mimetype est rejeté', function () {
