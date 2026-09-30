@@ -6,8 +6,8 @@ namespace App\Livewire\Notifications\SmsMessages;
 
 use App\Domain\Enrollment\Enums\GuardianLinkStatus;
 use App\Domain\Enrollment\Models\Student;
-use App\Domain\Notifications\Jobs\SendSmsJob;
 use App\Domain\Notifications\Models\SmsMessage;
+use App\Domain\Notifications\Services\SmsDispatcher;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -45,7 +45,7 @@ class Send extends Component
             ->get();
     }
 
-    public function send(): void
+    public function send(SmsDispatcher $dispatcher): void
     {
         $this->authorize('create', SmsMessage::class);
 
@@ -73,7 +73,7 @@ class Send extends Component
                 'related_id' => $student->id,
             ]);
 
-            SendSmsJob::dispatch($smsMessage->id, $establishmentId);
+            $dispatcher->dispatch($smsMessage);
         }
 
         $this->confirmation = $guardians->isEmpty()

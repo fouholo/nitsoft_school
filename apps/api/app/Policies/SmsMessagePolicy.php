@@ -29,4 +29,14 @@ class SmsMessagePolicy
     {
         return RolePermissions::can($user->currentRole(), 'guardians.notify');
     }
+
+    /**
+     * Écran « SMS » de la plateforme (solde Orange, consommation par école,
+     * renvoi des SMS en attente) : réservé aux administrateurs SaaS, par le
+     * bypass Gate::before.
+     */
+    public function overview(User $user): bool
+    {
+        return false;
+    }
 }

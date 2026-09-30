@@ -6,20 +6,23 @@ namespace App\Domain\Notifications\Listeners;
 
 use App\Domain\Attendance\Events\StudentMarkedAbsent;
 use App\Domain\Enrollment\Enums\GuardianLinkStatus;
-use App\Domain\Notifications\Jobs\SendSmsJob;
 use App\Domain\Notifications\Models\SmsMessage;
 use App\Domain\Notifications\Models\SmsTemplate;
+use App\Domain\Notifications\Services\SmsDispatcher;
 
 /**
  * Crée une entrée SmsMessage (statut "queued") pour le seul contact
  * principal approuvé de l'élève, puis délègue l'envoi effectif à
- * SendSmsJob — voir docs/superpowers/specs/2026-08-06-parents-autoinscription-design.md.
+ * SmsDispatcher — voir docs/superpowers/specs/2026-08-06-parents-autoinscription-design.md.
  * Aucun envoi si aucun contact principal n'est désigné (pas de repli vers
  * l'ensemble des tuteurs). Écouteur synchrone (l'écriture en base est peu
- * coûteuse) ; seul l'envoi réseau est mis en file d'attente.
+ * coûteuse) ; l'envoi réseau part après la réponse ou dans la file, selon
+ * sms.dispatch.
  */
 class NotifyGuardiansOfAbsence
 {
+    public function __construct(private readonly SmsDispatcher $dispatcher) {}
+
     public function handle(StudentMarkedAbsent $event): void
     {
         if ($event->record->status !== 'absent') {
@@ -63,6 +66,6 @@ class NotifyGuardiansOfAbsence
             'related_id' => $event->record->id,
         ]);
 
-        SendSmsJob::dispatch($smsMessage->id, $establishmentId);
+        $this->dispatcher->dispatch($smsMessage);
     }
 }

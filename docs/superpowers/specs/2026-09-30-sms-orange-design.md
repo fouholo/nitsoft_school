@@ -88,7 +88,7 @@ Documentation Orange : https://developer.orange.com/apis/sms/getting-started
 | 403 (forfait épuisé/expiré, politique) | réessayable | `queued` |
 | 429, 5xx, délai dépassé, erreur réseau | réessayable | `queued` |
 
-Les identifiants et le jeton ne sont jamais écrits dans les journaux ni en base ; les erreurs sont journalisées avec le statut HTTP et le message d'Orange uniquement.
+Les identifiants ne sont jamais écrits dans les journaux ni en base. Le jeton (valable une heure) vit uniquement dans le cache de l'application — qui est la table `cache` avec `CACHE_STORE=database`, le réglage actuel — jamais dans les tables métier ni les journaux. Les erreurs sont journalisées avec le statut HTTP et le message d'Orange uniquement.
 
 ## Écran « SMS » (administrateur SaaS)
 

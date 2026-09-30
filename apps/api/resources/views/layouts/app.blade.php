@@ -129,6 +129,7 @@
                     ['label' => __('Séries arabes'), 'route' => 'arabic.series.index'],
                     ['label' => __('Matières arabes'), 'route' => 'arabic.subjects.index'],
                 ]];
+                $navItems[] = ['type' => 'link', 'label' => __('Suivi des SMS'), 'route' => 'sms.overview', 'active' => 'sms.*', 'icon' => 'chat'];
                 $navItems[] = ['type' => 'link', 'label' => __('Informations générales'), 'route' => 'general-information.edit', 'active' => 'general-information.*', 'icon' => 'document-text'];
                 $navItems[] = ['type' => 'link', 'label' => __('Sauvegarde'), 'route' => 'backup.index', 'active' => 'backup.*', 'icon' => 'lock'];
             }

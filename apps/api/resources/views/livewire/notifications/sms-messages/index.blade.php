@@ -23,12 +23,14 @@
                                 $statusLabel = match ($smsMessage->status) {
                                     'sent' => __('Envoyé'),
                                     'delivered' => __('Délivré'),
-                                    'queued' => __('En file'),
+                                    'queued' => __('En attente'),
                                     'failed' => __('Échoué'),
                                     default => $smsMessage->status,
                                 };
                             @endphp
-                            <span @class([
+                            <span
+                                @if ($smsMessage->error_message && in_array($smsMessage->status, ['queued', 'failed'], true)) title="{{ $smsMessage->error_message }}" @endif
+                                @class([
                                 'rounded-full px-2 py-0.5 text-xs font-medium',
                                 'bg-emerald-100 text-emerald-700' => in_array($smsMessage->status, ['sent', 'delivered']),
                                 'bg-stone-100 text-stone-700' => $smsMessage->status === 'queued',

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Livewire\Notifications\SmsMessages\Index as SmsMessagesIndex;
 use App\Livewire\Notifications\SmsMessages\Send as SmsMessagesSend;
+use App\Livewire\Notifications\SmsOverview;
 use App\Livewire\Notifications\SmsTemplates\Index as SmsTemplatesIndex;
 use Illuminate\Support\Facades\Route;
 
@@ -12,3 +13,5 @@ Route::prefix('notifications')->name('notifications.')->group(function (): void 
     Route::get('/sms-messages', SmsMessagesIndex::class)->name('sms-messages.index');
     Route::get('/sms-messages/create', SmsMessagesSend::class)->name('sms-messages.create');
 });
+
+Route::get('/sms', SmsOverview::class)->name('sms.overview');
