@@ -11,6 +11,7 @@
     @endif
 
     <div class="mt-6 overflow-hidden rounded-lg border border-stone-200 bg-white">
+        <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-stone-200 text-sm">
             <thead class="bg-stone-50">
                 <tr>
@@ -31,7 +32,7 @@
                         </td>
                         <td class="px-4 py-2 text-stone-600">{{ \App\Models\User::roleLabel($member->role) }}</td>
                         <td class="px-4 py-2">
-                            <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium {{ $member->is_active ? 'bg-green-100 text-green-700' : 'bg-stone-100 text-stone-500' }}">
+                            <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium {{ $member->is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-stone-100 text-stone-500' }}">
                                 {{ $member->is_active ? __('Actif') : __('En attente / Inactif') }}
                             </span>
                         </td>
@@ -47,7 +48,7 @@
                                     </button>
                                 @endif
                             @else
-                                <span class="text-xs text-stone-400">{{ __('Vous') }}</span>
+                                <span class="text-xs text-stone-500">{{ __('Vous') }}</span>
                             @endif
                         </td>
                     </tr>
@@ -58,34 +59,35 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 
     <form wire:submit="create" class="mt-6 max-w-md space-y-3 rounded-lg border border-stone-200 bg-white p-4">
         <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500">{{ __('Créer un compte') }}</h2>
 
         <div>
-            <label class="block text-xs font-medium text-stone-700">{{ __('Prénom') }}</label>
-            <input type="text" wire:model="staff_first_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+            <label for="staff_first_name" class="block text-xs font-medium text-stone-700">{{ __('Prénom') }}</label>
+            <input id="staff_first_name" type="text" wire:model="staff_first_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
             @error('staff_first_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
         </div>
         <div>
-            <label class="block text-xs font-medium text-stone-700">{{ __('Nom') }}</label>
-            <input type="text" wire:model="staff_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+            <label for="staff_name" class="block text-xs font-medium text-stone-700">{{ __('Nom') }}</label>
+            <input id="staff_name" type="text" wire:model="staff_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
             @error('staff_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
         </div>
         <div>
-            <label class="block text-xs font-medium text-stone-700">{{ __('E-mail') }}</label>
-            <input type="email" wire:model="staff_email" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+            <label for="staff_email" class="block text-xs font-medium text-stone-700">{{ __('E-mail') }}</label>
+            <input id="staff_email" type="email" wire:model="staff_email" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
             @error('staff_email') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
         </div>
         <div>
-            <label class="block text-xs font-medium text-stone-700">{{ __('Pseudo') }}</label>
-            <input type="text" wire:model="staff_pseudo" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+            <label for="staff_pseudo" class="block text-xs font-medium text-stone-700">{{ __('Pseudo') }}</label>
+            <input id="staff_pseudo" type="text" wire:model="staff_pseudo" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
             @error('staff_pseudo') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
         </div>
         <div>
-            <label class="block text-xs font-medium text-stone-700">{{ __('Rôle') }}</label>
-            <select wire:model="staff_role" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+            <label for="staff_role" class="block text-xs font-medium text-stone-700">{{ __('Rôle') }}</label>
+            <select id="staff_role" wire:model="staff_role" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 <option value="gestionnaire">{{ __('Gestionnaire') }}</option>
                 <option value="enseignant">{{ __('Enseignant') }}</option>
                 <option value="caissier">{{ __('Caissier') }}</option>

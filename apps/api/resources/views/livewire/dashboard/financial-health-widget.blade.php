@@ -2,7 +2,7 @@
     <div class="flex items-center justify-between">
         <p class="text-sm font-semibold uppercase tracking-wide text-stone-500">{{ __('Santé financière') }}</p>
         @if ($schoolYear)
-            <span class="text-xs text-stone-400">{{ __('Année :label', ['label' => $schoolYear->label]) }}</span>
+            <span class="text-xs text-stone-500">{{ __('Année :label', ['label' => $schoolYear->label]) }}</span>
         @endif
         <a href="{{ route('billing.financial-summary.index') }}" wire:navigate class="text-xs font-medium text-orange-700 hover:underline">
             {{ __('Voir le bilan complet') }}

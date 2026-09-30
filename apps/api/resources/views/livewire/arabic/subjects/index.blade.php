@@ -12,20 +12,20 @@
     @if ($showForm)
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-3">
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-stone-700">{{ __('Nom (arabe)') }}</label>
-                <input type="text" wire:model="name" dir="rtl" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="name" class="block text-sm font-medium text-stone-700">{{ __('Nom (arabe)') }}</label>
+                <input id="name" type="text" wire:model="name" dir="rtl" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Abréviation') }}</label>
-                <input type="text" wire:model="abbreviation" maxlength="20" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="abbreviation" class="block text-sm font-medium text-stone-700">{{ __('Abréviation') }}</label>
+                <input id="abbreviation" type="text" wire:model="abbreviation" maxlength="20" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('abbreviation') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-stone-700">{{ __('Nom (français)') }}</label>
-                <input type="text" wire:model="name_fr" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="name_fr" class="block text-sm font-medium text-stone-700">{{ __('Nom (français)') }}</label>
+                <input id="name_fr" type="text" wire:model="name_fr" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('name_fr') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
@@ -64,7 +64,7 @@
                                 <button
                                     wire:click="delete({{ $arabicSubject->id }})"
                                     wire:confirm="{{ __('Supprimer cette matière ?') }}"
-                                    class="ms-3 text-red-500 hover:text-red-700"
+                                    class="ms-3 text-red-600 hover:text-red-800"
                                 >
                                     {{ __('Supprimer') }}
                                 </button>

@@ -6,8 +6,8 @@
 
         <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Année scolaire') }}</label>
-                <select wire:model.live="school_year_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="school_year_id" class="block text-sm font-medium text-stone-700">{{ __('Année scolaire') }}</label>
+                <select id="school_year_id" wire:model.live="school_year_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
                     @foreach ($schoolYears as $schoolYear)
                         <option value="{{ $schoolYear->id }}">{{ $schoolYear->label }}</option>
@@ -16,8 +16,8 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Classe') }}</label>
-                <select wire:model.live="classroom_id" @disabled(! $school_year_id) class="mt-1 block w-full rounded-lg border-stone-300 text-sm disabled:bg-stone-100 disabled:text-stone-500">
+                <label for="classroom_id" class="block text-sm font-medium text-stone-700">{{ __('Classe') }}</label>
+                <select id="classroom_id" wire:model.live="classroom_id" @disabled(! $school_year_id) class="mt-1 block w-full rounded-lg border-stone-300 text-sm disabled:bg-stone-100 disabled:text-stone-500">
                     <option value="">—</option>
                     @foreach ($classrooms as $classroom)
                         <option value="{{ $classroom->id }}">{{ $classroom->name }}</option>
@@ -28,8 +28,8 @@
 
         <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Sexe') }}</label>
-                <select wire:model.live="genderFilter" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="genderFilter" class="block text-sm font-medium text-stone-700">{{ __('Sexe') }}</label>
+                <select id="genderFilter" wire:model.live="genderFilter" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">{{ __('Tous') }}</option>
                     <option value="m">{{ __('Masculin') }}</option>
                     <option value="f">{{ __('Féminin') }}</option>
@@ -37,8 +37,8 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Redoublement') }}</label>
-                <select wire:model.live="repeatingFilter" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="repeatingFilter" class="block text-sm font-medium text-stone-700">{{ __('Redoublement') }}</label>
+                <select id="repeatingFilter" wire:model.live="repeatingFilter" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">{{ __('Tous') }}</option>
                     <option value="1">{{ __('Redoublant') }}</option>
                     <option value="0">{{ __('Non redoublant') }}</option>
@@ -47,8 +47,8 @@
 
             @if ($isSecondaire)
                 <div>
-                    <label class="block text-sm font-medium text-stone-700">{{ __('Statut') }}</label>
-                    <select wire:model.live="assignedFilter" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                    <label for="assignedFilter" class="block text-sm font-medium text-stone-700">{{ __('Statut') }}</label>
+                    <select id="assignedFilter" wire:model.live="assignedFilter" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         <option value="">{{ __('Tous') }}</option>
                         <option value="1">{{ __('Affecté') }}</option>
                         <option value="0">{{ __('Non affecté') }}</option>
@@ -56,8 +56,8 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-stone-700">{{ __('Bourse') }}</label>
-                    <select wire:model.live="scholarshipFilter" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                    <label for="scholarshipFilter" class="block text-sm font-medium text-stone-700">{{ __('Bourse') }}</label>
+                    <select id="scholarshipFilter" wire:model.live="scholarshipFilter" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         <option value="">{{ __('Tous') }}</option>
                         <option value="1">{{ __('Boursier') }}</option>
                         <option value="0">{{ __('Non boursier') }}</option>
@@ -96,8 +96,8 @@
         <h2 class="text-base font-medium text-stone-900">{{ __('Carte d\'identité scolaire — un élève') }}</h2>
 
         <div class="mt-4">
-            <label class="block text-sm font-medium text-stone-700">{{ __('Rechercher un élève') }}</label>
-            <input
+            <label for="studentSearch" class="block text-sm font-medium text-stone-700">{{ __('Rechercher un élève') }}</label>
+            <input id="studentSearch"
                 type="search"
                 wire:model.live.debounce.300ms="studentSearch"
                 placeholder="{{ __('Nom, prénom ou matricule...') }}"
@@ -138,8 +138,8 @@
             <p class="mt-1 text-sm text-stone-500">{{ __("Une lettre par élève en retard de paiement, ou n'ayant pas encore soldé la prochaine échéance, sur l'année scolaire en cours.") }}</p>
 
             <div class="mt-4">
-                <label class="block text-sm font-medium text-stone-700">{{ __('Niveau') }}</label>
-                <select wire:model.live="reminderLevelFilter" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="reminderLevelFilter" class="block text-sm font-medium text-stone-700">{{ __('Niveau') }}</label>
+                <select id="reminderLevelFilter" wire:model.live="reminderLevelFilter" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">{{ __('Tous les niveaux') }}</option>
                     @foreach ($levels as $level)
                         <option value="{{ $level->id }}">{{ $level->level_wording }}</option>

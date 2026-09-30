@@ -71,8 +71,8 @@
     @if ($showForm)
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-4">
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Classe') }}</label>
-                <select wire:model="classroom_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="classroom_id" class="block text-sm font-medium text-stone-700">{{ __('Classe') }}</label>
+                <select id="classroom_id" wire:model="classroom_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
                     @foreach ($classrooms as $classroom)
                         <option value="{{ $classroom->id }}">{{ $classroom->name }}</option>
@@ -82,8 +82,8 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Matière (optionnel)') }}</label>
-                <select wire:model="subject_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="subject_id" class="block text-sm font-medium text-stone-700">{{ __('Matière (optionnel)') }}</label>
+                <select id="subject_id" wire:model="subject_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">{{ __('Appel général') }}</option>
                     @foreach ($subjects as $subject)
                         <option value="{{ $subject->id }}">{{ $subject->name }}</option>
@@ -92,14 +92,14 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Date') }}</label>
-                <input type="date" wire:model="session_date" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="session_date" class="block text-sm font-medium text-stone-700">{{ __('Date') }}</label>
+                <input id="session_date" type="date" wire:model="session_date" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('session_date') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Heure') }}</label>
-                <input type="time" wire:model="started_at" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="started_at" class="block text-sm font-medium text-stone-700">{{ __('Heure') }}</label>
+                <input id="started_at" type="time" wire:model="started_at" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
             </div>
 
             <div class="flex gap-2 sm:col-span-4">

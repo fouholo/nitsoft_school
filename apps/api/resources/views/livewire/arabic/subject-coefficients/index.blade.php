@@ -5,8 +5,8 @@
 
     <div class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-3">
         <div>
-            <label class="block text-sm font-medium text-stone-700">{{ __('Niveau arabe') }}</label>
-            <select wire:model.live="arabic_level_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+            <label for="arabic_level_id" class="block text-sm font-medium text-stone-700">{{ __('Niveau arabe') }}</label>
+            <select id="arabic_level_id" wire:model.live="arabic_level_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 <option value="">—</option>
                 @foreach ($arabicLevels as $arabicLevel)
                     <option value="{{ $arabicLevel->id }}" dir="rtl">{{ $arabicLevel->wording }}</option>
@@ -16,8 +16,8 @@
 
         @if ($this->selectedLevelRequiresSeries())
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Série arabe') }}</label>
-                <select wire:model.live="arabic_serie_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="arabic_serie_id" class="block text-sm font-medium text-stone-700">{{ __('Série arabe') }}</label>
+                <select id="arabic_serie_id" wire:model.live="arabic_serie_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
                     @foreach ($arabicSeries as $arabicSerie)
                         <option value="{{ $arabicSerie->id }}" dir="rtl">{{ $arabicSerie->serie_wording }}</option>
@@ -29,6 +29,7 @@
 
     @if ($arabic_level_id && (! $this->selectedLevelRequiresSeries() || $arabic_serie_id))
         <form wire:submit="save" class="mt-6 overflow-hidden rounded-lg border border-stone-200 bg-white">
+            <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-stone-200 text-sm">
                 <thead class="bg-stone-50">
                     <tr>
@@ -52,6 +53,7 @@
                     @endforelse
                 </tbody>
             </table>
+            </div>
 
             <div class="flex gap-2 border-t border-stone-200 p-4">
                 <button type="submit" class="rounded-lg bg-orange-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-800">

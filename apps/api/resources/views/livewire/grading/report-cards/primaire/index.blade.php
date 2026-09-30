@@ -3,8 +3,8 @@
 
     <div class="mt-4 flex flex-wrap items-end gap-4 rounded-lg border border-stone-200 bg-white p-4">
         <div>
-            <label class="block text-sm font-medium text-stone-700">{{ __('Classe') }}</label>
-            <select wire:model.live="classroom_id" class="mt-1 block w-48 rounded-lg border-stone-300 text-sm">
+            <label for="classroom_id" class="block text-sm font-medium text-stone-700">{{ __('Classe') }}</label>
+            <select id="classroom_id" wire:model.live="classroom_id" class="mt-1 block w-48 rounded-lg border-stone-300 text-sm">
                 <option value="">—</option>
                 @foreach ($classrooms as $classroom)
                     <option value="{{ $classroom->id }}">{{ $classroom->name }}</option>
@@ -13,8 +13,8 @@
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-stone-700">{{ __('N° de composition') }}</label>
-            <input type="number" min="1" max="10" wire:model.live="composition_number" class="mt-1 block w-48 rounded-lg border-stone-300 text-sm">
+            <label for="composition_number" class="block text-sm font-medium text-stone-700">{{ __('N° de composition') }}</label>
+            <input id="composition_number" type="number" min="1" max="10" wire:model.live="composition_number" class="mt-1 block w-48 rounded-lg border-stone-300 text-sm">
         </div>
 
         @can('create', \App\Domain\Grading\Models\ReportCard::class)
@@ -34,6 +34,7 @@
     @enderror
 
     <div class="mt-6 overflow-hidden rounded-lg border border-stone-200 bg-white">
+        <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-stone-200 text-sm">
             <thead class="bg-stone-50">
                 <tr>
@@ -67,5 +68,6 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 </div>

@@ -18,7 +18,7 @@
                             {{ $contact->name }}
                         </label>
                     @empty
-                        <p class="px-2 py-1 text-xs text-stone-400">{{ __('Aucun contact trouvé.') }}</p>
+                        <p class="px-2 py-1 text-xs text-stone-500">{{ __('Aucun contact trouvé.') }}</p>
                     @endforelse
                 </div>
                 @error('selectedParticipantIds') <p class="text-xs text-red-600">{{ $message }}</p> @enderror
@@ -72,7 +72,7 @@
                                 <p class="mb-0.5 text-xs font-semibold text-stone-500">{{ $chatMessage->sender->name }}</p>
                             @endunless
                             <p>{{ $chatMessage->body }}</p>
-                            <p class="mt-1 text-[11px] {{ $isMine ? 'text-orange-100' : 'text-stone-400' }}">{{ $chatMessage->created_at->format('d/m/Y H:i') }}</p>
+                            <p class="mt-1 text-[11px] {{ $isMine ? 'text-orange-100' : 'text-stone-500' }}">{{ $chatMessage->created_at->format('d/m/Y H:i') }}</p>
                         </div>
                     </div>
                 @empty

@@ -5,8 +5,8 @@
 
     <div class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-3">
         <div>
-            <label class="block text-sm font-medium text-stone-700">{{ __('Niveau') }}</label>
-            <select wire:model.live="level_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+            <label for="level_id" class="block text-sm font-medium text-stone-700">{{ __('Niveau') }}</label>
+            <select id="level_id" wire:model.live="level_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 <option value="">—</option>
                 @foreach ($levels as $level)
                     <option value="{{ $level->id }}">{{ $level->level_wording }}</option>
@@ -16,8 +16,8 @@
 
         @if ($this->selectedLevelRequiresSeries())
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Série') }}</label>
-                <select wire:model.live="serie_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="serie_id" class="block text-sm font-medium text-stone-700">{{ __('Série') }}</label>
+                <select id="serie_id" wire:model.live="serie_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
                     @foreach ($series as $serie)
                         <option value="{{ $serie->id }}">{{ $serie->serie_wording }}</option>
@@ -29,6 +29,7 @@
 
     @if ($level_id && (! $this->selectedLevelRequiresSeries() || $serie_id))
         <form wire:submit="save" class="mt-6 overflow-hidden rounded-lg border border-stone-200 bg-white">
+            <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-stone-200 text-sm">
                 <thead class="bg-stone-50">
                     <tr>
@@ -52,6 +53,7 @@
                     @endforelse
                 </tbody>
             </table>
+            </div>
 
             <div class="flex gap-2 border-t border-stone-200 p-4">
                 <button type="submit" class="rounded-lg bg-orange-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-800">

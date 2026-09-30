@@ -12,8 +12,8 @@
     @if ($showForm)
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-4">
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Cycle') }}</label>
-                <select wire:model.live="cycle" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="cycle" class="block text-sm font-medium text-stone-700">{{ __('Cycle') }}</label>
+                <select id="cycle" wire:model.live="cycle" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     @foreach ($cycles as $cycleOption)
                         <option value="{{ $cycleOption->value }}">{{ $cycleOption->label() }}</option>
                     @endforeach
@@ -21,8 +21,8 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Niveau') }}</label>
-                <select wire:model.live="level_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="level_id" class="block text-sm font-medium text-stone-700">{{ __('Niveau') }}</label>
+                <select id="level_id" wire:model.live="level_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
                     @foreach ($levels as $levelOption)
                         <option value="{{ $levelOption->id }}">{{ $levelOption->level }}</option>
@@ -33,8 +33,8 @@
 
             @if ($this->selectedLevelRequiresSeries())
                 <div>
-                    <label class="block text-sm font-medium text-stone-700">{{ __('Série') }}</label>
-                    <select wire:model="serie_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                    <label for="serie_id" class="block text-sm font-medium text-stone-700">{{ __('Série') }}</label>
+                    <select id="serie_id" wire:model="serie_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         <option value="">—</option>
                         @foreach ($series as $serie)
                             <option value="{{ $serie->id }}">{{ $serie->serie }}</option>
@@ -45,8 +45,8 @@
             @endif
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Numéro') }}</label>
-                <select wire:model="numero" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="numero" class="block text-sm font-medium text-stone-700">{{ __('Numéro') }}</label>
+                <select id="numero" wire:model="numero" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
                     @foreach ($this->numeroOptions() as $numeroOption)
                         <option value="{{ $numeroOption }}">{{ $numeroOption }}</option>
@@ -56,14 +56,14 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Capacité') }}</label>
-                <input type="number" wire:model="capacity" min="1" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="capacity" class="block text-sm font-medium text-stone-700">{{ __('Capacité') }}</label>
+                <input id="capacity" type="number" wire:model="capacity" min="1" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('capacity') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Année scolaire') }}</label>
-                <select wire:model="school_year_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="school_year_id" class="block text-sm font-medium text-stone-700">{{ __('Année scolaire') }}</label>
+                <select id="school_year_id" wire:model="school_year_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
                     @foreach ($schoolYears as $schoolYear)
                         <option value="{{ $schoolYear->id }}">{{ $schoolYear->label }}</option>
@@ -84,6 +84,7 @@
     @endif
 
     <div class="mt-6 overflow-hidden rounded-lg border border-stone-200 bg-white">
+        <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-stone-200 text-sm">
             <thead class="bg-stone-50">
                 <tr>
@@ -115,7 +116,7 @@
                                 <button
                                     wire:click="delete({{ $classroom->id }})"
                                     wire:confirm="{{ __('Supprimer cette classe ?') }}"
-                                    class="ms-3 text-red-500 hover:text-red-700"
+                                    class="ms-3 text-red-600 hover:text-red-800"
                                 >
                                     {{ __('Supprimer') }}
                                 </button>
@@ -129,5 +130,6 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 </div>

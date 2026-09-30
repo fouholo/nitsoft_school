@@ -15,6 +15,7 @@
             <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500">{{ __('Établissements du groupe') }}</h2>
 
             <div class="mt-2 overflow-hidden rounded-lg border border-stone-200 bg-white">
+                <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-stone-200 text-sm">
                     <tbody class="divide-y divide-stone-100">
                         @forelse ($establishments as $establishment)
@@ -24,7 +25,7 @@
                                     <button
                                         wire:click="unlinkEstablishment({{ $establishment->id }})"
                                         wire:confirm="{{ __('Détacher cet établissement du groupe ?') }}"
-                                        class="text-red-500 hover:text-red-700"
+                                        class="text-red-600 hover:text-red-800"
                                     >
                                         {{ __('Détacher') }}
                                     </button>
@@ -37,6 +38,7 @@
                         @endforelse
                     </tbody>
                 </table>
+                </div>
             </div>
 
             <form wire:submit="linkEstablishment" class="mt-3 flex gap-2">
@@ -52,7 +54,7 @@
             </form>
             @error('establishment_to_link') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             @if ($availableEstablishments->isEmpty())
-                <p class="mt-2 text-sm text-stone-400">{{ __('Aucun établissement indépendant disponible à rattacher.') }}</p>
+                <p class="mt-2 text-sm text-stone-500">{{ __('Aucun établissement indépendant disponible à rattacher.') }}</p>
             @endif
         </section>
 
@@ -60,6 +62,7 @@
             <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500">{{ __('Fondateurs') }}</h2>
 
             <div class="mt-2 overflow-hidden rounded-lg border border-stone-200 bg-white">
+                <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-stone-200 text-sm">
                     <tbody class="divide-y divide-stone-100">
                         @forelse ($founders as $founder)
@@ -72,7 +75,7 @@
                                     <button
                                         wire:click="removeFounder({{ $founder->id }})"
                                         wire:confirm="{{ __('Retirer ce fondateur du groupe ?') }}"
-                                        class="text-red-500 hover:text-red-700"
+                                        class="text-red-600 hover:text-red-800"
                                     >
                                         {{ __('Retirer') }}
                                     </button>
@@ -85,19 +88,20 @@
                         @endforelse
                     </tbody>
                 </table>
+                </div>
             </div>
 
             <form wire:submit="addFounder" class="mt-3 space-y-2 rounded-lg border border-stone-200 bg-white p-3">
                 <div>
-                    <label class="block text-xs font-medium text-stone-700">{{ __('Nom') }}</label>
-                    <input type="text" wire:model="founder_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                    <label for="founder_name" class="block text-xs font-medium text-stone-700">{{ __('Nom') }}</label>
+                    <input id="founder_name" type="text" wire:model="founder_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     @error('founder_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-stone-700">{{ __('E-mail') }}</label>
-                    <input type="email" wire:model="founder_email" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                    <label for="founder_email" class="block text-xs font-medium text-stone-700">{{ __('E-mail') }}</label>
+                    <input id="founder_email" type="email" wire:model="founder_email" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     @error('founder_email') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-                    <p class="mt-1 text-xs text-stone-400">{{ __("Si un compte existe déjà avec cet e-mail, il est simplement rattaché comme fondateur.") }}</p>
+                    <p class="mt-1 text-xs text-stone-500">{{ __("Si un compte existe déjà avec cet e-mail, il est simplement rattaché comme fondateur.") }}</p>
                 </div>
                 <button type="submit" class="rounded-lg bg-orange-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-800">
                     {{ __('Ajouter le fondateur') }}

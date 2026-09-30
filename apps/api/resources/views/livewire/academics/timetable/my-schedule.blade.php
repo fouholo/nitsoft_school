@@ -25,7 +25,7 @@
                         </td>
 
                         @if ($slot->is_break)
-                            <td colspan="{{ count($days) }}" class="bg-stone-50 px-4 py-2 text-center text-xs uppercase tracking-wide text-stone-400">
+                            <td colspan="{{ count($days) }}" class="bg-stone-50 px-4 py-2 text-center text-xs uppercase tracking-wide text-stone-500">
                                 {{ __('Pause') }}
                             </td>
                         @else

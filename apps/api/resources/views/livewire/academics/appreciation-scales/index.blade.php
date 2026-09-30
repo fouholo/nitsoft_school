@@ -12,14 +12,14 @@
     @if ($showForm)
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-6">
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('% minimum') }}</label>
-                <input type="number" step="1" wire:model="percentage" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="percentage" class="block text-sm font-medium text-stone-700">{{ __('% minimum') }}</label>
+                <input id="percentage" type="number" step="1" wire:model="percentage" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('percentage') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-stone-700">{{ __('Appréciation') }}</label>
-                <input type="text" wire:model="appreciation" placeholder="Excellent" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="appreciation" class="block text-sm font-medium text-stone-700">{{ __('Appréciation') }}</label>
+                <input id="appreciation" type="text" wire:model="appreciation" placeholder="Excellent" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('appreciation') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
@@ -92,7 +92,7 @@
                                 <button
                                     wire:click="delete({{ $appreciationScale->id }})"
                                     wire:confirm="{{ __('Supprimer cette tranche ?') }}"
-                                    class="ms-3 text-red-500 hover:text-red-700"
+                                    class="ms-3 text-red-600 hover:text-red-800"
                                 >
                                     {{ __('Supprimer') }}
                                 </button>

@@ -12,20 +12,20 @@
     @if ($showForm)
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-3">
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-stone-700">{{ __('Titre') }}</label>
-                <input type="text" wire:model="title" placeholder="Composition 1" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="title" class="block text-sm font-medium text-stone-700">{{ __('Titre') }}</label>
+                <input id="title" type="text" wire:model="title" placeholder="Composition 1" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('title') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('N° de composition') }}</label>
-                <input type="number" min="1" max="10" wire:model="composition_number" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="composition_number" class="block text-sm font-medium text-stone-700">{{ __('N° de composition') }}</label>
+                <input id="composition_number" type="number" min="1" max="10" wire:model="composition_number" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('composition_number') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Date') }}</label>
-                <input type="date" wire:model="graded_on" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="graded_on" class="block text-sm font-medium text-stone-700">{{ __('Date') }}</label>
+                <input id="graded_on" type="date" wire:model="graded_on" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('graded_on') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
@@ -43,6 +43,7 @@
     <p class="mt-4 text-sm text-stone-500">{{ __('Une composition est commune à toutes les classes du primaire.') }}</p>
 
     <div class="mt-6 overflow-hidden rounded-lg border border-stone-200 bg-white">
+        <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-stone-200 text-sm">
             <thead class="bg-stone-50">
                 <tr>
@@ -71,5 +72,6 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 </div>

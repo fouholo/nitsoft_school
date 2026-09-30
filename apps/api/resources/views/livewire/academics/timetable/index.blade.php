@@ -31,7 +31,7 @@
                         </td>
 
                         @if ($slot->is_break)
-                            <td colspan="{{ count($days) }}" class="bg-stone-50 px-4 py-2 text-center text-xs uppercase tracking-wide text-stone-400">
+                            <td colspan="{{ count($days) }}" class="bg-stone-50 px-4 py-2 text-center text-xs uppercase tracking-wide text-stone-500">
                                 {{ __('Pause') }}
                             </td>
                         @else
@@ -82,8 +82,8 @@
             </div>
 
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-stone-700">{{ __('Enseignant / matière') }}</label>
-                <select wire:model="teacher_assignment_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="teacher_assignment_id" class="block text-sm font-medium text-stone-700">{{ __('Enseignant / matière') }}</label>
+                <select id="teacher_assignment_id" wire:model="teacher_assignment_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
                     @foreach ($assignments as $assignment)
                         <option value="{{ $assignment->id }}">{{ $assignment->teacher?->name }} — {{ $assignment->subject?->name }}</option>
@@ -93,8 +93,8 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Salle') }}</label>
-                <input type="text" wire:model="room" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="room" class="block text-sm font-medium text-stone-700">{{ __('Salle') }}</label>
+                <input id="room" type="text" wire:model="room" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('room') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 

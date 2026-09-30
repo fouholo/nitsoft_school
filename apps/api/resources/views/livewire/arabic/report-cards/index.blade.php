@@ -3,8 +3,8 @@
 
     <div class="mt-4 flex flex-wrap items-end gap-4 rounded-lg border border-stone-200 bg-white p-4">
         <div>
-            <label class="block text-sm font-medium text-stone-700">{{ __('Niveau arabe') }}</label>
-            <select wire:model.live="arabic_level_id" class="mt-1 block w-48 rounded-lg border-stone-300 text-sm" dir="rtl">
+            <label for="arabic_level_id" class="block text-sm font-medium text-stone-700">{{ __('Niveau arabe') }}</label>
+            <select id="arabic_level_id" wire:model.live="arabic_level_id" class="mt-1 block w-48 rounded-lg border-stone-300 text-sm" dir="rtl">
                 <option value="">—</option>
                 @foreach ($arabicLevels as $arabicLevel)
                     <option value="{{ $arabicLevel->id }}">{{ $arabicLevel->wording }}</option>
@@ -14,8 +14,8 @@
 
         @if ($this->selectedLevelRequiresSeries())
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Série arabe') }}</label>
-                <select wire:model.live="arabic_serie_id" class="mt-1 block w-48 rounded-lg border-stone-300 text-sm" dir="rtl">
+                <label for="arabic_serie_id" class="block text-sm font-medium text-stone-700">{{ __('Série arabe') }}</label>
+                <select id="arabic_serie_id" wire:model.live="arabic_serie_id" class="mt-1 block w-48 rounded-lg border-stone-300 text-sm" dir="rtl">
                     <option value="">—</option>
                     @foreach ($arabicSeries as $arabicSerie)
                         <option value="{{ $arabicSerie->id }}">{{ $arabicSerie->serie_wording }}</option>
@@ -25,8 +25,8 @@
         @endif
 
         <div>
-            <label class="block text-sm font-medium text-stone-700">{{ __('Période') }}</label>
-            <select wire:model.live="arabic_term_id" class="mt-1 block w-48 rounded-lg border-stone-300 text-sm">
+            <label for="arabic_term_id" class="block text-sm font-medium text-stone-700">{{ __('Période') }}</label>
+            <select id="arabic_term_id" wire:model.live="arabic_term_id" class="mt-1 block w-48 rounded-lg border-stone-300 text-sm">
                 <option value="">—</option>
                 @foreach ($arabicTerms as $arabicTerm)
                     <option value="{{ $arabicTerm->id }}">{{ $arabicTerm->label }}</option>

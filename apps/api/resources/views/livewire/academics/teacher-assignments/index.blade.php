@@ -12,8 +12,8 @@
     @if ($showForm)
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-4">
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Enseignant') }}</label>
-                <select wire:model="user_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="user_id" class="block text-sm font-medium text-stone-700">{{ __('Enseignant') }}</label>
+                <select id="user_id" wire:model="user_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
                     @foreach ($teachers as $teacher)
                         <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
@@ -23,8 +23,8 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Classe') }}</label>
-                <select wire:model.live="classroom_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="classroom_id" class="block text-sm font-medium text-stone-700">{{ __('Classe') }}</label>
+                <select id="classroom_id" wire:model.live="classroom_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
                     @foreach ($classrooms as $classroom)
                         <option value="{{ $classroom->id }}">{{ $classroom->name }}</option>
@@ -35,8 +35,8 @@
 
             @if ($this->selectedClassroomCycle() === \App\Domain\Academics\Enums\Cycle::Secondaire)
                 <div>
-                    <label class="block text-sm font-medium text-stone-700">{{ __('Matière') }}</label>
-                    <select wire:model="subject_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                    <label for="subject_id" class="block text-sm font-medium text-stone-700">{{ __('Matière') }}</label>
+                    <select id="subject_id" wire:model="subject_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         <option value="">—</option>
                         @foreach ($subjects as $subject)
                             <option value="{{ $subject->id }}">{{ $subject->name }}</option>
@@ -47,8 +47,8 @@
             @endif
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Année scolaire') }}</label>
-                <select wire:model="school_year_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="school_year_id" class="block text-sm font-medium text-stone-700">{{ __('Année scolaire') }}</label>
+                <select id="school_year_id" wire:model="school_year_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
                     @foreach ($schoolYears as $schoolYear)
                         <option value="{{ $schoolYear->id }}">{{ $schoolYear->label }}</option>
@@ -69,6 +69,7 @@
     @endif
 
     <div class="mt-6 overflow-hidden rounded-lg border border-stone-200 bg-white">
+        <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-stone-200 text-sm">
             <thead class="bg-stone-50">
                 <tr>
@@ -91,7 +92,7 @@
                                 <button
                                     wire:click="delete({{ $assignment->id }})"
                                     wire:confirm="{{ __('Retirer cette affectation ?') }}"
-                                    class="text-red-500 hover:text-red-700"
+                                    class="text-red-600 hover:text-red-800"
                                 >
                                     {{ __('Retirer') }}
                                 </button>
@@ -105,5 +106,6 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 </div>

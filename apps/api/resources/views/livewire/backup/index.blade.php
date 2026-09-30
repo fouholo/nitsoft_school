@@ -31,8 +31,8 @@
 
             <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div>
-                    <label class="block text-sm font-medium text-stone-700">{{ __('Périmètre') }}</label>
-                    <select wire:model.live="wipeScope" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                    <label for="wipeScope" class="block text-sm font-medium text-stone-700">{{ __('Périmètre') }}</label>
+                    <select id="wipeScope" wire:model.live="wipeScope" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         <option value="all">{{ __('Toutes les tables') }}</option>
                         <option value="table">{{ __('Une table précise') }}</option>
                     </select>
@@ -40,8 +40,8 @@
 
                 @if ($wipeScope === 'table')
                     <div>
-                        <label class="block text-sm font-medium text-stone-700">{{ __('Table') }}</label>
-                        <select wire:model="wipeTable" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <label for="wipeTable" class="block text-sm font-medium text-stone-700">{{ __('Table') }}</label>
+                        <select id="wipeTable" wire:model="wipeTable" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                             <option value="">—</option>
                             @foreach ($tables as $table)
                                 <option value="{{ $table }}">{{ $table }}</option>
@@ -51,10 +51,10 @@
                 @endif
 
                 <div>
-                    <label class="block text-sm font-medium text-stone-700">
+                    <label for="wipeConfirmationWord" class="block text-sm font-medium text-stone-700">
                         {{ __('Tapez :word pour confirmer', ['word' => 'VIDER']) }}
                     </label>
-                    <input type="text" wire:model.live="wipeConfirmationWord" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                    <input id="wipeConfirmationWord" type="text" wire:model.live="wipeConfirmationWord" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     @error('wipeConfirmationWord') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
             </div>
@@ -87,14 +87,14 @@
 
             <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-4">
                 <div>
-                    <label class="block text-sm font-medium text-stone-700">{{ __('Archive (.zip)') }}</label>
-                    <input type="file" wire:model="archive" class="mt-1 block w-full text-sm">
+                    <label for="archive" class="block text-sm font-medium text-stone-700">{{ __('Archive (.zip)') }}</label>
+                    <input id="archive" type="file" wire:model="archive" class="mt-1 block w-full text-sm">
                     @error('archive') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-stone-700">{{ __('Périmètre') }}</label>
-                    <select wire:model.live="importScope" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                    <label for="importScope" class="block text-sm font-medium text-stone-700">{{ __('Périmètre') }}</label>
+                    <select id="importScope" wire:model.live="importScope" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         <option value="all">{{ __('Toutes les tables') }}</option>
                         <option value="table">{{ __('Une table précise') }}</option>
                     </select>
@@ -102,8 +102,8 @@
 
                 @if ($importScope === 'table')
                     <div>
-                        <label class="block text-sm font-medium text-stone-700">{{ __('Table') }}</label>
-                        <select wire:model="importTable" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <label for="importTable" class="block text-sm font-medium text-stone-700">{{ __('Table') }}</label>
+                        <select id="importTable" wire:model="importTable" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                             <option value="">—</option>
                             @foreach ($tables as $table)
                                 <option value="{{ $table }}">{{ $table }}</option>
@@ -113,10 +113,10 @@
                 @endif
 
                 <div>
-                    <label class="block text-sm font-medium text-stone-700">
+                    <label for="importConfirmationWord" class="block text-sm font-medium text-stone-700">
                         {{ __('Tapez :word pour confirmer', ['word' => 'RESTAURER']) }}
                     </label>
-                    <input type="text" wire:model.live="importConfirmationWord" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                    <input id="importConfirmationWord" type="text" wire:model.live="importConfirmationWord" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     @error('importConfirmationWord') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
             </div>

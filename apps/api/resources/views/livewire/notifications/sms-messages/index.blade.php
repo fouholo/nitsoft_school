@@ -2,6 +2,7 @@
     <h1 class="text-2xl font-semibold text-stone-900">{{ __('Journal SMS') }}</h1>
 
     <div class="mt-6 overflow-hidden rounded-lg border border-stone-200 bg-white">
+        <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-stone-200 text-sm">
             <thead class="bg-stone-50">
                 <tr>
@@ -44,6 +45,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
 
         <div class="border-t border-stone-200 px-4 py-3">
             {{ $smsMessages->links() }}

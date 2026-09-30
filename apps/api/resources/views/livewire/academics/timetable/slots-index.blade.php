@@ -12,26 +12,26 @@
     @if ($showForm)
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-5">
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Libellé') }}</label>
-                <input type="text" wire:model="label" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="label" class="block text-sm font-medium text-stone-700">{{ __('Libellé') }}</label>
+                <input id="label" type="text" wire:model="label" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('label') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Heure de début') }}</label>
-                <input type="time" wire:model="start_time" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="start_time" class="block text-sm font-medium text-stone-700">{{ __('Heure de début') }}</label>
+                <input id="start_time" type="time" wire:model="start_time" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('start_time') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Heure de fin') }}</label>
-                <input type="time" wire:model="end_time" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="end_time" class="block text-sm font-medium text-stone-700">{{ __('Heure de fin') }}</label>
+                <input id="end_time" type="time" wire:model="end_time" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('end_time') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Ordre') }}</label>
-                <input type="number" wire:model="sequence" min="1" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="sequence" class="block text-sm font-medium text-stone-700">{{ __('Ordre') }}</label>
+                <input id="sequence" type="number" wire:model="sequence" min="1" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('sequence') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
@@ -54,6 +54,7 @@
     @endif
 
     <div class="mt-6 overflow-hidden rounded-lg border border-stone-200 bg-white">
+        <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-stone-200 text-sm">
             <thead class="bg-stone-50">
                 <tr>
@@ -83,7 +84,7 @@
                                 <button
                                     wire:click="delete({{ $slot->id }})"
                                     wire:confirm="{{ __('Supprimer ce créneau ?') }}"
-                                    class="ms-3 text-red-500 hover:text-red-700"
+                                    class="ms-3 text-red-600 hover:text-red-800"
                                 >
                                     {{ __('Supprimer') }}
                                 </button>
@@ -97,5 +98,6 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 </div>

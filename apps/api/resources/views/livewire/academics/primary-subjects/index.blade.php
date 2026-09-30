@@ -12,8 +12,8 @@
     @if ($showForm)
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-4">
             <div class="sm:col-span-3">
-                <label class="block text-sm font-medium text-stone-700">{{ __('Matière') }}</label>
-                <select wire:model="subject_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="subject_id" class="block text-sm font-medium text-stone-700">{{ __('Matière') }}</label>
+                <select id="subject_id" wire:model="subject_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
                     @foreach ($subjects as $subjectOption)
                         <option value="{{ $subjectOption->id }}">{{ $subjectOption->name }}</option>
@@ -28,11 +28,11 @@
                     @foreach (['cp1' => 'CP1', 'cp2' => 'CP2', 'ce1' => 'CE1', 'ce2' => 'CE2', 'cm1' => 'CM1', 'cm2' => 'CM2'] as $suffix => $label)
                         <div class="rounded-lg border border-stone-200 p-2">
                             <p class="text-xs font-medium text-stone-700">{{ $label }}</p>
-                            <label class="mt-1 block text-xs text-stone-500">{{ __('Coef.') }}</label>
-                            <input type="number" step="0.5" wire:model="coefficient_{{ $suffix }}" class="mt-0.5 block w-full rounded-lg border-stone-300 text-sm">
+                            <label for="coefficient_{{ $suffix }}" class="mt-1 block text-xs text-stone-500">{{ __('Coef.') }}</label>
+                            <input id="coefficient_{{ $suffix }}" type="number" step="0.5" wire:model="coefficient_{{ $suffix }}" class="mt-0.5 block w-full rounded-lg border-stone-300 text-sm">
                             @error('coefficient_'.$suffix) <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-                            <label class="mt-1 block text-xs text-stone-500">{{ __('Barème') }}</label>
-                            <input type="number" step="1" wire:model="bareme_{{ $suffix }}" class="mt-0.5 block w-full rounded-lg border-stone-300 text-sm">
+                            <label for="bareme_{{ $suffix }}" class="mt-1 block text-xs text-stone-500">{{ __('Barème') }}</label>
+                            <input id="bareme_{{ $suffix }}" type="number" step="1" wire:model="bareme_{{ $suffix }}" class="mt-0.5 block w-full rounded-lg border-stone-300 text-sm">
                             @error('bareme_'.$suffix) <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                         </div>
                     @endforeach
@@ -64,7 +64,7 @@
                     <th class="px-4 py-2 text-start font-medium text-stone-500">CM2</th>
                     <th class="px-4 py-2"></th>
                 </tr>
-                <tr class="bg-stone-50 text-xs text-stone-400">
+                <tr class="bg-stone-50 text-xs text-stone-500">
                     <th class="px-4 pb-2 text-start font-normal"></th>
                     <th class="px-4 pb-2 text-start font-normal"></th>
                     <th class="px-4 pb-2 text-start font-normal" colspan="6">{{ __('coefficient / barème') }}</th>
@@ -89,7 +89,7 @@
                                 <button
                                     wire:click="delete({{ $primarySubject->id }})"
                                     wire:confirm="{{ __('Supprimer cette matière ?') }}"
-                                    class="ms-3 text-red-500 hover:text-red-700"
+                                    class="ms-3 text-red-600 hover:text-red-800"
                                 >
                                     {{ __('Supprimer') }}
                                 </button>

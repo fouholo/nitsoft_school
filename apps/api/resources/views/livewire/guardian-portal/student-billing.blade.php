@@ -8,15 +8,15 @@
     @else
         <div class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-3">
             <div>
-                <p class="text-xs font-medium uppercase tracking-wide text-stone-400">{{ __('Total dû') }}</p>
+                <p class="text-xs font-medium uppercase tracking-wide text-stone-500">{{ __('Total dû') }}</p>
                 <p class="text-sm text-stone-900">{{ money($totalDue) }}</p>
             </div>
             <div>
-                <p class="text-xs font-medium uppercase tracking-wide text-stone-400">{{ __('Total versé') }}</p>
+                <p class="text-xs font-medium uppercase tracking-wide text-stone-500">{{ __('Total versé') }}</p>
                 <p class="text-sm text-stone-900">{{ money($totalPaid) }}</p>
             </div>
             <div>
-                <p class="text-xs font-medium uppercase tracking-wide text-stone-400">{{ __('Solde') }}</p>
+                <p class="text-xs font-medium uppercase tracking-wide text-stone-500">{{ __('Solde') }}</p>
                 @if ($balance > 0)
                     <span class="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">{{ __('Reste :amount', ['amount' => money($balance)]) }}</span>
                 @else
@@ -28,6 +28,7 @@
         <h2 class="mt-8 text-sm font-semibold uppercase tracking-wide text-stone-500">{{ __('Détail des montants dus') }}</h2>
 
         <div class="mt-2 overflow-hidden rounded-lg border border-stone-200 bg-white">
+            <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-stone-200 text-sm">
                 <thead class="bg-stone-50">
                     <tr>
@@ -51,11 +52,13 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
         </div>
 
         <h2 class="mt-8 text-sm font-semibold uppercase tracking-wide text-stone-500">{{ __('Paiements') }}</h2>
 
         <div class="mt-2 overflow-hidden rounded-lg border border-stone-200 bg-white">
+            <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-stone-200 text-sm">
                 <thead class="bg-stone-50">
                     <tr>
@@ -80,6 +83,7 @@
                     @endforelse
                 </tbody>
             </table>
+            </div>
         </div>
     @endif
 </div>

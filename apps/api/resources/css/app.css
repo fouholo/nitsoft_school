@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import '@fontsource-variable/instrument-sans/wght.css';
 @plugin '@tailwindcss/forms';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -7,6 +8,31 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    /* Police auto-hébergée (paquet @fontsource-variable) : aucune requête vers
+       un service tiers. L'arabe, absent de cette police, retombe sur la
+       police système. */
+    --font-sans: 'Instrument Sans Variable', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
+        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+/* Le plugin forms colore le focus et les cases cochées en bleu (#2563eb).
+   Règles hors couche, pour primer sur celles du plugin : le focus et la
+   coche reprennent le terracotta du reste de l'interface (voir DESIGN.md). */
+input:focus,
+select:focus,
+textarea:focus {
+    --tw-ring-color: var(--color-orange-600);
+    border-color: var(--color-orange-600);
+}
+
+[type='checkbox'],
+[type='radio'] {
+    color: var(--color-orange-700);
+}
+
+/* Un élément en position absolue (ex. le texte .sr-only d'un en-tête de
+   colonne) échappe à un conteneur de défilement non positionné et élargit
+   toute la page sur mobile : le conteneur devient sa référence. */
+.overflow-x-auto {
+    position: relative;
 }

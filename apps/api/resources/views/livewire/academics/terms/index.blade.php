@@ -12,32 +12,32 @@
     @if ($showForm)
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-5">
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Libellé') }}</label>
-                <input type="text" wire:model="label" placeholder="Trimestre 1" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="label" class="block text-sm font-medium text-stone-700">{{ __('Libellé') }}</label>
+                <input id="label" type="text" wire:model="label" placeholder="Trimestre 1" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('label') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Ordre') }}</label>
-                <input type="number" min="1" wire:model="sequence" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="sequence" class="block text-sm font-medium text-stone-700">{{ __('Ordre') }}</label>
+                <input id="sequence" type="number" min="1" wire:model="sequence" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('sequence') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Début') }}</label>
-                <input type="date" wire:model="starts_on" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="starts_on" class="block text-sm font-medium text-stone-700">{{ __('Début') }}</label>
+                <input id="starts_on" type="date" wire:model="starts_on" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('starts_on') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Fin') }}</label>
-                <input type="date" wire:model="ends_on" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="ends_on" class="block text-sm font-medium text-stone-700">{{ __('Fin') }}</label>
+                <input id="ends_on" type="date" wire:model="ends_on" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('ends_on') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Année scolaire') }}</label>
-                <select wire:model="school_year_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="school_year_id" class="block text-sm font-medium text-stone-700">{{ __('Année scolaire') }}</label>
+                <select id="school_year_id" wire:model="school_year_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
                     @foreach ($schoolYears as $schoolYear)
                         <option value="{{ $schoolYear->id }}">{{ $schoolYear->label }}</option>
@@ -58,6 +58,7 @@
     @endif
 
     <div class="mt-6 overflow-hidden rounded-lg border border-stone-200 bg-white">
+        <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-stone-200 text-sm">
             <thead class="bg-stone-50">
                 <tr>
@@ -81,7 +82,7 @@
                                 <button
                                     wire:click="delete({{ $term->id }})"
                                     wire:confirm="{{ __('Supprimer cette période ?') }}"
-                                    class="ms-3 text-red-500 hover:text-red-700"
+                                    class="ms-3 text-red-600 hover:text-red-800"
                                 >
                                     {{ __('Supprimer') }}
                                 </button>
@@ -95,5 +96,6 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 </div>

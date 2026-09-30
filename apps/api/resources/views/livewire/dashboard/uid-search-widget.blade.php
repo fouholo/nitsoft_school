@@ -3,9 +3,9 @@
     x-on:uid-search-failed.window="$nextTick(() => $refs.uidInput.focus())"
     class="mt-6 rounded-2xl border border-stone-200 bg-white p-5"
 >
-    <label class="text-sm font-medium text-stone-700">{{ __('Rechercher un élève (UID / code-barres)') }}</label>
+    <label for="uid" class="text-sm font-medium text-stone-700">{{ __('Rechercher un élève (UID / code-barres)') }}</label>
     <form wire:submit="search" class="mt-2">
-        <input
+        <input id="uid"
             type="text"
             wire:model="uid"
             x-ref="uidInput"

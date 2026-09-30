@@ -18,8 +18,8 @@
 
     <div class="mt-4 flex flex-wrap items-end gap-4">
         <div>
-            <label class="sr-only">{{ __('Année scolaire') }}</label>
-            <select wire:model.live="school_year_id" class="rounded-lg border-stone-300 text-sm">
+            <label for="school_year_id" class="sr-only">{{ __('Année scolaire') }}</label>
+            <select id="school_year_id" wire:model.live="school_year_id" class="rounded-lg border-stone-300 text-sm">
                 <option value="">—</option>
                 @foreach ($schoolYears as $schoolYear)
                     <option value="{{ $schoolYear->id }}">{{ $schoolYear->label }}</option>
@@ -28,8 +28,8 @@
         </div>
 
         <div>
-            <label class="sr-only">{{ __('Niveau') }}</label>
-            <select wire:model.live="levelFilter" class="rounded-lg border-stone-300 text-sm">
+            <label for="levelFilter" class="sr-only">{{ __('Niveau') }}</label>
+            <select id="levelFilter" wire:model.live="levelFilter" class="rounded-lg border-stone-300 text-sm">
                 <option value="">{{ __('Tous les niveaux') }}</option>
                 @foreach ($levels as $level)
                     <option value="{{ $level->id }}">{{ $level->level_wording }}</option>
@@ -38,8 +38,8 @@
         </div>
 
         <div>
-            <label class="sr-only">{{ __('Statut') }}</label>
-            <select wire:model.live="statusFilter" class="rounded-lg border-stone-300 text-sm">
+            <label for="statusFilter" class="sr-only">{{ __('Statut') }}</label>
+            <select id="statusFilter" wire:model.live="statusFilter" class="rounded-lg border-stone-300 text-sm">
                 <option value="">{{ __('Tous les statuts') }}</option>
                 <option value="late">{{ __('En retard') }}</option>
                 <option value="ontime">{{ __('À jour') }}</option>
@@ -48,8 +48,8 @@
         </div>
 
         <div>
-            <label class="sr-only">{{ __('Rechercher un élève') }}</label>
-            <input
+            <label for="search" class="sr-only">{{ __('Rechercher un élève') }}</label>
+            <input id="search"
                 type="search"
                 wire:model.live.debounce.400ms="search"
                 placeholder="{{ __('Rechercher un élève…') }}"
@@ -69,7 +69,7 @@
                         <th scope="col" class="whitespace-nowrap px-4 py-2 text-start font-medium text-stone-500">{{ __('Classe') }}</th>
                         <th scope="col" class="whitespace-nowrap px-4 py-2 text-end font-medium text-stone-500">{{ __('Dû à ce jour') }}</th>
                         <th scope="col" class="whitespace-nowrap px-4 py-2 text-end font-medium text-stone-500">{{ __('Payé') }}</th>
-                        <th scope="col" class="whitespace-nowrap px-4 py-2 text-end font-medium text-stone-500">{{ __('Solde') }} <span class="font-normal text-stone-400" title="{{ __('Triés du solde le plus élevé au plus faible') }}">▾</span></th>
+                        <th scope="col" class="whitespace-nowrap px-4 py-2 text-end font-medium text-stone-500">{{ __('Solde') }} <span class="font-normal text-stone-500" title="{{ __('Triés du solde le plus élevé au plus faible') }}">▾</span></th>
                         @if ($canRecordPayments)
                             <th scope="col" class="whitespace-nowrap px-4 py-2"><span class="sr-only">{{ __('Actions') }}</span></th>
                         @endif

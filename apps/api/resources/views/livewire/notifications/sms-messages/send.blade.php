@@ -9,8 +9,8 @@
 
     <form wire:submit="send" class="mt-6 max-w-lg space-y-4 rounded-lg border border-stone-200 bg-white p-4">
         <div>
-            <label class="block text-sm font-medium text-stone-700">{{ __('Élève') }}</label>
-            <select wire:model.live="student_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+            <label for="student_id" class="block text-sm font-medium text-stone-700">{{ __('Élève') }}</label>
+            <select id="student_id" wire:model.live="student_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 <option value="">{{ __('Sélectionner…') }}</option>
                 @foreach ($students as $student)
                     <option value="{{ $student->id }}">{{ $student->last_name }} {{ $student->first_name }}</option>
@@ -30,8 +30,8 @@
         @endif
 
         <div>
-            <label class="block text-sm font-medium text-stone-700">{{ __('Message') }}</label>
-            <textarea wire:model="body" rows="4" class="mt-1 block w-full rounded-lg border-stone-300 text-sm" maxlength="480"></textarea>
+            <label for="body" class="block text-sm font-medium text-stone-700">{{ __('Message') }}</label>
+            <textarea id="body" wire:model="body" rows="4" class="mt-1 block w-full rounded-lg border-stone-300 text-sm" maxlength="480"></textarea>
             @error('body') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
         </div>
 

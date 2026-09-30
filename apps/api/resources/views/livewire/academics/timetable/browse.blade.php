@@ -20,6 +20,7 @@
 
     @if ($tab === 'classes')
         <div class="mt-4 overflow-hidden rounded-lg border border-stone-200 bg-white">
+            <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-stone-200 text-sm">
                 <thead class="bg-stone-50">
                     <tr>
@@ -44,9 +45,11 @@
                     @endforelse
                 </tbody>
             </table>
+            </div>
         </div>
     @else
         <div class="mt-4 overflow-hidden rounded-lg border border-stone-200 bg-white">
+            <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-stone-200 text-sm">
                 <thead class="bg-stone-50">
                     <tr>
@@ -71,6 +74,7 @@
                     @endforelse
                 </tbody>
             </table>
+            </div>
         </div>
     @endif
 </div>

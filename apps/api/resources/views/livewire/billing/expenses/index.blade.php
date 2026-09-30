@@ -11,8 +11,8 @@
 
     <div class="mt-4 flex flex-wrap items-end justify-between gap-4">
         <div>
-            <label class="block text-sm font-medium text-stone-700">{{ __('Mois') }}</label>
-            <input type="month" wire:model.live="month" class="mt-1 rounded-lg border-stone-300 text-sm">
+            <label for="month" class="block text-sm font-medium text-stone-700">{{ __('Mois') }}</label>
+            <input id="month" type="month" wire:model.live="month" class="mt-1 rounded-lg border-stone-300 text-sm">
         </div>
 
         <div class="text-end">
@@ -24,20 +24,20 @@
     @if ($showForm)
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-3">
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-stone-700">{{ __('Libellé') }}</label>
-                <input type="text" wire:model="label" placeholder="{{ __('Fournitures de bureau') }}" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="label" class="block text-sm font-medium text-stone-700">{{ __('Libellé') }}</label>
+                <input id="label" type="text" wire:model="label" placeholder="{{ __('Fournitures de bureau') }}" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('label') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Montant') }}</label>
-                <input type="number" step="0.01" wire:model="amount" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="amount" class="block text-sm font-medium text-stone-700">{{ __('Montant') }}</label>
+                <input id="amount" type="number" step="0.01" wire:model="amount" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('amount') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Date') }}</label>
-                <input type="date" wire:model="spent_at" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="spent_at" class="block text-sm font-medium text-stone-700">{{ __('Date') }}</label>
+                <input id="spent_at" type="date" wire:model="spent_at" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('spent_at') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 

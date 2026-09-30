@@ -11,8 +11,8 @@
 
     <div class="mt-4 flex flex-wrap items-end gap-4">
         <div>
-            <label class="block text-xs font-medium text-stone-500">{{ __('Année scolaire') }}</label>
-            <select wire:model.live="school_year_id" @disabled($useCustomRange) class="mt-1 rounded-lg border-stone-300 text-sm disabled:bg-stone-100 disabled:text-stone-500">
+            <label for="school_year_id" class="block text-xs font-medium text-stone-500">{{ __('Année scolaire') }}</label>
+            <select id="school_year_id" wire:model.live="school_year_id" @disabled($useCustomRange) class="mt-1 rounded-lg border-stone-300 text-sm disabled:bg-stone-100 disabled:text-stone-500">
                 <option value="">—</option>
                 @foreach ($schoolYears as $schoolYear)
                     <option value="{{ $schoolYear->id }}">{{ $schoolYear->label }}</option>
@@ -27,12 +27,12 @@
 
         @if ($useCustomRange)
             <div>
-                <label class="block text-xs font-medium text-stone-500">{{ __('Du') }}</label>
-                <input type="date" wire:model.live="start_date" class="mt-1 rounded-lg border-stone-300 text-sm">
+                <label for="start_date" class="block text-xs font-medium text-stone-500">{{ __('Du') }}</label>
+                <input id="start_date" type="date" wire:model.live="start_date" class="mt-1 rounded-lg border-stone-300 text-sm">
             </div>
             <div>
-                <label class="block text-xs font-medium text-stone-500">{{ __('Au') }}</label>
-                <input type="date" wire:model.live="end_date" class="mt-1 rounded-lg border-stone-300 text-sm">
+                <label for="end_date" class="block text-xs font-medium text-stone-500">{{ __('Au') }}</label>
+                <input id="end_date" type="date" wire:model.live="end_date" class="mt-1 rounded-lg border-stone-300 text-sm">
             </div>
         @endif
 
@@ -104,6 +104,7 @@
                 @endforeach
 
                 <div class="overflow-hidden rounded-lg border border-stone-300 bg-white">
+                    <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
                         <tbody>
                             <tr>
@@ -114,6 +115,7 @@
                             </tr>
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         @endif

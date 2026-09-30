@@ -24,6 +24,7 @@
             <section class="mt-6">
                 <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500">{{ __('Établissements du groupe') }}</h2>
                 <div class="mt-2 overflow-hidden rounded-lg border border-stone-200 bg-white">
+                    <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-stone-200 text-sm">
                         <tbody class="divide-y divide-stone-100">
                             @forelse ($establishments as $groupEstablishment)
@@ -36,18 +37,19 @@
                             @endforelse
                         </tbody>
                     </table>
+                    </div>
                 </div>
 
                 <form wire:submit="createEstablishment" class="mt-3 space-y-2 rounded-lg border border-stone-200 bg-white p-3">
                     <h3 class="text-xs font-semibold uppercase tracking-wide text-stone-500">{{ __('Créer un établissement') }}</h3>
                     <div>
-                        <label class="block text-xs font-medium text-stone-700">{{ __('Nom') }}</label>
-                        <input type="text" wire:model="new_establishment_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <label for="new_establishment_name" class="block text-xs font-medium text-stone-700">{{ __('Nom') }}</label>
+                        <input id="new_establishment_name" type="text" wire:model="new_establishment_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         @error('new_establishment_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-stone-700">{{ __('Type') }}</label>
-                        <select wire:model.live="new_establishment_type" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <label for="new_establishment_type" class="block text-xs font-medium text-stone-700">{{ __('Type') }}</label>
+                        <select id="new_establishment_type" wire:model.live="new_establishment_type" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                             <option value="">—</option>
                             @foreach ($establishmentTypes as $typeOption)
                                 <option value="{{ $typeOption->value }}">{{ $typeOption->label() }}</option>
@@ -56,24 +58,24 @@
                         @error('new_establishment_type') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-stone-700">{{ __('Adresse') }}</label>
-                        <input type="text" wire:model="new_establishment_address" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <label for="new_establishment_address" class="block text-xs font-medium text-stone-700">{{ __('Adresse') }}</label>
+                        <input id="new_establishment_address" type="text" wire:model="new_establishment_address" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         @error('new_establishment_address') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-stone-700">{{ __('Téléphone') }}</label>
-                        <input type="text" wire:model="new_establishment_phone" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <label for="new_establishment_phone" class="block text-xs font-medium text-stone-700">{{ __('Téléphone') }}</label>
+                        <input id="new_establishment_phone" type="text" wire:model="new_establishment_phone" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         @error('new_establishment_phone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-stone-700">{{ __('E-mail') }}</label>
-                        <input type="email" wire:model="new_establishment_email" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <label for="new_establishment_email" class="block text-xs font-medium text-stone-700">{{ __('E-mail') }}</label>
+                        <input id="new_establishment_email" type="email" wire:model="new_establishment_email" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         @error('new_establishment_email') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     @if ($new_establishment_type === \App\Domain\Establishments\Enums\EstablishmentType::PrescolairePrimaire->value)
                         <div>
-                            <label class="block text-xs font-medium text-stone-700">{{ __('Inspection') }}</label>
-                            <select wire:model="new_establishment_inspection_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                            <label for="new_establishment_inspection_id" class="block text-xs font-medium text-stone-700">{{ __('Inspection') }}</label>
+                            <select id="new_establishment_inspection_id" wire:model="new_establishment_inspection_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                                 <option value="">—</option>
                                 @foreach ($inspections as $inspection)
                                     <option value="{{ $inspection->id }}">{{ $inspection->codeiep }} — {{ $inspection->inspection_name }}</option>
@@ -83,8 +85,8 @@
                         </div>
                     @elseif ($new_establishment_type === \App\Domain\Establishments\Enums\EstablishmentType::Secondaire->value)
                         <div>
-                            <label class="block text-xs font-medium text-stone-700">{{ __('Direction') }}</label>
-                            <select wire:model="new_establishment_direction_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                            <label for="new_establishment_direction_id" class="block text-xs font-medium text-stone-700">{{ __('Direction') }}</label>
+                            <select id="new_establishment_direction_id" wire:model="new_establishment_direction_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                                 <option value="">—</option>
                                 @foreach ($directions as $direction)
                                     <option value="{{ $direction->id }}">{{ $direction->code }} — {{ $direction->direction_name }}</option>
@@ -94,28 +96,28 @@
                         </div>
                     @endif
                     <div>
-                        <label class="block text-xs font-medium text-stone-700">{{ __("Code d'ouverture") }}</label>
-                        <input type="text" wire:model="new_establishment_opening_code" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <label for="new_establishment_opening_code" class="block text-xs font-medium text-stone-700">{{ __("Code d'ouverture") }}</label>
+                        <input id="new_establishment_opening_code" type="text" wire:model="new_establishment_opening_code" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         @error('new_establishment_opening_code') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-stone-700">{{ __('Code DSPS') }}</label>
-                        <input type="text" wire:model="new_establishment_dsps_code" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <label for="new_establishment_dsps_code" class="block text-xs font-medium text-stone-700">{{ __('Code DSPS') }}</label>
+                        <input id="new_establishment_dsps_code" type="text" wire:model="new_establishment_dsps_code" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         @error('new_establishment_dsps_code') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-stone-700">{{ __('Latitude') }}</label>
-                        <input type="text" wire:model="new_establishment_latitude" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <label for="new_establishment_latitude" class="block text-xs font-medium text-stone-700">{{ __('Latitude') }}</label>
+                        <input id="new_establishment_latitude" type="text" wire:model="new_establishment_latitude" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         @error('new_establishment_latitude') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-stone-700">{{ __('Longitude') }}</label>
-                        <input type="text" wire:model="new_establishment_longitude" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <label for="new_establishment_longitude" class="block text-xs font-medium text-stone-700">{{ __('Longitude') }}</label>
+                        <input id="new_establishment_longitude" type="text" wire:model="new_establishment_longitude" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         @error('new_establishment_longitude') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-stone-700">{{ __('Logo') }}</label>
-                        <input type="file" wire:model="new_establishment_logo" class="mt-1 block w-full text-sm">
+                        <label for="new_establishment_logo" class="block text-xs font-medium text-stone-700">{{ __('Logo') }}</label>
+                        <input id="new_establishment_logo" type="file" wire:model="new_establishment_logo" class="mt-1 block w-full text-sm">
                         @error('new_establishment_logo') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <label class="flex items-center gap-2 text-sm text-stone-600">
@@ -131,6 +133,7 @@
             <section class="mt-6">
                 <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500">{{ __('Fondateurs') }}</h2>
                 <div class="mt-2 overflow-hidden rounded-lg border border-stone-200 bg-white">
+                    <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-stone-200 text-sm">
                         <tbody class="divide-y divide-stone-100">
                             @forelse ($fondateurs as $fondateur)
@@ -143,7 +146,7 @@
                                         @endif
                                     </td>
                                     <td class="px-4 py-2">
-                                        <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium {{ $fondateur->is_active ? 'bg-green-100 text-green-700' : 'bg-stone-100 text-stone-500' }}">
+                                        <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium {{ $fondateur->is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-stone-100 text-stone-500' }}">
                                             {{ $fondateur->is_active ? __('Actif') : __('En attente / Inactif') }}
                                         </span>
                                     </td>
@@ -155,7 +158,7 @@
                                                 <button wire:click="activateFondateur({{ $fondateur->id }})" class="text-orange-700 hover:text-orange-900">{{ __('Activer') }}</button>
                                             @endif
                                         @else
-                                            <span class="text-xs text-stone-400">{{ __('Vous') }}</span>
+                                            <span class="text-xs text-stone-500">{{ __('Vous') }}</span>
                                         @endif
                                     </td>
                                 </tr>
@@ -164,6 +167,7 @@
                             @endforelse
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </section>
         @endif
@@ -171,6 +175,7 @@
         <section class="mt-6">
             <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500">{{ __('Utilisateurs') }}</h2>
             <div class="mt-2 overflow-hidden rounded-lg border border-stone-200 bg-white">
+                <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-stone-200 text-sm">
                     <thead class="bg-stone-50">
                         <tr>
@@ -196,7 +201,7 @@
                                     @endif
                                 </td>
                                 <td class="px-4 py-2">
-                                    <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium {{ $member->is_active ? 'bg-green-100 text-green-700' : 'bg-stone-100 text-stone-500' }}">
+                                    <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium {{ $member->is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-stone-100 text-stone-500' }}">
                                         {{ $member->is_active ? __('Actif') : __('En attente / Inactif') }}
                                     </span>
                                 </td>
@@ -214,9 +219,9 @@
                                             <button wire:click="nominateLocalAdmin({{ $member->id }})" class="text-orange-700 hover:text-orange-900">{{ __('Nommer admin local') }}</button>
                                         @endif
 
-                                        <button wire:click="delete({{ $member->id }})" wire:confirm="{{ __('Supprimer ce compte ? Cette action est irréversible.') }}" class="text-red-500 hover:text-red-700">{{ __('Supprimer') }}</button>
+                                        <button wire:click="delete({{ $member->id }})" wire:confirm="{{ __('Supprimer ce compte ? Cette action est irréversible.') }}" class="text-red-600 hover:text-red-800">{{ __('Supprimer') }}</button>
                                     @else
-                                        <span class="text-xs text-stone-400">{{ __('Vous') }}</span>
+                                        <span class="text-xs text-stone-500">{{ __('Vous') }}</span>
                                     @endif
                                 </td>
                             </tr>
@@ -225,6 +230,7 @@
                         @endforelse
                     </tbody>
                 </table>
+                </div>
             </div>
         </section>
 
@@ -233,8 +239,8 @@
 
             @if ($establishments->count() > 1)
                 <div>
-                    <label class="block text-xs font-medium text-stone-700">{{ __('Établissement') }}</label>
-                    <select wire:model="staff_establishment_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                    <label for="staff_establishment_id" class="block text-xs font-medium text-stone-700">{{ __('Établissement') }}</label>
+                    <select id="staff_establishment_id" wire:model="staff_establishment_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         <option value="">{{ __('Sélectionner…') }}</option>
                         @foreach ($establishments as $establishment)
                             <option value="{{ $establishment->id }}">{{ $establishment->name }}</option>
@@ -245,18 +251,18 @@
             @endif
 
             <div>
-                <label class="block text-xs font-medium text-stone-700">{{ __('Nom') }}</label>
-                <input type="text" wire:model="staff_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="staff_name" class="block text-xs font-medium text-stone-700">{{ __('Nom') }}</label>
+                <input id="staff_name" type="text" wire:model="staff_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('staff_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
             <div>
-                <label class="block text-xs font-medium text-stone-700">{{ __('E-mail') }}</label>
-                <input type="email" wire:model="staff_email" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="staff_email" class="block text-xs font-medium text-stone-700">{{ __('E-mail') }}</label>
+                <input id="staff_email" type="email" wire:model="staff_email" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('staff_email') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
             <div>
-                <label class="block text-xs font-medium text-stone-700">{{ __('Rôle') }}</label>
-                <select wire:model="staff_role" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="staff_role" class="block text-xs font-medium text-stone-700">{{ __('Rôle') }}</label>
+                <select id="staff_role" wire:model="staff_role" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     @foreach ($assignableRoles as $role)
                         <option value="{{ $role->code }}">{{ $role->wording }}</option>
                     @endforeach

@@ -3,6 +3,7 @@
     $totalLabel ??= __('Total général');
 @endphp
 
+<div class="overflow-x-auto">
 <table class="min-w-full divide-y divide-stone-200 text-sm">
     <thead class="bg-stone-50">
         <tr>
@@ -39,3 +40,4 @@
         </tr>
     </tfoot>
 </table>
+</div>

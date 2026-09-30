@@ -11,8 +11,8 @@
 
     <div class="mt-4 flex flex-wrap gap-4">
         <div>
-            <label class="sr-only">{{ __('Année scolaire') }}</label>
-            <select wire:model.live="school_year_id" class="rounded-lg border-stone-300 text-sm">
+            <label for="school_year_id" class="sr-only">{{ __('Année scolaire') }}</label>
+            <select id="school_year_id" wire:model.live="school_year_id" class="rounded-lg border-stone-300 text-sm">
                 <option value="">—</option>
                 @foreach ($schoolYears as $schoolYear)
                     <option value="{{ $schoolYear->id }}">{{ $schoolYear->label }}</option>
@@ -58,22 +58,22 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Type') }}</label>
-                <select wire:model="type" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="type" class="block text-sm font-medium text-stone-700">{{ __('Type') }}</label>
+                <select id="type" wire:model="type" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="percentage">{{ __('Pourcentage') }}</option>
                     <option value="fixed_amount">{{ __('Montant fixe') }}</option>
                 </select>
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Valeur') }}</label>
-                <input type="number" step="0.01" wire:model="value" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="value" class="block text-sm font-medium text-stone-700">{{ __('Valeur') }}</label>
+                <input id="value" type="number" step="0.01" wire:model="value" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('value') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Motif (optionnel)') }}</label>
-                <input type="text" wire:model="reason" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="reason" class="block text-sm font-medium text-stone-700">{{ __('Motif (optionnel)') }}</label>
+                <input id="reason" type="text" wire:model="reason" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('reason') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 

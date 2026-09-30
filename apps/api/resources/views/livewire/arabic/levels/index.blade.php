@@ -12,26 +12,26 @@
     @if ($showForm)
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-4">
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Code') }}</label>
-                <input type="text" wire:model="code" placeholder="N1" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="code" class="block text-sm font-medium text-stone-700">{{ __('Code') }}</label>
+                <input id="code" type="text" wire:model="code" placeholder="N1" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('code') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-stone-700">{{ __('Libellé (arabe)') }}</label>
-                <input type="text" wire:model="wording" dir="rtl" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="wording" class="block text-sm font-medium text-stone-700">{{ __('Libellé (arabe)') }}</label>
+                <input id="wording" type="text" wire:model="wording" dir="rtl" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('wording') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-stone-700">{{ __('Libellé (français)') }}</label>
-                <input type="text" wire:model="wording_fr" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="wording_fr" class="block text-sm font-medium text-stone-700">{{ __('Libellé (français)') }}</label>
+                <input id="wording_fr" type="text" wire:model="wording_fr" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('wording_fr') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Cycle') }}</label>
-                <select wire:model="cycle" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="cycle" class="block text-sm font-medium text-stone-700">{{ __('Cycle') }}</label>
+                <select id="cycle" wire:model="cycle" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
                     @foreach ($cycles as $cycleOption)
                         <option value="{{ $cycleOption->value }}">{{ $cycleOption->label() }}</option>
@@ -86,7 +86,7 @@
                                 <button
                                     wire:click="delete({{ $arabicLevel->id }})"
                                     wire:confirm="{{ __('Supprimer ce niveau ?') }}"
-                                    class="ms-3 text-red-500 hover:text-red-700"
+                                    class="ms-3 text-red-600 hover:text-red-800"
                                 >
                                     {{ __('Supprimer') }}
                                 </button>

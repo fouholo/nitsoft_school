@@ -23,7 +23,7 @@ colors:
   attention-texte: "#b45309"
   danger-fond: "#fee2e2"
   danger-texte: "#b91c1c"
-  danger-lien: "#ef4444"
+  danger-lien: "#dc2626"
   cycle-primaire-fond: "#e0f2fe"
   cycle-primaire-texte: "#0369a1"
 typography:
@@ -108,7 +108,7 @@ components:
 
 Nitsoft School emprunte le langage visuel du bureau d'un chef d'établissement sérieux mais accessible : des documents propres, une hiérarchie claire, une seule couleur d'accent utilisée avec parcimonie pour signaler l'action, et un fond largement neutre qui laisse la donnée — élèves, notes, factures — occuper l'écran. L'identité a délibérément quitté le registre froid d'un accent bleu-indigo et de gris ardoise bleutés : l'accent est aujourd'hui un terracotta chaud et les neutres sont des gris pierre, pour qu'un directeur, un caissier ou un parent qui s'y connecte pour la première fois ressente un outil humain plutôt qu'un back-office générique — sans jamais verser dans l'exubérance ou le ludique.
 
-Le système est aujourd'hui entièrement porté par la palette par défaut de Tailwind CSS v4 (aucune personnalisation de couleur dans `@theme`, seulement des classes `orange-*` et `stone-*` du référentiel standard) — seule la police (Instrument Sans) a été substituée à la pile système par défaut.
+Le système est aujourd'hui entièrement porté par la palette par défaut de Tailwind CSS v4 (aucune personnalisation de couleur dans `@theme`, seulement des classes `orange-*` et `stone-*` du référentiel standard) — seule la police (Instrument Sans) a été substituée à la pile système par défaut. Elle est auto-hébergée via le paquet npm `@fontsource-variable/instrument-sans`, importé dans `resources/css/app.css` : aucune requête vers un service de polices tiers. L'arabe, absent de cette police, retombe sur la police système.
 
 Un logo dessiné existe désormais (`public/branding/nitsoft-school-logo.png` — capuchon de diplômé et ruban en « N », orange/bleu marine/vert) et remplace le monogramme « N » en sidebar, connexion/inscription, portail parents et favicon. Ses couleurs sont propres à la marque et n'entraînent pas de changement de l'accent UI (toujours terracotta institutionnel) : une marque peut porter sa propre palette sans dicter celle de l'interface qui l'entoure — pratique volontaire, pas un oubli.
 
@@ -192,7 +192,7 @@ Les coins sont ouverts et accueillants, sans devenir enfantins : `rounded-lg` (8
 - **Shape:** coins à 8px (`rounded-lg`).
 - **Primary:** fond terracotta institutionnel, texte blanc, `padding: 6px 12px`, `font-weight: 500`, `font-size: 14px`. Hover : fond terracotta institutionnel foncé (`#9a3412`).
 - **Secondary/Ghost:** fond blanc ou transparent, texte gris pierre corps, bordure `1px solid` gris pierre bordure, même padding que le primary. Utilisé pour « Annuler » à côté de chaque « Enregistrer ».
-- **Danger (texte seul) :** pas de fond ; texte `text-red-500`, devient `text-red-700` au survol. Utilisé pour les actions de suppression dans les tableaux — jamais un bouton plein rouge.
+- **Danger (texte seul) :** pas de fond ; texte `text-red-600`, devient `text-red-800` au survol (`text-red-500` échoue au contraste AA sur fond blanc). Utilisé pour les actions de suppression dans les tableaux — jamais un bouton plein rouge.
 - **Confirmation destructive :** les suppressions passent par la confirmation native du navigateur (`wire:confirm`), pas par une modale personnalisée — aucune modale n'existe dans le produit à ce jour.
 
 ### Chips / Badges
@@ -208,7 +208,9 @@ Les coins sont ouverts et accueillants, sans devenir enfantins : `rounded-lg` (8
 - **Internal Padding:** 16px (cartes de formulaire/liste), 20px (cartes de statistiques du tableau de bord).
 
 ### Inputs / Fields
-- **Style:** bordure gris pierre bordure, fond blanc, `rounded-lg`, `text-sm`. Pas de classe de focus personnalisée sur la quasi-totalité du produit — l'anneau de focus vient du comportement par défaut du plugin `@tailwindcss/forms`.
+- **Style:** bordure gris pierre bordure, fond blanc, `rounded-lg`, `text-sm`. Pas de classe de focus par champ : l'anneau de focus vient du plugin `@tailwindcss/forms`, recoloré une fois pour toutes en terracotta institutionnel vif (`orange-600`) dans `resources/css/app.css` — même règle pour la coche des cases et boutons radio (`orange-700`), que le plugin colore en bleu par défaut.
+- **Association libellé/champ :** tout `<label>` porte un `for` qui pointe sur l'`id` de son champ (ou englobe le champ). Un libellé de donnée en lecture seule n'est pas un `<label>` mais un `<p>`.
+- **Tableaux :** tout `<table>` d'écran est placé dans un conteneur `overflow-x-auto`, lui-même dans le conteneur bordé `overflow-hidden`, pour rester consultable sur mobile.
 - **Label:** au-dessus du champ, `text-sm font-medium` gris pierre corps, `mt-1` entre libellé et champ.
 - **Error:** message `text-sm text-red-600` sous le champ.
 
@@ -227,8 +229,9 @@ Les coins sont ouverts et accueillants, sans devenir enfantins : `rounded-lg` (8
 - **Do** garder toute l'interface en une seule police (Instrument Sans) — construire la hiérarchie par taille/graisse, jamais par changement de famille.
 
 ### Don't:
-- **Don't** copier les classes `shadow-sm` / `focus:ring-stone-500` des écrans de connexion/inscription dans un nouvel écran — c'est un reste du gabarit par défaut de Laravel, pas la convention du reste du produit (voir Elevation & Depth).
+- **Don't** copier les classes `shadow-sm` / `focus:ring-stone-500` des écrans de connexion/inscription dans un nouvel écran — c'est un reste du gabarit par défaut de Laravel, pas la convention du reste du produit (voir Elevation & Depth). Les classes `focus:*-stone-500` y sont d'ailleurs sans effet : la règle globale de focus terracotta prime.
 - **Don't** traiter `resources/views/welcome.blade.php` comme une référence de design — c'est la page de démonstration par défaut de Laravel (encore sur l'ancienne palette indigo/slate), jamais liée dans la navigation réelle et non alignée avec ce système.
-- **Don't** introduire une nouvelle couleur de statut sans vérifier `bg-emerald-*` (majoritaire) vs `bg-green-*` (minoritaire) pour « actif » — une incohérence connue, non encore arbitrée, à corriger plutôt qu'à étendre.
+- **Don't** utiliser `green-*` pour un statut positif : le vert du produit est `emerald-*` partout (arbitré, les derniers `green-*` ont été remplacés).
+- **Don't** utiliser `text-stone-400` pour du texte (contraste insuffisant) : `text-stone-500` au minimum. `stone-400` reste réservé aux icônes décoratives et aux états désactivés.
 - **Don't** construire de modale personnalisée pour une confirmation destructive sans décision explicite — le produit s'appuie aujourd'hui uniquement sur `wire:confirm` natif.
 - **Don't** réintroduire des classes `indigo-*` ou `slate-*` dans un nouvel écran — l'accent et les neutres sont désormais `orange-*` (terracotta) et `stone-*` (pierre) partout, `welcome.blade.php` excepté.

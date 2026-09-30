@@ -41,16 +41,16 @@
                             <td class="whitespace-nowrap px-4 py-2 text-stone-900">
                                 {{ $link->guardian->last_name }} {{ $link->guardian->first_name }}
                                 @if ($link->guardian->email)
-                                    <br><span class="text-xs text-stone-400">{{ $link->guardian->email }}</span>
+                                    <br><span class="text-xs text-stone-500">{{ $link->guardian->email }}</span>
                                 @endif
                             </td>
                             <td class="px-4 py-2 text-stone-600">
                                 <div>
-                                    <span class="text-xs uppercase tracking-wide text-stone-400">{{ __('Téléphone déclaré') }}</span>
+                                    <span class="text-xs uppercase tracking-wide text-stone-500">{{ __('Téléphone déclaré') }}</span>
                                     <div class="whitespace-nowrap text-stone-900">{{ $link->guardian->phone ?: '—' }}</div>
                                 </div>
                                 <div class="mt-2">
-                                    <span class="text-xs uppercase tracking-wide text-stone-400">{{ __('Référence école (:role)', ['role' => $link->relationship?->label()]) }}</span>
+                                    <span class="text-xs uppercase tracking-wide text-stone-500">{{ __('Référence école (:role)', ['role' => $link->relationship?->label()]) }}</span>
                                     @if ($ref['match'] === 'missing')
                                         <div class="whitespace-nowrap font-medium text-amber-700">{{ __('Aucune référence en dossier') }}</div>
                                     @else

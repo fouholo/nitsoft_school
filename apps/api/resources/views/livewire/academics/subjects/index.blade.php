@@ -12,20 +12,20 @@
     @if ($showForm)
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-4">
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-stone-700">{{ __('Nom') }}</label>
-                <input type="text" wire:model="name" placeholder="Mathématiques" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="name" class="block text-sm font-medium text-stone-700">{{ __('Nom') }}</label>
+                <input id="name" type="text" wire:model="name" placeholder="Mathématiques" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Abréviation') }}</label>
-                <input type="text" wire:model="abbreviation" placeholder="MATHS" maxlength="10" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="abbreviation" class="block text-sm font-medium text-stone-700">{{ __('Abréviation') }}</label>
+                <input id="abbreviation" type="text" wire:model="abbreviation" placeholder="MATHS" maxlength="10" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('abbreviation') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Domaine') }}</label>
-                <select wire:model="domain_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="domain_id" class="block text-sm font-medium text-stone-700">{{ __('Domaine') }}</label>
+                <select id="domain_id" wire:model="domain_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
                     @foreach ($domains as $domain)
                         <option value="{{ $domain->id }}">{{ $domain->name }}</option>
@@ -94,7 +94,7 @@
                                 <button
                                     wire:click="delete({{ $subject->id }})"
                                     wire:confirm="{{ __('Supprimer cette matière ?') }}"
-                                    class="ms-3 text-red-500 hover:text-red-700"
+                                    class="ms-3 text-red-600 hover:text-red-800"
                                 >
                                     {{ __('Supprimer') }}
                                 </button>

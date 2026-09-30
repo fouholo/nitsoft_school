@@ -49,15 +49,15 @@
             @endif
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __("Frais d'inscription") }}</label>
-                <input type="number" step="0.01" wire:model="registration_amount" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="registration_amount" class="block text-sm font-medium text-stone-700">{{ __("Frais d'inscription") }}</label>
+                <input id="registration_amount" type="number" step="0.01" wire:model="registration_amount" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('registration_amount') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             @foreach (range(1, 7) as $position)
                 <div>
-                    <label class="block text-sm font-medium text-stone-700">{{ __('Tranche :number', ['number' => $position]) }}</label>
-                    <input type="number" step="0.01" wire:model="installment_amounts.{{ $position }}" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                    <label for="installment_amounts-{{ $position }}" class="block text-sm font-medium text-stone-700">{{ __('Tranche :number', ['number' => $position]) }}</label>
+                    <input id="installment_amounts-{{ $position }}" type="number" step="0.01" wire:model="installment_amounts.{{ $position }}" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     @error('installment_amounts.' . $position) <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
             @endforeach
@@ -76,14 +76,14 @@
     @if ($showPaymentForm)
         <form wire:submit="savePayment" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-4">
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Montant') }}</label>
-                <input type="number" step="0.01" wire:model="amount" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="amount" class="block text-sm font-medium text-stone-700">{{ __('Montant') }}</label>
+                <input id="amount" type="number" step="0.01" wire:model="amount" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('amount') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Moyen') }}</label>
-                <select wire:model="method" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="method" class="block text-sm font-medium text-stone-700">{{ __('Moyen') }}</label>
+                <select id="method" wire:model="method" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="cash">{{ __('Espèces') }}</option>
                     <option value="mobile_money">Mobile Money</option>
                     <option value="bank_transfer">{{ __('Virement') }}</option>
@@ -92,14 +92,14 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Date') }}</label>
-                <input type="date" wire:model="paid_at" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="paid_at" class="block text-sm font-medium text-stone-700">{{ __('Date') }}</label>
+                <input id="paid_at" type="date" wire:model="paid_at" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('paid_at') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Référence') }}</label>
-                <input type="text" wire:model="reference" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="reference" class="block text-sm font-medium text-stone-700">{{ __('Référence') }}</label>
+                <input id="reference" type="text" wire:model="reference" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
             </div>
 
             <div class="rounded-lg bg-stone-50 px-3 py-2 text-sm text-stone-600 sm:col-span-4" x-data>

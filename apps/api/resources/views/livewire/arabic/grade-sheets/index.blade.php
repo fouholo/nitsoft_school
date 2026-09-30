@@ -12,14 +12,14 @@
     @if ($showForm)
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-4">
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-stone-700">{{ __('Titre') }}</label>
-                <input type="text" wire:model="title" placeholder="{{ __('Devoir 1') }}" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="title" class="block text-sm font-medium text-stone-700">{{ __('Titre') }}</label>
+                <input id="title" type="text" wire:model="title" placeholder="{{ __('Devoir 1') }}" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('title') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Niveau arabe') }}</label>
-                <select wire:model.live="arabic_level_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm" dir="rtl">
+                <label for="arabic_level_id" class="block text-sm font-medium text-stone-700">{{ __('Niveau arabe') }}</label>
+                <select id="arabic_level_id" wire:model.live="arabic_level_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm" dir="rtl">
                     <option value="">—</option>
                     @foreach ($arabicLevels as $arabicLevel)
                         <option value="{{ $arabicLevel->id }}">{{ $arabicLevel->wording }}</option>
@@ -30,8 +30,8 @@
 
             @if ($this->selectedLevelRequiresSeries())
                 <div>
-                    <label class="block text-sm font-medium text-stone-700">{{ __('Série arabe') }}</label>
-                    <select wire:model="arabic_serie_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm" dir="rtl">
+                    <label for="arabic_serie_id" class="block text-sm font-medium text-stone-700">{{ __('Série arabe') }}</label>
+                    <select id="arabic_serie_id" wire:model="arabic_serie_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm" dir="rtl">
                         <option value="">—</option>
                         @foreach ($arabicSeries as $arabicSerie)
                             <option value="{{ $arabicSerie->id }}">{{ $arabicSerie->serie_wording }}</option>
@@ -42,8 +42,8 @@
             @endif
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Matière arabe') }}</label>
-                <select wire:model="arabic_subject_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm" dir="rtl">
+                <label for="arabic_subject_id" class="block text-sm font-medium text-stone-700">{{ __('Matière arabe') }}</label>
+                <select id="arabic_subject_id" wire:model="arabic_subject_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm" dir="rtl">
                     <option value="">—</option>
                     @foreach ($arabicSubjects as $arabicSubject)
                         <option value="{{ $arabicSubject->id }}">{{ $arabicSubject->name }}</option>
@@ -53,8 +53,8 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Période') }}</label>
-                <select wire:model="arabic_term_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="arabic_term_id" class="block text-sm font-medium text-stone-700">{{ __('Période') }}</label>
+                <select id="arabic_term_id" wire:model="arabic_term_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
                     @foreach ($arabicTerms as $arabicTerm)
                         <option value="{{ $arabicTerm->id }}">{{ $arabicTerm->label }}</option>
@@ -64,8 +64,8 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Type') }}</label>
-                <select wire:model.live="type" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="type" class="block text-sm font-medium text-stone-700">{{ __('Type') }}</label>
+                <select id="type" wire:model.live="type" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="devoir">{{ __('Devoir') }}</option>
                     <option value="interrogation">{{ __('Interrogation') }}</option>
                 </select>
@@ -73,20 +73,20 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Barème') }}</label>
-                <input type="number" step="0.5" wire:model="max_score" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="max_score" class="block text-sm font-medium text-stone-700">{{ __('Barème') }}</label>
+                <input id="max_score" type="number" step="0.5" wire:model="max_score" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('max_score') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Coefficient') }}</label>
-                <input type="number" step="0.5" wire:model="weight" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="weight" class="block text-sm font-medium text-stone-700">{{ __('Coefficient') }}</label>
+                <input id="weight" type="number" step="0.5" wire:model="weight" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('weight') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Date') }}</label>
-                <input type="date" wire:model="graded_on" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="graded_on" class="block text-sm font-medium text-stone-700">{{ __('Date') }}</label>
+                <input id="graded_on" type="date" wire:model="graded_on" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('graded_on') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
@@ -102,6 +102,7 @@
     @endif
 
     <div class="mt-6 overflow-hidden rounded-lg border border-stone-200 bg-white">
+        <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-stone-200 text-sm">
             <thead class="bg-stone-50">
                 <tr>
@@ -138,5 +139,6 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 </div>

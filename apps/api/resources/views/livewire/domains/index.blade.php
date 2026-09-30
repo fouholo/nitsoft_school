@@ -12,8 +12,8 @@
     @if ($showForm)
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-4">
             <div class="sm:col-span-3">
-                <label class="block text-sm font-medium text-stone-700">{{ __('Nom') }}</label>
-                <input type="text" wire:model="name" placeholder="{{ __('Sciences') }}" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="name" class="block text-sm font-medium text-stone-700">{{ __('Nom') }}</label>
+                <input id="name" type="text" wire:model="name" placeholder="{{ __('Sciences') }}" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
@@ -29,6 +29,7 @@
     @endif
 
     <div class="mt-6 overflow-hidden rounded-lg border border-stone-200 bg-white">
+        <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-stone-200 text-sm">
             <thead class="bg-stone-50">
                 <tr>
@@ -48,7 +49,7 @@
                                 <button
                                     wire:click="delete({{ $domain->id }})"
                                     wire:confirm="{{ __('Supprimer ce domaine ?') }}"
-                                    class="ms-3 text-red-500 hover:text-red-700"
+                                    class="ms-3 text-red-600 hover:text-red-800"
                                 >
                                     {{ __('Supprimer') }}
                                 </button>
@@ -62,5 +63,6 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 </div>

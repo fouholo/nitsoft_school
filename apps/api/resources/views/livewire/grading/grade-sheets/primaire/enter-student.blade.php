@@ -15,40 +15,41 @@
     @endif
 
     <div class="mt-6 overflow-hidden rounded-lg border border-stone-300 bg-white">
-        <div class="border-b border-stone-300 bg-emerald-100 py-2 text-center text-sm font-semibold text-emerald-900">
+        <div class="border-b border-stone-300 bg-stone-100 py-2 text-center text-sm font-semibold text-stone-800">
             {{ __("Informations sur l'élève") }}
         </div>
 
         <div class="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2">
             <div class="sm:col-span-2">
-                <label class="mb-1 block text-xs font-medium text-emerald-700">{{ __('Nom et prénoms') }}</label>
-                <div class="rounded-lg border border-rose-100 bg-rose-50 px-3 py-2 text-sm text-stone-900">{{ $student->last_name }} {{ $student->first_name }}</div>
+                <p class="mb-1 block text-xs font-medium text-stone-600">{{ __('Nom et prénoms') }}</p>
+                <div class="rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-900">{{ $student->last_name }} {{ $student->first_name }}</div>
             </div>
             <div>
-                <label class="mb-1 block text-xs font-medium text-emerald-700">{{ __('Matricule') }}</label>
-                <div class="rounded-lg border border-rose-100 bg-rose-50 px-3 py-2 text-sm text-stone-900">{{ $student->student_number ?? '—' }}</div>
+                <p class="mb-1 block text-xs font-medium text-stone-600">{{ __('Matricule') }}</p>
+                <div class="rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-900">{{ $student->student_number ?? '—' }}</div>
             </div>
             <div>
-                <label class="mb-1 block text-xs font-medium text-emerald-700">{{ __('Genre') }}</label>
-                <div class="rounded-lg border border-rose-100 bg-rose-50 px-3 py-2 text-sm text-stone-900">{{ $student->gender ?? '—' }}</div>
+                <p class="mb-1 block text-xs font-medium text-stone-600">{{ __('Genre') }}</p>
+                <div class="rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-900">{{ $student->gender ?? '—' }}</div>
             </div>
             <div>
-                <label class="mb-1 block text-xs font-medium text-emerald-700">{{ __('Date de naissance') }}</label>
-                <div class="rounded-lg border border-rose-100 bg-rose-50 px-3 py-2 text-sm text-stone-900">{{ $student->birth_date?->format('d/m/Y') ?? '—' }}</div>
+                <p class="mb-1 block text-xs font-medium text-stone-600">{{ __('Date de naissance') }}</p>
+                <div class="rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-900">{{ $student->birth_date?->format('d/m/Y') ?? '—' }}</div>
             </div>
             <div>
-                <label class="mb-1 block text-xs font-medium text-emerald-700">{{ __('Lieu de naissance') }}</label>
-                <div class="rounded-lg border border-rose-100 bg-rose-50 px-3 py-2 text-sm text-stone-900">{{ $student->birth_place ?? '—' }}</div>
+                <p class="mb-1 block text-xs font-medium text-stone-600">{{ __('Lieu de naissance') }}</p>
+                <div class="rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-900">{{ $student->birth_place ?? '—' }}</div>
             </div>
         </div>
 
-        <div class="border-y border-stone-300 bg-emerald-100 py-2 text-center text-sm font-semibold text-emerald-900">
+        <div class="border-y border-stone-300 bg-stone-100 py-2 text-center text-sm font-semibold text-stone-800">
             {{ __('Délibérations des notes') }}
         </div>
 
         <form wire:submit="save">
             <div class="grid grid-cols-1 gap-6 md:grid-cols-12">
                 <div class="overflow-hidden rounded-lg border border-stone-200 md:col-span-8">
+                    <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-stone-200 text-sm">
                         <thead class="bg-stone-50">
                             <tr>
@@ -86,13 +87,14 @@
                             @endforelse
                         </tbody>
                     </table>
+                    </div>
 
                     <div class="border-t border-stone-200 p-4">
                         <label class="flex items-center gap-2 text-sm font-medium text-stone-900">
                             <input
                                 type="checkbox"
                                 wire:model.live="absentGenerale"
-                                class="rounded border-stone-300 text-rose-600"
+                                class="rounded border-stone-300"
                             >
                             {{ __('Absent à la composition') }}
                         </label>
@@ -100,19 +102,19 @@
                 </div>
 
                 <div class="rounded-lg border border-stone-200 bg-white p-4 md:col-span-4">
-                    <h2 class="mb-3 text-sm font-semibold text-emerald-700">{{ __('Résultats') }}</h2>
+                    <h2 class="mb-3 text-sm font-semibold text-stone-900">{{ __('Résultats') }}</h2>
 
                     <div class="space-y-4 text-sm">
                         <div>
-                            <label class="mb-1 block text-xs font-medium text-emerald-700">{{ __('Total') }}</label>
-                            <div class="rounded-lg border border-rose-100 bg-rose-50 px-3 py-2 text-stone-900">{{ $preview['totalPoints'] }}</div>
+                            <p class="mb-1 block text-xs font-medium text-stone-600">{{ __('Total') }}</p>
+                            <div class="rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-stone-900">{{ $preview['totalPoints'] }}</div>
                         </div>
                         <div>
-                            <label class="mb-1 block text-xs font-medium text-emerald-700">{{ __('Moyenne / :scale', ['scale' => (int) $scale]) }}</label>
-                            <div class="rounded-lg border border-rose-100 bg-rose-50 px-3 py-2 font-semibold text-stone-900">{{ $preview['average'] ?? '—' }}</div>
+                            <p class="mb-1 block text-xs font-medium text-stone-600">{{ __('Moyenne / :scale', ['scale' => (int) $scale]) }}</p>
+                            <div class="rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 font-semibold text-stone-900">{{ $preview['average'] ?? '—' }}</div>
                         </div>
                         <div>
-                            <label class="mb-1 block text-xs font-medium text-emerald-700">{{ __('Résultat') }}</label>
+                            <p class="mb-1 block text-xs font-medium text-stone-600">{{ __('Résultat') }}</p>
                             @php
                                 $resultLabel = match ($preview['result']) {
                                     'passed' => __('Admis(e)'),
@@ -127,8 +129,8 @@
                             ])>{{ $resultLabel }}</div>
                         </div>
                         <div>
-                            <label class="mb-1 block text-xs font-medium text-emerald-700">{{ __('Appréciation') }}</label>
-                            <div class="rounded-lg border border-rose-100 bg-rose-50 px-3 py-2 text-stone-900">{{ $preview['appreciation'] ?? '—' }}</div>
+                            <p class="mb-1 block text-xs font-medium text-stone-600">{{ __('Appréciation') }}</p>
+                            <div class="rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-stone-900">{{ $preview['appreciation'] ?? '—' }}</div>
                         </div>
                     </div>
                 </div>

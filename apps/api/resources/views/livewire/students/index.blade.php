@@ -41,6 +41,7 @@
     <div class="mt-4">
         <input
             type="search"
+            aria-label="{{ __('Rechercher un élève') }}"
             wire:model.live.debounce.300ms="search"
             placeholder="{{ __('Rechercher un élève...') }}"
             class="block w-full max-w-sm rounded-lg border-stone-300 text-sm"
@@ -272,7 +273,7 @@
                                     <button
                                         wire:click="delete({{ $student->id }})"
                                         wire:confirm="{{ __('Supprimer cet élève ?') }}"
-                                        class="ms-3 text-red-500 hover:text-red-700"
+                                        class="ms-3 text-red-600 hover:text-red-800"
                                     >
                                         {{ __('Supprimer') }}
                                     </button>

@@ -16,44 +16,44 @@
     @if ($showForm)
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-4">
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Code IEP') }}</label>
-                <input type="text" wire:model="codeiep" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="codeiep" class="block text-sm font-medium text-stone-700">{{ __('Code IEP') }}</label>
+                <input id="codeiep" type="text" wire:model="codeiep" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('codeiep') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div class="sm:col-span-3">
-                <label class="block text-sm font-medium text-stone-700">{{ __("Nom de l'inspection") }}</label>
-                <input type="text" wire:model="inspection_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="inspection_name" class="block text-sm font-medium text-stone-700">{{ __("Nom de l'inspection") }}</label>
+                <input id="inspection_name" type="text" wire:model="inspection_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('inspection_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-stone-700">{{ __('Adresse') }}</label>
-                <input type="text" wire:model="address" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="address" class="block text-sm font-medium text-stone-700">{{ __('Adresse') }}</label>
+                <input id="address" type="text" wire:model="address" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('address') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Téléphone') }}</label>
-                <input type="text" wire:model="phone_number" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="phone_number" class="block text-sm font-medium text-stone-700">{{ __('Téléphone') }}</label>
+                <input id="phone_number" type="text" wire:model="phone_number" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('phone_number') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Email') }}</label>
-                <input type="email" wire:model="email" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="email" class="block text-sm font-medium text-stone-700">{{ __('Email') }}</label>
+                <input id="email" type="email" wire:model="email" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('email') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-stone-700">{{ __('Localisation') }}</label>
-                <input type="text" wire:model="location" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="location" class="block text-sm font-medium text-stone-700">{{ __('Localisation') }}</label>
+                <input id="location" type="text" wire:model="location" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('location') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-stone-700">{{ __('Direction de rattachement') }}</label>
-                <select wire:model="uid_direction" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="uid_direction" class="block text-sm font-medium text-stone-700">{{ __('Direction de rattachement') }}</label>
+                <select id="uid_direction" wire:model="uid_direction" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
                     @foreach ($directions as $direction)
                         <option value="{{ $direction->uid_serveur }}">{{ $direction->code }} — {{ $direction->direction_name }}</option>
@@ -105,7 +105,7 @@
                                 <button
                                     wire:click="delete({{ $inspection->id }})"
                                     wire:confirm="{{ __('Supprimer cette inspection ?') }}"
-                                    class="ms-3 text-red-500 hover:text-red-700"
+                                    class="ms-3 text-red-600 hover:text-red-800"
                                 >
                                     {{ __('Supprimer') }}
                                 </button>

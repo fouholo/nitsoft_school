@@ -9,6 +9,7 @@
     @endif
 
     <div class="mt-6 overflow-hidden rounded-lg border border-stone-200 bg-white">
+        <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-stone-200 text-sm">
             <thead class="bg-stone-50">
                 <tr>
@@ -28,7 +29,7 @@
                         </td>
                         <td class="px-4 py-2 text-stone-600">{{ $admin->type->label() }}</td>
                         <td class="px-4 py-2">
-                            <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium {{ $admin->is_active ? 'bg-green-100 text-green-700' : 'bg-stone-100 text-stone-500' }}">
+                            <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium {{ $admin->is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-stone-100 text-stone-500' }}">
                                 {{ $admin->is_active ? __('Actif') : __('Inactif') }}
                             </span>
                         </td>
@@ -44,11 +45,11 @@
                                         {{ __('Activer') }}
                                     </button>
                                 @endif
-                                <button wire:click="delete({{ $admin->id }})" wire:confirm="{{ __('Supprimer cet administrateur ? Cette action est irréversible.') }}" class="ms-3 text-red-500 hover:text-red-700">
+                                <button wire:click="delete({{ $admin->id }})" wire:confirm="{{ __('Supprimer cet administrateur ? Cette action est irréversible.') }}" class="ms-3 text-red-600 hover:text-red-800">
                                     {{ __('Supprimer') }}
                                 </button>
                             @else
-                                <span class="text-xs text-stone-400">{{ __('Vous') }}</span>
+                                <span class="text-xs text-stone-500">{{ __('Vous') }}</span>
                             @endif
                         </td>
                     </tr>
@@ -59,29 +60,30 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 
     <form wire:submit="create" class="mt-6 max-w-md space-y-3 rounded-lg border border-stone-200 bg-white p-4">
         <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500">{{ __('Créer un administrateur secondaire') }}</h2>
 
         <div>
-            <label class="block text-xs font-medium text-stone-700">{{ __('Prénom') }}</label>
-            <input type="text" wire:model="admin_first_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+            <label for="admin_first_name" class="block text-xs font-medium text-stone-700">{{ __('Prénom') }}</label>
+            <input id="admin_first_name" type="text" wire:model="admin_first_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
             @error('admin_first_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
         </div>
         <div>
-            <label class="block text-xs font-medium text-stone-700">{{ __('Nom') }}</label>
-            <input type="text" wire:model="admin_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+            <label for="admin_name" class="block text-xs font-medium text-stone-700">{{ __('Nom') }}</label>
+            <input id="admin_name" type="text" wire:model="admin_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
             @error('admin_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
         </div>
         <div>
-            <label class="block text-xs font-medium text-stone-700">{{ __('E-mail') }}</label>
-            <input type="email" wire:model="admin_email" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+            <label for="admin_email" class="block text-xs font-medium text-stone-700">{{ __('E-mail') }}</label>
+            <input id="admin_email" type="email" wire:model="admin_email" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
             @error('admin_email') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
         </div>
         <div>
-            <label class="block text-xs font-medium text-stone-700">{{ __('Pseudo') }}</label>
-            <input type="text" wire:model="admin_pseudo" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+            <label for="admin_pseudo" class="block text-xs font-medium text-stone-700">{{ __('Pseudo') }}</label>
+            <input id="admin_pseudo" type="text" wire:model="admin_pseudo" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
             @error('admin_pseudo') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
         </div>
         <button type="submit" class="rounded-lg bg-orange-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-800">

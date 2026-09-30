@@ -51,26 +51,26 @@
     @if ($showForm)
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-3">
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Prénom') }}</label>
-                <input type="text" wire:model="first_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="first_name" class="block text-sm font-medium text-stone-700">{{ __('Prénom') }}</label>
+                <input id="first_name" type="text" wire:model="first_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('first_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Nom') }}</label>
-                <input type="text" wire:model="last_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="last_name" class="block text-sm font-medium text-stone-700">{{ __('Nom') }}</label>
+                <input id="last_name" type="text" wire:model="last_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('last_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Téléphone') }}</label>
-                <input type="text" wire:model="phone" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="phone" class="block text-sm font-medium text-stone-700">{{ __('Téléphone') }}</label>
+                <input id="phone" type="text" wire:model="phone" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('phone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-stone-700">{{ __('E-mail') }}</label>
-                <input type="email" wire:model="email" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="email" class="block text-sm font-medium text-stone-700">{{ __('E-mail') }}</label>
+                <input id="email" type="email" wire:model="email" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('email') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
@@ -112,7 +112,7 @@
                                 @if ($guardian->user_id)
                                     <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">{{ __('Actif') }}</span>
                                 @else
-                                    <span class="text-xs text-stone-400">—</span>
+                                    <span class="text-xs text-stone-500">—</span>
                                 @endif
                             </td>
                             <td class="whitespace-nowrap px-4 py-2 text-end">

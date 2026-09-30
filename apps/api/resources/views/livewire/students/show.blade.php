@@ -60,8 +60,8 @@
     @if ($showEnrollmentForm)
         <form wire:submit="saveEnrollment" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-3">
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Classe') }}</label>
-                <select wire:model.live="classroom_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="classroom_id" class="block text-sm font-medium text-stone-700">{{ __('Classe') }}</label>
+                <select id="classroom_id" wire:model.live="classroom_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
                     @foreach ($classrooms as $classroom)
                         <option value="{{ $classroom->id }}">{{ $classroom->name }}</option>
@@ -71,8 +71,8 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Année scolaire') }}</label>
-                <select wire:model="school_year_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="school_year_id" class="block text-sm font-medium text-stone-700">{{ __('Année scolaire') }}</label>
+                <select id="school_year_id" wire:model="school_year_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
                     @foreach ($schoolYears as $schoolYear)
                         <option value="{{ $schoolYear->id }}">{{ $schoolYear->label }}</option>
@@ -82,8 +82,8 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __("Date d'inscription") }}</label>
-                <input type="date" wire:model="enrolled_on" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="enrolled_on" class="block text-sm font-medium text-stone-700">{{ __("Date d'inscription") }}</label>
+                <input id="enrolled_on" type="date" wire:model="enrolled_on" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('enrolled_on') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
@@ -167,7 +167,7 @@
                                         <button
                                             wire:click="withdrawEnrollment({{ $enrollment->id }})"
                                             wire:confirm="{{ __("Retirer cette inscription ? L'élève ne sera plus compté comme actif dans cette classe pour cette année scolaire.") }}"
-                                            class="text-red-500 hover:text-red-700"
+                                            class="text-red-600 hover:text-red-800"
                                         >
                                             {{ __('Retirer') }}
                                         </button>
@@ -198,13 +198,13 @@
     @if ($showGuardianForm)
         <form wire:submit="saveGuardian" class="mt-2 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-3">
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-stone-700">{{ __('Rechercher un tuteur') }}</label>
-                <input type="text" wire:model.live.debounce.300ms="guardianSearch" placeholder="{{ __('Nom du tuteur') }}" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="guardianSearch" class="block text-sm font-medium text-stone-700">{{ __('Rechercher un tuteur') }}</label>
+                <input id="guardianSearch" type="text" wire:model.live.debounce.300ms="guardianSearch" placeholder="{{ __('Nom du tuteur') }}" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
             </div>
 
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-stone-700">{{ __('Tuteur') }}</label>
-                <select wire:model="guardian_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="guardian_id" class="block text-sm font-medium text-stone-700">{{ __('Tuteur') }}</label>
+                <select id="guardian_id" wire:model="guardian_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
                     @foreach ($availableGuardians as $availableGuardian)
                         <option value="{{ $availableGuardian->id }}">{{ $availableGuardian->last_name }} {{ $availableGuardian->first_name }}</option>
@@ -214,8 +214,8 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Rôle') }}</label>
-                <select wire:model="relationship" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="relationship" class="block text-sm font-medium text-stone-700">{{ __('Rôle') }}</label>
+                <select id="relationship" wire:model="relationship" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
                     @foreach (\App\Domain\Enrollment\Enums\GuardianRelationship::cases() as $relationshipOption)
                         <option value="{{ $relationshipOption->value }}">{{ $relationshipOption->label() }}</option>
@@ -264,7 +264,7 @@
                                     <button
                                         wire:click="removeGuardian({{ $guardian->id }})"
                                         wire:confirm="{{ __("Délier ce tuteur ? Il perdra l'accès à l'espace parent pour cet élève si ce lien lui donnait accès au portail.") }}"
-                                        class="text-red-500 hover:text-red-700"
+                                        class="text-red-600 hover:text-red-800"
                                     >
                                         {{ __('Délier') }}
                                     </button>

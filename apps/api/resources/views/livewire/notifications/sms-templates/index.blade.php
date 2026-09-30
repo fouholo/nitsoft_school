@@ -19,14 +19,14 @@
     @if ($showForm)
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-3">
             <div>
-                <label class="block text-sm font-medium text-stone-700">{{ __('Code') }}</label>
-                <input type="text" wire:model="code" placeholder="attendance_absence" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                <label for="code" class="block text-sm font-medium text-stone-700">{{ __('Code') }}</label>
+                <input id="code" type="text" wire:model="code" placeholder="attendance_absence" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('code') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-stone-700">{{ __('Message') }}</label>
-                <textarea wire:model="body" rows="2" class="mt-1 block w-full rounded-lg border-stone-300 text-sm"></textarea>
+                <label for="body" class="block text-sm font-medium text-stone-700">{{ __('Message') }}</label>
+                <textarea id="body" wire:model="body" rows="2" class="mt-1 block w-full rounded-lg border-stone-300 text-sm"></textarea>
                 @error('body') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
@@ -47,6 +47,7 @@
     @endif
 
     <div class="mt-6 overflow-hidden rounded-lg border border-stone-200 bg-white">
+        <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-stone-200 text-sm">
             <thead class="bg-stone-50">
                 <tr>
@@ -67,7 +68,7 @@
                             <button
                                 wire:click="delete({{ $smsTemplate->id }})"
                                 wire:confirm="{{ __('Supprimer ce modèle ?') }}"
-                                class="ms-3 text-red-500 hover:text-red-700"
+                                class="ms-3 text-red-600 hover:text-red-800"
                             >
                                 {{ __('Supprimer') }}
                             </button>
@@ -80,5 +81,6 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 </div>

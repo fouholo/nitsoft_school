@@ -3,8 +3,8 @@
 
     <div class="mt-4 flex flex-wrap items-end gap-4 rounded-lg border border-stone-200 bg-white p-4">
         <div>
-            <label class="block text-sm font-medium text-stone-700">{{ __('Classe') }}</label>
-            <select wire:model.live="classroom_id" class="mt-1 block w-48 rounded-lg border-stone-300 text-sm">
+            <label for="classroom_id" class="block text-sm font-medium text-stone-700">{{ __('Classe') }}</label>
+            <select id="classroom_id" wire:model.live="classroom_id" class="mt-1 block w-48 rounded-lg border-stone-300 text-sm">
                 <option value="">—</option>
                 @foreach ($classrooms as $classroom)
                     <option value="{{ $classroom->id }}">{{ $classroom->name }}</option>
@@ -13,8 +13,8 @@
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-stone-700">{{ __('Période') }}</label>
-            <select wire:model.live="term_id" class="mt-1 block w-48 rounded-lg border-stone-300 text-sm">
+            <label for="term_id" class="block text-sm font-medium text-stone-700">{{ __('Période') }}</label>
+            <select id="term_id" wire:model.live="term_id" class="mt-1 block w-48 rounded-lg border-stone-300 text-sm">
                 <option value="">—</option>
                 @foreach ($terms as $term)
                     <option value="{{ $term->id }}">{{ $term->label }}</option>

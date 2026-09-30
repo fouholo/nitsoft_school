@@ -3,8 +3,8 @@
         <h1 class="text-2xl font-semibold text-stone-900">{{ __('Tarifs') }}</h1>
 
         <div>
-            <label class="sr-only">{{ __('Année scolaire') }}</label>
-            <select wire:model.live="school_year_id" class="rounded-lg border-stone-300 text-sm">
+            <label for="school_year_id" class="sr-only">{{ __('Année scolaire') }}</label>
+            <select id="school_year_id" wire:model.live="school_year_id" class="rounded-lg border-stone-300 text-sm">
                 <option value="">—</option>
                 @foreach ($schoolYears as $schoolYear)
                     <option value="{{ $schoolYear->id }}">{{ $schoolYear->label }}</option>
@@ -37,20 +37,20 @@
             @if ($showInstallmentForm)
                 <form wire:submit="saveInstallment" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-3">
                     <div class="sm:col-span-2">
-                        <label class="block text-sm font-medium text-stone-700">{{ __('Libellé') }}</label>
-                        <input type="text" wire:model="label" placeholder="{{ __('Octobre') }}" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <label for="label" class="block text-sm font-medium text-stone-700">{{ __('Libellé') }}</label>
+                        <input id="label" type="text" wire:model="label" placeholder="{{ __('Octobre') }}" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         @error('label') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-stone-700">{{ __('Ordre') }}</label>
-                        <input type="number" wire:model="position" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <label for="position" class="block text-sm font-medium text-stone-700">{{ __('Ordre') }}</label>
+                        <input id="position" type="number" wire:model="position" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         @error('position') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-stone-700">{{ __('Échéance') }}</label>
-                        <input type="date" wire:model="due_date" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <label for="due_date" class="block text-sm font-medium text-stone-700">{{ __('Échéance') }}</label>
+                        <input id="due_date" type="date" wire:model="due_date" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         @error('due_date') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
 
@@ -91,7 +91,7 @@
                                             <button
                                                 wire:click="deleteInstallment({{ $installment->id }})"
                                                 wire:confirm="{{ __('Supprimer cette tranche ? Les montants de scolarité configurés dessus seront aussi supprimés.') }}"
-                                                class="ms-3 text-red-500 hover:text-red-700"
+                                                class="ms-3 text-red-600 hover:text-red-800"
                                             >
                                                 {{ __('Supprimer') }}
                                             </button>
@@ -167,8 +167,8 @@
                                             >
                                                 @if ($otherConfiguredLevelIds->isNotEmpty())
                                                     <div class="col-span-2 sm:col-span-4">
-                                                        <label class="block text-sm font-medium text-stone-700">{{ __('Dupliquer les montants depuis un autre niveau') }}</label>
-                                                        <select wire:model.live="duplicateSourceLevelId" class="mt-1 block w-full max-w-xs rounded-lg border-stone-300 text-sm">
+                                                        <label for="duplicateSourceLevelId" class="block text-sm font-medium text-stone-700">{{ __('Dupliquer les montants depuis un autre niveau') }}</label>
+                                                        <select id="duplicateSourceLevelId" wire:model.live="duplicateSourceLevelId" class="mt-1 block w-full max-w-xs rounded-lg border-stone-300 text-sm">
                                                             <option value="">{{ __('— Choisir un niveau —') }}</option>
                                                             @foreach ($levels->whereIn('id', $otherConfiguredLevelIds) as $otherLevel)
                                                                 <option value="{{ $otherLevel->id }}">{{ $otherLevel->level_wording }}</option>
@@ -179,15 +179,15 @@
                                                 @endif
 
                                                 <div>
-                                                    <label class="block text-sm font-medium text-stone-700">{{ __("Frais d'inscription") }} {{ $configuringLevelIsSecondaire ? __('(non affecté)') : '' }} — F CFA</label>
-                                                    <input type="number" step="0.01" wire:model="registration_amount" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                                                    <label for="registration_amount" class="block text-sm font-medium text-stone-700">{{ __("Frais d'inscription") }} {{ $configuringLevelIsSecondaire ? __('(non affecté)') : '' }} — F CFA</label>
+                                                    <input id="registration_amount" type="number" step="0.01" wire:model="registration_amount" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                                                     @error('registration_amount') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                                                 </div>
 
                                                 @if ($configuringLevelIsSecondaire)
                                                     <div>
-                                                        <label class="block text-sm font-medium text-stone-700">{{ __("Frais d'inscription (affecté)") }} — F CFA</label>
-                                                        <input type="number" step="0.01" wire:model="registration_amount_assigned" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                                                        <label for="registration_amount_assigned" class="block text-sm font-medium text-stone-700">{{ __("Frais d'inscription (affecté)") }} — F CFA</label>
+                                                        <input id="registration_amount_assigned" type="number" step="0.01" wire:model="registration_amount_assigned" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                                                         @error('registration_amount_assigned') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                                                     </div>
 
@@ -196,8 +196,8 @@
 
                                                 @foreach ($installments as $installment)
                                                     <div>
-                                                        <label class="block text-sm font-medium text-stone-700">{{ $installment->label }} — F CFA</label>
-                                                        <input type="number" step="0.01" wire:model="installment_amounts.{{ $installment->id }}" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                                                        <label for="installment_amounts-{{ $installment->id }}" class="block text-sm font-medium text-stone-700">{{ $installment->label }} — F CFA</label>
+                                                        <input id="installment_amounts-{{ $installment->id }}" type="number" step="0.01" wire:model="installment_amounts.{{ $installment->id }}" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                                                         @error('installment_amounts.' . $installment->id) <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                                                     </div>
                                                 @endforeach
