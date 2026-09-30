@@ -34,8 +34,9 @@ class User extends Authenticatable
     /**
      * Mot de passe attribué par défaut à tout compte créé par un tiers
      * (staff, tuteur, admin...) plutôt qu'un mot de passe aléatoire affiché
-     * une seule fois — la personne le change ensuite elle-même depuis son
-     * profil (voir App\Livewire\Account\ChangePassword).
+     * une seule fois. Le compte est alors créé avec must_change_password :
+     * son titulaire doit en choisir un autre à la première connexion (voir
+     * EnsurePasswordIsChanged et App\Livewire\Account\ChangePassword).
      */
     public const DEFAULT_PASSWORD = 'azerty';
 
@@ -51,6 +52,7 @@ class User extends Authenticatable
         'email',
         'phone',
         'password',
+        'must_change_password',
         'locale',
         'gender',
         'birth_date',
@@ -77,6 +79,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'must_change_password' => 'boolean',
         'client_updated_at' => 'datetime',
         'gender' => Gender::class,
         'birth_date' => 'date',
@@ -243,7 +246,15 @@ class User extends Authenticatable
 
     public function currentRoleLabel(): string
     {
-        return self::roleLabel($this->currentRole());
+        $role = $this->currentRole();
+
+        // Un administrateur SaaS n'a de rôle dans aucun établissement :
+        // on affiche sa fonction plutôt que « Aucun rôle ».
+        if ($role === null && $this->isSaasAdmin()) {
+            return __('Administrateur SaaS');
+        }
+
+        return self::roleLabel($role);
     }
 
     public static function roleLabel(?string $role): string

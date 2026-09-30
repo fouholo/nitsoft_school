@@ -3,7 +3,7 @@
 
     @if ($pendingApproval)
         <div class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-            {{ __("Votre compte a été créé. Il est en attente d'activation par l'administrateur de votre organisation.") }}
+            {{ __("Votre compte a été créé. Vous pourrez vous connecter dès qu'il aura été activé par l'administrateur de votre organisation ou par l'équipe Nitsoft.") }}
         </div>
 
         <p class="mt-4 text-center text-sm text-stone-500">

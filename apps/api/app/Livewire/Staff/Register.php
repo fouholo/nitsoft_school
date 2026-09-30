@@ -8,18 +8,29 @@ use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\EstablishmentUserPivot;
 use App\Domain\Establishments\Models\Foundation;
 use App\Domain\Establishments\Models\FoundationUserPivot;
+use App\Livewire\Concerns\ThrottlesSubmissions;
 use App\Models\User;
-use Illuminate\Database\QueryException;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
+/**
+ * Auto-inscription d'un fondateur, directeur ou gestionnaire sur un
+ * établissement ou une fondation existant, à partir de son UID.
+ *
+ * L'UID est séquentiel, donc devinable : il ne vaut pas preuve
+ * d'appartenance. Le compte est toujours créé inactif et sans pouvoir
+ * d'administration ; il est activé par un administrateur de l'organisation
+ * (Staff\ManageOrganization, Staff\Index) ou, si elle n'en a pas encore, par
+ * un administrateur SaaS (StaffRegistrationReviewer, écran Établissements).
+ */
 #[Layout('layouts.guest')]
 class Register extends Component
 {
+    use ThrottlesSubmissions;
+
     public string $name = '';
 
     public string $first_name = '';
@@ -43,6 +54,8 @@ class Register extends Component
 
     public function register(): void
     {
+        $this->throttle('staff-register', 5, 600, 'uid');
+
         $data = $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'first_name' => ['required', 'string', 'max:255'],
@@ -60,9 +73,9 @@ class Register extends Component
             $foundation = Foundation::where('uid_serveur', $data['uid'])->first();
 
             if ($foundation !== null) {
-                [$user, $pendingApproval] = DB::transaction(fn () => $this->registerOnFoundation($data, $foundation));
+                DB::transaction(fn () => $this->registerOnFoundation($data, $foundation));
 
-                $this->finalizeRegistration($user, $pendingApproval);
+                $this->pendingApproval = true;
 
                 return;
             }
@@ -76,121 +89,57 @@ class Register extends Component
             return;
         }
 
-        [$user, $pendingApproval] = DB::transaction(function () use ($data, $establishment) {
-            if ($data['role'] === 'fondateur' && $establishment->foundation_id === null) {
-                return $this->registerOnEstablishment($data, $establishment, 'is_general_admin');
+        DB::transaction(function () use ($data, $establishment): void {
+            if ($data['role'] === 'fondateur' && $establishment->foundation_id !== null) {
+                $this->registerOnFoundation($data, $establishment->foundation()->firstOrFail());
+
+                return;
             }
 
-            if ($data['role'] === 'fondateur') {
-                return $this->registerOnFoundation($data, $establishment->foundation()->firstOrFail());
-            }
-
-            return $this->registerOnEstablishment($data, $establishment, 'is_local_admin');
+            $this->registerOnEstablishment($data, $establishment);
         });
 
-        $this->finalizeRegistration($user, $pendingApproval);
-    }
-
-    private function finalizeRegistration(User $user, bool $pendingApproval): void
-    {
-        if ($pendingApproval) {
-            $this->pendingApproval = true;
-
-            return;
-        }
-
-        Auth::login($user);
-        session()->regenerate();
-
-        $this->redirectRoute('home', navigate: true);
+        $this->pendingApproval = true;
     }
 
     /**
      * @param  array{name: string, first_name: string, email: string, pseudo: string, password: string, role: string}  $data
-     * @return array{0: User, 1: bool}
      */
-    private function registerOnEstablishment(array $data, Establishment $establishment, string $flagColumn): array
+    private function registerOnEstablishment(array $data, Establishment $establishment): void
     {
-        $alreadyTaken = EstablishmentUserPivot::where('establishment_id', $establishment->id)
-            ->where($flagColumn, true)
-            ->lockForUpdate()
-            ->exists();
-
-        $user = User::create([
-            'name' => $data['name'],
-            'first_name' => $data['first_name'],
-            'email' => $data['email'],
-            'pseudo' => $data['pseudo'],
-            'password' => $data['password'],
-        ]);
-
-        $attributes = [
+        EstablishmentUserPivot::create([
             'establishment_id' => $establishment->id,
-            'user_id' => $user->id,
+            'user_id' => $this->createUser($data)->id,
             'role' => $data['role'],
-            'is_active' => ! $alreadyTaken,
-            $flagColumn => $alreadyTaken ? null : true,
-        ];
-
-        try {
-            EstablishmentUserPivot::create($attributes);
-        } catch (QueryException $e) {
-            $needle = $flagColumn === 'is_general_admin' ? 'general_admin' : 'local_admin';
-
-            if (! str_contains($e->getMessage(), $needle)) {
-                throw $e;
-            }
-
-            $attributes['is_active'] = false;
-            $attributes[$flagColumn] = null;
-            EstablishmentUserPivot::create($attributes);
-            $alreadyTaken = true;
-        }
-
-        return [$user, $alreadyTaken];
+            'is_active' => false,
+        ]);
     }
 
     /**
      * @param  array{name: string, first_name: string, email: string, pseudo: string, password: string, role: string}  $data
-     * @return array{0: User, 1: bool}
      */
-    private function registerOnFoundation(array $data, Foundation $foundation): array
+    private function registerOnFoundation(array $data, Foundation $foundation): void
     {
-        $alreadyTaken = FoundationUserPivot::where('foundation_id', $foundation->id)
-            ->where('is_general_admin', true)
-            ->lockForUpdate()
-            ->exists();
+        FoundationUserPivot::create([
+            'foundation_id' => $foundation->id,
+            'user_id' => $this->createUser($data)->id,
+            'role' => $data['role'],
+            'is_active' => false,
+        ]);
+    }
 
-        $user = User::create([
+    /**
+     * @param  array{name: string, first_name: string, email: string, pseudo: string, password: string, role: string}  $data
+     */
+    private function createUser(array $data): User
+    {
+        return User::create([
             'name' => $data['name'],
             'first_name' => $data['first_name'],
             'email' => $data['email'],
             'pseudo' => $data['pseudo'],
             'password' => $data['password'],
         ]);
-
-        $attributes = [
-            'foundation_id' => $foundation->id,
-            'user_id' => $user->id,
-            'role' => $data['role'],
-            'is_active' => ! $alreadyTaken,
-            'is_general_admin' => $alreadyTaken ? null : true,
-        ];
-
-        try {
-            FoundationUserPivot::create($attributes);
-        } catch (QueryException $e) {
-            if (! str_contains($e->getMessage(), 'general_admin')) {
-                throw $e;
-            }
-
-            $attributes['is_active'] = false;
-            $attributes['is_general_admin'] = null;
-            FoundationUserPivot::create($attributes);
-            $alreadyTaken = true;
-        }
-
-        return [$user, $alreadyTaken];
     }
 
     public function render()

@@ -84,6 +84,7 @@ class Show extends Component
                 'name' => $data['founder_name'],
                 'email' => $data['founder_email'],
                 'password' => User::DEFAULT_PASSWORD,
+                'must_change_password' => true,
             ]);
 
             $this->generatedPassword = User::DEFAULT_PASSWORD;

@@ -40,6 +40,16 @@ class EstablishmentPolicy
         return false;
     }
 
+    /**
+     * Validation des auto-inscriptions du personnel sur les organisations
+     * sans administrateur (écran global Livewire\Establishments\Index) :
+     * réservée au Super Admin SaaS, par le bypass Gate::before.
+     */
+    public function reviewStaffRegistrations(User $user): bool
+    {
+        return false;
+    }
+
     public function update(User $user, Establishment $establishment): bool
     {
         return $establishment->foundation_id !== null && $user->isFounderOfEstablishment($establishment->id);

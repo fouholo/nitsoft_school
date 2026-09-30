@@ -62,6 +62,7 @@ class Index extends Component
                 'email' => $data['staff_email'],
                 'pseudo' => $data['staff_pseudo'],
                 'password' => User::DEFAULT_PASSWORD,
+                'must_change_password' => true,
             ]);
 
             EstablishmentUserPivot::create([

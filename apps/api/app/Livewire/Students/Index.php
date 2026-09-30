@@ -285,6 +285,7 @@ class Index extends Component
                 'email' => $guardian->email,
                 'phone' => $guardian->phone,
                 'password' => User::DEFAULT_PASSWORD,
+                'must_change_password' => true,
             ]);
 
             $guardian->update(['user_id' => $user->id]);

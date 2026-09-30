@@ -113,6 +113,7 @@ class ManageOrganization extends Component
             'name' => $data['staff_name'],
             'email' => $data['staff_email'],
             'password' => User::DEFAULT_PASSWORD,
+            'must_change_password' => true,
         ]);
 
         EstablishmentUserPivot::create([

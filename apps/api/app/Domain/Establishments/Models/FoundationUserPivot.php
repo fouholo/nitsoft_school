@@ -31,4 +31,12 @@ class FoundationUserPivot extends Pivot
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * @return BelongsTo<Foundation, $this>
+     */
+    public function foundation(): BelongsTo
+    {
+        return $this->belongsTo(Foundation::class);
+    }
 }

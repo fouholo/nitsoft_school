@@ -8,10 +8,13 @@ use App\Domain\Establishments\Enums\EstablishmentType;
 use App\Domain\Establishments\Exceptions\SchoolRegistrationConflictException;
 use App\Domain\Establishments\Models\Direction;
 use App\Domain\Establishments\Models\Establishment;
+use App\Domain\Establishments\Models\EstablishmentUserPivot;
 use App\Domain\Establishments\Models\Foundation;
+use App\Domain\Establishments\Models\FoundationUserPivot;
 use App\Domain\Establishments\Models\Inspection;
 use App\Domain\Establishments\Models\SchoolRegistration;
 use App\Domain\Establishments\Services\SchoolRegistrationApprover;
+use App\Domain\Establishments\Services\StaffRegistrationReviewer;
 use App\Domain\Establishments\Support\UniqueSlug;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -194,6 +197,34 @@ class Index extends Component
         $approver->reject($registration, Auth::user());
     }
 
+    public function approveStaffMember(int $pivotId, StaffRegistrationReviewer $reviewer): void
+    {
+        $this->authorize('reviewStaffRegistrations', Establishment::class);
+
+        $reviewer->approveEstablishmentMember(EstablishmentUserPivot::findOrFail($pivotId), Auth::user());
+    }
+
+    public function rejectStaffMember(int $pivotId, StaffRegistrationReviewer $reviewer): void
+    {
+        $this->authorize('reviewStaffRegistrations', Establishment::class);
+
+        $reviewer->reject(EstablishmentUserPivot::findOrFail($pivotId), Auth::user());
+    }
+
+    public function approveFounder(int $pivotId, StaffRegistrationReviewer $reviewer): void
+    {
+        $this->authorize('reviewStaffRegistrations', Establishment::class);
+
+        $reviewer->approveFounder(FoundationUserPivot::findOrFail($pivotId), Auth::user());
+    }
+
+    public function rejectFounder(int $pivotId, StaffRegistrationReviewer $reviewer): void
+    {
+        $this->authorize('reviewStaffRegistrations', Establishment::class);
+
+        $reviewer->reject(FoundationUserPivot::findOrFail($pivotId), Auth::user());
+    }
+
     public function delete(int $establishmentId): void
     {
         $establishment = Establishment::findOrFail($establishmentId);
@@ -221,7 +252,12 @@ class Index extends Component
 
     public function render()
     {
+        $canReviewStaff = Auth::user()?->can('reviewStaffRegistrations', Establishment::class) ?? false;
+        $reviewer = app(StaffRegistrationReviewer::class);
+
         return view('livewire.establishments.index', [
+            'pendingStaff' => $canReviewStaff ? $reviewer->pendingEstablishmentMembers() : collect(),
+            'pendingFounders' => $canReviewStaff ? $reviewer->pendingFounders() : collect(),
             'establishments' => Establishment::with('foundation')->orderBy('name')->get(),
             'pendingRegistrations' => Auth::user()?->can('viewAny', SchoolRegistration::class)
                 ? SchoolRegistration::with(['inspection', 'direction'])->oldest()->get()

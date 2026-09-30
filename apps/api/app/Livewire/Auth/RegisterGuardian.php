@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Auth;
 
 use App\Domain\Enrollment\Models\Guardian;
+use App\Livewire\Concerns\ThrottlesSubmissions;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -13,6 +14,8 @@ use Livewire\Component;
 #[Layout('layouts.guest')]
 class RegisterGuardian extends Component
 {
+    use ThrottlesSubmissions;
+
     public string $first_name = '';
 
     public string $last_name = '';
@@ -27,6 +30,8 @@ class RegisterGuardian extends Component
 
     public function register(): void
     {
+        $this->throttle('register-guardian', 5, 600, 'email');
+
         $data = $this->validate([
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],

@@ -110,21 +110,27 @@
 
             if (auth()->user()->isSaasAdmin()) {
                 $navItems[] = ['type' => 'link', 'label' => __('Groupes scolaires'), 'route' => 'foundations.index', 'active' => 'foundations.*', 'icon' => 'building'];
-                $navItems[] = ['type' => 'link', 'label' => __('Établissements'), 'route' => 'establishments.index', 'active' => 'establishments.*', 'icon' => 'building', 'badge' => \App\Domain\Establishments\Models\SchoolRegistration::count()];
-                $navItems[] = ['type' => 'link', 'label' => __('Inspections'), 'route' => 'inspections.index', 'active' => 'inspections.*', 'icon' => 'building'];
-                $navItems[] = ['type' => 'link', 'label' => __('Directions'), 'route' => 'directions.index', 'active' => 'directions.*', 'icon' => 'building'];
-                $navItems[] = ['type' => 'link', 'label' => __('Années scolaires'), 'route' => 'academics.school-years.index', 'active' => 'academics.school-years.*', 'icon' => 'book'];
-                $navItems[] = ['type' => 'link', 'label' => __('Niveaux'), 'route' => 'academics.levels.index', 'active' => 'academics.levels.*', 'icon' => 'book'];
-                $navItems[] = ['type' => 'link', 'label' => __('Séries'), 'route' => 'academics.series.index', 'active' => 'academics.series.*', 'icon' => 'book'];
-                $navItems[] = ['type' => 'link', 'label' => __('Matières'), 'route' => 'academics.subjects.index', 'active' => 'academics.subjects.*', 'icon' => 'book'];
-                $navItems[] = ['type' => 'link', 'label' => __('Matières du primaire'), 'route' => 'academics.primary-subjects.index', 'active' => 'academics.primary-subjects.*', 'icon' => 'book'];
-                $navItems[] = ['type' => 'link', 'label' => __("Barème d'appréciations"), 'route' => 'academics.appreciation-scales.index', 'active' => 'academics.appreciation-scales.*', 'icon' => 'book'];
-                $navItems[] = ['type' => 'link', 'label' => __('Domaines'), 'route' => 'domains.index', 'active' => 'domains.*', 'icon' => 'book'];
-                $navItems[] = ['type' => 'link', 'label' => __('Niveaux arabes'), 'route' => 'arabic.levels.index', 'active' => 'arabic.levels.*', 'icon' => 'book'];
-                $navItems[] = ['type' => 'link', 'label' => __('Séries arabes'), 'route' => 'arabic.series.index', 'active' => 'arabic.series.*', 'icon' => 'book'];
-                $navItems[] = ['type' => 'link', 'label' => __('Matières arabes'), 'route' => 'arabic.subjects.index', 'active' => 'arabic.subjects.*', 'icon' => 'book'];
-                $navItems[] = ['type' => 'link', 'label' => __('Informations générales'), 'route' => 'general-information.edit', 'active' => 'general-information.*', 'icon' => 'building'];
-                $navItems[] = ['type' => 'link', 'label' => __('Sauvegarde'), 'route' => 'backup.index', 'active' => 'backup.*', 'icon' => 'building'];
+                $navItems[] = ['type' => 'link', 'label' => __('Établissements'), 'route' => 'establishments.index', 'active' => 'establishments.*', 'icon' => 'building', 'badge' => \App\Domain\Establishments\Models\SchoolRegistration::count() + app(\App\Domain\Establishments\Services\StaffRegistrationReviewer::class)->pendingCount()];
+                $navItems[] = ['type' => 'group', 'label' => __('Inspections et directions'), 'icon' => 'identification', 'active' => ['inspections.*', 'directions.*'], 'children' => [
+                    ['label' => __('Inspections'), 'route' => 'inspections.index'],
+                    ['label' => __('Directions'), 'route' => 'directions.index'],
+                ]];
+                $navItems[] = ['type' => 'group', 'label' => __('Référentiels'), 'icon' => 'book', 'active' => ['academics.school-years.*', 'academics.levels.*', 'academics.series.*', 'academics.subjects.*', 'academics.primary-subjects.*', 'academics.appreciation-scales.*', 'domains.*'], 'children' => [
+                    ['label' => __('Années scolaires'), 'route' => 'academics.school-years.index'],
+                    ['label' => __('Niveaux'), 'route' => 'academics.levels.index'],
+                    ['label' => __('Séries'), 'route' => 'academics.series.index'],
+                    ['label' => __('Matières'), 'route' => 'academics.subjects.index'],
+                    ['label' => __('Matières du primaire'), 'route' => 'academics.primary-subjects.index'],
+                    ['label' => __("Barème d'appréciations"), 'route' => 'academics.appreciation-scales.index'],
+                    ['label' => __('Domaines'), 'route' => 'domains.index'],
+                ]];
+                $navItems[] = ['type' => 'group', 'label' => __('Filière arabe'), 'icon' => 'book', 'active' => ['arabic.levels.*', 'arabic.series.*', 'arabic.subjects.*'], 'children' => [
+                    ['label' => __('Niveaux arabes'), 'route' => 'arabic.levels.index'],
+                    ['label' => __('Séries arabes'), 'route' => 'arabic.series.index'],
+                    ['label' => __('Matières arabes'), 'route' => 'arabic.subjects.index'],
+                ]];
+                $navItems[] = ['type' => 'link', 'label' => __('Informations générales'), 'route' => 'general-information.edit', 'active' => 'general-information.*', 'icon' => 'document-text'];
+                $navItems[] = ['type' => 'link', 'label' => __('Sauvegarde'), 'route' => 'backup.index', 'active' => 'backup.*', 'icon' => 'lock'];
             }
 
             if (auth()->user()->isMainSaasAdmin()) {
@@ -165,7 +171,7 @@
                 <div class="flex h-16 items-center gap-2 border-b border-stone-200 px-5">
                     <img src="{{ asset('branding/nitsoft-school-logo.png') }}" alt="{{ config('app.name') }}" class="h-9 w-9 shrink-0 object-contain">
                     <span class="text-xl font-semibold leading-none text-blue-900 whitespace-nowrap">{{ config('app.name') }}</span>
-                    <button type="button" class="ms-auto rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700 lg:hidden" aria-label="{{ __('Fermer le menu') }}" @click="sidebarOpen = false">
+                    <button type="button" class="ms-auto rounded-lg p-1.5 text-stone-500 hover:bg-stone-100 hover:text-stone-700 lg:hidden" aria-label="{{ __('Fermer le menu') }}" @click="sidebarOpen = false">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
                             <path d="M6 6l12 12M18 6 6 18" />
                         </svg>
@@ -196,7 +202,7 @@
                                 @endif
                             </a>
                         @else
-                            @php $groupActive = request()->routeIs($item['active']); @endphp
+                            @php $groupActive = request()->routeIs(...(array) $item['active']); @endphp
                             <details {{ $groupActive ? 'open' : '' }} class="group pt-3 first:pt-0">
                                 <summary class="flex cursor-pointer list-none items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wide text-stone-500 hover:bg-stone-100 hover:text-stone-700 [&::-webkit-details-marker]:hidden">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 shrink-0">

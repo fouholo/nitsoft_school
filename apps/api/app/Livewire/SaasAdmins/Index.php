@@ -51,6 +51,7 @@ class Index extends Component
             'email' => $data['admin_email'],
             'pseudo' => $data['admin_pseudo'],
             'password' => User::DEFAULT_PASSWORD,
+            'must_change_password' => true,
         ]);
 
         SaasAdmin::create([

@@ -8,6 +8,7 @@ use App\Domain\Establishments\Enums\EstablishmentType;
 use App\Domain\Establishments\Models\Direction;
 use App\Domain\Establishments\Models\Inspection;
 use App\Domain\Establishments\Models\SchoolRegistration;
+use App\Livewire\Concerns\ThrottlesSubmissions;
 use App\Models\User;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
@@ -21,6 +22,8 @@ use Livewire\Component;
 #[Layout('layouts.guest')]
 class RegisterSchool extends Component
 {
+    use ThrottlesSubmissions;
+
     public string $name = '';
 
     public string $first_name = '';
@@ -53,6 +56,8 @@ class RegisterSchool extends Component
 
     public function register(): void
     {
+        $this->throttle('register-school', 5, 600, 'email');
+
         $data = $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'first_name' => ['required', 'string', 'max:255'],

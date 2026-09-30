@@ -6,6 +6,7 @@ namespace App\Livewire\SaasAdmins;
 
 use App\Domain\Establishments\Enums\SaasAdminType;
 use App\Domain\Establishments\Models\SaasAdmin;
+use App\Livewire\Concerns\ThrottlesSubmissions;
 use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +17,8 @@ use Livewire\Component;
 #[Layout('layouts.guest')]
 class Register extends Component
 {
+    use ThrottlesSubmissions;
+
     public string $name = '';
 
     public string $first_name = '';
@@ -37,6 +40,8 @@ class Register extends Component
 
     public function register(): void
     {
+        $this->throttle('register-saas-admin', 5, 600, 'email');
+
         $data = $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'first_name' => ['required', 'string', 'max:255'],
