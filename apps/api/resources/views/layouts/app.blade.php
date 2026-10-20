@@ -63,13 +63,13 @@
                     ['label' => __('Journal'), 'route' => 'notifications.sms-messages.index', 'ability' => 'viewAny', 'model' => \App\Domain\Notifications\Models\SmsMessage::class],
                     ['label' => __('Envoyer un SMS'), 'route' => 'notifications.sms-messages.create', 'ability' => 'create', 'model' => \App\Domain\Notifications\Models\SmsMessage::class],
                 ]],
-                // Groupe entier invisible sauf établissement is_arabe : son
-                // seul enfant s'appuie sur ArabicSubjectCoefficientPolicy,
-                // qui refuse déjà viewAny hors établissement is_arabe — pas
-                // besoin de condition PHP supplémentaire ici, le filtrage
-                // par ability ci-dessous suffit à vider (et donc masquer) le
-                // groupe.
+                // Groupe entier invisible sauf établissement is_arabe : ses
+                // enfants s'appuient sur des Policies arabes qui refusent
+                // déjà viewAny hors établissement is_arabe — pas besoin de
+                // condition PHP supplémentaire ici, le filtrage par ability
+                // ci-dessous suffit à vider (et donc masquer) le groupe.
                 ['type' => 'group', 'label' => __('Arabe'), 'icon' => 'book', 'active' => 'arabic.*', 'children' => [
+                    ['label' => __('Classes'), 'route' => 'arabic.classrooms.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicClassroom::class],
                     ['label' => __('Coefficients par matière'), 'route' => 'arabic.subject-coefficients.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicSubjectCoefficient::class],
                     ['label' => __('Périodes'), 'route' => 'arabic.terms.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicTerm::class],
                     ['label' => __('Affectations enseignants'), 'route' => 'arabic.teacher-assignments.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicTeacherAssignment::class],

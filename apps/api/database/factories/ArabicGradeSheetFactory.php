@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Domain\Arabic\Models\ArabicClassroom;
 use App\Domain\Arabic\Models\ArabicGradeSheet;
-use App\Domain\Arabic\Models\ArabicLevel;
 use App\Domain\Arabic\Models\ArabicSubject;
 use App\Domain\Arabic\Models\ArabicTerm;
 use App\Domain\Establishments\Models\Establishment;
@@ -23,7 +23,7 @@ class ArabicGradeSheetFactory extends Factory
     {
         return [
             'establishment_id' => Establishment::factory(),
-            'arabic_level_id' => ArabicLevel::factory(),
+            'arabic_classroom_id' => ArabicClassroom::factory(),
             'arabic_subject_id' => ArabicSubject::factory(),
             'arabic_term_id' => ArabicTerm::factory(),
             'teacher_id' => User::factory(),

@@ -3,10 +3,13 @@
 declare(strict_types=1);
 
 use App\Domain\Academics\Enums\Cycle;
+use App\Domain\Academics\Models\Classroom;
+use App\Domain\Arabic\Models\ArabicClassroom;
 use App\Domain\Arabic\Models\ArabicLevel;
 use App\Domain\Arabic\Models\ArabicSerie;
 use App\Domain\Arabic\Models\ArabicSubject;
 use App\Domain\Arabic\Models\ArabicSubjectCoefficient;
+use App\Domain\Enrollment\Enums\Track;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Establishments\Models\Establishment;
 
@@ -88,29 +91,69 @@ test('le catalogue ArabicLevel/ArabicSerie/ArabicSubject est partagé entre éta
         ->and(ArabicSubjectCoefficient::withoutTenant()->where('establishment_id', $establishmentA->id)->count())->toBe(1);
 });
 
-test('une inscription peut porter un niveau et une série arabes indépendants de sa classe française', function () {
+test('une inscription porte une classe arabe en plus de sa classe française', function () {
     $establishment = Establishment::factory()->create();
     actingInEstablishment($establishment);
 
     $arabicLevel = ArabicLevel::factory()->create(['requires_series' => true]);
     $arabicSerie = ArabicSerie::factory()->create();
-
-    $enrollment = Enrollment::factory()->create([
+    $arabicClassroom = ArabicClassroom::factory()->create([
         'establishment_id' => $establishment->id,
         'arabic_level_id' => $arabicLevel->id,
         'arabic_serie_id' => $arabicSerie->id,
     ]);
 
-    expect($enrollment->arabicLevel->is($arabicLevel))->toBeTrue()
-        ->and($enrollment->arabicSerie->is($arabicSerie))->toBeTrue();
+    $enrollment = Enrollment::factory()->create([
+        'establishment_id' => $establishment->id,
+        'classroom_id' => Classroom::factory()->create(['establishment_id' => $establishment->id])->id,
+        'arabic_classroom_id' => $arabicClassroom->id,
+    ])->refresh();
+
+    expect($enrollment->arabicClassroom->is($arabicClassroom))->toBeTrue()
+        ->and($enrollment->arabicClassroom->arabicLevel->is($arabicLevel))->toBeTrue()
+        ->and($enrollment->arabicClassroom->arabicSerie->is($arabicSerie))->toBeTrue()
+        ->and($enrollment->main_track)->toBe(Track::Francais)
+        ->and($enrollment->mainClassroom()?->is($enrollment->classroom))->toBeTrue()
+        ->and($enrollment->secondaryClassroom()?->is($arabicClassroom))->toBeTrue();
 });
 
-test('arabic_level_id et arabic_serie_id restent nuls pour une inscription hors filière arabe', function () {
+test('une inscription dont la filière principale est arabe peut ne pas avoir de classe française', function () {
     $establishment = Establishment::factory()->create();
     actingInEstablishment($establishment);
 
-    $enrollment = Enrollment::factory()->create(['establishment_id' => $establishment->id]);
+    $arabicClassroom = ArabicClassroom::factory()->create(['establishment_id' => $establishment->id]);
 
-    expect($enrollment->arabic_level_id)->toBeNull()
-        ->and($enrollment->arabic_serie_id)->toBeNull();
+    $enrollment = Enrollment::factory()->create([
+        'establishment_id' => $establishment->id,
+        'classroom_id' => null,
+        'arabic_classroom_id' => $arabicClassroom->id,
+        'main_track' => Track::Arabe,
+    ]);
+
+    expect($enrollment->mainClassroom()?->is($arabicClassroom))->toBeTrue()
+        ->and($enrollment->secondaryClassroom())->toBeNull()
+        ->and($enrollment->mainClassroomName())->toBe($arabicClassroom->name);
+});
+
+test('le nom de la classe arabe reprend le libellé français du niveau, la série et le numéro', function () {
+    $establishment = Establishment::factory()->create();
+    actingInEstablishment($establishment);
+
+    $arabicLevel = ArabicLevel::factory()->create(['wording' => 'الصف الأول', 'wording_fr' => '1ère année', 'requires_series' => true]);
+    $arabicSerie = ArabicSerie::factory()->create(['serie' => 'L']);
+
+    $arabicClassroom = ArabicClassroom::factory()->create([
+        'establishment_id' => $establishment->id,
+        'arabic_level_id' => $arabicLevel->id,
+        'arabic_serie_id' => $arabicSerie->id,
+        'numero' => 'A',
+    ]);
+
+    expect($arabicClassroom->name)->toBe('1ère année L A')
+        ->and($arabicClassroom->uid_serveur)->toMatch('/^255\d{9}$/');
+
+    $arabicLevel->update(['wording_fr' => null]);
+    $arabicClassroom->update(['arabic_serie_id' => null, 'numero' => 'B']);
+
+    expect($arabicClassroom->refresh()->name)->toBe('الصف الأول B');
 });

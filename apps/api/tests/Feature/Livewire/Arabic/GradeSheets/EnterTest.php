@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Domain\Arabic\Models\ArabicClassroom;
 use App\Domain\Arabic\Models\ArabicGrade;
 use App\Domain\Arabic\Models\ArabicGradeSheet;
-use App\Domain\Arabic\Models\ArabicLevel;
 use App\Domain\Arabic\Models\ArabicSubject;
 use App\Domain\Arabic\Models\ArabicTeacherAssignment;
 use App\Domain\Arabic\Models\ArabicTerm;
+use App\Domain\Enrollment\Enums\Track;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Establishments\Models\Establishment;
 use App\Livewire\Arabic\GradeSheets\Enter;
@@ -17,31 +18,39 @@ beforeEach(function () {
     $this->establishment = Establishment::factory()->create(['is_arabe' => true]);
     actingInEstablishment($this->establishment);
 
-    $this->arabicLevel = ArabicLevel::factory()->create(['requires_series' => false]);
+    $this->arabicClassroom = ArabicClassroom::factory()->create(['establishment_id' => $this->establishment->id]);
 
     $this->educateur = createUserWithRole($this->establishment, 'educateur');
 
     $this->gradeSheet = ArabicGradeSheet::factory()->create([
         'establishment_id' => $this->establishment->id,
-        'arabic_level_id' => $this->arabicLevel->id,
+        'arabic_classroom_id' => $this->arabicClassroom->id,
         'teacher_id' => $this->educateur->id,
         'max_score' => 20,
     ]);
 
+    // A : classe arabe secondaire (filière principale française).
     $this->enrollmentA = Enrollment::factory()->create([
         'establishment_id' => $this->establishment->id,
-        'arabic_level_id' => $this->arabicLevel->id,
+        'arabic_classroom_id' => $this->arabicClassroom->id,
     ]);
+    // B : classe arabe principale, sans classe française.
     $this->enrollmentB = Enrollment::factory()->create([
         'establishment_id' => $this->establishment->id,
-        'arabic_level_id' => $this->arabicLevel->id,
+        'classroom_id' => null,
+        'arabic_classroom_id' => $this->arabicClassroom->id,
+        'main_track' => Track::Arabe,
     ]);
 
-    // Inscription hors groupe arabe : ne doit jamais apparaître dans le roster.
+    // Inscriptions hors de cette classe arabe : jamais dans le roster.
     Enrollment::factory()->create(['establishment_id' => $this->establishment->id]);
+    Enrollment::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'arabic_classroom_id' => ArabicClassroom::factory()->create(['establishment_id' => $this->establishment->id])->id,
+    ]);
 });
 
-test('le roster regroupe les inscriptions du niveau/série arabe visé, indépendamment de la classe', function () {
+test('le roster contient les élèves de la classe arabe, qu’elle soit leur classe principale ou secondaire', function () {
     $this->actingAs($this->educateur);
 
     $enrollments = Livewire::test(Enter::class, ['gradeSheet' => $this->gradeSheet])
@@ -78,14 +87,14 @@ test('une note hors barème est rejetée', function () {
     expect(ArabicGrade::count())->toBe(0);
 });
 
-test('un enseignant non affecté au groupe est refusé', function () {
+test('un enseignant non affecté à la classe est refusé', function () {
     $teacher = createUserWithRole($this->establishment, 'enseignant');
     $this->actingAs($teacher);
 
     Livewire::test(Enter::class, ['gradeSheet' => $this->gradeSheet])->assertForbidden();
 });
 
-test('un enseignant affecté au groupe, auteur de la grille, peut saisir les notes', function () {
+test('un enseignant affecté à la classe, auteur de la grille, peut saisir les notes', function () {
     $teacher = createUserWithRole($this->establishment, 'enseignant');
     $arabicSubject = ArabicSubject::factory()->create();
     $arabicTerm = ArabicTerm::factory()->create(['establishment_id' => $this->establishment->id]);
@@ -93,13 +102,13 @@ test('un enseignant affecté au groupe, auteur de la grille, peut saisir les not
     ArabicTeacherAssignment::factory()->create([
         'establishment_id' => $this->establishment->id,
         'user_id' => $teacher->id,
-        'arabic_level_id' => $this->arabicLevel->id,
+        'arabic_classroom_id' => $this->arabicClassroom->id,
         'arabic_subject_id' => $arabicSubject->id,
     ]);
 
     $ownGradeSheet = ArabicGradeSheet::factory()->create([
         'establishment_id' => $this->establishment->id,
-        'arabic_level_id' => $this->arabicLevel->id,
+        'arabic_classroom_id' => $this->arabicClassroom->id,
         'arabic_subject_id' => $arabicSubject->id,
         'arabic_term_id' => $arabicTerm->id,
         'teacher_id' => $teacher->id,

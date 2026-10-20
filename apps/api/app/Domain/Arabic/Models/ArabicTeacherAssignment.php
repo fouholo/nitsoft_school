@@ -12,44 +12,46 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Affectation d'un enseignant à un groupe arabe (niveau × série arabe ×
- * matière arabe) — groupé par niveau/série arabe plutôt que par classe
- * française, contrairement à TeacherAssignment, puisque le niveau arabe est
- * porté par l'élève (Enrollment) et peut regrouper des élèves de classes
- * françaises différentes. Pas Syncable, comme TeacherAssignment (pas de
- * suivi offline sur les affectations).
+ * Affectation d'un enseignant à une classe arabe pour une matière arabe —
+ * miroir de TeacherAssignment (classe française). Regroupée par classe
+ * arabe depuis docs/superpowers/specs/2026-10-20-classes-arabes-design.md
+ * (auparavant par niveau/série arabe). Pas Syncable, comme
+ * TeacherAssignment (pas de suivi offline sur les affectations).
  */
 class ArabicTeacherAssignment extends Model
 {
     use HasFactory;
     use TenantScoped;
 
-    protected $table = 'teacher_arabic_level_subject';
+    protected $table = 'teacher_arabic_classroom_subject';
 
     protected $fillable = [
         'establishment_id',
         'user_id',
-        'arabic_level_id',
-        'arabic_serie_id',
+        'arabic_classroom_id',
         'arabic_subject_id',
         'school_year_id',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function teacher(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function arabicLevel(): BelongsTo
+    /**
+     * @return BelongsTo<ArabicClassroom, $this>
+     */
+    public function arabicClassroom(): BelongsTo
     {
-        return $this->belongsTo(ArabicLevel::class);
+        return $this->belongsTo(ArabicClassroom::class);
     }
 
-    public function arabicSerie(): BelongsTo
-    {
-        return $this->belongsTo(ArabicSerie::class);
-    }
-
+    /**
+     * @return BelongsTo<ArabicSubject, $this>
+     */
     public function arabicSubject(): BelongsTo
     {
         return $this->belongsTo(ArabicSubject::class);

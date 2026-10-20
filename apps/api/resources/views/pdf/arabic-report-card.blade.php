@@ -53,8 +53,8 @@
         <tr>
             <td class="label">Date d'édition</td>
             <td>{{ now()->format('d/m/Y') }}</td>
-            <td></td>
-            <td></td>
+            <td class="label">Classe</td>
+            <td>{{ $reportCard->enrollment->arabicClassroom?->name ?? '—' }}</td>
         </tr>
     </table>
 

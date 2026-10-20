@@ -18,28 +18,15 @@
             </div>
 
             <div>
-                <label for="arabic_level_id" class="block text-sm font-medium text-stone-700">{{ __('Niveau arabe') }}</label>
-                <select id="arabic_level_id" wire:model.live="arabic_level_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm" dir="rtl">
+                <label for="arabic_classroom_id" class="block text-sm font-medium text-stone-700">{{ __('Classe arabe') }}</label>
+                <select id="arabic_classroom_id" wire:model="arabic_classroom_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
-                    @foreach ($arabicLevels as $arabicLevel)
-                        <option value="{{ $arabicLevel->id }}">{{ $arabicLevel->wording }}</option>
+                    @foreach ($arabicClassrooms as $arabicClassroom)
+                        <option value="{{ $arabicClassroom->id }}">{{ $arabicClassroom->name }}</option>
                     @endforeach
                 </select>
-                @error('arabic_level_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                @error('arabic_classroom_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
-
-            @if ($this->selectedLevelRequiresSeries())
-                <div>
-                    <label for="arabic_serie_id" class="block text-sm font-medium text-stone-700">{{ __('Série arabe') }}</label>
-                    <select id="arabic_serie_id" wire:model="arabic_serie_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm" dir="rtl">
-                        <option value="">—</option>
-                        @foreach ($arabicSeries as $arabicSerie)
-                            <option value="{{ $arabicSerie->id }}">{{ $arabicSerie->serie_wording }}</option>
-                        @endforeach
-                    </select>
-                    @error('arabic_serie_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-                </div>
-            @endif
 
             <div>
                 <label for="arabic_subject_id" class="block text-sm font-medium text-stone-700">{{ __('Matière arabe') }}</label>
@@ -108,7 +95,7 @@
                 <tr>
                     <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Titre') }}</th>
                     <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Type') }}</th>
-                    <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Niveau') }}</th>
+                    <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Classe arabe') }}</th>
                     <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Matière') }}</th>
                     <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Période') }}</th>
                     <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Date') }}</th>
@@ -120,7 +107,7 @@
                     <tr wire:key="arabic-grade-sheet-{{ $gradeSheet->id }}">
                         <td class="px-4 py-2 text-stone-900">{{ $gradeSheet->title }}</td>
                         <td class="px-4 py-2 text-stone-600">{{ $gradeSheet->type === 'devoir' ? __('Devoir') : __('Interrogation') }}</td>
-                        <td class="px-4 py-2 text-stone-600" dir="rtl">{{ $gradeSheet->arabicLevel?->wording }}</td>
+                        <td class="px-4 py-2 text-stone-600">{{ $gradeSheet->arabicClassroom?->name }}</td>
                         <td class="px-4 py-2 text-stone-600" dir="rtl">{{ $gradeSheet->arabicSubject?->name }}</td>
                         <td class="px-4 py-2 text-stone-600">{{ $gradeSheet->arabicTerm?->label }}</td>
                         <td class="px-4 py-2 text-stone-600">{{ $gradeSheet->graded_on->format('d/m/Y') }}</td>

@@ -55,7 +55,7 @@ class PaymentRemindersBatchPdfController extends Controller
             ->when($schoolYear, fn ($query) => $query->where('school_year_id', $schoolYear->id))
             ->where('status', 'active')
             ->when($levelId, fn ($query) => $query->whereHas('classroom', fn ($q) => $q->where('level_id', $levelId)))
-            ->with(['student', 'classroom', 'establishment.inspection.direction'])
+            ->with(['student', 'classroom', 'arabicClassroom', 'establishment.inspection.direction'])
             ->get()
             ->sortBy([['student.last_name', 'asc'], ['student.first_name', 'asc']])
             ->values();
@@ -66,7 +66,7 @@ class PaymentRemindersBatchPdfController extends Controller
             return [
                 'student' => $enrollment->student,
                 'establishment' => $enrollment->establishment,
-                'classroom' => $enrollment->classroom,
+                'classroom' => $enrollment->mainClassroom(),
                 'rows' => $reminder['rows'],
                 'total' => $reminder['total'],
             ];

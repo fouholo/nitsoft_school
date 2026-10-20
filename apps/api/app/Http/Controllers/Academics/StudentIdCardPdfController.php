@@ -33,13 +33,13 @@ class StudentIdCardPdfController extends Controller
         $enrollment = $student->enrollments()
             ->where('status', 'active')
             ->when($currentSchoolYear, fn ($query) => $query->where('school_year_id', $currentSchoolYear->id))
-            ->with(['classroom', 'schoolYear'])
+            ->with(['classroom', 'arabicClassroom', 'schoolYear'])
             ->first();
 
         $pdf = Pdf::loadView('pdf.student-id-card', [
             'student' => $student,
             'establishment' => $student->establishment,
-            'classroom' => $enrollment?->classroom,
+            'classroom' => $enrollment?->mainClassroom(),
             'schoolYear' => $enrollment !== null ? $enrollment->schoolYear : $currentSchoolYear,
             'cardBackgroundPath' => GeneralInformation::current()->card_background_path,
         ])->setPaper([0, 0, 242.65, 153.02]);

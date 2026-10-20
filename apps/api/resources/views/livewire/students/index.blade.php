@@ -38,7 +38,7 @@
         </div>
     @endif
 
-    <div class="mt-4">
+    <div class="mt-4 flex flex-wrap items-center gap-4">
         <input
             type="search"
             aria-label="{{ __('Rechercher un élève') }}"
@@ -46,6 +46,13 @@
             placeholder="{{ __('Rechercher un élève...') }}"
             class="block w-full max-w-sm rounded-lg border-stone-300 text-sm"
         >
+
+        @if ($isArabe)
+            <label class="flex items-center gap-2 text-sm text-stone-700">
+                <input type="checkbox" wire:model.live="withoutSecondaryOnly" class="rounded border-stone-300 text-orange-700 focus:ring-orange-600">
+                {{ __('Sans classe secondaire') }}
+            </label>
+        @endif
     </div>
 
     @if ($showForm)
@@ -252,6 +259,10 @@
                         <th class="whitespace-nowrap px-4 py-2 text-start font-medium text-stone-500">{{ __('Matricule') }}</th>
                         <th class="whitespace-nowrap px-4 py-2 text-start font-medium text-stone-500">{{ __('Nom') }}</th>
                         <th class="whitespace-nowrap px-4 py-2 text-start font-medium text-stone-500">{{ __('Date de naissance') }}</th>
+                        @if ($isArabe)
+                            <th class="whitespace-nowrap px-4 py-2 text-start font-medium text-stone-500">{{ __('Classe principale') }}</th>
+                            <th class="whitespace-nowrap px-4 py-2 text-start font-medium text-stone-500">{{ __('Classe secondaire') }}</th>
+                        @endif
                         <th class="whitespace-nowrap px-4 py-2"></th>
                     </tr>
                 </thead>
@@ -265,6 +276,19 @@
                                 </a>
                             </td>
                             <td class="whitespace-nowrap px-4 py-2 text-stone-600">{{ $student->birth_date?->format('d/m/Y') }}</td>
+                            @if ($isArabe)
+                                @php $currentEnrollment = $student->enrollments->first(); @endphp
+                                <td class="whitespace-nowrap px-4 py-2 text-stone-600">{{ $currentEnrollment?->mainClassroomName() ?? '—' }}</td>
+                                <td class="whitespace-nowrap px-4 py-2 text-stone-600">
+                                    @if (! $currentEnrollment)
+                                        —
+                                    @elseif ($currentEnrollment->secondaryClassroom())
+                                        {{ $currentEnrollment->secondaryClassroom()->name }}
+                                    @else
+                                        <span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-800">{{ __('À renseigner') }}</span>
+                                    @endif
+                                </td>
+                            @endif
                             <td class="whitespace-nowrap px-4 py-2 text-end">
                                 @can('update', $student)
                                     <button wire:click="edit({{ $student->id }})" class="text-stone-500 hover:text-stone-900">{{ __('Modifier') }}</button>
@@ -282,7 +306,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-4 py-6 text-center text-stone-500">{{ __('Aucun élève.') }}</td>
+                            <td colspan="{{ $isArabe ? 6 : 4 }}" class="px-4 py-6 text-center text-stone-500">{{ __('Aucun élève.') }}</td>
                         </tr>
                     @endforelse
                 </tbody>

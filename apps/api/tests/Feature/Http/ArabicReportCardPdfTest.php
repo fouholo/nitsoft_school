@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domain\Arabic\Models\ArabicClassroom;
 use App\Domain\Arabic\Models\ArabicGrade;
 use App\Domain\Arabic\Models\ArabicGradeSheet;
 use App\Domain\Arabic\Models\ArabicLevel;
@@ -18,6 +19,7 @@ beforeEach(function () {
     actingInEstablishment($this->establishment);
 
     $arabicLevel = ArabicLevel::factory()->create(['requires_series' => false]);
+    $arabicClassroom = ArabicClassroom::factory()->create(['establishment_id' => $this->establishment->id, 'arabic_level_id' => $arabicLevel->id]);
     $arabicTerm = ArabicTerm::factory()->create(['establishment_id' => $this->establishment->id]);
     $arabicSubject = ArabicSubject::factory()->create(['name' => 'القرآن الكريم']);
 
@@ -33,12 +35,12 @@ beforeEach(function () {
     $enrollment = Enrollment::factory()->create([
         'establishment_id' => $this->establishment->id,
         'student_id' => $student->id,
-        'arabic_level_id' => $arabicLevel->id,
+        'arabic_classroom_id' => $arabicClassroom->id,
     ]);
 
     $gradeSheet = ArabicGradeSheet::factory()->create([
         'establishment_id' => $this->establishment->id,
-        'arabic_level_id' => $arabicLevel->id,
+        'arabic_classroom_id' => $arabicClassroom->id,
         'arabic_subject_id' => $arabicSubject->id,
         'arabic_term_id' => $arabicTerm->id,
     ]);

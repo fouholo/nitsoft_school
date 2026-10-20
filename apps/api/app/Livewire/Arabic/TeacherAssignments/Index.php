@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Livewire\Arabic\TeacherAssignments;
 
-use App\Domain\Academics\Models\SchoolYear;
-use App\Domain\Arabic\Models\ArabicLevel;
-use App\Domain\Arabic\Models\ArabicSerie;
+use App\Domain\Arabic\Models\ArabicClassroom;
 use App\Domain\Arabic\Models\ArabicSubject;
 use App\Domain\Arabic\Models\ArabicTeacherAssignment;
 use App\Domain\Establishments\Models\Establishment;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -20,13 +21,9 @@ class Index extends Component
 
     public ?int $user_id = null;
 
-    public ?int $arabic_level_id = null;
-
-    public ?int $arabic_serie_id = null;
+    public ?int $arabic_classroom_id = null;
 
     public ?int $arabic_subject_id = null;
-
-    public ?int $school_year_id = null;
 
     public function mount(): void
     {
@@ -37,41 +34,34 @@ class Index extends Component
     {
         $this->authorize('create', ArabicTeacherAssignment::class);
 
-        $this->reset(['user_id', 'arabic_level_id', 'arabic_serie_id', 'arabic_subject_id']);
-        $this->school_year_id = SchoolYear::where('is_current', true)->value('id');
+        $this->reset(['user_id', 'arabic_classroom_id', 'arabic_subject_id']);
         $this->showForm = true;
-    }
-
-    public function updatedArabicLevelId(): void
-    {
-        $this->arabic_serie_id = null;
     }
 
     public function save(): void
     {
         $this->authorize('create', ArabicTeacherAssignment::class);
 
+        $establishmentId = (int) app('currentEstablishmentId');
+
         $data = $this->validate([
-            'user_id' => ['required', 'exists:users,id'],
-            'arabic_level_id' => ['required', 'exists:arabic_levels,id'],
-            'arabic_serie_id' => $this->selectedLevelRequiresSeries() ? ['required', 'exists:arabic_series,id'] : ['nullable'],
+            'user_id' => ['required', Rule::in($this->teachers()->pluck('id')->all())],
+            'arabic_classroom_id' => ['required', Rule::exists('arabic_classrooms', 'id')->where('establishment_id', $establishmentId)],
             'arabic_subject_id' => ['required', 'exists:arabic_subjects,id'],
-            'school_year_id' => ['required', 'exists:school_years,id'],
+        ], [], [
+            'user_id' => __('enseignant'),
+            'arabic_classroom_id' => __('classe arabe'),
+            'arabic_subject_id' => __('matière arabe'),
         ]);
 
-        if (! $this->selectedLevelRequiresSeries()) {
-            $data['arabic_serie_id'] = null;
-        }
+        // L'année de l'affectation est celle de la classe : une classe
+        // arabe n'existe que pour une année scolaire.
+        $data['school_year_id'] = ArabicClassroom::findOrFail($data['arabic_classroom_id'])->school_year_id;
 
         ArabicTeacherAssignment::firstOrCreate($data);
 
-        $this->reset(['user_id', 'arabic_level_id', 'arabic_serie_id', 'arabic_subject_id']);
+        $this->reset(['user_id', 'arabic_classroom_id', 'arabic_subject_id']);
         $this->showForm = false;
-    }
-
-    public function selectedLevelRequiresSeries(): bool
-    {
-        return $this->arabic_level_id ? (bool) ArabicLevel::whereKey($this->arabic_level_id)->value('requires_series') : false;
     }
 
     public function delete(int $assignmentId): void
@@ -88,23 +78,31 @@ class Index extends Component
         $this->showForm = false;
     }
 
+    /**
+     * @return Collection<int, User>
+     */
+    private function teachers()
+    {
+        return Establishment::findOrFail((int) app('currentEstablishmentId'))
+            ->users()
+            ->wherePivot('role', 'enseignant')
+            ->wherePivot('is_active', true)
+            ->orderBy('name')
+            ->get();
+    }
+
     public function render()
     {
-        $establishmentId = (int) app('currentEstablishmentId');
-
         return view('livewire.arabic.teacher-assignments.index', [
-            'assignments' => ArabicTeacherAssignment::with(['teacher', 'arabicLevel', 'arabicSerie', 'arabicSubject', 'schoolYear'])
+            'assignments' => ArabicTeacherAssignment::with(['teacher', 'arabicClassroom', 'arabicSubject', 'schoolYear'])
                 ->orderByDesc('id')
                 ->get(),
-            'teachers' => Establishment::find($establishmentId)
-                ->users()
-                ->wherePivot('role', 'enseignant')
-                ->wherePivot('is_active', true)
+            'teachers' => $this->teachers(),
+            'arabicClassrooms' => ArabicClassroom::query()
+                ->whereHas('schoolYear', fn ($query) => $query->where('is_current', true))
+                ->orderBy('name')
                 ->get(),
-            'arabicLevels' => ArabicLevel::orderBy('wording')->get(),
-            'arabicSeries' => ArabicSerie::orderBy('serie')->get(),
             'arabicSubjects' => ArabicSubject::orderBy('name')->get(),
-            'schoolYears' => SchoolYear::orderByDesc('starts_on')->get(),
         ])->title(__('Affectations enseignants arabes'));
     }
 }

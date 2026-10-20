@@ -16,7 +16,7 @@ use App\Policies\Concerns\ChecksEstablishmentMembership;
  * large à la saisie de notes suit RolePermissions::MATRIX['grades.enter']
  * (educateur uniquement — ni directeur/gestionnaire/fondateur, qui n'ont pas
  * plus d'accès large côté français, cf. GradeSheetPolicy), en plus de
- * l'enseignant affecté à son groupe précis (niveau/série/matière) — voir
+ * l'enseignant affecté à sa classe arabe pour la matière — voir
  * docs/superpowers/specs/2026-08-21-arabe-affectations-notes-design.md.
  */
 class ArabicGradeSheetPolicy
@@ -64,9 +64,8 @@ class ArabicGradeSheetPolicy
             return false;
         }
 
-        return $user->isAssignedToArabicGroup(
-            $arabicGradeSheet->arabic_level_id,
-            $arabicGradeSheet->arabic_serie_id,
+        return $user->isAssignedToArabicClassroom(
+            $arabicGradeSheet->arabic_classroom_id,
             $arabicGradeSheet->arabic_subject_id,
         );
     }

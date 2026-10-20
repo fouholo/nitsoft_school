@@ -32,7 +32,7 @@ class Dashboard extends Component
             ->with(['enrollments' => fn ($query) => $query
                 ->where('status', 'active')
                 ->latest('enrolled_on')
-                ->with('classroom')])
+                ->with(['classroom', 'arabicClassroom'])])
             ->get();
 
         $pendingCount = $guardian->students()

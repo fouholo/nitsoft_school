@@ -23,7 +23,7 @@ class ArabicReportCardPdfController extends Controller
     {
         Gate::authorize('view', $arabicReportCard);
 
-        $arabicReportCard->loadMissing(['enrollment.student', 'arabicTerm.schoolYear', 'establishment']);
+        $arabicReportCard->loadMissing(['enrollment.student', 'enrollment.arabicClassroom', 'arabicTerm.schoolYear', 'establishment']);
 
         $pdf = Pdf::loadView('pdf.arabic-report-card', [
             'reportCard' => $arabicReportCard,

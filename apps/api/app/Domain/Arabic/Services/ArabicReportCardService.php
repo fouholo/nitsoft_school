@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domain\Arabic\Services;
 
+use App\Domain\Arabic\Models\ArabicClassroom;
 use App\Domain\Arabic\Models\ArabicGrade;
-use App\Domain\Arabic\Models\ArabicLevel;
 use App\Domain\Arabic\Models\ArabicReportCard;
-use App\Domain\Arabic\Models\ArabicSerie;
 use App\Domain\Arabic\Models\ArabicSubject;
 use App\Domain\Arabic\Models\ArabicSubjectCoefficient;
 use App\Domain\Arabic\Models\ArabicTerm;
@@ -20,19 +19,20 @@ use Illuminate\Validation\ValidationException;
 /**
  * Miroir simplifié de ReportCardService : un seul chemin de calcul (pas de
  * branchement Cycle::Primaire/Secondaire), puisque les coefficients arabes
- * passent toujours par une table de jointure (ArabicSubjectCoefficient), et
- * que le roster est déterminé par (arabic_level_id, arabic_serie_id) plutôt
- * que par une classe française — voir
- * docs/superpowers/specs/2026-08-21-arabe-bulletins-design.md.
+ * passent toujours par une table de jointure (ArabicSubjectCoefficient), lue
+ * par niveau/série de la classe arabe. Le roster et le rang sont ceux de la
+ * classe arabe, qu'elle soit la classe principale ou secondaire de l'élève —
+ * voir docs/superpowers/specs/2026-08-21-arabe-bulletins-design.md et
+ * docs/superpowers/specs/2026-10-20-classes-arabes-design.md.
  */
 class ArabicReportCardService
 {
     /**
      * @return Collection<int, ArabicReportCard>
      */
-    public function generate(ArabicLevel $level, ?ArabicSerie $serie, ArabicTerm $term): Collection
+    public function generate(ArabicClassroom $arabicClassroom, ArabicTerm $term): Collection
     {
-        $enrollments = $this->enrollmentsFor($level, $serie, $term);
+        $enrollments = $this->enrollmentsFor($arabicClassroom, $term);
 
         if ($enrollments->isEmpty()) {
             return collect();
@@ -42,12 +42,14 @@ class ArabicReportCardService
             ->with('arabicGradeSheet')
             ->whereNotNull('score')
             ->whereIn('enrollment_id', $enrollments->pluck('id'))
-            ->whereHas('arabicGradeSheet', fn ($query) => $query->where('arabic_term_id', $term->id))
+            ->whereHas('arabicGradeSheet', fn ($query) => $query
+                ->where('arabic_term_id', $term->id)
+                ->where('arabic_classroom_id', $arabicClassroom->id))
             ->get();
 
         $gradesByEnrollment = $grades->groupBy('enrollment_id');
 
-        $coefficients = $this->coefficientsFor($level, $serie);
+        $coefficients = $this->coefficientsFor($arabicClassroom);
 
         $this->assertCoefficientsConfigured($grades, $coefficients);
 
@@ -92,12 +94,11 @@ class ArabicReportCardService
     {
         $enrollment = $arabicReportCard->enrollment;
 
-        if (! $enrollment || $enrollment->arabic_level_id === null) {
+        $arabicClassroom = $enrollment?->arabicClassroom;
+
+        if ($arabicClassroom === null) {
             return collect();
         }
-
-        $level = ArabicLevel::find($enrollment->arabic_level_id);
-        $serie = $enrollment->arabic_serie_id !== null ? ArabicSerie::find($enrollment->arabic_serie_id) : null;
 
         $grades = ArabicGrade::query()
             ->with('arabicGradeSheet.arabicSubject', 'arabicGradeSheet.teacher')
@@ -106,7 +107,7 @@ class ArabicReportCardService
             ->whereHas('arabicGradeSheet', fn ($query) => $query->where('arabic_term_id', $arabicReportCard->arabic_term_id))
             ->get();
 
-        $coefficients = $level !== null ? $this->coefficientsFor($level, $serie) : collect();
+        $coefficients = $this->coefficientsFor($arabicClassroom);
 
         $rows = [];
 
@@ -131,13 +132,12 @@ class ArabicReportCardService
     /**
      * @return Collection<int, Enrollment>
      */
-    private function enrollmentsFor(ArabicLevel $level, ?ArabicSerie $serie, ArabicTerm $term): Collection
+    private function enrollmentsFor(ArabicClassroom $arabicClassroom, ArabicTerm $term): Collection
     {
         return Enrollment::query()
-            ->where('establishment_id', $term->establishment_id)
+            ->where('establishment_id', $arabicClassroom->establishment_id)
             ->where('school_year_id', $term->school_year_id)
-            ->where('arabic_level_id', $level->id)
-            ->where('arabic_serie_id', $serie?->id)
+            ->where('arabic_classroom_id', $arabicClassroom->id)
             ->where('status', 'active')
             ->get();
     }
@@ -145,11 +145,11 @@ class ArabicReportCardService
     /**
      * @return Collection<int, float>
      */
-    private function coefficientsFor(ArabicLevel $level, ?ArabicSerie $serie): Collection
+    private function coefficientsFor(ArabicClassroom $arabicClassroom): Collection
     {
         $rows = ArabicSubjectCoefficient::query()
-            ->where('arabic_level_id', $level->id)
-            ->where('arabic_serie_id', $serie?->id)
+            ->where('arabic_level_id', $arabicClassroom->arabic_level_id)
+            ->where('arabic_serie_id', $arabicClassroom->arabic_serie_id)
             ->get();
 
         $coefficients = [];
@@ -177,7 +177,7 @@ class ArabicReportCardService
         $names = ArabicSubject::whereIn('id', $missing)->pluck('name')->implode(', ');
 
         throw ValidationException::withMessages([
-            'arabic_level_id' => "Coefficient manquant pour : {$names}.",
+            'arabic_classroom_id' => __('Coefficient manquant pour : :names.', ['names' => $names]),
         ]);
     }
 

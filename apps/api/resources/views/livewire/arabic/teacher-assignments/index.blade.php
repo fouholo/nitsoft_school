@@ -10,7 +10,7 @@
     </div>
 
     @if ($showForm)
-        <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-5">
+        <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-3">
             <div>
                 <label for="user_id" class="block text-sm font-medium text-stone-700">{{ __('Enseignant') }}</label>
                 <select id="user_id" wire:model="user_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
@@ -23,28 +23,15 @@
             </div>
 
             <div>
-                <label for="arabic_level_id" class="block text-sm font-medium text-stone-700">{{ __('Niveau arabe') }}</label>
-                <select id="arabic_level_id" wire:model.live="arabic_level_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm" dir="rtl">
+                <label for="arabic_classroom_id" class="block text-sm font-medium text-stone-700">{{ __('Classe arabe') }}</label>
+                <select id="arabic_classroom_id" wire:model="arabic_classroom_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                     <option value="">—</option>
-                    @foreach ($arabicLevels as $arabicLevel)
-                        <option value="{{ $arabicLevel->id }}">{{ $arabicLevel->wording }}</option>
+                    @foreach ($arabicClassrooms as $arabicClassroom)
+                        <option value="{{ $arabicClassroom->id }}">{{ $arabicClassroom->name }}</option>
                     @endforeach
                 </select>
-                @error('arabic_level_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                @error('arabic_classroom_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
-
-            @if ($this->selectedLevelRequiresSeries())
-                <div>
-                    <label for="arabic_serie_id" class="block text-sm font-medium text-stone-700">{{ __('Série arabe') }}</label>
-                    <select id="arabic_serie_id" wire:model="arabic_serie_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm" dir="rtl">
-                        <option value="">—</option>
-                        @foreach ($arabicSeries as $arabicSerie)
-                            <option value="{{ $arabicSerie->id }}">{{ $arabicSerie->serie_wording }}</option>
-                        @endforeach
-                    </select>
-                    @error('arabic_serie_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-                </div>
-            @endif
 
             <div>
                 <label for="arabic_subject_id" class="block text-sm font-medium text-stone-700">{{ __('Matière arabe') }}</label>
@@ -57,18 +44,7 @@
                 @error('arabic_subject_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
-            <div>
-                <label for="school_year_id" class="block text-sm font-medium text-stone-700">{{ __('Année scolaire') }}</label>
-                <select id="school_year_id" wire:model="school_year_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
-                    <option value="">—</option>
-                    @foreach ($schoolYears as $schoolYear)
-                        <option value="{{ $schoolYear->id }}">{{ $schoolYear->label }}</option>
-                    @endforeach
-                </select>
-                @error('school_year_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-            </div>
-
-            <div class="flex gap-2 sm:col-span-5">
+            <div class="flex gap-2 sm:col-span-3">
                 <button type="submit" class="rounded-lg bg-orange-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-800">
                     {{ __('Enregistrer') }}
                 </button>
@@ -85,8 +61,7 @@
             <thead class="bg-stone-50">
                 <tr>
                     <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Enseignant') }}</th>
-                    <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Niveau') }}</th>
-                    <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Série') }}</th>
+                    <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Classe arabe') }}</th>
                     <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Matière') }}</th>
                     <th class="px-4 py-2 text-start font-medium text-stone-500">{{ __('Année scolaire') }}</th>
                     <th class="px-4 py-2"></th>
@@ -96,8 +71,7 @@
                 @forelse ($assignments as $assignment)
                     <tr wire:key="arabic-assignment-{{ $assignment->id }}">
                         <td class="px-4 py-2 text-stone-900">{{ $assignment->teacher?->name }}</td>
-                        <td class="px-4 py-2 text-stone-600" dir="rtl">{{ $assignment->arabicLevel?->wording }}</td>
-                        <td class="px-4 py-2 text-stone-600" dir="rtl">{{ $assignment->arabicSerie?->serie_wording ?? '—' }}</td>
+                        <td class="px-4 py-2 text-stone-600">{{ $assignment->arabicClassroom?->name }}</td>
                         <td class="px-4 py-2 text-stone-600" dir="rtl">{{ $assignment->arabicSubject?->name }}</td>
                         <td class="px-4 py-2 text-stone-600">{{ $assignment->schoolYear?->label }}</td>
                         <td class="px-4 py-2 text-end">
@@ -114,7 +88,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-4 py-6 text-center text-stone-500">{{ __('Aucune affectation.') }}</td>
+                        <td colspan="5" class="px-4 py-6 text-center text-stone-500">{{ __('Aucune affectation.') }}</td>
                     </tr>
                 @endforelse
             </tbody>

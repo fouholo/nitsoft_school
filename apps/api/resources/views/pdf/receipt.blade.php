@@ -54,7 +54,7 @@
         </tr>
         <tr>
             <td class="label">Classe</td>
-            <td>{{ $payment->enrollment->classroom?->name }}</td>
+            <td>{{ $payment->enrollment->mainClassroom()?->name }}</td>
         </tr>
         <tr>
             <td class="label">Moyen de paiement</td>

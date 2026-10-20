@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Domain\Academics\Models\SchoolYear;
+use App\Domain\Arabic\Models\ArabicClassroom;
 use App\Domain\Arabic\Models\ArabicGrade;
 use App\Domain\Arabic\Models\ArabicGradeSheet;
 use App\Domain\Arabic\Models\ArabicLevel;
@@ -11,6 +12,7 @@ use App\Domain\Arabic\Models\ArabicSubject;
 use App\Domain\Arabic\Models\ArabicSubjectCoefficient;
 use App\Domain\Arabic\Models\ArabicTerm;
 use App\Domain\Arabic\Services\ArabicReportCardService;
+use App\Domain\Enrollment\Enums\Track;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Establishments\Models\Establishment;
 use Illuminate\Validation\ValidationException;
@@ -21,6 +23,11 @@ beforeEach(function () {
 
     $this->schoolYear = SchoolYear::factory()->create();
     $this->arabicLevel = ArabicLevel::factory()->create(['requires_series' => false]);
+    $this->arabicClassroom = ArabicClassroom::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'school_year_id' => $this->schoolYear->id,
+        'arabic_level_id' => $this->arabicLevel->id,
+    ]);
     $this->arabicTerm = ArabicTerm::factory()->create(['establishment_id' => $this->establishment->id, 'school_year_id' => $this->schoolYear->id]);
     $this->arabicSubjectA = ArabicSubject::factory()->create(['name' => 'القرآن الكريم']);
     $this->arabicSubjectB = ArabicSubject::factory()->create(['name' => 'اللغة العربية']);
@@ -43,8 +50,7 @@ function makeArabicGrade(Enrollment $enrollment, ArabicTerm $term, ArabicSubject
 {
     $gradeSheet = ArabicGradeSheet::factory()->create([
         'establishment_id' => $enrollment->establishment_id,
-        'arabic_level_id' => $enrollment->arabic_level_id,
-        'arabic_serie_id' => $enrollment->arabic_serie_id,
+        'arabic_classroom_id' => $enrollment->arabic_classroom_id,
         'arabic_subject_id' => $subject->id,
         'arabic_term_id' => $term->id,
         'max_score' => $maxScore,
@@ -63,12 +69,12 @@ test('la moyenne générale est pondérée par coefficient, regroupant des élè
     $enrollmentA = Enrollment::factory()->create([
         'establishment_id' => $this->establishment->id,
         'school_year_id' => $this->schoolYear->id,
-        'arabic_level_id' => $this->arabicLevel->id,
+        'arabic_classroom_id' => $this->arabicClassroom->id,
     ]);
     $enrollmentB = Enrollment::factory()->create([
         'establishment_id' => $this->establishment->id,
         'school_year_id' => $this->schoolYear->id,
-        'arabic_level_id' => $this->arabicLevel->id,
+        'arabic_classroom_id' => $this->arabicClassroom->id,
     ]);
     expect($enrollmentA->classroom_id)->not->toBe($enrollmentB->classroom_id);
 
@@ -79,7 +85,7 @@ test('la moyenne générale est pondérée par coefficient, regroupant des élè
     makeArabicGrade($enrollmentB, $this->arabicTerm, $this->arabicSubjectB, 20);
 
     $service = new ArabicReportCardService;
-    $reportCards = $service->generate($this->arabicLevel, null, $this->arabicTerm);
+    $reportCards = $service->generate($this->arabicClassroom, $this->arabicTerm);
 
     expect($reportCards)->toHaveCount(2);
 
@@ -97,7 +103,7 @@ test('erreur explicite si un coefficient est manquant pour une matière notée',
     $enrollment = Enrollment::factory()->create([
         'establishment_id' => $this->establishment->id,
         'school_year_id' => $this->schoolYear->id,
-        'arabic_level_id' => $this->arabicLevel->id,
+        'arabic_classroom_id' => $this->arabicClassroom->id,
     ]);
 
     $arabicSubjectSansCoefficient = ArabicSubject::factory()->create();
@@ -105,7 +111,7 @@ test('erreur explicite si un coefficient est manquant pour une matière notée',
 
     $service = new ArabicReportCardService;
 
-    expect(fn () => $service->generate($this->arabicLevel, null, $this->arabicTerm))
+    expect(fn () => $service->generate($this->arabicClassroom, $this->arabicTerm))
         ->toThrow(ValidationException::class);
 });
 
@@ -113,18 +119,18 @@ test('regénérer un bulletin met à jour la moyenne existante plutôt que d’e
     $enrollment = Enrollment::factory()->create([
         'establishment_id' => $this->establishment->id,
         'school_year_id' => $this->schoolYear->id,
-        'arabic_level_id' => $this->arabicLevel->id,
+        'arabic_classroom_id' => $this->arabicClassroom->id,
     ]);
 
     makeArabicGrade($enrollment, $this->arabicTerm, $this->arabicSubjectA, 10);
     makeArabicGrade($enrollment, $this->arabicTerm, $this->arabicSubjectB, 10);
 
     $service = new ArabicReportCardService;
-    $service->generate($this->arabicLevel, null, $this->arabicTerm);
+    $service->generate($this->arabicClassroom, $this->arabicTerm);
 
     ArabicGrade::where('enrollment_id', $enrollment->id)->update(['score' => 20]);
 
-    $service->generate($this->arabicLevel, null, $this->arabicTerm);
+    $service->generate($this->arabicClassroom, $this->arabicTerm);
 
     expect(ArabicReportCard::count())->toBe(1)
         ->and((float) ArabicReportCard::sole()->average)->toBe(20.0);
@@ -134,14 +140,14 @@ test('subjectBreakdown détaille chaque matière avec coefficient et enseignant'
     $enrollment = Enrollment::factory()->create([
         'establishment_id' => $this->establishment->id,
         'school_year_id' => $this->schoolYear->id,
-        'arabic_level_id' => $this->arabicLevel->id,
+        'arabic_classroom_id' => $this->arabicClassroom->id,
     ]);
 
     makeArabicGrade($enrollment, $this->arabicTerm, $this->arabicSubjectA, 16);
     makeArabicGrade($enrollment, $this->arabicTerm, $this->arabicSubjectB, 10);
 
     $service = new ArabicReportCardService;
-    $service->generate($this->arabicLevel, null, $this->arabicTerm);
+    $service->generate($this->arabicClassroom, $this->arabicTerm);
 
     $reportCard = ArabicReportCard::sole();
     $breakdown = $service->subjectBreakdown($reportCard);
@@ -151,4 +157,40 @@ test('subjectBreakdown détaille chaque matière avec coefficient et enseignant'
     $rowA = $breakdown->firstWhere(fn ($row) => $row->subject->is($this->arabicSubjectA));
     expect($rowA->average)->toBe(16.0)
         ->and($rowA->coefficient)->toBe(4.0);
+});
+
+test('le classement couvre la classe arabe, filière principale ou secondaire, et ignore les autres classes arabes', function () {
+    $mainArabic = Enrollment::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'school_year_id' => $this->schoolYear->id,
+        'classroom_id' => null,
+        'arabic_classroom_id' => $this->arabicClassroom->id,
+        'main_track' => Track::Arabe,
+    ]);
+    $secondaryArabic = Enrollment::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'school_year_id' => $this->schoolYear->id,
+        'arabic_classroom_id' => $this->arabicClassroom->id,
+    ]);
+
+    $otherClassroom = ArabicClassroom::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'school_year_id' => $this->schoolYear->id,
+        'arabic_level_id' => $this->arabicLevel->id,
+    ]);
+    $elsewhere = Enrollment::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'school_year_id' => $this->schoolYear->id,
+        'arabic_classroom_id' => $otherClassroom->id,
+    ]);
+
+    makeArabicGrade($mainArabic, $this->arabicTerm, $this->arabicSubjectA, 12);
+    makeArabicGrade($secondaryArabic, $this->arabicTerm, $this->arabicSubjectA, 18);
+    makeArabicGrade($elsewhere, $this->arabicTerm, $this->arabicSubjectA, 20);
+
+    (new ArabicReportCardService)->generate($this->arabicClassroom, $this->arabicTerm);
+
+    expect(ArabicReportCard::where('enrollment_id', $secondaryArabic->id)->sole()->rank)->toBe(1)
+        ->and(ArabicReportCard::where('enrollment_id', $mainArabic->id)->sole()->rank)->toBe(2)
+        ->and(ArabicReportCard::where('enrollment_id', $elsewhere->id)->exists())->toBeFalse();
 });

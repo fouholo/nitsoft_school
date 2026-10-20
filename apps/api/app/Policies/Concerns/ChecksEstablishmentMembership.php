@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Policies\Concerns;
 
 use App\Domain\Billing\Contracts\HasOwnerColumn;
+use App\Domain\Establishments\Models\Establishment;
 use App\Models\User;
 
 /**
@@ -32,6 +33,15 @@ trait ChecksEstablishmentMembership
     protected function isLocalAdminOfCurrentEstablishment(User $user): bool
     {
         return $user->isLocalAdminOfCurrentEstablishment();
+    }
+
+    /**
+     * Écoles franco-arabes uniquement (filière arabe).
+     */
+    protected function currentEstablishmentIsArabe(): bool
+    {
+        return app()->bound('currentEstablishmentId')
+            && (bool) Establishment::whereKey((int) app('currentEstablishmentId'))->value('is_arabe');
     }
 
     protected function belongsToSameEstablishment(User $user, int $modelEstablishmentId): bool

@@ -3,8 +3,7 @@
 declare(strict_types=1);
 
 use App\Domain\Academics\Models\SchoolYear;
-use App\Domain\Arabic\Models\ArabicLevel;
-use App\Domain\Arabic\Models\ArabicSerie;
+use App\Domain\Arabic\Models\ArabicClassroom;
 use App\Domain\Arabic\Models\ArabicSubject;
 use App\Domain\Arabic\Models\ArabicTeacherAssignment;
 use App\Domain\Establishments\Models\Establishment;
@@ -19,54 +18,75 @@ beforeEach(function () {
     $this->teacher = createUserWithRole($this->establishment, 'enseignant');
     $this->arabicSubject = ArabicSubject::factory()->create();
     $this->schoolYear = SchoolYear::factory()->create(['is_current' => true]);
+    $this->arabicClassroom = ArabicClassroom::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'school_year_id' => $this->schoolYear->id,
+    ]);
 });
 
-test('un directeur affecte un enseignant à un niveau sans série', function () {
+test('un directeur affecte un enseignant à une classe arabe, l’année venant de la classe', function () {
     $this->actingAs($this->directeur);
-
-    $arabicLevel = ArabicLevel::factory()->create(['requires_series' => false]);
 
     Livewire::test(Index::class)
         ->set('user_id', $this->teacher->id)
-        ->set('arabic_level_id', $arabicLevel->id)
+        ->set('arabic_classroom_id', $this->arabicClassroom->id)
         ->set('arabic_subject_id', $this->arabicSubject->id)
-        ->set('school_year_id', $this->schoolYear->id)
         ->call('save')
         ->assertHasNoErrors();
 
     $assignment = ArabicTeacherAssignment::sole();
 
-    expect($assignment->arabic_level_id)->toBe($arabicLevel->id)
-        ->and($assignment->arabic_serie_id)->toBeNull();
+    expect($assignment->arabic_classroom_id)->toBe($this->arabicClassroom->id)
+        ->and($assignment->user_id)->toBe($this->teacher->id)
+        ->and($assignment->school_year_id)->toBe($this->schoolYear->id);
 });
 
-test('la série est requise quand le niveau l’exige', function () {
+test('la classe arabe est obligatoire', function () {
     $this->actingAs($this->directeur);
-
-    $arabicLevel = ArabicLevel::factory()->create(['requires_series' => true]);
 
     Livewire::test(Index::class)
         ->set('user_id', $this->teacher->id)
-        ->set('arabic_level_id', $arabicLevel->id)
         ->set('arabic_subject_id', $this->arabicSubject->id)
-        ->set('school_year_id', $this->schoolYear->id)
         ->call('save')
-        ->assertHasErrors(['arabic_serie_id']);
+        ->assertHasErrors(['arabic_classroom_id']);
 
     expect(ArabicTeacherAssignment::count())->toBe(0);
+});
+
+test('une classe arabe d’un autre établissement est refusée', function () {
+    $this->actingAs($this->directeur);
+
+    $foreignClassroom = ArabicClassroom::factory()->create(['school_year_id' => $this->schoolYear->id]);
+
+    Livewire::test(Index::class)
+        ->set('user_id', $this->teacher->id)
+        ->set('arabic_classroom_id', $foreignClassroom->id)
+        ->set('arabic_subject_id', $this->arabicSubject->id)
+        ->call('save')
+        ->assertHasErrors(['arabic_classroom_id']);
+
+    expect(ArabicTeacherAssignment::withoutTenant()->count())->toBe(0);
+});
+
+test('seul un enseignant actif de l’établissement peut être affecté', function () {
+    $this->actingAs($this->directeur);
+
+    Livewire::test(Index::class)
+        ->set('user_id', $this->directeur->id)
+        ->set('arabic_classroom_id', $this->arabicClassroom->id)
+        ->set('arabic_subject_id', $this->arabicSubject->id)
+        ->call('save')
+        ->assertHasErrors(['user_id']);
 });
 
 test('un fondateur d’un établissement indépendant peut affecter un enseignant', function () {
     $founder = createUserWithRole($this->establishment, 'fondateur');
     $this->actingAs($founder);
 
-    $arabicLevel = ArabicLevel::factory()->create(['requires_series' => false]);
-
     Livewire::test(Index::class)
         ->set('user_id', $this->teacher->id)
-        ->set('arabic_level_id', $arabicLevel->id)
+        ->set('arabic_classroom_id', $this->arabicClassroom->id)
         ->set('arabic_subject_id', $this->arabicSubject->id)
-        ->set('school_year_id', $this->schoolYear->id)
         ->call('save')
         ->assertHasNoErrors();
 
@@ -76,13 +96,10 @@ test('un fondateur d’un établissement indépendant peut affecter un enseignan
 test('un enseignant ne peut pas créer d’affectation', function () {
     $this->actingAs($this->teacher);
 
-    $arabicLevel = ArabicLevel::factory()->create(['requires_series' => false]);
-
     Livewire::test(Index::class)
         ->set('user_id', $this->teacher->id)
-        ->set('arabic_level_id', $arabicLevel->id)
+        ->set('arabic_classroom_id', $this->arabicClassroom->id)
         ->set('arabic_subject_id', $this->arabicSubject->id)
-        ->set('school_year_id', $this->schoolYear->id)
         ->call('save')
         ->assertForbidden();
 
@@ -98,27 +115,16 @@ test('un établissement non arabe n’a pas accès à l’écran', function () {
     Livewire::test(Index::class)->assertForbidden();
 });
 
-test('les affectations de niveaux nécessitant une série ne dupliquent pas en base', function () {
+test('réaffecter le même enseignant à la même classe et matière ne crée pas de doublon', function () {
     $this->actingAs($this->directeur);
 
-    $arabicLevel = ArabicLevel::factory()->create(['requires_series' => true]);
-    $arabicSerie = ArabicSerie::factory()->create();
-
-    Livewire::test(Index::class)
-        ->set('user_id', $this->teacher->id)
-        ->set('arabic_level_id', $arabicLevel->id)
-        ->set('arabic_serie_id', $arabicSerie->id)
-        ->set('arabic_subject_id', $this->arabicSubject->id)
-        ->set('school_year_id', $this->schoolYear->id)
-        ->call('save');
-
-    Livewire::test(Index::class)
-        ->set('user_id', $this->teacher->id)
-        ->set('arabic_level_id', $arabicLevel->id)
-        ->set('arabic_serie_id', $arabicSerie->id)
-        ->set('arabic_subject_id', $this->arabicSubject->id)
-        ->set('school_year_id', $this->schoolYear->id)
-        ->call('save');
+    foreach ([1, 2] as $attempt) {
+        Livewire::test(Index::class)
+            ->set('user_id', $this->teacher->id)
+            ->set('arabic_classroom_id', $this->arabicClassroom->id)
+            ->set('arabic_subject_id', $this->arabicSubject->id)
+            ->call('save');
+    }
 
     expect(ArabicTeacherAssignment::count())->toBe(1);
 });

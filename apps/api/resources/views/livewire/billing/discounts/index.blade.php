@@ -46,7 +46,7 @@
                     <select wire:model="student_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                         <option value="">—</option>
                         @foreach ($students as $student)
-                            @php $classroom = $student->enrollments->first()?->classroom; @endphp
+                            @php $classroom = $student->enrollments->first()?->mainClassroom(); @endphp
                             <option value="{{ $student->id }}">{{ $student->last_name }} {{ $student->first_name }}{{ $classroom ? ' — '.$classroom->name : '' }}</option>
                         @endforeach
                     </select>

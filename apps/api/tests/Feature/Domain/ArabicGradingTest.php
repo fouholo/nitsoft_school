@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Domain\Arabic\Models\ArabicClassroom;
 use App\Domain\Arabic\Models\ArabicGrade;
 use App\Domain\Arabic\Models\ArabicGradeSheet;
 use App\Domain\Arabic\Models\ArabicLevel;
-use App\Domain\Arabic\Models\ArabicSerie;
 use App\Domain\Arabic\Models\ArabicSubject;
 use App\Domain\Arabic\Models\ArabicTeacherAssignment;
 use App\Domain\Arabic\Models\ArabicTerm;
@@ -33,24 +33,18 @@ test('un ArabicTerm peut porter des dates pour un niveau secondaire-équivalent'
         ->and($arabicTerm->ends_on?->toDateString())->toBe('2026-12-01');
 });
 
-test('le roster d\'un groupe arabe regroupe des élèves de classes françaises différentes', function () {
+test('une classe arabe regroupe des élèves de classes françaises différentes', function () {
     $establishment = Establishment::factory()->create();
     actingInEstablishment($establishment);
 
-    $arabicLevel = ArabicLevel::factory()->create(['requires_series' => false]);
+    $arabicClassroom = ArabicClassroom::factory()->create(['establishment_id' => $establishment->id]);
 
-    $enrollmentA = Enrollment::factory()->create(['establishment_id' => $establishment->id, 'arabic_level_id' => $arabicLevel->id]);
-    $enrollmentB = Enrollment::factory()->create(['establishment_id' => $establishment->id, 'arabic_level_id' => $arabicLevel->id]);
+    $enrollmentA = Enrollment::factory()->create(['establishment_id' => $establishment->id, 'arabic_classroom_id' => $arabicClassroom->id]);
+    $enrollmentB = Enrollment::factory()->create(['establishment_id' => $establishment->id, 'arabic_classroom_id' => $arabicClassroom->id]);
 
     // Classes françaises volontairement différentes pour les deux inscriptions.
-    expect($enrollmentA->classroom_id)->not->toBe($enrollmentB->classroom_id);
-
-    $roster = Enrollment::where('establishment_id', $establishment->id)
-        ->where('arabic_level_id', $arabicLevel->id)
-        ->where('arabic_serie_id', null)
-        ->pluck('id');
-
-    expect($roster)->toContain($enrollmentA->id, $enrollmentB->id);
+    expect($enrollmentA->classroom_id)->not->toBe($enrollmentB->classroom_id)
+        ->and($arabicClassroom->enrollments()->pluck('id'))->toContain($enrollmentA->id, $enrollmentB->id);
 });
 
 test('ArabicGrade::updateOrCreate est idempotent par grille × inscription', function () {
@@ -83,25 +77,25 @@ test('ArabicGrade référence l\'Enrollment, pas le Student', function () {
     expect($grade->enrollment->is($enrollment))->toBeTrue();
 });
 
-test('un enseignant affecté à un groupe arabe est reconnu via isAssignedToArabicGroup', function () {
+test('un enseignant affecté à une classe arabe est reconnu via isAssignedToArabicClassroom', function () {
     $establishment = Establishment::factory()->create();
     actingInEstablishment($establishment);
 
     $teacher = createUserWithRole($establishment, 'enseignant');
-    $arabicLevel = ArabicLevel::factory()->create(['requires_series' => true]);
-    $arabicSerie = ArabicSerie::factory()->create();
+    $arabicClassroom = ArabicClassroom::factory()->create(['establishment_id' => $establishment->id]);
+    $otherClassroom = ArabicClassroom::factory()->create(['establishment_id' => $establishment->id]);
     $arabicSubject = ArabicSubject::factory()->create();
 
     ArabicTeacherAssignment::factory()->create([
         'establishment_id' => $establishment->id,
         'user_id' => $teacher->id,
-        'arabic_level_id' => $arabicLevel->id,
-        'arabic_serie_id' => $arabicSerie->id,
+        'arabic_classroom_id' => $arabicClassroom->id,
         'arabic_subject_id' => $arabicSubject->id,
     ]);
 
-    expect($teacher->isAssignedToArabicGroup($arabicLevel->id, $arabicSerie->id, $arabicSubject->id))->toBeTrue()
-        ->and($teacher->isAssignedToArabicGroup($arabicLevel->id, null, $arabicSubject->id))->toBeFalse();
+    expect($teacher->isAssignedToArabicClassroom($arabicClassroom->id, $arabicSubject->id))->toBeTrue()
+        ->and($teacher->isAssignedToArabicClassroom($arabicClassroom->id))->toBeTrue()
+        ->and($teacher->isAssignedToArabicClassroom($otherClassroom->id, $arabicSubject->id))->toBeFalse();
 });
 
 test('les grilles/notes d\'un établissement restent invisibles depuis un autre, le catalogue arabe reste partagé', function () {
@@ -114,7 +108,7 @@ test('les grilles/notes d\'un établissement restent invisibles depuis un autre,
     actingInEstablishment($establishmentA);
     $gradeSheet = ArabicGradeSheet::factory()->create([
         'establishment_id' => $establishmentA->id,
-        'arabic_level_id' => $arabicLevel->id,
+        'arabic_classroom_id' => ArabicClassroom::factory()->create(['establishment_id' => $establishmentA->id, 'arabic_level_id' => $arabicLevel->id])->id,
         'arabic_subject_id' => $arabicSubject->id,
     ]);
 

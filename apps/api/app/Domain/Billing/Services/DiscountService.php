@@ -60,12 +60,6 @@ class DiscountService
 
     private function resetInstallmentsToLevelDefaults(Enrollment $enrollment): void
     {
-        $defaults = $this->levelFeeDefaults->installmentDefaultsFor(
-            $enrollment->school_year_id,
-            $enrollment->classroom->level_id,
-            (bool) $enrollment->is_assigned,
-        );
-
-        $enrollment->fill($defaults);
+        $enrollment->fill($this->levelFeeDefaults->installmentDefaultsForEnrollment($enrollment));
     }
 }

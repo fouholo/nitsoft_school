@@ -4,7 +4,7 @@
     <div class="mt-2">
         <h1 class="text-2xl font-semibold text-stone-900">{{ $gradeSheet->title }}</h1>
         <p class="text-sm text-stone-500">
-            <span dir="rtl">{{ $gradeSheet->arabicLevel?->wording }}</span>
+            {{ $gradeSheet->arabicClassroom?->name }}
             — <span dir="rtl">{{ $gradeSheet->arabicSubject?->name }}</span>
             — {{ __('Barème :max', ['max' => $gradeSheet->max_score]) }} — {{ $gradeSheet->arabicTerm?->label }}
             @if ($totalCount > 0)

@@ -159,7 +159,7 @@ class Index extends Component
             ->with(['enrollments' => fn ($query) => $query
                 ->where('school_year_id', $this->school_year_id)
                 ->where('status', 'active')
-                ->with('classroom')])
+                ->with(['classroom', 'arabicClassroom'])])
             ->orderBy('last_name')
             ->limit(50)
             ->get();

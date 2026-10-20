@@ -40,7 +40,7 @@ class Show extends Component
     {
         $this->authorize('viewAny', Payment::class);
 
-        $this->enrollment = $enrollment->load(['student', 'classroom.level', 'schoolYear']);
+        $this->enrollment = $enrollment->load(['student', 'classroom.level', 'arabicClassroom', 'schoolYear']);
     }
 
     public function editAmounts(): void

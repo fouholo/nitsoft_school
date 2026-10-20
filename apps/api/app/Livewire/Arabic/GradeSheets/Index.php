@@ -4,24 +4,22 @@ declare(strict_types=1);
 
 namespace App\Livewire\Arabic\GradeSheets;
 
+use App\Domain\Arabic\Models\ArabicClassroom;
 use App\Domain\Arabic\Models\ArabicGradeSheet;
-use App\Domain\Arabic\Models\ArabicLevel;
-use App\Domain\Arabic\Models\ArabicSerie;
 use App\Domain\Arabic\Models\ArabicSubject;
 use App\Domain\Arabic\Models\ArabicTeacherAssignment;
 use App\Domain\Arabic\Models\ArabicTerm;
 use App\Domain\Establishments\Support\RolePermissions;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 class Index extends Component
 {
     public bool $showForm = false;
 
-    public ?int $arabic_level_id = null;
-
-    public ?int $arabic_serie_id = null;
+    public ?int $arabic_classroom_id = null;
 
     public ?int $arabic_subject_id = null;
 
@@ -46,16 +44,11 @@ class Index extends Component
     {
         $this->authorize('create', ArabicGradeSheet::class);
 
-        $this->reset(['arabic_level_id', 'arabic_serie_id', 'arabic_subject_id', 'arabic_term_id', 'title', 'type']);
+        $this->reset(['arabic_classroom_id', 'arabic_subject_id', 'arabic_term_id', 'title', 'type']);
         $this->max_score = 20.0;
         $this->weight = 2.0;
         $this->graded_on = now()->toDateString();
         $this->showForm = true;
-    }
-
-    public function updatedArabicLevelId(): void
-    {
-        $this->arabic_serie_id = null;
     }
 
     public function updatedType(): void
@@ -67,18 +60,12 @@ class Index extends Component
         };
     }
 
-    public function selectedLevelRequiresSeries(): bool
-    {
-        return $this->arabic_level_id ? (bool) ArabicLevel::whereKey($this->arabic_level_id)->value('requires_series') : false;
-    }
-
     public function save(): void
     {
         $this->authorize('create', ArabicGradeSheet::class);
 
         $data = $this->validate([
-            'arabic_level_id' => ['required', 'exists:arabic_levels,id'],
-            'arabic_serie_id' => $this->selectedLevelRequiresSeries() ? ['required', 'exists:arabic_series,id'] : ['nullable'],
+            'arabic_classroom_id' => ['required', Rule::exists('arabic_classrooms', 'id')->where('establishment_id', (int) app('currentEstablishmentId'))],
             'arabic_subject_id' => ['required', 'exists:arabic_subjects,id'],
             'arabic_term_id' => ['required', 'exists:arabic_terms,id'],
             'title' => ['required', 'string', 'max:255'],
@@ -88,15 +75,11 @@ class Index extends Component
             'graded_on' => ['required', 'date'],
         ]);
 
-        if (! $this->selectedLevelRequiresSeries()) {
-            $data['arabic_serie_id'] = null;
-        }
-
         /** @var User $user */
         $user = Auth::user();
 
-        if (! $this->hasBroadAccess($user) && ! $user->isAssignedToArabicGroup((int) $data['arabic_level_id'], $data['arabic_serie_id'], (int) $data['arabic_subject_id'])) {
-            abort(403, __("Vous n'êtes pas affecté à ce groupe pour cette matière."));
+        if (! $this->hasBroadAccess($user) && ! $user->isAssignedToArabicClassroom((int) $data['arabic_classroom_id'], (int) $data['arabic_subject_id'])) {
+            abort(403, __("Vous n'êtes pas affecté à cette classe pour cette matière."));
         }
 
         ArabicGradeSheet::create([...$data, 'teacher_id' => $user->id]);
@@ -121,22 +104,21 @@ class Index extends Component
         $isAdmin = $this->hasBroadAccess($user);
 
         $gradeSheets = ArabicGradeSheet::query()
-            ->with(['arabicLevel', 'arabicSerie', 'arabicSubject', 'arabicTerm'])
+            ->with(['arabicClassroom', 'arabicSubject', 'arabicTerm'])
             ->when(! $isAdmin, fn ($query) => $query->where('teacher_id', $user->id))
             ->orderByDesc('graded_on')
             ->get();
 
         $assignments = ArabicTeacherAssignment::query()
             ->when(! $isAdmin, fn ($query) => $query->where('user_id', $user->id))
-            ->with(['arabicLevel', 'arabicSerie', 'arabicSubject'])
+            ->with(['arabicClassroom', 'arabicSubject'])
             ->get();
 
         return view('livewire.arabic.grade-sheets.index', [
             'gradeSheets' => $gradeSheets,
-            'arabicLevels' => $isAdmin
-                ? ArabicLevel::orderBy('wording')->get()
-                : $assignments->pluck('arabicLevel')->filter()->unique('id')->values(),
-            'arabicSeries' => ArabicSerie::orderBy('serie')->get(),
+            'arabicClassrooms' => $isAdmin
+                ? ArabicClassroom::whereHas('schoolYear', fn ($query) => $query->where('is_current', true))->orderBy('name')->get()
+                : $assignments->pluck('arabicClassroom')->filter()->unique('id')->sortBy('name')->values(),
             'arabicSubjects' => $isAdmin
                 ? ArabicSubject::orderBy('name')->get()
                 : $assignments->pluck('arabicSubject')->filter()->unique('id')->values(),

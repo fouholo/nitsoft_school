@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Domain\Arabic\Models\ArabicClassroom;
 use App\Domain\Arabic\Models\ArabicGradeSheet;
-use App\Domain\Arabic\Models\ArabicLevel;
 use App\Domain\Arabic\Models\ArabicSubject;
 use App\Domain\Arabic\Models\ArabicTeacherAssignment;
 use App\Domain\Arabic\Models\ArabicTerm;
@@ -15,7 +15,7 @@ beforeEach(function () {
     $this->establishment = Establishment::factory()->create(['is_arabe' => true]);
     actingInEstablishment($this->establishment);
 
-    $this->arabicLevel = ArabicLevel::factory()->create(['requires_series' => false]);
+    $this->arabicClassroom = ArabicClassroom::factory()->create(['establishment_id' => $this->establishment->id]);
     $this->arabicSubject = ArabicSubject::factory()->create();
     $this->arabicTerm = ArabicTerm::factory()->create(['establishment_id' => $this->establishment->id]);
 });
@@ -25,7 +25,7 @@ test('un educateur crée une évaluation sans être affecté', function () {
     $this->actingAs($educateur);
 
     Livewire::test(Index::class)
-        ->set('arabic_level_id', $this->arabicLevel->id)
+        ->set('arabic_classroom_id', $this->arabicClassroom->id)
         ->set('arabic_subject_id', $this->arabicSubject->id)
         ->set('arabic_term_id', $this->arabicTerm->id)
         ->set('title', 'Devoir 1')
@@ -36,18 +36,18 @@ test('un educateur crée une évaluation sans être affecté', function () {
     expect(ArabicGradeSheet::count())->toBe(1);
 });
 
-test('un enseignant affecté au groupe peut créer une évaluation', function () {
+test('un enseignant affecté à la classe peut créer une évaluation', function () {
     $teacher = createUserWithRole($this->establishment, 'enseignant');
     ArabicTeacherAssignment::factory()->create([
         'establishment_id' => $this->establishment->id,
         'user_id' => $teacher->id,
-        'arabic_level_id' => $this->arabicLevel->id,
+        'arabic_classroom_id' => $this->arabicClassroom->id,
         'arabic_subject_id' => $this->arabicSubject->id,
     ]);
     $this->actingAs($teacher);
 
     Livewire::test(Index::class)
-        ->set('arabic_level_id', $this->arabicLevel->id)
+        ->set('arabic_classroom_id', $this->arabicClassroom->id)
         ->set('arabic_subject_id', $this->arabicSubject->id)
         ->set('arabic_term_id', $this->arabicTerm->id)
         ->set('title', 'Devoir 1')
@@ -56,6 +56,42 @@ test('un enseignant affecté au groupe peut créer une évaluation', function ()
         ->assertHasNoErrors();
 
     expect(ArabicGradeSheet::count())->toBe(1);
+});
+
+test('un enseignant affecté à une autre classe arabe est refusé', function () {
+    $teacher = createUserWithRole($this->establishment, 'enseignant');
+    ArabicTeacherAssignment::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'user_id' => $teacher->id,
+        'arabic_classroom_id' => ArabicClassroom::factory()->create(['establishment_id' => $this->establishment->id])->id,
+        'arabic_subject_id' => $this->arabicSubject->id,
+    ]);
+    $this->actingAs($teacher);
+
+    Livewire::test(Index::class)
+        ->set('arabic_classroom_id', $this->arabicClassroom->id)
+        ->set('arabic_subject_id', $this->arabicSubject->id)
+        ->set('arabic_term_id', $this->arabicTerm->id)
+        ->set('title', 'Devoir 1')
+        ->set('graded_on', now()->toDateString())
+        ->call('save')
+        ->assertForbidden();
+
+    expect(ArabicGradeSheet::count())->toBe(0);
+});
+
+test('une classe arabe d’un autre établissement est refusée', function () {
+    $educateur = createUserWithRole($this->establishment, 'educateur');
+    $this->actingAs($educateur);
+
+    Livewire::test(Index::class)
+        ->set('arabic_classroom_id', ArabicClassroom::factory()->create()->id)
+        ->set('arabic_subject_id', $this->arabicSubject->id)
+        ->set('arabic_term_id', $this->arabicTerm->id)
+        ->set('title', 'Devoir 1')
+        ->set('graded_on', now()->toDateString())
+        ->call('save')
+        ->assertHasErrors(['arabic_classroom_id']);
 });
 
 test('un enseignant sans affectation est refusé', function () {
@@ -63,7 +99,7 @@ test('un enseignant sans affectation est refusé', function () {
     $this->actingAs($teacher);
 
     Livewire::test(Index::class)
-        ->set('arabic_level_id', $this->arabicLevel->id)
+        ->set('arabic_classroom_id', $this->arabicClassroom->id)
         ->set('arabic_subject_id', $this->arabicSubject->id)
         ->set('arabic_term_id', $this->arabicTerm->id)
         ->set('title', 'Devoir 1')
@@ -77,7 +113,7 @@ test('un enseignant sans affectation est refusé', function () {
 test('un directeur ne voit pas le lien Saisir les notes pour une feuille qu’il ne peut pas modifier', function () {
     ArabicGradeSheet::factory()->create([
         'establishment_id' => $this->establishment->id,
-        'arabic_level_id' => $this->arabicLevel->id,
+        'arabic_classroom_id' => $this->arabicClassroom->id,
         'arabic_subject_id' => $this->arabicSubject->id,
         'arabic_term_id' => $this->arabicTerm->id,
     ]);

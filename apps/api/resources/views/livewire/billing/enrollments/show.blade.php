@@ -5,7 +5,7 @@
         <div>
             <h1 class="text-2xl font-semibold text-stone-900">{{ $enrollment->student?->last_name }} {{ $enrollment->student?->first_name }}</h1>
             <p class="text-sm text-stone-500">
-                {{ $enrollment->classroom?->name }} — {{ $enrollment->schoolYear?->label }}
+                {{ $enrollment->mainClassroomName() }} — {{ $enrollment->schoolYear?->label }}
             </p>
         </div>
 

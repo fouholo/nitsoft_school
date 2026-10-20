@@ -6,10 +6,10 @@ namespace App\Domain\Enrollment\Models;
 
 use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\SchoolYear;
-use App\Domain\Arabic\Models\ArabicLevel;
-use App\Domain\Arabic\Models\ArabicSerie;
+use App\Domain\Arabic\Models\ArabicClassroom;
 use App\Domain\Billing\Models\Installment;
 use App\Domain\Billing\Models\Payment;
+use App\Domain\Enrollment\Enums\Track;
 use App\Domain\Establishments\Concerns\TenantScoped;
 use App\Domain\Sync\Concerns\Syncable;
 use Carbon\Carbon;
@@ -31,12 +31,13 @@ class Enrollment extends Model
         'establishment_id',
         'student_id',
         'classroom_id',
-        'arabic_level_id',
-        'arabic_serie_id',
+        'arabic_classroom_id',
+        'main_track',
         'school_year_id',
         'enrolled_on',
         'status',
         'is_repeating',
+        'is_arabic_repeating',
         'is_scholarship',
         'is_boarding',
         'is_assigned',
@@ -57,7 +58,9 @@ class Enrollment extends Model
 
     protected $casts = [
         'enrolled_on' => 'date',
+        'main_track' => Track::class,
         'is_repeating' => 'boolean',
+        'is_arabic_repeating' => 'boolean',
         'is_scholarship' => 'boolean',
         'is_boarding' => 'boolean',
         'is_assigned' => 'boolean',
@@ -95,19 +98,47 @@ class Enrollment extends Model
     }
 
     /**
-     * @return BelongsTo<ArabicLevel, $this>
+     * @return BelongsTo<ArabicClassroom, $this>
      */
-    public function arabicLevel(): BelongsTo
+    public function arabicClassroom(): BelongsTo
     {
-        return $this->belongsTo(ArabicLevel::class);
+        return $this->belongsTo(ArabicClassroom::class);
     }
 
     /**
-     * @return BelongsTo<ArabicSerie, $this>
+     * Classe de la filière principale (française ou arabe) : celle qui
+     * détermine les frais et qui est affichée comme classe de l'élève —
+     * voir docs/superpowers/specs/2026-10-20-classes-arabes-design.md.
+     * Toujours passer par ici plutôt que par $enrollment->classroom pour
+     * afficher la classe d'un élève : la classe française peut être absente.
      */
-    public function arabicSerie(): BelongsTo
+    public function mainClassroom(): Classroom|ArabicClassroom|null
     {
-        return $this->belongsTo(ArabicSerie::class);
+        return $this->classroomFor($this->mainTrack());
+    }
+
+    /**
+     * Classe de l'autre filière (école franco-arabe) ; null tant qu'elle
+     * n'est pas renseignée.
+     */
+    public function secondaryClassroom(): Classroom|ArabicClassroom|null
+    {
+        return $this->classroomFor($this->mainTrack()->other());
+    }
+
+    public function mainClassroomName(): string
+    {
+        return $this->mainClassroom()->name ?? '—';
+    }
+
+    public function mainTrack(): Track
+    {
+        return $this->main_track ?? Track::Francais;
+    }
+
+    private function classroomFor(Track $track): Classroom|ArabicClassroom|null
+    {
+        return $track === Track::Arabe ? $this->arabicClassroom : $this->classroom;
     }
 
     public function schoolYear(): BelongsTo

@@ -66,7 +66,7 @@ class PaymentReminderPdfController extends Controller
         $enrollment = $student->enrollments()
             ->where('school_year_id', $schoolYear->id)
             ->where('status', 'active')
-            ->with('classroom')
+            ->with(['classroom', 'arabicClassroom'])
             ->first();
 
         if ($enrollment === null) {
@@ -78,7 +78,7 @@ class PaymentReminderPdfController extends Controller
         $pdf = Pdf::loadView('pdf.payment-reminder', [
             'student' => $student,
             'establishment' => $student->establishment,
-            'classroom' => $enrollment->classroom,
+            'classroom' => $enrollment->mainClassroom(),
             'schoolYear' => $schoolYear,
             'rows' => $reminder['rows'],
             'total' => $reminder['total'],

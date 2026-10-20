@@ -113,6 +113,28 @@
         <div class="mt-8">
             <h2 class="text-lg font-semibold text-stone-900">{{ __('Tarifs par niveau') }}</h2>
 
+            @if ($isArabe)
+                <div class="mt-3 flex gap-2" role="tablist" aria-label="{{ __('Filière') }}">
+                    @foreach (['francais' => __('Niveaux français'), 'arabe' => __('Niveaux arabes')] as $tabKey => $tabLabel)
+                        <button
+                            type="button"
+                            role="tab"
+                            aria-selected="{{ $levelTab === $tabKey ? 'true' : 'false' }}"
+                            wire:click="$set('levelTab', '{{ $tabKey }}')"
+                            @class([
+                                'rounded-lg px-3 py-1.5 text-sm font-medium',
+                                'bg-orange-700 text-white' => $levelTab === $tabKey,
+                                'border border-stone-300 bg-white text-stone-700 hover:bg-stone-50' => $levelTab !== $tabKey,
+                            ])
+                        >{{ $tabLabel }}</button>
+                    @endforeach
+                </div>
+            @endif
+
+            @if ($isArabe && $levelTab === 'arabe')
+                <p class="mt-2 text-sm text-stone-500">{{ __('Appliqués aux élèves dont la classe principale est arabe.') }}</p>
+                <livewire:billing.tuition-fees.arabic-level-fees :school-year-id="$school_year_id" :key="'arabic-level-fees-'.$school_year_id" />
+            @else
             @if ($installments->isEmpty())
                 <p class="mt-2 text-sm text-stone-500">{{ __("Aucune tranche n'est encore définie pour cette année scolaire — vous pouvez tout de même configurer les frais d'inscription par niveau.") }}</p>
             @endif
@@ -225,6 +247,7 @@
                     </table>
                 </div>
             </div>
+            @endif
         </div>
     @endif
 </div>

@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace App\Livewire\Students;
 
+use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Enrollment\Enums\GuardianLinkStatus;
 use App\Domain\Enrollment\Enums\GuardianRelationship;
+use App\Domain\Enrollment\Enums\Track;
 use App\Domain\Enrollment\Models\Guardian;
 use App\Domain\Enrollment\Models\Nationalite;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Models\Establishment;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -46,6 +49,12 @@ class Index extends Component
     public int $currentStep = 1;
 
     public string $search = '';
+
+    /**
+     * École franco-arabe : n'afficher que les élèves inscrits cette année
+     * sans classe secondaire.
+     */
+    public bool $withoutSecondaryOnly = false;
 
     public string $first_name = '';
 
@@ -118,6 +127,11 @@ class Index extends Component
     }
 
     public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingWithoutSecondaryOnly(): void
     {
         $this->resetPage();
     }
@@ -417,7 +431,20 @@ class Index extends Component
 
     public function render()
     {
+        $isArabe = (bool) Establishment::whereKey((int) app('currentEstablishmentId'))->value('is_arabe');
+        $currentYearId = SchoolYear::where('is_current', true)->value('id');
+
         $students = Student::query()
+            ->when($isArabe, fn ($query) => $query->with(['enrollments' => fn ($query) => $query
+                ->where('school_year_id', $currentYearId)
+                ->where('status', 'active')
+                ->with(['classroom', 'arabicClassroom'])]))
+            ->when($isArabe && $this->withoutSecondaryOnly, fn ($query) => $query->whereHas('enrollments', fn (Builder $query) => $query
+                ->where('school_year_id', $currentYearId)
+                ->where('status', 'active')
+                ->where(fn (Builder $query) => $query
+                    ->where(fn (Builder $query) => $query->where('main_track', Track::Francais->value)->whereNull('arabic_classroom_id'))
+                    ->orWhere(fn (Builder $query) => $query->where('main_track', Track::Arabe->value)->whereNull('classroom_id')))))
             ->when($this->search !== '', function ($query): void {
                 $query->where(function ($query): void {
                     $query->where('first_name', 'like', "%{$this->search}%")
@@ -430,6 +457,7 @@ class Index extends Component
 
         return view('livewire.students.index', [
             'students' => $students,
+            'isArabe' => $isArabe,
             'nationalites' => Nationalite::orderBy('libelle')->get(),
         ])->title(__('Élèves'));
     }

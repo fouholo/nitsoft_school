@@ -11,7 +11,7 @@
         @forelse ($students as $student)
             <div class="rounded-lg border border-stone-200 bg-white p-4">
                 <p class="text-lg font-semibold text-stone-900">{{ $student->last_name }} {{ $student->first_name }}</p>
-                <p class="text-sm text-stone-500">{{ $student->enrollments->first()?->classroom?->name }}</p>
+                <p class="text-sm text-stone-500">{{ $student->enrollments->first()?->mainClassroom()?->name }}</p>
 
                 <div class="mt-3 flex flex-wrap gap-1 text-sm">
                     <a href="{{ route('guardian-portal.students.grades', $student) }}" class="inline-flex min-h-11 items-center rounded-lg px-2 text-stone-600 hover:bg-stone-50 hover:text-stone-900">

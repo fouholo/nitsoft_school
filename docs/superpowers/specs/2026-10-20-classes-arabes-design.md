@@ -46,7 +46,7 @@
 | `capacity` | entier nullable |
 | `timestamps` | |
 
-- Unicité sur (`establishment_id`, `school_year_id`, `arabic_level_id`, `arabic_serie_id`, `numero`), index au nom court explicite.
+- Unicité de (année, niveau, série, numéro) vérifiée par l'écran, comme pour les classes françaises : une contrainte SQL ne verrait pas les doublons « sans série » (NULL n'est jamais égal à NULL). Index (`establishment_id`, `school_year_id`) au nom court explicite.
 - **Pas de `SoftDeletes`** : une ligne supprimée en douceur bloquerait encore la contrainte unique.
 - Modèle `App\Domain\Arabic\Models\ArabicClassroom` avec `TenantScoped`, relations `schoolYear`, `arabicLevel`, `arabicSerie`, `enrollments`.
 
@@ -64,10 +64,10 @@ La classe de la filière principale doit être renseignée. La règle est vérif
 
 Méthodes de `Enrollment` :
 - `mainClassroom(): Classroom|ArabicClassroom|null` et `secondaryClassroom(): Classroom|ArabicClassroom|null`, selon `main_track` ;
-- `mainClassroomName(): string` (« — » si absente), et `mainLevelLabel(): string`, utilisés par les écrans d'affichage ;
+- `mainClassroomName(): string` (« — » si absente) et `mainTrack(): Track` (français si la valeur n'est pas encore chargée), utilisés par les écrans d'affichage ;
 - relation `arabicClassroom()`.
 
-Les classes françaises et arabes exposent une méthode commune `levelLabel(): string`, sans interface lourde.
+Les écrans n'utilisent que le nom de la classe (`name`), commun aux deux modèles : aucune interface commune n'est nécessaire.
 
 ### Grille de frais arabe
 
@@ -78,14 +78,15 @@ Les classes françaises et arabes exposent une méthode commune `levelLabel(): s
 
 ### Tables arabes existantes
 
-- `teacher_arabic_level_subject` : `arabic_level_id` et `arabic_serie_id` remplacés par `arabic_classroom_id` ; l'unicité devient (`user_id`, `arabic_classroom_id`, `arabic_subject_id`, `school_year_id`).
+- `teacher_arabic_level_subject` est remplacée par `teacher_arabic_classroom_subject` (miroir de `teacher_classroom_subject`) : `arabic_classroom_id` à la place de `arabic_level_id` / `arabic_serie_id`, unicité (`user_id`, `arabic_classroom_id`, `arabic_subject_id`, `school_year_id`). L'année de l'affectation est celle de la classe.
 - `arabic_grade_sheets` : `arabic_level_id` et `arabic_serie_id` remplacés par `arabic_classroom_id`.
 - `arabic_subject_coefficients` : **inchangée**. Les coefficients restent définis par niveau et série. Pour une classe, on lit ceux du niveau et de la série de la classe.
 - `arabic_grades`, `arabic_report_cards`, `arabic_terms` : inchangées. Elles référencent l'inscription ou la période.
 
 ### Migration
 
-- Elle vérifie d'abord que `teacher_arabic_level_subject` et `arabic_grade_sheets` sont vides, et que plus aucune inscription n'a `arabic_level_id` renseigné. Sinon elle s'arrête avec un message explicite (`RuntimeException`), sans rien modifier.
+- Elle vérifie d'abord que `teacher_arabic_level_subject`, `arabic_grade_sheets` et `arabic_grades` sont vides, et que plus aucune inscription n'a `arabic_level_id` ou `arabic_serie_id` renseigné. Sinon elle s'arrête avec un message explicite (`RuntimeException`), sans rien modifier.
+- Ces trois tables, vides, sont recréées avec leur schéma final plutôt que modifiées : sur MySQL, la clé étrangère `user_id` de `teacher_arabic_level_subject` n'a pas d'index propre et s'appuie sur l'index unique à remplacer.
 - Elle retire les clés étrangères avant les index (MySQL).
 - Elle donne des noms d'index courts, à cause de la limite de 64 caractères de MySQL.
 - Elle n'a pas de DDL dans `DB::transaction()`.
@@ -105,10 +106,11 @@ Les classes françaises et arabes exposent une méthode commune `levelLabel(): s
 
 École franco-arabe :
 1. Un choix « Filière principale » (Française / Arabe), français par défaut.
-2. « Classe principale » : liste des classes de la filière principale de l'année. **Obligatoire.**
+2. « Classe principale » : liste des classes de la filière principale de l'année choisie. **Obligatoire.**
 3. « Classe secondaire » : liste des classes de l'autre filière. Facultative.
-4. Une case « Redoublant » par filière. « Boursier », « Interne » et « Affecté » ne sont proposés que si la classe principale est française du secondaire, comme aujourd'hui.
-5. Les frais sont préremplis depuis la grille française (`defaultsFor`, niveau français) ou arabe (`arabicDefaultsFor`, niveau arabe), selon la filière principale.
+4. Une case « Redoublant » par filière : « Redoublant (français) » si la classe française est du secondaire (règle actuelle), « Redoublant (arabe) » dès qu'une classe arabe est choisie. « Boursier », « Interne » et « Affecté » ne sont proposés que si la classe principale est française du secondaire, comme aujourd'hui.
+5. Une seule inscription par élève et par année (contrainte existante en base) : une seconde inscription la même année est refusée par le message « Cet élève a déjà une inscription pour cette année scolaire. » au lieu d'une erreur SQL.
+6. Les frais sont préremplis depuis la grille française (`defaultsFor`, niveau français) ou arabe (`arabicDefaultsFor`, niveau arabe), selon la filière principale.
 
 École non franco-arabe : formulaire actuel inchangé. Côté serveur, `main_track` est forcé à `francais`, et `arabic_classroom_id` comme `is_arabic_repeating` sont mis à vide, quoi qu'envoie le navigateur.
 
@@ -126,12 +128,12 @@ Dans une école franco-arabe :
 ### Frais de scolarité (`Billing\TuitionFees\Index`)
 
 - Dans une école franco-arabe, deux onglets : « Niveaux français » (l'écran actuel) et « Niveaux arabes ».
-- L'onglet arabe permet la même saisie (inscription et tranches) et la même copie depuis une autre année, sans le montant « affecté ».
+- L'onglet arabe permet la même saisie (inscription et tranches) et la même duplication depuis un autre niveau, sans le montant « affecté ». Il est porté par un composant à part (`Billing\TuitionFees\ArabicLevelFees`), l'écran français restant inchangé.
 - `ArabicLevelFeePolicy` reprend les droits de `LevelFeePolicy`, en exigeant en plus `is_arabe`.
 
 ### Affichage de la classe « officielle »
 
-Les écrans qui affichent la classe d'un élève passent par `mainClassroomName()` ou `mainLevelLabel()`, au lieu de `$enrollment->classroom->…` :
+Les écrans qui affichent la classe d'un élève passent par `mainClassroom()` ou `mainClassroomName()`, au lieu de `$enrollment->classroom->…` :
 - la fiche élève (classe principale et classe secondaire) ;
 - la liste des élèves ;
 - le suivi des paiements ;

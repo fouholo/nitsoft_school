@@ -14,9 +14,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * Une évaluation arabe (niveau × série arabe × matière × période) — miroir
- * de GradeSheet, sans la dualité de colonnes du français puisque
- * ArabicSubject/ArabicTerm sont déjà unifiés pour tous les cycles.
+ * Une évaluation arabe (classe arabe × matière × période) — miroir de
+ * GradeSheet, sans la dualité de colonnes du français puisque
+ * ArabicSubject/ArabicTerm sont déjà unifiés pour tous les cycles. Regroupée
+ * par classe arabe depuis
+ * docs/superpowers/specs/2026-10-20-classes-arabes-design.md.
  */
 class ArabicGradeSheet extends Model
 {
@@ -27,8 +29,7 @@ class ArabicGradeSheet extends Model
 
     protected $fillable = [
         'establishment_id',
-        'arabic_level_id',
-        'arabic_serie_id',
+        'arabic_classroom_id',
         'arabic_subject_id',
         'arabic_term_id',
         'teacher_id',
@@ -55,14 +56,12 @@ class ArabicGradeSheet extends Model
         return '253';
     }
 
-    public function arabicLevel(): BelongsTo
+    /**
+     * @return BelongsTo<ArabicClassroom, $this>
+     */
+    public function arabicClassroom(): BelongsTo
     {
-        return $this->belongsTo(ArabicLevel::class);
-    }
-
-    public function arabicSerie(): BelongsTo
-    {
-        return $this->belongsTo(ArabicSerie::class);
+        return $this->belongsTo(ArabicClassroom::class);
     }
 
     /**

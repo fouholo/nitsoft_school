@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Arabic\ArabicReportCardPdfController;
+use App\Livewire\Arabic\Classrooms\Index as ArabicClassroomsIndex;
 use App\Livewire\Arabic\GradeSheets\Enter as ArabicGradeSheetsEnter;
 use App\Livewire\Arabic\GradeSheets\Index as ArabicGradeSheetsIndex;
 use App\Livewire\Arabic\Levels\Index as ArabicLevelsIndex;
@@ -15,6 +16,7 @@ use App\Livewire\Arabic\Terms\Index as ArabicTermsIndex;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('arabic')->name('arabic.')->group(function (): void {
+    Route::get('/classrooms', ArabicClassroomsIndex::class)->name('classrooms.index');
     Route::get('/levels', ArabicLevelsIndex::class)->name('levels.index');
     Route::get('/series', ArabicSeriesIndex::class)->name('series.index');
     Route::get('/subjects', ArabicSubjectsIndex::class)->name('subjects.index');

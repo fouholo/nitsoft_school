@@ -365,16 +365,14 @@ class User extends Authenticatable
     }
 
     /**
-     * Équivalent de isAssignedToClassroom() pour la filière arabe : le
-     * groupement se fait par niveau/série arabe, pas par classe française
-     * (voir ArabicTeacherAssignment).
+     * Équivalent de isAssignedToClassroom() pour la filière arabe, par
+     * classe arabe (voir ArabicTeacherAssignment).
      */
-    public function isAssignedToArabicGroup(int $arabicLevelId, ?int $arabicSerieId, ?int $arabicSubjectId = null): bool
+    public function isAssignedToArabicClassroom(int $arabicClassroomId, ?int $arabicSubjectId = null): bool
     {
         return ArabicTeacherAssignment::query()
             ->where('user_id', $this->id)
-            ->where('arabic_level_id', $arabicLevelId)
-            ->where('arabic_serie_id', $arabicSerieId)
+            ->where('arabic_classroom_id', $arabicClassroomId)
             ->when($arabicSubjectId !== null, fn ($query) => $query->where('arabic_subject_id', $arabicSubjectId))
             ->exists();
     }

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Domain\Academics\Models\SchoolYear;
-use App\Domain\Arabic\Models\ArabicLevel;
+use App\Domain\Arabic\Models\ArabicClassroom;
 use App\Domain\Arabic\Models\ArabicSubject;
 use App\Domain\Arabic\Models\ArabicTeacherAssignment;
 use App\Domain\Establishments\Models\Establishment;
@@ -24,7 +24,7 @@ class ArabicTeacherAssignmentFactory extends Factory
         return [
             'establishment_id' => Establishment::factory(),
             'user_id' => User::factory(),
-            'arabic_level_id' => ArabicLevel::factory(),
+            'arabic_classroom_id' => ArabicClassroom::factory(),
             'arabic_subject_id' => ArabicSubject::factory(),
             'school_year_id' => SchoolYear::factory(),
         ];

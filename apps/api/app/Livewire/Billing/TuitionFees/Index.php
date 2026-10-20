@@ -56,6 +56,12 @@ class Index extends Component
 
     public ?int $duplicateSourceLevelId = null;
 
+    /**
+     * Onglet des tarifs par niveau (école franco-arabe) : 'francais' ou
+     * 'arabe' (composant ArabicLevelFees).
+     */
+    public string $levelTab = 'francais';
+
     public function mount(): void
     {
         $this->authorize('viewAny', Installment::class);
@@ -301,13 +307,15 @@ class Index extends Component
             ? LevelFee::where('school_year_id', $this->school_year_id)->with('installmentAmounts')->get()->keyBy('level_id')
             : collect();
 
-        $allowedCycles = Establishment::findOrFail((int) app('currentEstablishmentId'))->allowedCycles();
+        $establishment = Establishment::findOrFail((int) app('currentEstablishmentId'));
+        $allowedCycles = $establishment->allowedCycles();
 
         return view('livewire.billing.tuition-fees.index', [
             'schoolYears' => SchoolYear::orderByDesc('starts_on')->get(),
             'installments' => $installments,
             'levels' => Level::whereIn('cycle', $allowedCycles)->orderBy('level_wording')->get(),
             'levelFees' => $levelFees,
+            'isArabe' => $establishment->is_arabe,
         ])->title(__('Tarifs'));
     }
 }

@@ -3,26 +3,14 @@
 
     <div class="mt-4 flex flex-wrap items-end gap-4 rounded-lg border border-stone-200 bg-white p-4">
         <div>
-            <label for="arabic_level_id" class="block text-sm font-medium text-stone-700">{{ __('Niveau arabe') }}</label>
-            <select id="arabic_level_id" wire:model.live="arabic_level_id" class="mt-1 block w-48 rounded-lg border-stone-300 text-sm" dir="rtl">
+            <label for="arabic_classroom_id" class="block text-sm font-medium text-stone-700">{{ __('Classe arabe') }}</label>
+            <select id="arabic_classroom_id" wire:model.live="arabic_classroom_id" class="mt-1 block w-48 rounded-lg border-stone-300 text-sm">
                 <option value="">—</option>
-                @foreach ($arabicLevels as $arabicLevel)
-                    <option value="{{ $arabicLevel->id }}">{{ $arabicLevel->wording }}</option>
+                @foreach ($arabicClassrooms as $arabicClassroom)
+                    <option value="{{ $arabicClassroom->id }}">{{ $arabicClassroom->name }}</option>
                 @endforeach
             </select>
         </div>
-
-        @if ($this->selectedLevelRequiresSeries())
-            <div>
-                <label for="arabic_serie_id" class="block text-sm font-medium text-stone-700">{{ __('Série arabe') }}</label>
-                <select id="arabic_serie_id" wire:model.live="arabic_serie_id" class="mt-1 block w-48 rounded-lg border-stone-300 text-sm" dir="rtl">
-                    <option value="">—</option>
-                    @foreach ($arabicSeries as $arabicSerie)
-                        <option value="{{ $arabicSerie->id }}">{{ $arabicSerie->serie_wording }}</option>
-                    @endforeach
-                </select>
-            </div>
-        @endif
 
         <div>
             <label for="arabic_term_id" class="block text-sm font-medium text-stone-700">{{ __('Période') }}</label>
@@ -41,7 +29,7 @@
                     wire:click="generate"
                     wire:loading.attr="disabled"
                     wire:target="generate"
-                    wire:confirm="{{ __('Ce groupe a déjà des bulletins générés pour cette période. Continuer va recalculer et remplacer le rang et la moyenne de chaque élève. Continuer ?') }}"
+                    wire:confirm="{{ __('Cette classe a déjà des bulletins générés pour cette période. Continuer va recalculer et remplacer le rang et la moyenne de chaque élève. Continuer ?') }}"
                     class="rounded-lg bg-orange-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-800"
                 >
                     <span wire:loading.remove wire:target="generate">{{ __('Régénérer les bulletins') }}</span>
@@ -62,17 +50,14 @@
         @endcan
     </div>
 
-    @error('arabic_level_id')
-        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-    @enderror
-    @error('arabic_serie_id')
+    @error('arabic_classroom_id')
         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
     @enderror
     @error('arabic_term_id')
         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
     @enderror
 
-    @if ($arabic_level_id && $arabic_term_id)
+    @if ($arabic_classroom_id && $arabic_term_id)
         <div class="mt-4 rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm text-stone-600">
             @if ($reportCards->isNotEmpty())
                 {{ __('Bulletins générés le :date — :count/:total élèves classés.', ['date' => $generatedAt?->format('d/m/Y à H:i'), 'count' => $reportCards->count(), 'total' => $totalStudents]) }}
@@ -80,7 +65,7 @@
                     <span class="text-amber-700">{{ __(':count élève(s) sans note exclu(s) du classement.', ['count' => $totalStudents - $reportCards->count()]) }}</span>
                 @endif
             @else
-                {{ __(':count élève(s) inscrit(s) dans ce groupe. Bulletins non encore générés pour cette période.', ['count' => $totalStudents]) }}
+                {{ __(':count élève(s) inscrit(s) dans cette classe. Bulletins non encore générés pour cette période.', ['count' => $totalStudents]) }}
             @endif
         </div>
     @endif
@@ -114,7 +99,7 @@
                     @empty
                         <tr>
                             <td colspan="4" class="px-4 py-6 text-center text-stone-500">
-                                {{ __('Sélectionnez un niveau et une période') }}{{ $arabic_level_id && $arabic_term_id ? __(', puis générez les bulletins') : '' }}.
+                                {{ __('Sélectionnez une classe et une période') }}{{ $arabic_classroom_id && $arabic_term_id ? __(', puis générez les bulletins') : '' }}.
                             </td>
                         </tr>
                     @endforelse
