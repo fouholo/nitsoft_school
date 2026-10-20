@@ -6,6 +6,9 @@
         </div>
     </div>
 
+    @if ($agenda)
+        @include('livewire.academics.timetable.partials.agenda', ['agenda' => $agenda])
+    @else
     <div class="mt-4 overflow-x-auto rounded-lg border border-stone-200 bg-white">
         <table class="min-w-full divide-y divide-stone-200 text-sm">
             <thead class="bg-stone-50">
@@ -55,4 +58,5 @@
             </tbody>
         </table>
     </div>
+    @endif
 </div>

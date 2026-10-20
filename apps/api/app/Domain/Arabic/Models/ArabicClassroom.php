@@ -8,6 +8,7 @@ use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Establishments\Concerns\TenantScoped;
 use App\Domain\Sync\Concerns\Syncable;
+use App\Domain\Timetable\Models\ArabicTimetableSession;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -116,5 +117,13 @@ class ArabicClassroom extends Model
     public function teacherAssignments(): HasMany
     {
         return $this->hasMany(ArabicTeacherAssignment::class);
+    }
+
+    /**
+     * @return HasMany<ArabicTimetableSession, $this>
+     */
+    public function timetableSessions(): HasMany
+    {
+        return $this->hasMany(ArabicTimetableSession::class);
     }
 }

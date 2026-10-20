@@ -10,6 +10,7 @@ use App\Domain\Academics\Models\TeacherAssignment;
 use App\Domain\Timetable\Enums\DayOfWeek;
 use App\Domain\Timetable\Models\TimetableSession;
 use App\Domain\Timetable\Models\TimetableSlot;
+use App\Domain\Timetable\Services\CrossTrackConflicts;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -111,6 +112,25 @@ class Index extends Component
             return;
         }
 
+        // École franco-arabe : enseignant, salle et élèves ne doivent pas
+        // avoir de cours arabe sur une plage qui chevauche.
+        $slot = TimetableSlot::findOrFail($this->timetable_slot_id);
+        $crossTrackConflict = app(CrossTrackConflicts::class)->forFrenchSession(
+            $this->classroom->school_year_id,
+            $this->classroom->id,
+            $assignment->user_id,
+            $this->room,
+            DayOfWeek::from($this->day_of_week),
+            $slot->start_time,
+            $slot->end_time,
+        );
+
+        if ($crossTrackConflict !== null) {
+            $this->addError('conflict', $crossTrackConflict);
+
+            return;
+        }
+
         $sessionData = [
             'establishment_id' => (int) app('currentEstablishmentId'),
             'school_year_id' => $this->classroom->school_year_id,
@@ -157,7 +177,7 @@ class Index extends Component
             ->keyBy(fn (TimetableSession $session) => $session->day_of_week->value.'-'.$session->timetable_slot_id);
 
         return view('livewire.academics.timetable.index', [
-            'days' => DayOfWeek::cases(),
+            'days' => DayOfWeek::weekdays(),
             'timetableSlots' => TimetableSlot::orderBy('sequence')->get(),
             'sessions' => $sessions,
             'assignments' => TeacherAssignment::where('classroom_id', $this->classroom->id)

@@ -72,7 +72,7 @@ test('la vue PDF de la classe affiche la matière, l’enseignant et la salle', 
         'title' => 'Emploi du temps — '.$this->classroom->name,
         'establishment' => $this->establishment,
         'generalInformation' => GeneralInformation::current(),
-        'days' => DayOfWeek::cases(),
+        'days' => DayOfWeek::weekdays(),
         'slots' => TimetableSlot::orderBy('sequence')->get(),
         'sessions' => TimetableSession::where('classroom_id', $this->classroom->id)
             ->with(['subject', 'teacher'])

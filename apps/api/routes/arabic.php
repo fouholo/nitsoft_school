@@ -13,6 +13,9 @@ use App\Livewire\Arabic\SubjectCoefficients\Index as ArabicSubjectCoefficientsIn
 use App\Livewire\Arabic\Subjects\Index as ArabicSubjectsIndex;
 use App\Livewire\Arabic\TeacherAssignments\Index as ArabicTeacherAssignmentsIndex;
 use App\Livewire\Arabic\Terms\Index as ArabicTermsIndex;
+use App\Livewire\Arabic\Timetable\Browse as ArabicTimetableBrowse;
+use App\Livewire\Arabic\Timetable\Index as ArabicTimetableIndex;
+use App\Livewire\Arabic\Timetable\SlotsIndex as ArabicTimetableSlotsIndex;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('arabic')->name('arabic.')->group(function (): void {
@@ -25,6 +28,9 @@ Route::prefix('arabic')->name('arabic.')->group(function (): void {
     Route::get('/teacher-assignments', ArabicTeacherAssignmentsIndex::class)->name('teacher-assignments.index');
     Route::get('/grade-sheets', ArabicGradeSheetsIndex::class)->name('grade-sheets.index');
     Route::get('/grade-sheets/{gradeSheet}/enter', ArabicGradeSheetsEnter::class)->name('grade-sheets.enter');
+    Route::get('/timetable/slots', ArabicTimetableSlotsIndex::class)->name('timetable.slots.index');
+    Route::get('/timetable', ArabicTimetableBrowse::class)->name('timetable.browse');
+    Route::get('/timetable/{arabicClassroom}', ArabicTimetableIndex::class)->name('timetable.index');
     Route::get('/report-cards', ArabicReportCardsIndex::class)->name('report-cards.index');
     Route::get('/report-cards/{arabicReportCard}/pdf', ArabicReportCardPdfController::class)->name('report-cards.pdf');
 });

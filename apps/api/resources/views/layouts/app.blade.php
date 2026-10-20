@@ -72,6 +72,8 @@
                     ['label' => __('Classes'), 'route' => 'arabic.classrooms.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicClassroom::class],
                     ['label' => __('Coefficients par matière'), 'route' => 'arabic.subject-coefficients.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicSubjectCoefficient::class],
                     ['label' => __('Périodes'), 'route' => 'arabic.terms.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicTerm::class],
+                    ['label' => __('Grille de créneaux'), 'route' => 'arabic.timetable.slots.index', 'ability' => 'viewAny', 'model' => \App\Domain\Timetable\Models\ArabicTimetableSlot::class],
+                    ['label' => __('Emplois du temps'), 'route' => 'arabic.timetable.browse', 'ability' => 'browseStaff', 'model' => \App\Domain\Timetable\Models\ArabicTimetableSession::class],
                     ['label' => __('Affectations enseignants'), 'route' => 'arabic.teacher-assignments.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicTeacherAssignment::class],
                     ['label' => __('Grilles de notes'), 'route' => 'arabic.grade-sheets.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicGradeSheet::class],
                     ['label' => __('Bulletins'), 'route' => 'arabic.report-cards.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicReportCard::class],

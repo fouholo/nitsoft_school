@@ -8,6 +8,7 @@ use App\Http\Controllers\Academics\StudentIdCardPdfController;
 use App\Http\Controllers\Academics\TimetableClassroomPdfController;
 use App\Http\Controllers\Academics\TimetableTeacherPdfController;
 use App\Http\Controllers\Arabic\ArabicClassroomStudentListPdfController;
+use App\Http\Controllers\Arabic\ArabicTimetableClassroomPdfController;
 use App\Http\Controllers\Billing\FinancialSummaryPdfController;
 use App\Http\Controllers\Billing\PaymentReminderPdfController;
 use App\Http\Controllers\Billing\PaymentRemindersBatchPdfController;
@@ -18,6 +19,7 @@ Route::prefix('rapports')->name('reports.')->group(function (): void {
     Route::get('/', Index::class)->name('index');
     Route::get('/classes/{classroom}/eleves', ClassroomStudentListPdfController::class)->name('classroom-students-pdf');
     Route::get('/classes-arabes/{arabicClassroom}/eleves', ArabicClassroomStudentListPdfController::class)->name('arabic-classroom-students-pdf');
+    Route::get('/classes-arabes/{arabicClassroom}/emploi-du-temps', ArabicTimetableClassroomPdfController::class)->name('arabic-timetable-classroom-pdf');
     Route::get('/classes/{classroom}/cartes', ClassroomIdCardsPdfController::class)->name('classroom-id-cards-pdf');
     Route::get('/classes/{classroom}/emploi-du-temps', TimetableClassroomPdfController::class)->name('timetable-classroom-pdf');
     Route::get('/mon-emploi-du-temps', TimetableTeacherPdfController::class)->name('timetable-mine-pdf');

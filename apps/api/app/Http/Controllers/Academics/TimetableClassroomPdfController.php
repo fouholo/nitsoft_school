@@ -33,7 +33,7 @@ class TimetableClassroomPdfController extends Controller
             'title' => __('Emploi du temps').' — '.$classroom->name,
             'establishment' => $classroom->establishment,
             'generalInformation' => GeneralInformation::current(),
-            'days' => DayOfWeek::cases(),
+            'days' => DayOfWeek::weekdays(),
             'slots' => TimetableSlot::orderBy('sequence')->get(),
             'sessions' => $sessions,
             'showClassroom' => false,
