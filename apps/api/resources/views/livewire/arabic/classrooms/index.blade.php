@@ -105,8 +105,9 @@
                         <td class="px-4 py-2 tabular-nums text-stone-600">{{ $arabicClassroom->capacity }}</td>
                         <td class="px-4 py-2 text-stone-600">{{ $arabicClassroom->schoolYear?->label }}</td>
                         <td class="px-4 py-2 text-end">
+                            <a href="{{ route('reports.arabic-classroom-students-pdf', $arabicClassroom) }}" target="_blank" class="text-stone-500 hover:text-stone-900">{{ __('Liste PDF') }}</a>
                             @can('update', $arabicClassroom)
-                                <button type="button" wire:click="edit({{ $arabicClassroom->id }})" class="text-stone-500 hover:text-stone-900">{{ __('Modifier') }}</button>
+                                <button type="button" wire:click="edit({{ $arabicClassroom->id }})" class="ms-3 text-stone-500 hover:text-stone-900">{{ __('Modifier') }}</button>
                             @endcan
                             @can('delete', $arabicClassroom)
                                 <button

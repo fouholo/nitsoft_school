@@ -72,7 +72,7 @@
         <tbody>
             @forelse ($breakdown as $row)
                 <tr>
-                    <td class="col-disciplines">{{ $row->subject->name }}</td>
+                    <td class="col-disciplines">{{ pdf_rtl($row->subject->name) }}</td>
                     <td class="col-narrow">{{ $row->average !== null ? number_format($row->average, 2) : '—' }}</td>
                     <td class="col-narrow">{{ $row->coefficient !== null ? number_format($row->coefficient, 1) : '—' }}</td>
                     <td class="col-narrow">{{ $row->coefficientWeightedAverage() !== null ? number_format($row->coefficientWeightedAverage(), 2) : '—' }}</td>

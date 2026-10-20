@@ -912,5 +912,9 @@
     "Nouvelle classe arabe": "New Arabic class",
     "Aucune classe arabe.": "No Arabic class.",
     "Aucun niveau arabe pour ce type d’établissement.": "No Arabic level for this type of school.",
-    "Cet élève a déjà une inscription pour cette année scolaire.": "This student is already enrolled for this school year."
+    "Cet élève a déjà une inscription pour cette année scolaire.": "This student is already enrolled for this school year.",
+    "Liste des élèves d'une classe arabe": "Student list of an Arabic class",
+    "Document en arabe, sous l’en-tête officiel de l’établissement.": "Document in Arabic, under the school's official header.",
+    "Redoublement (arabe)": "Repeating (Arabic)",
+    "Liste PDF": "PDF list"
 }

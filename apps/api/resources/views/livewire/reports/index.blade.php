@@ -92,6 +92,68 @@
         @endif
     </div>
 
+    @if ($isArabe)
+        <div class="mt-4 rounded-lg border border-stone-200 bg-white p-4 sm:max-w-xl">
+            <h2 class="text-base font-medium text-stone-900">{{ __("Liste des élèves d'une classe arabe") }}</h2>
+            <p class="mt-1 text-sm text-stone-500">{{ __('Document en arabe, sous l’en-tête officiel de l’établissement.') }}</p>
+
+            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                    <label for="arabic_school_year_id" class="block text-sm font-medium text-stone-700">{{ __('Année scolaire') }}</label>
+                    <select id="arabic_school_year_id" wire:model.live="arabic_school_year_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <option value="">—</option>
+                        @foreach ($schoolYears as $schoolYear)
+                            <option value="{{ $schoolYear->id }}">{{ $schoolYear->label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label for="arabic_classroom_id" class="block text-sm font-medium text-stone-700">{{ __('Classe arabe') }}</label>
+                    <select id="arabic_classroom_id" wire:model.live="arabic_classroom_id" @disabled(! $arabic_school_year_id) class="mt-1 block w-full rounded-lg border-stone-300 text-sm disabled:bg-stone-100 disabled:text-stone-500">
+                        <option value="">—</option>
+                        @foreach ($arabicClassrooms as $arabicClassroom)
+                            <option value="{{ $arabicClassroom->id }}">{{ $arabicClassroom->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label for="arabicGenderFilter" class="block text-sm font-medium text-stone-700">{{ __('Sexe') }}</label>
+                    <select id="arabicGenderFilter" wire:model.live="arabicGenderFilter" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <option value="">{{ __('Tous') }}</option>
+                        <option value="m">{{ __('Masculin') }}</option>
+                        <option value="f">{{ __('Féminin') }}</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="arabicRepeatingFilter" class="block text-sm font-medium text-stone-700">{{ __('Redoublement (arabe)') }}</label>
+                    <select id="arabicRepeatingFilter" wire:model.live="arabicRepeatingFilter" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <option value="">{{ __('Tous') }}</option>
+                        <option value="1">{{ __('Redoublant') }}</option>
+                        <option value="0">{{ __('Non redoublant') }}</option>
+                    </select>
+                </div>
+            </div>
+
+            @if ($arabic_classroom_id)
+                <div class="mt-4">
+                    <a
+                        href="{{ route('reports.arabic-classroom-students-pdf', [
+                            'arabicClassroom' => $arabic_classroom_id,
+                            'gender' => $arabicGenderFilter,
+                            'repeating' => $arabicRepeatingFilter,
+                        ]) }}"
+                        target="_blank"
+                        class="inline-block rounded-lg bg-orange-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-800"
+                    >
+                        {{ __('Liste des élèves (PDF)') }}
+                    </a>
+                </div>
+            @endif
+        </div>
+    @endif
     <div class="mt-4 rounded-lg border border-stone-200 bg-white p-4 sm:max-w-xl">
         <h2 class="text-base font-medium text-stone-900">{{ __('Carte d\'identité scolaire — un élève') }}</h2>
 

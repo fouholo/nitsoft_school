@@ -912,5 +912,9 @@
     "Nouvelle classe arabe": "قسم عربي جديد",
     "Aucune classe arabe.": "لا يوجد قسم عربي.",
     "Aucun niveau arabe pour ce type d’établissement.": "لا يوجد مستوى عربي لهذا النوع من المؤسسات.",
-    "Cet élève a déjà une inscription pour cette année scolaire.": "هذا التلميذ مسجل بالفعل لهذه السنة الدراسية."
+    "Cet élève a déjà une inscription pour cette année scolaire.": "هذا التلميذ مسجل بالفعل لهذه السنة الدراسية.",
+    "Liste des élèves d'une classe arabe": "قائمة تلاميذ قسم عربي",
+    "Document en arabe, sous l’en-tête officiel de l’établissement.": "وثيقة باللغة العربية، تحت الترويسة الرسمية للمؤسسة.",
+    "Redoublement (arabe)": "الإعادة (عربي)",
+    "Liste PDF": "قائمة PDF"
 }

@@ -35,6 +35,14 @@ Suite de [2026-10-20-classes-arabes-design.md](2026-10-20-classes-arabes-design.
 - **Pied de page** : « أنشئت في » suivi de la date et de l'heure (`d/m/Y H:i`).
 - **Nom du fichier** : `liste-eleves-arabe-<nom de la classe>.pdf`, après `Str::slug`.
 
+## Rendu de l'arabe par dompdf
+
+Constaté en contrôlant le PDF réel, en extrayant la position des mots :
+
+- dompdf lie et ordonne correctement les lettres de chaque mot, mais **pose les mots de gauche à droite**, même avec `direction: rtl`. Un texte arabe de plusieurs mots se lit donc à l'envers. Le helper global `pdf_rtl()` (`app/Support/helpers.php`) inverse l'ordre des mots d'un texte contenant de l'arabe, sans toucher aux lettres. Il laisse intact un texte sans arabe et convient aux textes tenant sur une ligne. Tous les textes arabes de plusieurs mots de la liste passent par lui.
+- dompdf ignore `direction: rtl` pour l'ordre des colonnes : les colonnes sont écrites dans l'ordre visuel, « الرقم » en dernier, pour qu'elle apparaisse à droite.
+- Le même défaut touchait le **bulletin arabe** existant : les noms de matières de plusieurs mots (« القرآن الكريم ») s'y lisaient à l'envers. Ils passent désormais par `pdf_rtl()`. La disposition du bulletin ne change pas.
+
 ## Accès dans l'application
 
 - **Listes/Rapports** (`Reports\Index`) : un bloc « Liste des élèves d'une classe arabe », affiché seulement si l'établissement est `is_arabe`. Il contient l'année scolaire, la classe arabe de cette année, le sexe et le redoublement (arabe), puis le bouton « Liste des élèves (PDF) ». Ses propriétés sont distinctes de celles du bloc français.
@@ -51,6 +59,7 @@ Suite de [2026-10-20-classes-arabes-design.md](2026-10-20-classes-arabes-design.
 - Rendu HTML de la vue : titre arabe, nom de la classe, libellés des filtres, « المدير », ligne vide.
 - `Reports\Index` : le bloc est présent dans une école franco-arabe et absent sinon ; le lien porte les filtres.
 - `Arabic\Classrooms\Index` : le lien « Liste PDF » est présent.
+- `pdf_rtl()` : inversion des mots, espaces multiples, texte sans arabe ou vide.
 
 ## Hors périmètre
 
