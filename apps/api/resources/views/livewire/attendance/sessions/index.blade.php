@@ -24,7 +24,7 @@
             <h2 class="text-sm font-semibold text-stone-900">{{ $isAdmin ? __('Séances du jour') : __('Mes séances du jour') }}</h2>
         </div>
 
-        @if ($todaysTimetableSessions->isEmpty())
+        @if ($todayEntries->isEmpty())
             <p class="px-4 py-4 text-sm text-stone-500">{{ __("Aucune séance planifiée aujourd'hui.") }}</p>
         @else
             <div class="overflow-x-auto">
@@ -41,21 +41,26 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-stone-100">
-                        @foreach ($todaysTimetableSessions as $timetableSession)
-                            <tr wire:key="today-timetable-session-{{ $timetableSession->id }}">
-                                <td class="whitespace-nowrap px-4 py-2 text-stone-600">{{ $timetableSession->slot->label }}</td>
-                                <td class="whitespace-nowrap px-4 py-2 text-stone-900">{{ $timetableSession->classroom?->name }}</td>
-                                <td class="whitespace-nowrap px-4 py-2 text-stone-600">{{ $timetableSession->subject?->name }}</td>
+                        @foreach ($todayEntries as $entry)
+                            <tr wire:key="today-session-{{ $entry['key'] }}">
+                                <td class="whitespace-nowrap px-4 py-2 text-stone-600">{{ $entry['slot'] }}</td>
+                                <td class="whitespace-nowrap px-4 py-2 text-stone-900">
+                                    {{ $entry['classroom'] }}
+                                    @if ($entry['arabic'])
+                                        <span class="ms-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">{{ __('Arabe') }}</span>
+                                    @endif
+                                </td>
+                                <td class="whitespace-nowrap px-4 py-2 text-stone-600" dir="auto">{{ $entry['subject'] }}</td>
                                 @if ($isAdmin)
-                                    <td class="whitespace-nowrap px-4 py-2 text-stone-600">{{ $timetableSession->teacher?->name }}</td>
+                                    <td class="whitespace-nowrap px-4 py-2 text-stone-600">{{ $entry['teacher'] }}</td>
                                 @endif
                                 <td class="whitespace-nowrap px-4 py-2 text-end">
-                                    @if ($attendedTimetableSessionIds->has($timetableSession->id))
-                                        <a href="{{ route('attendance.sessions.mark', $attendedTimetableSessionIds[$timetableSession->id]) }}" class="inline-flex min-h-11 items-center text-stone-500 hover:text-stone-900">
+                                    @if ($entry['attendedId'])
+                                        <a href="{{ route('attendance.sessions.mark', $entry['attendedId']) }}" class="inline-flex min-h-11 items-center text-stone-500 hover:text-stone-900">
                                             {{ __("Modifier l'appel") }}
                                         </a>
                                     @else
-                                        <button type="button" wire:click="startFromTimetable({{ $timetableSession->id }})" class="inline-flex min-h-11 items-center text-orange-700 hover:text-orange-900">
+                                        <button type="button" wire:click="{{ $entry['arabic'] ? 'startFromArabicTimetable' : 'startFromTimetable' }}({{ $entry['id'] }})" class="inline-flex min-h-11 items-center text-orange-700 hover:text-orange-900">
                                             {{ __("Faire l'appel") }}
                                         </button>
                                     @endif
@@ -70,26 +75,60 @@
 
     @if ($showForm)
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-4">
-            <div>
-                <label for="classroom_id" class="block text-sm font-medium text-stone-700">{{ __('Classe') }}</label>
-                <select id="classroom_id" wire:model="classroom_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
-                    <option value="">—</option>
-                    @foreach ($classrooms as $classroom)
-                        <option value="{{ $classroom->id }}">{{ $classroom->name }}</option>
-                    @endforeach
-                </select>
-                @error('classroom_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-            </div>
+            @if ($isArabe)
+                <div>
+                    <label for="track" class="block text-sm font-medium text-stone-700">{{ __('Filière') }}</label>
+                    <select id="track" wire:model.live="track" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <option value="francais">{{ __('Française') }}</option>
+                        <option value="arabe">{{ __('Arabe') }}</option>
+                    </select>
+                </div>
+            @endif
 
-            <div>
-                <label for="subject_id" class="block text-sm font-medium text-stone-700">{{ __('Matière (optionnel)') }}</label>
-                <select id="subject_id" wire:model="subject_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
-                    <option value="">{{ __('Appel général') }}</option>
-                    @foreach ($subjects as $subject)
-                        <option value="{{ $subject->id }}">{{ $subject->name }}</option>
-                    @endforeach
-                </select>
-            </div>
+            @if ($isArabe && $track === 'arabe')
+                <div>
+                    <label for="arabic_classroom_id" class="block text-sm font-medium text-stone-700">{{ __('Classe arabe') }}</label>
+                    <select id="arabic_classroom_id" wire:model="arabic_classroom_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <option value="">—</option>
+                        @foreach ($arabicClassrooms as $arabicClassroom)
+                            <option value="{{ $arabicClassroom->id }}">{{ $arabicClassroom->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('arabic_classroom_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <label for="arabic_subject_id" class="block text-sm font-medium text-stone-700">{{ __('Matière (optionnel)') }}</label>
+                    <select id="arabic_subject_id" wire:model="arabic_subject_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <option value="">{{ __('Appel général') }}</option>
+                        @foreach ($arabicSubjects as $arabicSubject)
+                            <option value="{{ $arabicSubject->id }}">{{ $arabicSubject->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            @else
+                <div>
+                    <label for="classroom_id" class="block text-sm font-medium text-stone-700">{{ __('Classe') }}</label>
+                    <select id="classroom_id" wire:model="classroom_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <option value="">—</option>
+                        @foreach ($classrooms as $classroom)
+                            <option value="{{ $classroom->id }}">{{ $classroom->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('classroom_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <label for="subject_id" class="block text-sm font-medium text-stone-700">{{ __('Matière (optionnel)') }}</label>
+                    <select id="subject_id" wire:model="subject_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        <option value="">{{ __('Appel général') }}</option>
+                        @foreach ($subjects as $subject)
+                            <option value="{{ $subject->id }}">{{ $subject->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+            @endif
 
             <div>
                 <label for="session_date" class="block text-sm font-medium text-stone-700">{{ __('Date') }}</label>
@@ -129,8 +168,13 @@
                     @forelse ($sessions as $session)
                         <tr wire:key="session-{{ $session->id }}">
                             <td class="whitespace-nowrap px-4 py-2 text-stone-900">{{ $session->session_date->format('d/m/Y') }}</td>
-                            <td class="whitespace-nowrap px-4 py-2 text-stone-600">{{ $session->classroom?->name }}</td>
-                            <td class="whitespace-nowrap px-4 py-2 text-stone-600">{{ $session->subject?->name ?? __('Appel général') }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-stone-600">
+                                {{ $session->classroomName() }}
+                                @if ($session->isArabic())
+                                    <span class="ms-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">{{ __('Arabe') }}</span>
+                                @endif
+                            </td>
+                            <td class="whitespace-nowrap px-4 py-2 text-stone-600" dir="auto">{{ $session->subjectName() ?? __('Appel général') }}</td>
                             <td class="whitespace-nowrap px-4 py-2">
                                 @if ($session->records_count > 0)
                                     <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">

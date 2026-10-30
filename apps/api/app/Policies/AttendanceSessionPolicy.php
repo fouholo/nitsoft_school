@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Domain\Academics\Models\TeacherAssignment;
+use App\Domain\Arabic\Models\ArabicTeacherAssignment;
 use App\Domain\Attendance\Models\AttendanceSession;
 use App\Models\User;
 use App\Policies\Concerns\ChecksEstablishmentMembership;
@@ -30,7 +31,8 @@ class AttendanceSessionPolicy
         }
 
         return $user->currentRole() === 'enseignant'
-            && TeacherAssignment::query()->where('user_id', $user->id)->exists();
+            && (TeacherAssignment::query()->where('user_id', $user->id)->exists()
+                || ArabicTeacherAssignment::query()->where('user_id', $user->id)->exists());
     }
 
     public function update(User $user, AttendanceSession $attendanceSession): bool
@@ -43,8 +45,13 @@ class AttendanceSessionPolicy
             return true;
         }
 
-        return $user->id === $attendanceSession->teacher_id
-            && $user->isAssignedToClassroom($attendanceSession->classroom_id);
+        if ($user->id !== $attendanceSession->teacher_id) {
+            return false;
+        }
+
+        return $attendanceSession->arabic_classroom_id !== null
+            ? $user->isAssignedToArabicClassroom($attendanceSession->arabic_classroom_id)
+            : $user->isAssignedToClassroom((int) $attendanceSession->classroom_id);
     }
 
     public function delete(User $user, AttendanceSession $attendanceSession): bool

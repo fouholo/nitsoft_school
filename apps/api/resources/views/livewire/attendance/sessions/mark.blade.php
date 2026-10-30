@@ -2,9 +2,9 @@
     <a href="{{ route('attendance.sessions.index') }}" class="text-sm text-stone-500 hover:text-stone-900">&larr; {{ __('Retour aux présences') }}</a>
 
     <div class="mt-2">
-        <h1 class="text-2xl font-semibold text-stone-900">{{ __('Appel — :classroom', ['classroom' => $session->classroom?->name]) }}</h1>
+        <h1 class="text-2xl font-semibold text-stone-900">{{ __('Appel — :classroom', ['classroom' => $session->classroomName()]) }}</h1>
         <p class="text-sm text-stone-500">
-            {{ $session->session_date->format('d/m/Y') }} @if ($session->subject) — {{ $session->subject->name }} @endif
+            {{ $session->session_date->format('d/m/Y') }} @if ($session->subjectName()) — <span dir="auto">{{ $session->subjectName() }}</span> @endif
         </p>
     </div>
 

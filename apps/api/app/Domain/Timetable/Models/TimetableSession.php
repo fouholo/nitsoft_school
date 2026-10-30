@@ -55,6 +55,9 @@ class TimetableSession extends Model
         return $this->belongsTo(Subject::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function teacher(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');

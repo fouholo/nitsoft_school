@@ -89,8 +89,12 @@ class Mark extends Component
     {
         return Student::query()
             ->whereHas('enrollments', function ($query): void {
-                $query->where('classroom_id', $this->session->classroom_id)
-                    ->where('status', 'active');
+                // Appel arabe : la classe arabe, principale ou secondaire.
+                $query->when(
+                    $this->session->isArabic(),
+                    fn ($query) => $query->where('arabic_classroom_id', $this->session->arabic_classroom_id),
+                    fn ($query) => $query->where('classroom_id', $this->session->classroom_id),
+                )->where('status', 'active');
             })
             ->orderBy('last_name')
             ->get();

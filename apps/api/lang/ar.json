@@ -1005,5 +1005,6 @@
     "Ville": "المدينة",
     "Libellé en arabe": "التسمية بالعربية",
     "Matières par niveau": "المواد حسب المستوى",
-    "Les matières de chaque niveau arabe, dans l’ordre du relevé de notes ou du bulletin.": "مواد كل مستوى عربي، بترتيب كشف الدرجات."
+    "Les matières de chaque niveau arabe, dans l’ordre du relevé de notes ou du bulletin.": "مواد كل مستوى عربي، بترتيب كشف الدرجات.",
+    "Code :code utilisé pour une absence au cours d'arabe.": "الرمز :code يستخدم عند الغياب عن حصة العربية."
 }

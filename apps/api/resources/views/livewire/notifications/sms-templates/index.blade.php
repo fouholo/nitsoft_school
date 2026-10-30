@@ -14,6 +14,7 @@
         {{ __('Placeholders disponibles :') }} <code>{{guardian_name}}</code>, <code>{{student_name}}</code>.
         @endverbatim
         {!! __("Code :code utilisé automatiquement lors d'une absence.", ['code' => '<code>attendance_absence</code>']) !!}
+        {!! __("Code :code utilisé pour une absence au cours d'arabe.", ['code' => '<code>attendance_absence_arabic</code>']) !!}
     </p>
 
     @if ($showForm)

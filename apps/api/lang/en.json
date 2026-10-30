@@ -1005,5 +1005,6 @@
     "Ville": "City",
     "Libellé en arabe": "Label in Arabic",
     "Matières par niveau": "Subjects by level",
-    "Les matières de chaque niveau arabe, dans l’ordre du relevé de notes ou du bulletin.": "The subjects of each Arabic level, in report order."
+    "Les matières de chaque niveau arabe, dans l’ordre du relevé de notes ou du bulletin.": "The subjects of each Arabic level, in report order.",
+    "Code :code utilisé pour une absence au cours d'arabe.": "Code :code used for an absence from an Arabic class."
 }

@@ -41,13 +41,19 @@ class NotifyGuardiansOfAbsence
             return;
         }
 
-        $template = SmsTemplate::where('code', 'attendance_absence')
+        // Absence à un appel arabe : modèle et texte qui nomment le cours d'arabe.
+        $isArabic = (bool) $event->record->session?->isArabic();
+        $templateCode = $isArabic ? 'attendance_absence_arabic' : 'attendance_absence';
+
+        $template = SmsTemplate::where('code', $templateCode)
             ->where('is_active', true)
             ->first();
 
         $body = $template instanceof SmsTemplate
             ? $template->body
-            : "{{guardian_name}}, votre enfant {{student_name}} a été marqué(e) absent(e) aujourd'hui.";
+            : ($isArabic
+                ? "{{guardian_name}}, votre enfant {{student_name}} a été marqué(e) absent(e) au cours d'arabe aujourd'hui."
+                : "{{guardian_name}}, votre enfant {{student_name}} a été marqué(e) absent(e) aujourd'hui.");
 
         $rendered = str_replace(
             ['{{guardian_name}}', '{{student_name}}'],
@@ -58,7 +64,7 @@ class NotifyGuardiansOfAbsence
         $smsMessage = SmsMessage::create([
             'establishment_id' => $establishmentId,
             'guardian_id' => $primaryGuardian->id,
-            'template_code' => 'attendance_absence',
+            'template_code' => $templateCode,
             'phone' => $primaryGuardian->phone,
             'body_rendered' => $rendered,
             'status' => 'queued',
