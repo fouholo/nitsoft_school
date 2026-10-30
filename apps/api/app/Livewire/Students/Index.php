@@ -159,7 +159,7 @@ class Index extends Component
         $this->arabic_name = (string) $student->arabic_name;
         $this->birth_date = $student->birth_date?->toDateString() ?? '';
         $this->gender = (string) $student->gender;
-        $this->student_number = $student->student_number;
+        $this->student_number = (string) $student->student_number;
         $this->father_name = (string) $student->father_name;
         $this->father_phone = (string) $student->father_phone;
         $this->mother_name = (string) $student->mother_name;

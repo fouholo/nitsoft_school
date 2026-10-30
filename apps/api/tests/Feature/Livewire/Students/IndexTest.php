@@ -335,3 +335,26 @@ test('un tuteur existant identifié par e-mail est réutilisé plutôt que dupli
     $student = Student::sole();
     expect($student->guardians()->sole()->id)->toBe($existingGuardian->id);
 });
+
+test('un directeur ou un fondateur peut modifier un élève sans matricule', function (string $role) {
+    // Régression : le matricule est facultatif, mais edit() l'affectait tel
+    // quel à une propriété string, ce qui plantait quand il était null.
+    $this->actingAs(createUserWithRole($this->establishment, $role));
+
+    $student = Student::create([
+        'establishment_id' => $this->establishment->id,
+        'first_name' => 'Awa',
+        'last_name' => 'Traoré',
+    ]);
+
+    Livewire::test(Index::class)
+        ->call('edit', $student->id)
+        ->assertSet('student_number', '')
+        ->assertSet('showForm', true)
+        ->set('first_name', 'Aïcha')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect($student->fresh()->first_name)->toBe('Aïcha')
+        ->and($student->fresh()->student_number)->toBeNull();
+})->with(['directeur', 'fondateur']);
