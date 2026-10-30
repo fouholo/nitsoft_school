@@ -19,7 +19,7 @@ Modèle du relevé : livret de composition mensuelle fourni par l'utilisateur (�
 - `arabic_level_subjects` (`ArabicLevelSubject`, `TenantScoped`) : `establishment_id`, `arabic_level_id`, `arabic_subject_id`, `sequence`, timestamps. Unique (`establishment_id`, `arabic_level_id`, `arabic_subject_id`).
 - `arabic_compositions` (`ArabicComposition`, `TenantScoped`) : `establishment_id`, `school_year_id`, `month` (1 à 12), `graded_on`, `created_by`, timestamps. Unique (`establishment_id`, `school_year_id`, `month`). Ordre scolaire : septembre à août.
 - `arabic_composition_grades` (`ArabicCompositionGrade`, `TenantScoped`) : `establishment_id`, `arabic_composition_id`, `enrollment_id`, `arabic_subject_id`, `score` (nullable, décimal 4,2), `is_absent`, timestamps. Unique (`arabic_composition_id`, `enrollment_id`, `arabic_subject_id`).
-- `arabic_composition_results` (`ArabicCompositionResult`, `TenantScoped`) : `establishment_id`, `arabic_composition_id`, `enrollment_id`, `arabic_classroom_id`, `total`, `average`, `mention`, `rank`, `appreciation` (texte libre du maître), `generated_at`, timestamps. Unique (`arabic_composition_id`, `enrollment_id`).
+- `arabic_composition_results` (`ArabicCompositionResult`, `TenantScoped`) : `establishment_id`, `arabic_composition_id`, `enrollment_id`, `arabic_classroom_id`, `total`, `average`, `mention`, `rank`, `appreciation` (texte libre du maître, 200 caractères au plus), `generated_at`, timestamps. Unique (`arabic_composition_id`, `enrollment_id`).
 
 Pas de `SoftDeletes` ; pas `Syncable` (comme les emplois du temps arabes).
 
@@ -34,6 +34,8 @@ Service `App\Domain\Arabic\Services\ArabicCompositionCalculator` :
 
 Effectif : nombre d'inscriptions actives de la classe.
 
+À la génération, le résultat d'un élève qui a quitté la classe est retiré. L'écran « Relevés » signale les notes modifiées après la dernière génération.
+
 ## Périmètre
 
 - Écoles `is_arabe` de type préscolaire-primaire (`Establishment::isPrescolairePrimaire()`), classes arabes dont le niveau est au cycle **primaire**.
@@ -44,9 +46,9 @@ Effectif : nombre d'inscriptions actives de la classe.
 
 `ArabicCompositionPolicy` :
 
-- `viewAny` : membre d'une école franco-arabe primaire, sauf caissier ;
+- `viewAny` : membre d'une école franco-arabe primaire, sauf caissier et parent ;
 - `create`, `delete` : directeur (comme en français) ; suppression refusée si la composition a des notes ;
-- `enterGrades(User, ArabicClassroom)` : éducateur (`grades.enter`), fondateur, directeur, gestionnaire, ou enseignant affecté à la classe arabe ;
+- `accessClassroom(User, ArabicClassroom)`, pour saisir les notes et consulter les relevés : éducateur (`grades.enter`), fondateur, directeur, gestionnaire, ou enseignant affecté à la classe arabe ;
 - `generate` : fondateur, directeur, gestionnaire, ou `report_cards.generate`.
 
 `ArabicLevelSubjectPolicy` : `viewAny` comme ci-dessus ; `manage` : fondateur, directeur, gestionnaire.
@@ -67,7 +69,8 @@ Effectif : nombre d'inscriptions actives de la classe.
 - Résultats bilingues : Total / مجموع الدرجات, Moyenne / المعدل, Mention / التقدير, Rang / الترتيب, Effectif / عدد التلاميذ. Ligne Observation / الملاحظات vide.
 - Signatures : Le Maître / توقيع المعلم, Visa des parents / توقيع الأهل ; Appréciation du maître / تقدير المعلم (texte saisi ou pointillés).
 - Textes arabes de plusieurs mots passés par `pdf_rtl()`.
-- Objectif : une page A5 avec 19 matières, vérifié sur le rendu réel.
+- Une page A5 avec les 20 matières du livret, vérifié sur le rendu réel. Noto Naskh agrandit la hauteur de ligne : les cellules arabes ont un `line-height` réduit, sans quoi chaque rang passe à 16 pt et le relevé déborde.
+- L'appréciation du maître est limitée à 200 caractères (deux lignes), pour que le relevé tienne toujours sur une page.
 
 ## Tests (Pest)
 

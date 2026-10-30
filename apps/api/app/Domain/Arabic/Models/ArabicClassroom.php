@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Domain\Arabic\Models;
 
+use App\Domain\Academics\Enums\Cycle;
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Establishments\Concerns\TenantScoped;
 use App\Domain\Sync\Concerns\Syncable;
 use App\Domain\Timetable\Models\ArabicTimetableSession;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -77,6 +79,17 @@ class ArabicClassroom extends Model
                 (string) $arabicClassroom->numero,
             ));
         });
+    }
+
+    /**
+     * Classes dont le niveau arabe est au cycle primaire.
+     *
+     * @param  Builder<ArabicClassroom>  $query
+     * @return Builder<ArabicClassroom>
+     */
+    public function scopePrimary(Builder $query): Builder
+    {
+        return $query->whereHas('arabicLevel', fn (Builder $levelQuery) => $levelQuery->where('cycle', Cycle::Primaire));
     }
 
     /**

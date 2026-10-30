@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Policies\Concerns;
 
 use App\Domain\Billing\Contracts\HasOwnerColumn;
+use App\Domain\Establishments\Enums\EstablishmentType;
 use App\Domain\Establishments\Models\Establishment;
 use App\Models\User;
 
@@ -42,6 +43,18 @@ trait ChecksEstablishmentMembership
     {
         return app()->bound('currentEstablishmentId')
             && (bool) Establishment::whereKey((int) app('currentEstablishmentId'))->value('is_arabe');
+    }
+
+    /**
+     * École franco-arabe de type préscolaire-primaire.
+     */
+    protected function currentEstablishmentIsArabicPrimary(): bool
+    {
+        return app()->bound('currentEstablishmentId')
+            && Establishment::whereKey((int) app('currentEstablishmentId'))
+                ->where('is_arabe', true)
+                ->where('type', EstablishmentType::PrescolairePrimaire)
+                ->exists();
     }
 
     protected function belongsToSameEstablishment(User $user, int $modelEstablishmentId): bool

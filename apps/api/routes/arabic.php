@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Arabic\ArabicReportCardPdfController;
 use App\Livewire\Arabic\Classrooms\Index as ArabicClassroomsIndex;
+use App\Livewire\Arabic\Compositions\EnterStudent as ArabicCompositionsEnterStudent;
+use App\Livewire\Arabic\Compositions\Index as ArabicCompositionsIndex;
+use App\Livewire\Arabic\Compositions\LevelSubjects as ArabicCompositionsLevelSubjects;
+use App\Livewire\Arabic\Compositions\Reports as ArabicCompositionsReports;
+use App\Livewire\Arabic\Compositions\Students as ArabicCompositionsStudents;
 use App\Livewire\Arabic\GradeSheets\Enter as ArabicGradeSheetsEnter;
 use App\Livewire\Arabic\GradeSheets\Index as ArabicGradeSheetsIndex;
 use App\Livewire\Arabic\Levels\Index as ArabicLevelsIndex;
@@ -31,6 +36,11 @@ Route::prefix('arabic')->name('arabic.')->group(function (): void {
     Route::get('/timetable/slots', ArabicTimetableSlotsIndex::class)->name('timetable.slots.index');
     Route::get('/timetable', ArabicTimetableBrowse::class)->name('timetable.browse');
     Route::get('/timetable/{arabicClassroom}', ArabicTimetableIndex::class)->name('timetable.index');
+    Route::get('/primary-subjects', ArabicCompositionsLevelSubjects::class)->name('compositions.subjects');
+    Route::get('/compositions', ArabicCompositionsIndex::class)->name('compositions.index');
+    Route::get('/composition-reports', ArabicCompositionsReports::class)->name('compositions.reports');
+    Route::get('/compositions/{arabicComposition}', ArabicCompositionsStudents::class)->name('compositions.students');
+    Route::get('/compositions/{arabicComposition}/enrollments/{enrollment}', ArabicCompositionsEnterStudent::class)->name('compositions.enter');
     Route::get('/report-cards', ArabicReportCardsIndex::class)->name('report-cards.index');
     Route::get('/report-cards/{arabicReportCard}/pdf', ArabicReportCardPdfController::class)->name('report-cards.pdf');
 });

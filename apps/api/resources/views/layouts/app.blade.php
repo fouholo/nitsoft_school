@@ -70,17 +70,29 @@
                 // ci-dessous suffit à vider (et donc masquer) le groupe.
                 ['type' => 'group', 'label' => __('Arabe'), 'icon' => 'book', 'active' => 'arabic.*', 'children' => [
                     ['label' => __('Classes'), 'route' => 'arabic.classrooms.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicClassroom::class],
-                    ['label' => __('Coefficients par matière'), 'route' => 'arabic.subject-coefficients.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicSubjectCoefficient::class],
-                    ['label' => __('Périodes'), 'route' => 'arabic.terms.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicTerm::class],
+                    ['label' => __('Matières du primaire'), 'route' => 'arabic.compositions.subjects', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicLevelSubject::class],
+                    ['label' => __('Compositions'), 'route' => 'arabic.compositions.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicComposition::class],
+                    ['label' => __('Relevés de notes'), 'route' => 'arabic.compositions.reports', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicComposition::class],
+                    ['label' => __('Coefficients par matière'), 'route' => 'arabic.subject-coefficients.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicSubjectCoefficient::class, 'hiddenForArabicPrimary' => true],
+                    ['label' => __('Périodes'), 'route' => 'arabic.terms.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicTerm::class, 'hiddenForArabicPrimary' => true],
                     ['label' => __('Grille de créneaux'), 'route' => 'arabic.timetable.slots.index', 'ability' => 'viewAny', 'model' => \App\Domain\Timetable\Models\ArabicTimetableSlot::class],
                     ['label' => __('Emplois du temps'), 'route' => 'arabic.timetable.browse', 'ability' => 'browseStaff', 'model' => \App\Domain\Timetable\Models\ArabicTimetableSession::class],
                     ['label' => __('Affectations enseignants'), 'route' => 'arabic.teacher-assignments.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicTeacherAssignment::class],
-                    ['label' => __('Grilles de notes'), 'route' => 'arabic.grade-sheets.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicGradeSheet::class],
-                    ['label' => __('Bulletins'), 'route' => 'arabic.report-cards.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicReportCard::class],
+                    ['label' => __('Grilles de notes'), 'route' => 'arabic.grade-sheets.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicGradeSheet::class, 'hiddenForArabicPrimary' => true],
+                    ['label' => __('Bulletins'), 'route' => 'arabic.report-cards.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicReportCard::class, 'hiddenForArabicPrimary' => true],
                 ]],
             ];
 
-            $canAccessNavItem = fn (array $item): bool => ! isset($item['ability']) || auth()->user()->can($item['ability'], $item['model']);
+            // École primaire franco-arabe : les compositions remplacent
+            // coefficients, périodes, grilles de notes et bulletins arabes.
+            $isArabicPrimary = app()->bound('currentEstablishmentId')
+                && \App\Domain\Establishments\Models\Establishment::whereKey((int) app('currentEstablishmentId'))
+                    ->where('is_arabe', true)
+                    ->where('type', \App\Domain\Establishments\Enums\EstablishmentType::PrescolairePrimaire)
+                    ->exists();
+
+            $canAccessNavItem = fn (array $item): bool => ! ($isArabicPrimary && ($item['hiddenForArabicPrimary'] ?? false))
+                && (! isset($item['ability']) || auth()->user()->can($item['ability'], $item['model']));
 
             $navItems = collect($navItems)
                 ->map(function (array $item) use ($canAccessNavItem) {
