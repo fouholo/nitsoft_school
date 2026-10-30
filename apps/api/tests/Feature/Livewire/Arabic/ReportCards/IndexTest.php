@@ -9,7 +9,6 @@ use App\Domain\Arabic\Models\ArabicGradeSheet;
 use App\Domain\Arabic\Models\ArabicLevel;
 use App\Domain\Arabic\Models\ArabicReportCard;
 use App\Domain\Arabic\Models\ArabicSubject;
-use App\Domain\Arabic\Models\ArabicSubjectCoefficient;
 use App\Domain\Arabic\Models\ArabicTerm;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Establishments\Models\Establishment;
@@ -29,13 +28,6 @@ beforeEach(function () {
     ]);
     $this->arabicTerm = ArabicTerm::factory()->create(['establishment_id' => $this->establishment->id, 'school_year_id' => $this->schoolYear->id]);
     $this->arabicSubject = ArabicSubject::factory()->create();
-
-    ArabicSubjectCoefficient::factory()->create([
-        'establishment_id' => $this->establishment->id,
-        'arabic_level_id' => $this->arabicLevel->id,
-        'arabic_subject_id' => $this->arabicSubject->id,
-        'coefficient' => 3,
-    ]);
 
     $this->enrollment = Enrollment::factory()->create([
         'establishment_id' => $this->establishment->id,

@@ -132,3 +132,21 @@ test('un établissement non arabe n’a pas accès à l’écran', function () {
 
     Livewire::test(Index::class)->assertForbidden();
 });
+
+test('une évaluation arabe n’a pas de coefficient à saisir', function () {
+    $educateur = createUserWithRole($this->establishment, 'educateur');
+    $this->actingAs($educateur);
+
+    Livewire::test(Index::class)
+        ->call('create')
+        ->assertDontSee(__('Coefficient'))
+        ->set('arabic_classroom_id', $this->arabicClassroom->id)
+        ->set('arabic_subject_id', $this->arabicSubject->id)
+        ->set('arabic_term_id', $this->arabicTerm->id)
+        ->set('title', 'Devoir 1')
+        ->set('graded_on', now()->toDateString())
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect((float) ArabicGradeSheet::sole()->weight)->toBe(1.0);
+});

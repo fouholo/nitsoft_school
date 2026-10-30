@@ -8,8 +8,8 @@ use App\Domain\Arabic\Models\ArabicGradeSheet;
 use App\Domain\Arabic\Models\ArabicLevel;
 use App\Domain\Arabic\Models\ArabicReportCard;
 use App\Domain\Arabic\Models\ArabicSubject;
-use App\Domain\Arabic\Models\ArabicSubjectCoefficient;
 use App\Domain\Arabic\Models\ArabicTerm;
+use App\Domain\Arabic\Services\ArabicReportCardService;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
 use App\Domain\Establishments\Models\Establishment;
@@ -22,13 +22,6 @@ beforeEach(function () {
     $arabicClassroom = ArabicClassroom::factory()->create(['establishment_id' => $this->establishment->id, 'arabic_level_id' => $arabicLevel->id]);
     $arabicTerm = ArabicTerm::factory()->create(['establishment_id' => $this->establishment->id]);
     $arabicSubject = ArabicSubject::factory()->create(['name' => 'القرآن الكريم']);
-
-    ArabicSubjectCoefficient::factory()->create([
-        'establishment_id' => $this->establishment->id,
-        'arabic_level_id' => $arabicLevel->id,
-        'arabic_subject_id' => $arabicSubject->id,
-        'coefficient' => 3,
-    ]);
 
     $student = Student::factory()->create(['establishment_id' => $this->establishment->id]);
 
@@ -91,4 +84,20 @@ test('un membre d’un autre établissement ne peut pas résoudre le bulletin (i
     $response = $this->actingAs($adminB)->get(route('arabic.report-cards.pdf', $this->arabicReportCard));
 
     $response->assertNotFound();
+});
+
+test('le bulletin arabe n’affiche plus de colonne de coefficient', function () {
+    $service = app(ArabicReportCardService::class);
+    $this->arabicReportCard->loadMissing(['enrollment.student', 'enrollment.arabicClassroom', 'arabicTerm.schoolYear', 'establishment']);
+
+    $html = view('pdf.arabic-report-card', [
+        'reportCard' => $this->arabicReportCard,
+        'breakdown' => $service->subjectBreakdown($this->arabicReportCard),
+        'fontRegularPath' => '',
+        'fontBoldPath' => '',
+    ])->render();
+
+    expect($html)->not->toContain('Coéf')
+        ->toContain(pdf_rtl('القرآن الكريم'))
+        ->toContain('15.00');
 });

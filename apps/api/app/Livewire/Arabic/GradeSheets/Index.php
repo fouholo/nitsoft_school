@@ -31,8 +31,6 @@ class Index extends Component
 
     public float $max_score = 20.0;
 
-    public float $weight = 2.0;
-
     public string $graded_on = '';
 
     public function mount(): void
@@ -46,18 +44,8 @@ class Index extends Component
 
         $this->reset(['arabic_classroom_id', 'arabic_subject_id', 'arabic_term_id', 'title', 'type']);
         $this->max_score = 20.0;
-        $this->weight = 2.0;
         $this->graded_on = now()->toDateString();
         $this->showForm = true;
-    }
-
-    public function updatedType(): void
-    {
-        $this->weight = match ($this->type) {
-            'devoir' => 2.0,
-            'interrogation' => 1.0,
-            default => 1.0,
-        };
     }
 
     public function save(): void
@@ -71,7 +59,6 @@ class Index extends Component
             'title' => ['required', 'string', 'max:255'],
             'type' => ['required', 'in:devoir,interrogation'],
             'max_score' => ['required', 'numeric', 'min:1', 'max:1000'],
-            'weight' => ['required', 'numeric', 'min:0.5', 'max:20'],
             'graded_on' => ['required', 'date'],
         ]);
 
@@ -82,7 +69,9 @@ class Index extends Component
             abort(403, __("Vous n'êtes pas affecté à cette classe pour cette matière."));
         }
 
-        ArabicGradeSheet::create([...$data, 'teacher_id' => $user->id]);
+        // Pas de coefficient en filière arabe : la colonne reste à 1, sans effet
+        // sur le calcul (voir ArabicReportCardService).
+        ArabicGradeSheet::create([...$data, 'weight' => 1, 'teacher_id' => $user->id]);
 
         $this->showForm = false;
     }

@@ -63,8 +63,6 @@
             <tr>
                 <th class="col-disciplines">المادة</th>
                 <th class="col-narrow">Moy. /20</th>
-                <th class="col-narrow">Coéf.</th>
-                <th class="col-narrow">Moy. coéf.</th>
                 <th class="col-appreciation">Appréciation</th>
                 <th>Nom et signature du prof</th>
             </tr>
@@ -74,14 +72,12 @@
                 <tr>
                     <td class="col-disciplines">{{ pdf_rtl($row->subject->name) }}</td>
                     <td class="col-narrow">{{ $row->average !== null ? number_format($row->average, 2) : '—' }}</td>
-                    <td class="col-narrow">{{ $row->coefficient !== null ? number_format($row->coefficient, 1) : '—' }}</td>
-                    <td class="col-narrow">{{ $row->coefficientWeightedAverage() !== null ? number_format($row->coefficientWeightedAverage(), 2) : '—' }}</td>
                     <td class="col-appreciation">{{ $row->appreciation ?? '—' }}</td>
                     <td>{{ $row->teacherName ?? '—' }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6">Aucune note disponible pour cette période.</td>
+                    <td colspan="4">Aucune note disponible pour cette période.</td>
                 </tr>
             @endforelse
         </tbody>

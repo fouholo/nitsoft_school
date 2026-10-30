@@ -73,7 +73,6 @@
                     ['label' => __('Matières du primaire'), 'route' => 'arabic.compositions.subjects', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicLevelSubject::class],
                     ['label' => __('Compositions'), 'route' => 'arabic.compositions.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicComposition::class],
                     ['label' => __('Relevés de notes'), 'route' => 'arabic.compositions.reports', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicComposition::class],
-                    ['label' => __('Coefficients par matière'), 'route' => 'arabic.subject-coefficients.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicSubjectCoefficient::class, 'hiddenForArabicPrimary' => true],
                     ['label' => __('Périodes'), 'route' => 'arabic.terms.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicTerm::class, 'hiddenForArabicPrimary' => true],
                     ['label' => __('Grille de créneaux'), 'route' => 'arabic.timetable.slots.index', 'ability' => 'viewAny', 'model' => \App\Domain\Timetable\Models\ArabicTimetableSlot::class],
                     ['label' => __('Emplois du temps'), 'route' => 'arabic.timetable.browse', 'ability' => 'browseStaff', 'model' => \App\Domain\Timetable\Models\ArabicTimetableSession::class],

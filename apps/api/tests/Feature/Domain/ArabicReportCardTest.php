@@ -15,7 +15,6 @@ use App\Domain\Arabic\Services\ArabicReportCardService;
 use App\Domain\Enrollment\Enums\Track;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Establishments\Models\Establishment;
-use Illuminate\Validation\ValidationException;
 
 beforeEach(function () {
     $this->establishment = Establishment::factory()->create();
@@ -32,12 +31,6 @@ beforeEach(function () {
     $this->arabicSubjectA = ArabicSubject::factory()->create(['name' => 'القرآن الكريم']);
     $this->arabicSubjectB = ArabicSubject::factory()->create(['name' => 'اللغة العربية']);
 
-    ArabicSubjectCoefficient::factory()->create([
-        'establishment_id' => $this->establishment->id,
-        'arabic_level_id' => $this->arabicLevel->id,
-        'arabic_subject_id' => $this->arabicSubjectA->id,
-        'coefficient' => 4,
-    ]);
     ArabicSubjectCoefficient::factory()->create([
         'establishment_id' => $this->establishment->id,
         'arabic_level_id' => $this->arabicLevel->id,
@@ -65,7 +58,7 @@ function makeArabicGrade(Enrollment $enrollment, ArabicTerm $term, ArabicSubject
     ]);
 }
 
-test('la moyenne générale est pondérée par coefficient, regroupant des élèves de classes françaises différentes', function () {
+test('la moyenne générale est la moyenne simple des matières, sans coefficient, regroupant des élèves de classes françaises différentes', function () {
     $enrollmentA = Enrollment::factory()->create([
         'establishment_id' => $this->establishment->id,
         'school_year_id' => $this->schoolYear->id,
@@ -92,27 +85,37 @@ test('la moyenne générale est pondérée par coefficient, regroupant des élè
     $cardA = ArabicReportCard::where('enrollment_id', $enrollmentA->id)->sole();
     $cardB = ArabicReportCard::where('enrollment_id', $enrollmentB->id)->sole();
 
-    // A : (16*4 + 10*2) / 6 = 14.0 — B : (8*4 + 20*2) / 6 = 12.0
-    expect((float) $cardA->average)->toBe(14.0)
-        ->and((float) $cardB->average)->toBe(12.0)
-        ->and($cardA->rank)->toBe(1)
-        ->and($cardB->rank)->toBe(2);
+    // A : (16 + 10) / 2 = 13.0 — B : (8 + 20) / 2 = 14.0
+    expect((float) $cardA->average)->toBe(13.0)
+        ->and((float) $cardB->average)->toBe(14.0)
+        ->and($cardB->rank)->toBe(1)
+        ->and($cardA->rank)->toBe(2);
 });
 
-test('erreur explicite si un coefficient est manquant pour une matière notée', function () {
+test('le coefficient d’une évaluation et les coefficients configurés n’ont aucun effet, et le barème reste ramené sur 20', function () {
     $enrollment = Enrollment::factory()->create([
         'establishment_id' => $this->establishment->id,
         'school_year_id' => $this->schoolYear->id,
         'arabic_classroom_id' => $this->arabicClassroom->id,
     ]);
 
-    $arabicSubjectSansCoefficient = ArabicSubject::factory()->create();
-    makeArabicGrade($enrollment, $this->arabicTerm, $arabicSubjectSansCoefficient, 15);
+    // Coran : 10/20 (coefficient d'évaluation 5) et 5/10 = 10/20 ramené → 10 ;
+    // langue : 18/20. Moyenne simple : (10 + 18) / 2 = 14.
+    $sheet = makeArabicGrade($enrollment, $this->arabicTerm, $this->arabicSubjectA, 10)->arabicGradeSheet;
+    $sheet->update(['weight' => 5]);
+    makeArabicGrade($enrollment, $this->arabicTerm, $this->arabicSubjectA, 5, 10);
+    makeArabicGrade($enrollment, $this->arabicTerm, $this->arabicSubjectB, 18);
 
-    $service = new ArabicReportCardService;
+    ArabicSubjectCoefficient::factory()->create([
+        'establishment_id' => $this->establishment->id,
+        'arabic_level_id' => $this->arabicLevel->id,
+        'arabic_subject_id' => $this->arabicSubjectA->id,
+        'coefficient' => 9,
+    ]);
 
-    expect(fn () => $service->generate($this->arabicClassroom, $this->arabicTerm))
-        ->toThrow(ValidationException::class);
+    (new ArabicReportCardService)->generate($this->arabicClassroom, $this->arabicTerm);
+
+    expect((float) ArabicReportCard::sole()->average)->toBe(14.0);
 });
 
 test('regénérer un bulletin met à jour la moyenne existante plutôt que d’en créer un nouveau', function () {
@@ -136,7 +139,7 @@ test('regénérer un bulletin met à jour la moyenne existante plutôt que d’e
         ->and((float) ArabicReportCard::sole()->average)->toBe(20.0);
 });
 
-test('subjectBreakdown détaille chaque matière avec coefficient et enseignant', function () {
+test('subjectBreakdown détaille chaque matière avec sa moyenne', function () {
     $enrollment = Enrollment::factory()->create([
         'establishment_id' => $this->establishment->id,
         'school_year_id' => $this->schoolYear->id,
@@ -155,8 +158,7 @@ test('subjectBreakdown détaille chaque matière avec coefficient et enseignant'
     expect($breakdown)->toHaveCount(2);
 
     $rowA = $breakdown->firstWhere(fn ($row) => $row->subject->is($this->arabicSubjectA));
-    expect($rowA->average)->toBe(16.0)
-        ->and($rowA->coefficient)->toBe(4.0);
+    expect($rowA->average)->toBe(16.0);
 });
 
 test('le classement couvre la classe arabe, filière principale ou secondaire, et ignore les autres classes arabes', function () {

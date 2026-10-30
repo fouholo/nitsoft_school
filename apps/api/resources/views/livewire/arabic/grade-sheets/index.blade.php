@@ -66,12 +66,6 @@
             </div>
 
             <div>
-                <label for="weight" class="block text-sm font-medium text-stone-700">{{ __('Coefficient') }}</label>
-                <input id="weight" type="number" step="0.5" wire:model="weight" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
-                @error('weight') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-            </div>
-
-            <div>
                 <label for="graded_on" class="block text-sm font-medium text-stone-700">{{ __('Date') }}</label>
                 <input id="graded_on" type="date" wire:model="graded_on" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('graded_on') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror

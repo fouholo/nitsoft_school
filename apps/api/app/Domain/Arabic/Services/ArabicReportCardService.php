@@ -7,23 +7,19 @@ namespace App\Domain\Arabic\Services;
 use App\Domain\Arabic\Models\ArabicClassroom;
 use App\Domain\Arabic\Models\ArabicGrade;
 use App\Domain\Arabic\Models\ArabicReportCard;
-use App\Domain\Arabic\Models\ArabicSubject;
-use App\Domain\Arabic\Models\ArabicSubjectCoefficient;
 use App\Domain\Arabic\Models\ArabicTerm;
 use App\Domain\Arabic\ValueObjects\ArabicSubjectAverage;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Grading\Models\AppreciationScale;
 use Illuminate\Support\Collection;
-use Illuminate\Validation\ValidationException;
 
 /**
- * Miroir simplifié de ReportCardService : un seul chemin de calcul (pas de
- * branchement Cycle::Primaire/Secondaire), puisque les coefficients arabes
- * passent toujours par une table de jointure (ArabicSubjectCoefficient), lue
- * par niveau/série de la classe arabe. Le roster et le rang sont ceux de la
- * classe arabe, qu'elle soit la classe principale ou secondaire de l'élève —
- * voir docs/superpowers/specs/2026-08-21-arabe-bulletins-design.md et
- * docs/superpowers/specs/2026-10-20-classes-arabes-design.md.
+ * Miroir simplifié de ReportCardService, sans coefficient : la moyenne d'une
+ * matière est la moyenne simple de ses évaluations ramenées sur 20, la
+ * moyenne générale la moyenne simple des matières. Le roster et le rang sont
+ * ceux de la classe arabe, qu'elle soit la classe principale ou secondaire
+ * de l'élève — voir docs/superpowers/specs/2026-08-21-arabe-bulletins-design.md
+ * et docs/superpowers/specs/2026-10-20-classes-arabes-design.md.
  */
 class ArabicReportCardService
 {
@@ -49,12 +45,8 @@ class ArabicReportCardService
 
         $gradesByEnrollment = $grades->groupBy('enrollment_id');
 
-        $coefficients = $this->coefficientsFor($arabicClassroom);
-
-        $this->assertCoefficientsConfigured($grades, $coefficients);
-
         $averages = $gradesByEnrollment
-            ->map(fn (Collection $grades) => $this->generalAverage($grades, $coefficients))
+            ->map(fn (Collection $grades) => $this->generalAverage($grades))
             ->filter(fn (?float $average) => $average !== null)
             ->sortDesc();
 
@@ -107,17 +99,14 @@ class ArabicReportCardService
             ->whereHas('arabicGradeSheet', fn ($query) => $query->where('arabic_term_id', $arabicReportCard->arabic_term_id))
             ->get();
 
-        $coefficients = $this->coefficientsFor($arabicClassroom);
-
         $rows = [];
 
         foreach ($grades->groupBy(fn (ArabicGrade $grade) => $grade->arabicGradeSheet->arabic_subject_id) as $subjectId => $subjectGrades) {
-            $average = $this->weightedAverage($subjectGrades);
+            $average = $this->subjectAverage($subjectGrades);
 
             $rows[] = new ArabicSubjectAverage(
                 $subjectGrades->first()->arabicGradeSheet->arabicSubject,
                 $average,
-                $coefficients->get($subjectId),
                 null,
                 $average !== null ? AppreciationScale::forAverage($average, 20.0)?->appreciation : null,
                 $subjectGrades->first()->arabicGradeSheet->teacher?->name,
@@ -143,87 +132,31 @@ class ArabicReportCardService
     }
 
     /**
-     * @return Collection<int, float>
+     * Moyenne simple des matières de l'élève.
+     *
+     * @param  Collection<int, ArabicGrade>  $grades
      */
-    private function coefficientsFor(ArabicClassroom $arabicClassroom): Collection
+    private function generalAverage(Collection $grades): ?float
     {
-        $rows = ArabicSubjectCoefficient::query()
-            ->where('arabic_level_id', $arabicClassroom->arabic_level_id)
-            ->where('arabic_serie_id', $arabicClassroom->arabic_serie_id)
-            ->get();
+        $subjectAverages = $grades
+            ->groupBy(fn (ArabicGrade $grade) => $grade->arabicGradeSheet->arabic_subject_id)
+            ->map(fn (Collection $subjectGrades) => $this->subjectAverage($subjectGrades))
+            ->filter(fn (?float $average) => $average !== null);
 
-        $coefficients = [];
-
-        foreach ($rows as $row) {
-            $coefficients[(int) $row->arabic_subject_id] = (float) $row->coefficient;
-        }
-
-        return collect($coefficients);
+        return $subjectAverages->isNotEmpty() ? round($subjectAverages->avg(), 2) : null;
     }
 
     /**
+     * Moyenne simple des évaluations de la matière, ramenées sur 20.
+     *
      * @param  Collection<int, ArabicGrade>  $grades
-     * @param  Collection<int, float>  $coefficients
      */
-    private function assertCoefficientsConfigured(Collection $grades, Collection $coefficients): void
+    private function subjectAverage(Collection $grades): ?float
     {
-        $subjectIdsGraded = $grades->map(fn (ArabicGrade $grade) => (int) $grade->arabicGradeSheet->arabic_subject_id)->unique();
-        $missing = $subjectIdsGraded->diff($coefficients->keys());
-
-        if ($missing->isEmpty()) {
-            return;
-        }
-
-        $names = ArabicSubject::whereIn('id', $missing)->pluck('name')->implode(', ');
-
-        throw ValidationException::withMessages([
-            'arabic_classroom_id' => __('Coefficient manquant pour : :names.', ['names' => $names]),
-        ]);
-    }
-
-    /**
-     * @param  Collection<int, ArabicGrade>  $grades
-     * @param  Collection<int, float>  $coefficients
-     */
-    private function generalAverage(Collection $grades, Collection $coefficients): ?float
-    {
-        $weightedSum = 0.0;
-        $totalCoefficient = 0.0;
-
-        foreach ($grades->groupBy(fn (ArabicGrade $grade) => $grade->arabicGradeSheet->arabic_subject_id) as $subjectId => $subjectGrades) {
-            $subjectAverage = $this->weightedAverage($subjectGrades);
-
-            if ($subjectAverage === null) {
-                continue;
-            }
-
-            $coefficient = (float) $coefficients->get($subjectId);
-            $weightedSum += $subjectAverage * $coefficient;
-            $totalCoefficient += $coefficient;
-        }
-
-        if ($totalCoefficient <= 0) {
+        if ($grades->isEmpty()) {
             return null;
         }
 
-        return round($weightedSum / $totalCoefficient, 2);
-    }
-
-    /**
-     * @param  Collection<int, ArabicGrade>  $grades
-     */
-    private function weightedAverage(Collection $grades): ?float
-    {
-        $totalWeight = $grades->sum(fn (ArabicGrade $grade) => (float) $grade->arabicGradeSheet->weight);
-
-        if ($totalWeight <= 0) {
-            return null;
-        }
-
-        $weightedSum = $grades->sum(
-            fn (ArabicGrade $grade) => ((float) $grade->score / (float) $grade->arabicGradeSheet->max_score) * 20 * (float) $grade->arabicGradeSheet->weight
-        );
-
-        return round($weightedSum / $totalWeight, 2);
+        return round($grades->avg(fn (ArabicGrade $grade) => ((float) $grade->score / (float) $grade->arabicGradeSheet->max_score) * 20), 2);
     }
 }

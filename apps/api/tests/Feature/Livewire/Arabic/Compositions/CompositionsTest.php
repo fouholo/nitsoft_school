@@ -356,14 +356,13 @@ test('le menu d’une école primaire franco-arabe remplace les écrans du secon
 
     $page->assertSee(__('Matières du primaire'))
         ->assertSee(__('Relevés de notes'))
-        ->assertDontSee(__('Coefficients par matière'))
         ->assertDontSee(__('Grilles de notes'));
 
     $this->establishment->update(['type' => EstablishmentType::Secondaire]);
 
     $this->get(route('arabic.classrooms.index'))
         ->assertOk()
-        ->assertSee(__('Coefficients par matière'))
+        ->assertSee(__('Grilles de notes'))
         ->assertDontSee(__('Matières du primaire'));
 });
 
