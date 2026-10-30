@@ -24,17 +24,28 @@ class EnrollmentPolicy
 
     public function create(User $user): bool
     {
-        return $this->isAdminOfCurrentEstablishment($user);
+        return $this->canManageEnrollments($user);
     }
 
     public function update(User $user, Enrollment $enrollment): bool
     {
         return $this->belongsToSameEstablishment($user, $enrollment->establishment_id)
-            && $this->isAdminOfCurrentEstablishment($user);
+            && $this->canManageEnrollments($user);
     }
 
     public function delete(User $user, Enrollment $enrollment): bool
     {
         return $this->update($user, $enrollment);
+    }
+
+    /**
+     * isAdminOfCurrentEstablishment() ne reconnaît un fondateur que via une
+     * fondation : currentRole() couvre aussi celui d'une école indépendante,
+     * ainsi que le caissier, qui inscrit les élèves au guichet.
+     */
+    private function canManageEnrollments(User $user): bool
+    {
+        return $this->isAdminOfCurrentEstablishment($user)
+            || in_array($user->currentRole(), ['fondateur', 'caissier'], true);
     }
 }

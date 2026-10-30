@@ -253,3 +253,67 @@ test('les erreurs de validation du formulaire d’inscription utilisent des noms
         ->assertDontSee('classroom id')
         ->assertDontSee('school year id');
 });
+
+test('un fondateur rattaché directement à l’école peut inscrire un élève puis le retirer', function () {
+    // Régression : la policy ne reconnaissait un fondateur que via une
+    // fondation, ce qui masquait le bouton à celui d'une école indépendante.
+    $establishment = Establishment::factory()->create();
+    $founder = createUserWithRole($establishment, 'fondateur');
+    actingInEstablishment($establishment);
+    test()->actingAs($founder);
+
+    $schoolYear = SchoolYear::factory()->create();
+    $classroom = Classroom::factory()->primaire()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+    $student = Student::factory()->create(['establishment_id' => $establishment->id]);
+
+    $component = Livewire::test(Show::class, ['student' => $student])
+        ->assertSee(__('Nouvelle inscription'))
+        ->call('addEnrollment')
+        ->set('school_year_id', $schoolYear->id)
+        ->set('classroom_id', $classroom->id)
+        ->call('saveEnrollment')
+        ->assertHasNoErrors();
+
+    $enrollment = Enrollment::where('student_id', $student->id)->sole();
+
+    $component->call('withdrawEnrollment', $enrollment->id);
+
+    expect($enrollment->fresh()->status)->toBe('withdrawn');
+});
+
+test('un caissier peut inscrire un élève puis le retirer', function () {
+    $establishment = Establishment::factory()->create();
+    actingInEstablishment($establishment);
+    test()->actingAs(createUserWithRole($establishment, 'caissier'));
+
+    $schoolYear = SchoolYear::factory()->create();
+    $classroom = Classroom::factory()->primaire()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id]);
+    $student = Student::factory()->create(['establishment_id' => $establishment->id]);
+
+    $component = Livewire::test(Show::class, ['student' => $student])
+        ->assertSee(__('Nouvelle inscription'))
+        ->call('addEnrollment')
+        ->set('school_year_id', $schoolYear->id)
+        ->set('classroom_id', $classroom->id)
+        ->call('saveEnrollment')
+        ->assertHasNoErrors();
+
+    $enrollment = Enrollment::where('student_id', $student->id)->sole();
+
+    $component->call('withdrawEnrollment', $enrollment->id);
+
+    expect($enrollment->fresh()->status)->toBe('withdrawn');
+});
+
+test('un éducateur ou un enseignant ne peut pas inscrire un élève', function (string $role) {
+    $establishment = Establishment::factory()->create();
+    actingInEstablishment($establishment);
+    test()->actingAs(createUserWithRole($establishment, $role));
+
+    $student = Student::factory()->create(['establishment_id' => $establishment->id]);
+
+    Livewire::test(Show::class, ['student' => $student])
+        ->assertDontSee(__('Nouvelle inscription'))
+        ->call('addEnrollment')
+        ->assertForbidden();
+})->with(['educateur', 'enseignant']);
