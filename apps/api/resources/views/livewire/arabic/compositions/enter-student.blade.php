@@ -11,7 +11,7 @@
     @if ($subjects->isEmpty())
         <div class="mt-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="alert">
             {{ __('Aucune matière n’est choisie pour le niveau de cette classe.') }}
-            <a href="{{ route('arabic.compositions.subjects') }}" class="font-medium underline">{{ __('Matières du primaire') }}</a>
+            <a href="{{ route('arabic.compositions.subjects') }}" class="font-medium underline">{{ __('Matières par niveau') }}</a>
         </div>
     @else
         <form wire:submit="save" class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-12">

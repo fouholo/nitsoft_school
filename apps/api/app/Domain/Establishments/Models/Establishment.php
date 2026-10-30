@@ -24,6 +24,8 @@ class Establishment extends Model
     protected $fillable = [
         'foundation_id',
         'name',
+        'name_ar',
+        'city',
         'slug',
         'type',
         'address',

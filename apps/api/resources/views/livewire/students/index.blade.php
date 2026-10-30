@@ -93,6 +93,12 @@
                         </div>
 
                         <div>
+                            <label for="arabic_name" class="block text-sm font-medium text-stone-700">{{ __('Nom en arabe') }}</label>
+                            <input id="arabic_name" type="text" dir="rtl" wire:model="arabic_name" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                            @error('arabic_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div>
                             <label for="student_number" class="block text-sm font-medium text-stone-700">{{ __('Matricule') }}</label>
                             <input id="student_number" type="text" wire:model="student_number" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                             @error('student_number') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror

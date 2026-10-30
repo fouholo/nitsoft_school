@@ -8,14 +8,16 @@ use App\Domain\Academics\Enums\Cycle;
 use App\Domain\Arabic\Models\ArabicLevel;
 use App\Domain\Arabic\Models\ArabicLevelSubject;
 use App\Domain\Arabic\Models\ArabicSubject;
+use App\Domain\Establishments\Models\Establishment;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 /**
- * Matières du primaire arabe : l'école choisit, pour chaque niveau, ses
- * matières et leur ordre sur le relevé — voir
- * docs/superpowers/specs/2026-10-30-compositions-primaire-arabe-design.md.
+ * Matières arabes par niveau : l'école choisit, pour chaque niveau de ses
+ * cycles notés, ses matières et leur ordre sur le relevé ou le bulletin — voir
+ * docs/superpowers/specs/2026-10-30-compositions-primaire-arabe-design.md et
+ * docs/superpowers/specs/2026-10-30-bulletin-secondaire-arabe-design.md.
  */
 #[Layout('layouts.app')]
 class LevelSubjects extends Component
@@ -26,7 +28,7 @@ class LevelSubjects extends Component
     {
         $this->authorize('viewAny', ArabicLevelSubject::class);
 
-        $this->arabic_level_id = ArabicLevel::where('cycle', Cycle::Primaire)->orderBy('wording')->value('id');
+        $this->arabic_level_id = $this->gradedLevels()->first()?->id;
     }
 
     public function add(int $arabicSubjectId): void
@@ -74,9 +76,26 @@ class LevelSubjects extends Component
 
     private function selectedLevelId(): int
     {
-        $level = ArabicLevel::where('cycle', Cycle::Primaire)->findOrFail($this->arabic_level_id);
+        $level = $this->gradedLevels()->firstWhere('id', $this->arabic_level_id);
+
+        abort_unless($level instanceof ArabicLevel, 404);
 
         return $level->id;
+    }
+
+    /**
+     * Niveaux arabes des cycles de l'école, préscolaire exclu (non noté).
+     *
+     * @return Collection<int, ArabicLevel>
+     */
+    private function gradedLevels(): Collection
+    {
+        $cycles = array_filter(
+            Establishment::findOrFail((int) app('currentEstablishmentId'))->allowedCycles(),
+            fn (Cycle $cycle) => $cycle !== Cycle::Prescolaire,
+        );
+
+        return ArabicLevel::whereIn('cycle', $cycles)->orderBy('wording')->get()->toBase();
     }
 
     /**
@@ -97,9 +116,9 @@ class LevelSubjects extends Component
         $levelSubjects = $this->arabic_level_id ? $this->levelSubjects() : collect();
 
         return view('livewire.arabic.compositions.level-subjects', [
-            'arabicLevels' => ArabicLevel::where('cycle', Cycle::Primaire)->orderBy('wording')->get(),
+            'arabicLevels' => $this->gradedLevels(),
             'levelSubjects' => $levelSubjects,
             'availableSubjects' => ArabicSubject::whereNotIn('id', $levelSubjects->pluck('arabic_subject_id'))->orderBy('name')->get(),
-        ])->title(__('Matières du primaire'));
+        ])->title(__('Matières par niveau'));
     }
 }

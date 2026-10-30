@@ -999,5 +999,11 @@
     "Mai": "May",
     "Juin": "June",
     "Juillet": "July",
-    "Août": "August"
+    "Août": "August",
+    "Nom en arabe": "Name in Arabic",
+    "nom en arabe": "name in Arabic",
+    "Ville": "City",
+    "Libellé en arabe": "Label in Arabic",
+    "Matières par niveau": "Subjects by level",
+    "Les matières de chaque niveau arabe, dans l’ordre du relevé de notes ou du bulletin.": "The subjects of each Arabic level, in report order."
 }

@@ -354,7 +354,7 @@ test('une école secondaire, une école non arabe, un caissier et un parent n’
 test('le menu d’une école primaire franco-arabe remplace les écrans du secondaire', function () {
     $page = $this->get(route('arabic.compositions.index'))->assertOk();
 
-    $page->assertSee(__('Matières du primaire'))
+    $page->assertSee(__('Matières par niveau'))
         ->assertSee(__('Relevés de notes'))
         ->assertDontSee(__('Grilles de notes'));
 
@@ -363,7 +363,8 @@ test('le menu d’une école primaire franco-arabe remplace les écrans du secon
     $this->get(route('arabic.classrooms.index'))
         ->assertOk()
         ->assertSee(__('Grilles de notes'))
-        ->assertDontSee(__('Matières du primaire'));
+        ->assertSee(__('Matières par niveau'))
+        ->assertDontSee(__('Relevés de notes'));
 });
 
 test('le relevé PDF s’ouvre pour un élève et pour la classe, et reste introuvable depuis une autre école', function () {

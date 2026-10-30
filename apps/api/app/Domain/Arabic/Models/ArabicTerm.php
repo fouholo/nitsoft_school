@@ -30,6 +30,7 @@ class ArabicTerm extends Model
         'establishment_id',
         'school_year_id',
         'label',
+        'label_ar',
         'starts_on',
         'ends_on',
         'sequence',

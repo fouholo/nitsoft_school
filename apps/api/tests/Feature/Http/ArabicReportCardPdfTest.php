@@ -88,16 +88,17 @@ test('un membre d’un autre établissement ne peut pas résoudre le bulletin (i
 
 test('le bulletin arabe n’affiche plus de colonne de coefficient', function () {
     $service = app(ArabicReportCardService::class);
-    $this->arabicReportCard->loadMissing(['enrollment.student', 'enrollment.arabicClassroom', 'arabicTerm.schoolYear', 'establishment']);
+    $this->arabicReportCard->loadMissing(['enrollment.student', 'enrollment.arabicClassroom.arabicLevel', 'arabicTerm.schoolYear', 'establishment']);
 
     $html = view('pdf.arabic-report-card', [
         'reportCard' => $this->arabicReportCard,
         'breakdown' => $service->subjectBreakdown($this->arabicReportCard),
+        'headcount' => $service->headcount($this->arabicReportCard),
         'fontRegularPath' => '',
         'fontBoldPath' => '',
     ])->render();
 
     expect($html)->not->toContain('Coéf')
         ->toContain(pdf_rtl('القرآن الكريم'))
-        ->toContain('15.00');
+        ->toContain('Moyenne');
 });

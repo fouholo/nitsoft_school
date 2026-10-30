@@ -70,7 +70,7 @@
                 // ci-dessous suffit à vider (et donc masquer) le groupe.
                 ['type' => 'group', 'label' => __('Arabe'), 'icon' => 'book', 'active' => 'arabic.*', 'children' => [
                     ['label' => __('Classes'), 'route' => 'arabic.classrooms.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicClassroom::class],
-                    ['label' => __('Matières du primaire'), 'route' => 'arabic.compositions.subjects', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicLevelSubject::class],
+                    ['label' => __('Matières par niveau'), 'route' => 'arabic.compositions.subjects', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicLevelSubject::class],
                     ['label' => __('Compositions'), 'route' => 'arabic.compositions.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicComposition::class],
                     ['label' => __('Relevés de notes'), 'route' => 'arabic.compositions.reports', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicComposition::class],
                     ['label' => __('Périodes'), 'route' => 'arabic.terms.index', 'ability' => 'viewAny', 'model' => \App\Domain\Arabic\Models\ArabicTerm::class, 'hiddenForArabicPrimary' => true],

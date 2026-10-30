@@ -6,6 +6,7 @@ namespace App\Domain\Arabic\Services;
 
 use App\Domain\Arabic\Models\ArabicClassroom;
 use App\Domain\Arabic\Models\ArabicGrade;
+use App\Domain\Arabic\Models\ArabicLevelSubject;
 use App\Domain\Arabic\Models\ArabicReportCard;
 use App\Domain\Arabic\Models\ArabicTerm;
 use App\Domain\Arabic\ValueObjects\ArabicSubjectAverage;
@@ -113,9 +114,31 @@ class ArabicReportCardService
             );
         }
 
-        usort($rows, fn (ArabicSubjectAverage $a, ArabicSubjectAverage $b) => $a->subject->name <=> $b->subject->name);
+        // Ordre choisi par l'école pour ce niveau ; une matière notée hors de
+        // cette liste s'affiche à la fin, pour qu'aucune note ne disparaisse.
+        $positions = ArabicLevelSubject::query()
+            ->where('establishment_id', $arabicClassroom->establishment_id)
+            ->where('arabic_level_id', $arabicClassroom->arabic_level_id)
+            ->pluck('sequence', 'arabic_subject_id');
+
+        usort($rows, fn (ArabicSubjectAverage $a, ArabicSubjectAverage $b) => [$positions[$a->subject->id] ?? PHP_INT_MAX, $a->subject->name]
+            <=> [$positions[$b->subject->id] ?? PHP_INT_MAX, $b->subject->name]);
 
         return collect($rows);
+    }
+
+    /**
+     * Nombre d'élèves actifs de la classe arabe de l'élève.
+     */
+    public function headcount(ArabicReportCard $arabicReportCard): int
+    {
+        $arabicClassroomId = $arabicReportCard->enrollment?->arabic_classroom_id;
+
+        return $arabicClassroomId === null ? 0 : Enrollment::query()
+            ->where('establishment_id', $arabicReportCard->establishment_id)
+            ->where('arabic_classroom_id', $arabicClassroomId)
+            ->where('status', 'active')
+            ->count();
     }
 
     /**

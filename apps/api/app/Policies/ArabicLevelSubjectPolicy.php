@@ -8,7 +8,9 @@ use App\Models\User;
 use App\Policies\Concerns\ChecksEstablishmentMembership;
 
 /**
- * Matières du primaire arabe, par niveau, propres à chaque école.
+ * Matières arabes par niveau, propres à chaque école franco-arabe : elles
+ * donnent la liste des compositions du primaire et l'ordre du bulletin du
+ * secondaire.
  */
 class ArabicLevelSubjectPolicy
 {
@@ -17,7 +19,7 @@ class ArabicLevelSubjectPolicy
     public function viewAny(User $user): bool
     {
         return $this->isMemberOfCurrentEstablishment($user)
-            && $this->currentEstablishmentIsArabicPrimary()
+            && $this->currentEstablishmentIsArabe()
             && ! in_array($user->currentRole(), ['caissier', 'parent'], true);
     }
 

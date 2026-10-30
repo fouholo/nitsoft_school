@@ -18,6 +18,12 @@
             </div>
 
             <div>
+                <label for="label_ar" class="block text-sm font-medium text-stone-700">{{ __('Libellé en arabe') }}</label>
+                <input id="label_ar" type="text" dir="rtl" wire:model="label_ar" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                @error('label_ar') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
                 <label for="sequence" class="block text-sm font-medium text-stone-700">{{ __('Ordre') }}</label>
                 <input id="sequence" type="number" min="1" wire:model="sequence" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('sequence') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror

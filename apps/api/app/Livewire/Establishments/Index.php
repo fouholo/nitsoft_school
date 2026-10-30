@@ -49,6 +49,10 @@ class Index extends Component
 
     public string $direction_id = '';
 
+    public string $name_ar = '';
+
+    public string $city = '';
+
     public string $opening_code = '';
 
     public string $dsps_code = '';
@@ -96,6 +100,8 @@ class Index extends Component
         $this->is_active = $establishment->is_active;
         $this->inspection_id = (string) $establishment->inspection_id;
         $this->direction_id = (string) $establishment->direction_id;
+        $this->name_ar = (string) $establishment->name_ar;
+        $this->city = (string) $establishment->city;
         $this->opening_code = (string) $establishment->opening_code;
         $this->dsps_code = (string) $establishment->dsps_code;
         $this->latitude = (string) $establishment->latitude;
@@ -123,6 +129,8 @@ class Index extends Component
                 Rule::requiredIf($this->type === EstablishmentType::Secondaire->value),
                 'nullable', 'integer', 'exists:directions,id',
             ],
+            'name_ar' => ['nullable', 'string', 'max:255'],
+            'city' => ['nullable', 'string', 'max:255'],
             'opening_code' => ['nullable', 'string', 'max:100'],
             'dsps_code' => ['nullable', 'string', 'max:100'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
@@ -132,7 +140,7 @@ class Index extends Component
             'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:1024'],
         ]);
 
-        foreach (['inspection_id', 'direction_id', 'opening_code', 'dsps_code', 'latitude', 'longitude', 'email'] as $field) {
+        foreach (['name_ar', 'city', 'inspection_id', 'direction_id', 'opening_code', 'dsps_code', 'latitude', 'longitude', 'email'] as $field) {
             $data[$field] = $data[$field] !== '' ? $data[$field] : null;
         }
 
@@ -244,7 +252,7 @@ class Index extends Component
     {
         $this->reset([
             'editingId', 'name', 'foundation_id', 'type', 'address', 'phone', 'is_active',
-            'inspection_id', 'direction_id', 'opening_code', 'dsps_code', 'latitude', 'longitude', 'email',
+            'name_ar', 'city', 'inspection_id', 'direction_id', 'opening_code', 'dsps_code', 'latitude', 'longitude', 'email',
             'is_arabe', 'logo', 'existingLogoPath',
         ]);
         $this->is_active = true;

@@ -1,6 +1,6 @@
 <div>
-    <h1 class="text-2xl font-semibold text-stone-900">{{ __('Matières du primaire') }}</h1>
-    <p class="mt-1 text-sm text-stone-500">{{ __('Les matières de chaque niveau arabe, dans l’ordre du relevé de notes.') }}</p>
+    <h1 class="text-2xl font-semibold text-stone-900">{{ __('Matières par niveau') }}</h1>
+    <p class="mt-1 text-sm text-stone-500">{{ __('Les matières de chaque niveau arabe, dans l’ordre du relevé de notes ou du bulletin.') }}</p>
 
     <div class="mt-4 max-w-sm">
         <label for="arabic_level_id" class="block text-sm font-medium text-stone-700">{{ __('Niveau arabe') }}</label>

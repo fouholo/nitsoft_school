@@ -24,6 +24,7 @@ class Student extends Model
         'establishment_id',
         'first_name',
         'last_name',
+        'arabic_name',
         'birth_date',
         'gender',
         'student_number',

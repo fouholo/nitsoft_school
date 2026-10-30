@@ -19,6 +19,8 @@ class Index extends Component
 
     public string $label = '';
 
+    public string $label_ar = '';
+
     public string $starts_on = '';
 
     public string $ends_on = '';
@@ -49,6 +51,7 @@ class Index extends Component
 
         $this->editingId = $arabicTerm->id;
         $this->label = $arabicTerm->label;
+        $this->label_ar = (string) $arabicTerm->label_ar;
         $this->starts_on = $arabicTerm->starts_on?->toDateString() ?? '';
         $this->ends_on = $arabicTerm->ends_on?->toDateString() ?? '';
         $this->sequence = $arabicTerm->sequence;
@@ -60,12 +63,14 @@ class Index extends Component
     {
         $data = $this->validate([
             'label' => ['required', 'string', 'max:255'],
+            'label_ar' => ['nullable', 'string', 'max:255'],
             'starts_on' => ['nullable', 'date'],
             'ends_on' => ['nullable', 'date'],
             'sequence' => ['required', 'integer', 'min:1'],
             'school_year_id' => ['required', 'exists:school_years,id'],
         ]);
 
+        $data['label_ar'] = $data['label_ar'] !== '' ? $data['label_ar'] : null;
         $data['starts_on'] = $data['starts_on'] !== '' ? $data['starts_on'] : null;
         $data['ends_on'] = $data['ends_on'] !== '' ? $data['ends_on'] : null;
 
@@ -107,7 +112,7 @@ class Index extends Component
 
     protected function resetForm(): void
     {
-        $this->reset(['editingId', 'label', 'starts_on', 'ends_on', 'sequence', 'school_year_id']);
+        $this->reset(['editingId', 'label', 'label_ar', 'starts_on', 'ends_on', 'sequence', 'school_year_id']);
     }
 
     public function render()

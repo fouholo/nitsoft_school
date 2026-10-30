@@ -23,11 +23,12 @@ class ArabicReportCardPdfController extends Controller
     {
         Gate::authorize('view', $arabicReportCard);
 
-        $arabicReportCard->loadMissing(['enrollment.student', 'enrollment.arabicClassroom', 'arabicTerm.schoolYear', 'establishment']);
+        $arabicReportCard->loadMissing(['enrollment.student', 'enrollment.arabicClassroom.arabicLevel', 'arabicTerm.schoolYear', 'establishment']);
 
         $pdf = Pdf::loadView('pdf.arabic-report-card', [
             'reportCard' => $arabicReportCard,
             'breakdown' => $arabicReportCardService->subjectBreakdown($arabicReportCard),
+            'headcount' => $arabicReportCardService->headcount($arabicReportCard),
             'fontRegularPath' => str_replace('\\', '/', resource_path('fonts/arabic/NotoNaskhArabic-Regular.ttf')),
             'fontBoldPath' => str_replace('\\', '/', resource_path('fonts/arabic/NotoNaskhArabic-Bold.ttf')),
         ])->setPaper('a4');

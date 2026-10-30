@@ -999,5 +999,11 @@
     "Mai": "مايو",
     "Juin": "يونيو",
     "Juillet": "يوليو",
-    "Août": "أغسطس"
+    "Août": "أغسطس",
+    "Nom en arabe": "الاسم بالعربية",
+    "nom en arabe": "الاسم بالعربية",
+    "Ville": "المدينة",
+    "Libellé en arabe": "التسمية بالعربية",
+    "Matières par niveau": "المواد حسب المستوى",
+    "Les matières de chaque niveau arabe, dans l’ordre du relevé de notes ou du bulletin.": "مواد كل مستوى عربي، بترتيب كشف الدرجات."
 }

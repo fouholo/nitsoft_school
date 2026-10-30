@@ -37,7 +37,7 @@ class Index extends Component
      * @var array<int, array<int, string>>
      */
     private const STEP_FIELDS = [
-        1 => ['last_name', 'first_name', 'birth_date', 'birth_place', 'gender', 'student_number', 'photo'],
+        1 => ['last_name', 'first_name', 'arabic_name', 'birth_date', 'birth_place', 'gender', 'student_number', 'photo'],
         2 => ['nationalite_code', 'birth_certificate_number', 'birth_certificate_date', 'birth_certificate_place', 'residence'],
         3 => ['father_name', 'father_phone', 'mother_name', 'mother_phone', 'tutor_name', 'tutor_phone'],
     ];
@@ -59,6 +59,8 @@ class Index extends Component
     public string $first_name = '';
 
     public string $last_name = '';
+
+    public string $arabic_name = '';
 
     public string $birth_date = '';
 
@@ -154,6 +156,7 @@ class Index extends Component
         $this->currentStep = 1;
         $this->first_name = $student->first_name;
         $this->last_name = $student->last_name;
+        $this->arabic_name = (string) $student->arabic_name;
         $this->birth_date = $student->birth_date?->toDateString() ?? '';
         $this->gender = (string) $student->gender;
         $this->student_number = $student->student_number;
@@ -200,7 +203,7 @@ class Index extends Component
         $data['birth_date'] = $data['birth_date'] !== '' ? $data['birth_date'] : null;
         $data['gender'] = $data['gender'] !== '' ? $data['gender'] : null;
         $data['birth_certificate_date'] = $data['birth_certificate_date'] !== '' ? $data['birth_certificate_date'] : null;
-        foreach (['student_number', 'father_name', 'father_phone', 'mother_name', 'mother_phone', 'tutor_name', 'tutor_phone', 'birth_place', 'nationalite_code', 'birth_certificate_number', 'birth_certificate_place', 'residence'] as $field) {
+        foreach (['arabic_name', 'student_number', 'father_name', 'father_phone', 'mother_name', 'mother_phone', 'tutor_name', 'tutor_phone', 'birth_place', 'nationalite_code', 'birth_certificate_number', 'birth_certificate_place', 'residence'] as $field) {
             $data[$field] = $data[$field] !== '' ? $data[$field] : null;
         }
 
@@ -364,6 +367,7 @@ class Index extends Component
         return [
             'last_name' => ['required', 'string', 'max:255'],
             'first_name' => ['required', 'string', 'max:255'],
+            'arabic_name' => ['nullable', 'string', 'max:255'],
             'birth_date' => ['nullable', 'date'],
             'birth_place' => ['nullable', 'string', 'max:255'],
             'gender' => ['nullable', 'string', 'in:m,f'],
@@ -395,6 +399,7 @@ class Index extends Component
         return [
             'last_name' => __('nom'),
             'first_name' => __('prénom'),
+            'arabic_name' => __('nom en arabe'),
             'birth_date' => __('date de naissance'),
             'birth_place' => __('lieu de naissance'),
             'gender' => __('genre'),
@@ -420,7 +425,7 @@ class Index extends Component
     protected function resetForm(): void
     {
         $this->reset([
-            'editingId', 'currentStep', 'first_name', 'last_name', 'birth_date', 'gender', 'student_number',
+            'editingId', 'currentStep', 'first_name', 'last_name', 'arabic_name', 'birth_date', 'gender', 'student_number',
             'father_name', 'father_phone', 'mother_name', 'mother_phone', 'tutor_name', 'tutor_phone',
             'primaryContact', 'createAccountForFather', 'createAccountForMother', 'createAccountForTutor',
             'fatherEmail', 'motherEmail', 'tutorEmail',

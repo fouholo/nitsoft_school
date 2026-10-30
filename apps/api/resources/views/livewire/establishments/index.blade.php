@@ -213,6 +213,18 @@
             @endif
 
             <div>
+                <label for="name_ar" class="block text-sm font-medium text-stone-700">{{ __('Nom en arabe') }}</label>
+                <input id="name_ar" type="text" dir="rtl" wire:model="name_ar" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                @error('name_ar') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label for="city" class="block text-sm font-medium text-stone-700">{{ __('Ville') }}</label>
+                <input id="city" type="text" wire:model="city" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                @error('city') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
                 <label for="opening_code" class="block text-sm font-medium text-stone-700">{{ __("Code d'ouverture") }}</label>
                 <input id="opening_code" type="text" wire:model="opening_code" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('opening_code') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
