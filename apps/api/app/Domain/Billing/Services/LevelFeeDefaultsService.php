@@ -69,13 +69,36 @@ class LevelFeeDefaultsService
     {
         $mainClassroom = $enrollment->mainClassroom();
 
-        $fee = match (true) {
+        return $this->installmentDefaults(
+            $this->feeForEnrollment($enrollment),
+            ! $mainClassroom instanceof ArabicClassroom && (bool) $enrollment->is_assigned,
+        );
+    }
+
+    /**
+     * Frais d'inscription par défaut de l'inscription selon sa classe
+     * principale ; 0 sans classe principale ou sans grille.
+     */
+    public function registrationDefaultForEnrollment(Enrollment $enrollment): float
+    {
+        $fee = $this->feeForEnrollment($enrollment);
+
+        if ($fee instanceof LevelFee && $enrollment->is_assigned && $fee->registration_amount_assigned !== null) {
+            return (float) $fee->registration_amount_assigned;
+        }
+
+        return (float) ($fee->registration_amount ?? 0);
+    }
+
+    private function feeForEnrollment(Enrollment $enrollment): LevelFee|ArabicLevelFee|null
+    {
+        $mainClassroom = $enrollment->mainClassroom();
+
+        return match (true) {
             $mainClassroom instanceof ArabicClassroom => $this->arabicLevelFee($enrollment->school_year_id, $mainClassroom->arabic_level_id),
             $mainClassroom !== null => $this->levelFee($enrollment->school_year_id, $mainClassroom->level_id),
             default => null,
         };
-
-        return $this->installmentDefaults($fee, ! $mainClassroom instanceof ArabicClassroom && (bool) $enrollment->is_assigned);
     }
 
     private function levelFee(int $schoolYearId, int $levelId): ?LevelFee

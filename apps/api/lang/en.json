@@ -1006,5 +1006,10 @@
     "Libellé en arabe": "Label in Arabic",
     "Matières par niveau": "Subjects by level",
     "Les matières de chaque niveau arabe, dans l’ordre du relevé de notes ou du bulletin.": "The subjects of each Arabic level, in report order.",
-    "Code :code utilisé pour une absence au cours d'arabe.": "Code :code used for an absence from an Arabic class."
+    "Code :code utilisé pour une absence au cours d'arabe.": "Code :code used for an absence from an Arabic class.",
+    "Scolarité": "Tuition",
+    "Renseignez une réduction sur la scolarité ou sur les frais d'inscription.": "Enter a discount on tuition or on the registration fee.",
+    "Laissez la valeur vide pour ne pas accorder de réduction sur cette partie.": "Leave the value empty to grant no discount on this part.",
+    "Supprimer cette réduction ? Les frais d'inscription de :name seront remis au montant standard du niveau.": "Delete this discount? :name's registration fee will be reset to the standard level amount.",
+    "Supprimer cette réduction ? Les tranches de scolarité et les frais d'inscription de :name seront remis aux montants standards du niveau.": "Delete this discount? :name's tuition installments and registration fee will be reset to the standard level amounts."
 }

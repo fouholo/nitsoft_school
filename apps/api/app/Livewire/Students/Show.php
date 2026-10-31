@@ -8,6 +8,8 @@ use App\Domain\Academics\Enums\Cycle;
 use App\Domain\Academics\Models\Classroom;
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Arabic\Models\ArabicClassroom;
+use App\Domain\Billing\Models\Discount;
+use App\Domain\Billing\Services\DiscountService;
 use App\Domain\Billing\Services\LevelFeeDefaultsService;
 use App\Domain\Billing\Services\PaymentTrackingService;
 use App\Domain\Enrollment\Enums\GuardianLinkStatus;
@@ -108,7 +110,7 @@ class Show extends Component
      * docs/superpowers/specs/2026-10-20-classes-arabes-design.md. Les frais
      * sont préremplis depuis la grille de la filière principale.
      */
-    public function saveEnrollment(LevelFeeDefaultsService $levelFeeDefaults): void
+    public function saveEnrollment(LevelFeeDefaultsService $levelFeeDefaults, DiscountService $discountService): void
     {
         $this->authorize('create', Enrollment::class);
 
@@ -181,11 +183,20 @@ class Show extends Component
             ? $levelFeeDefaults->arabicDefaultsFor($data['school_year_id'], $arabicClassroom->arabic_level_id)
             : $levelFeeDefaults->defaultsFor($data['school_year_id'], (int) $classroom?->level_id, $data['is_assigned']);
 
-        $this->student->enrollments()->create([
+        $enrollment = $this->student->enrollments()->create([
             ...$data,
             ...$financialDefaults,
             'status' => 'active',
         ]);
+
+        // Une réduction peut avoir été accordée avant l'inscription.
+        $discount = Discount::where('school_year_id', $enrollment->school_year_id)
+            ->where('student_id', $this->student->id)
+            ->first();
+
+        if ($discount) {
+            $discountService->applyToEnrollment($enrollment, $discount);
+        }
 
         $this->showEnrollmentForm = false;
     }

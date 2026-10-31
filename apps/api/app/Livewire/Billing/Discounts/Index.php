@@ -35,6 +35,10 @@ class Index extends Component
 
     public ?float $value = null;
 
+    public string $registration_type = 'percentage';
+
+    public ?float $registration_value = null;
+
     public string $reason = '';
 
     public function mount(): void
@@ -61,8 +65,10 @@ class Index extends Component
         $this->editingId = $discount->id;
         $this->student_id = $discount->student_id;
         $this->editingStudentLabel = trim($discount->student->last_name.' '.$discount->student->first_name);
-        $this->type = $discount->type;
-        $this->value = (float) $discount->value;
+        $this->type = $discount->type ?? 'percentage';
+        $this->value = $discount->hasTuitionDiscount() ? (float) $discount->value : null;
+        $this->registration_type = $discount->registration_type ?? 'percentage';
+        $this->registration_value = $discount->hasRegistrationDiscount() ? (float) $discount->registration_value : null;
         $this->reason = (string) $discount->reason;
         $this->showForm = true;
     }
@@ -73,16 +79,22 @@ class Index extends Component
             'student_id' => ['required', 'exists:students,id'],
             'type' => ['required', 'in:percentage,fixed_amount'],
             'value' => [
-                'required',
+                'required_without:registration_value',
+                'nullable',
                 'numeric',
                 'min:0',
-                function (string $attribute, mixed $value, \Closure $fail): void {
-                    if ($this->type === 'percentage' && (float) $value > 100) {
-                        $fail(__('Le pourcentage ne peut pas dépasser 100.'));
-                    }
-                },
+                $this->maxPercentageRule($this->type),
+            ],
+            'registration_type' => ['required', 'in:percentage,fixed_amount'],
+            'registration_value' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                $this->maxPercentageRule($this->registration_type),
             ],
             'reason' => ['nullable', 'string', 'max:255'],
+        ], [
+            'value.required_without' => __("Renseignez une réduction sur la scolarité ou sur les frais d'inscription."),
         ]);
 
         $existing = Discount::where('school_year_id', $this->school_year_id)
@@ -91,11 +103,26 @@ class Index extends Component
 
         $this->authorize($existing ? 'update' : 'create', $existing ?? Discount::class);
 
+        $hadTuitionDiscount = (bool) $existing?->hasTuitionDiscount();
+        $hadRegistrationDiscount = (bool) $existing?->hasRegistrationDiscount();
+
+        // Une réduction supprimée en douceur occupe encore la contrainte
+        // unique (élève, année) : on la réactive au lieu d'en créer une autre.
+        if (! $existing) {
+            Discount::onlyTrashed()
+                ->where('school_year_id', $this->school_year_id)
+                ->where('student_id', $data['student_id'])
+                ->first()
+                ?->restore();
+        }
+
         $discount = Discount::updateOrCreate(
             ['school_year_id' => $this->school_year_id, 'student_id' => $data['student_id']],
             [
-                'type' => $data['type'],
+                'type' => $data['value'] !== null ? $data['type'] : null,
                 'value' => $data['value'],
+                'registration_type' => $data['registration_value'] !== null ? $data['registration_type'] : null,
+                'registration_value' => $data['registration_value'],
                 'reason' => $data['reason'] !== '' ? $data['reason'] : null,
                 'created_by' => $existing->created_by ?? Auth::id(),
             ],
@@ -107,7 +134,7 @@ class Index extends Component
             ->first();
 
         if ($enrollment) {
-            $discountService->applyToEnrollment($enrollment, $discount);
+            $discountService->applyToEnrollment($enrollment, $discount, $hadTuitionDiscount, $hadRegistrationDiscount);
         }
 
         $this->resetForm();
@@ -128,8 +155,17 @@ class Index extends Component
         $discount->delete();
 
         if ($enrollment) {
-            $discountService->resetToLevelDefaults($enrollment);
+            $discountService->removeFromEnrollment($enrollment, $discount);
         }
+    }
+
+    private function maxPercentageRule(string $type): \Closure
+    {
+        return function (string $attribute, mixed $value, \Closure $fail) use ($type): void {
+            if ($type === 'percentage' && (float) $value > 100) {
+                $fail(__('Le pourcentage ne peut pas dépasser 100.'));
+            }
+        };
     }
 
     public function cancel(): void
@@ -140,8 +176,9 @@ class Index extends Component
 
     protected function resetForm(): void
     {
-        $this->reset(['editingId', 'student_id', 'studentSearch', 'editingStudentLabel', 'value', 'reason']);
+        $this->reset(['editingId', 'student_id', 'studentSearch', 'editingStudentLabel', 'value', 'registration_value', 'reason']);
         $this->type = 'percentage';
+        $this->registration_type = 'percentage';
     }
 
     /**

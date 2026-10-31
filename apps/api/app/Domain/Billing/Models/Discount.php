@@ -27,6 +27,8 @@ class Discount extends Model
         'school_year_id',
         'type',
         'value',
+        'registration_type',
+        'registration_value',
         'reason',
         'created_by',
         'uid_local',
@@ -37,12 +39,23 @@ class Discount extends Model
 
     protected $casts = [
         'value' => 'decimal:2',
+        'registration_value' => 'decimal:2',
         'client_updated_at' => 'datetime',
     ];
 
     protected static function uidPrefix(): string
     {
         return '242';
+    }
+
+    public function hasTuitionDiscount(): bool
+    {
+        return $this->type !== null;
+    }
+
+    public function hasRegistrationDiscount(): bool
+    {
+        return $this->registration_type !== null;
     }
 
     /**

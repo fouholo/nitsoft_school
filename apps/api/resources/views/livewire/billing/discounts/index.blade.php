@@ -30,7 +30,7 @@
 
     @if ($showForm)
         <form wire:submit="save" class="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-4">
-            <div>
+            <div class="sm:col-span-2">
                 <label class="block text-sm font-medium text-stone-700">{{ __('Élève') }}</label>
                 @if ($editingId)
                     <select disabled class="mt-1 block w-full rounded-lg border-stone-300 bg-stone-50 text-sm text-stone-500">
@@ -57,25 +57,36 @@
                 @error('student_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
-            <div>
-                <label for="type" class="block text-sm font-medium text-stone-700">{{ __('Type') }}</label>
-                <select id="type" wire:model="type" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
-                    <option value="percentage">{{ __('Pourcentage') }}</option>
-                    <option value="fixed_amount">{{ __('Montant fixe') }}</option>
-                </select>
-            </div>
-
-            <div>
-                <label for="value" class="block text-sm font-medium text-stone-700">{{ __('Valeur') }}</label>
-                <input id="value" type="number" step="0.01" wire:model="value" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
-                @error('value') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-            </div>
-
-            <div>
+            <div class="sm:col-span-2">
                 <label for="reason" class="block text-sm font-medium text-stone-700">{{ __('Motif (optionnel)') }}</label>
                 <input id="reason" type="text" wire:model="reason" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
                 @error('reason') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
+
+            @foreach ([
+                ['legend' => __('Scolarité'), 'typeField' => 'type', 'valueField' => 'value'],
+                ['legend' => __("Frais d'inscription"), 'typeField' => 'registration_type', 'valueField' => 'registration_value'],
+            ] as $block)
+                <fieldset class="grid grid-cols-2 gap-4 sm:col-span-2" wire:key="discount-block-{{ $block['valueField'] }}">
+                    <legend class="col-span-2 text-sm font-semibold text-stone-900">{{ $block['legend'] }}</legend>
+
+                    <div>
+                        <label for="{{ $block['typeField'] }}" class="block text-sm font-medium text-stone-700">{{ __('Type') }}</label>
+                        <select id="{{ $block['typeField'] }}" wire:model="{{ $block['typeField'] }}" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                            <option value="percentage">{{ __('Pourcentage') }}</option>
+                            <option value="fixed_amount">{{ __('Montant fixe') }}</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="{{ $block['valueField'] }}" class="block text-sm font-medium text-stone-700">{{ __('Valeur') }}</label>
+                        <input id="{{ $block['valueField'] }}" type="number" step="0.01" wire:model="{{ $block['valueField'] }}" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        @error($block['valueField']) <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                </fieldset>
+            @endforeach
+
+            <p class="text-xs text-stone-500 sm:col-span-4">{{ __('Laissez la valeur vide pour ne pas accorder de réduction sur cette partie.') }}</p>
 
             <div class="flex gap-2 sm:col-span-4">
                 <button type="submit" class="rounded-lg bg-orange-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-800">
@@ -94,8 +105,8 @@
                 <thead class="bg-stone-50">
                     <tr>
                         <th class="whitespace-nowrap px-4 py-2 text-start font-medium text-stone-500">{{ __('Élève') }}</th>
-                        <th class="whitespace-nowrap px-4 py-2 text-start font-medium text-stone-500">{{ __('Type') }}</th>
-                        <th class="whitespace-nowrap px-4 py-2 text-start font-medium text-stone-500">{{ __('Valeur') }}</th>
+                        <th class="whitespace-nowrap px-4 py-2 text-start font-medium text-stone-500">{{ __('Scolarité') }}</th>
+                        <th class="whitespace-nowrap px-4 py-2 text-start font-medium text-stone-500">{{ __("Frais d'inscription") }}</th>
                         <th class="whitespace-nowrap px-4 py-2 text-start font-medium text-stone-500">{{ __('Motif') }}</th>
                         <th class="whitespace-nowrap px-4 py-2 text-start font-medium text-stone-500">{{ __('Accordée par') }}</th>
                         <th class="whitespace-nowrap px-4 py-2"></th>
@@ -103,10 +114,23 @@
                 </thead>
                 <tbody class="divide-y divide-stone-100">
                     @forelse ($discounts as $discount)
+                        @php
+                            $discountLabel = fn (?string $type, mixed $value): string => match ($type) {
+                                null => '—',
+                                'percentage' => number_format((float) $value, 2).' %',
+                                default => money((float) $value),
+                            };
+                            $studentName = trim($discount->student->last_name.' '.$discount->student->first_name);
+                            $deleteConfirmation = match (true) {
+                                $discount->hasTuitionDiscount() && $discount->hasRegistrationDiscount() => __("Supprimer cette réduction ? Les tranches de scolarité et les frais d'inscription de :name seront remis aux montants standards du niveau.", ['name' => $studentName]),
+                                $discount->hasRegistrationDiscount() => __("Supprimer cette réduction ? Les frais d'inscription de :name seront remis au montant standard du niveau.", ['name' => $studentName]),
+                                default => __('Supprimer cette réduction ? Les tranches de scolarité de :name seront remises aux montants standards du niveau.', ['name' => $studentName]),
+                            };
+                        @endphp
                         <tr wire:key="discount-{{ $discount->id }}">
                             <td class="whitespace-nowrap px-4 py-2 text-stone-900">{{ $discount->student->last_name }} {{ $discount->student->first_name }}</td>
-                            <td class="whitespace-nowrap px-4 py-2 text-stone-600">{{ $discount->type === 'percentage' ? __('Pourcentage') : __('Montant fixe') }}</td>
-                            <td class="whitespace-nowrap px-4 py-2 text-stone-600">{{ $discount->type === 'percentage' ? number_format((float) $discount->value, 2) . ' %' : money((float) $discount->value) }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-stone-600">{{ $discountLabel($discount->type, $discount->value) }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-stone-600">{{ $discountLabel($discount->registration_type, $discount->registration_value) }}</td>
                             <td class="whitespace-nowrap px-4 py-2 text-stone-600">{{ $discount->reason ?: '—' }}</td>
                             <td class="whitespace-nowrap px-4 py-2 text-stone-600">{{ $discount->createdBy?->name }}</td>
                             <td class="whitespace-nowrap px-4 py-2 text-end">
@@ -116,7 +140,7 @@
                                 @can('delete', $discount)
                                     <button
                                         wire:click="delete({{ $discount->id }})"
-                                        wire:confirm="{{ __('Supprimer cette réduction ? Les tranches de scolarité de :name seront remises aux montants standards du niveau.', ['name' => trim($discount->student->last_name.' '.$discount->student->first_name)]) }}"
+                                        wire:confirm="{{ $deleteConfirmation }}"
                                         class="ms-3 inline-flex min-h-11 items-center text-red-600 hover:text-red-700"
                                     >
                                         {{ __('Supprimer') }}
