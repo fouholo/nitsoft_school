@@ -1031,5 +1031,9 @@
     "Réduction libre": "تخفيض حر",
     "Cette réduction a été saisie librement : seul le fondateur ou le directeur peut la modifier.": "تم إدخال هذا التخفيض بحرية: يمكن للمؤسس أو المدير فقط تعديله.",
     "Retirer cette réduction ? Les parties concernées seront remises aux montants standards du niveau.": "إزالة هذا التخفيض؟ ستعاد الأجزاء المعنية إلى المبالغ المعتادة للمستوى.",
-    "Modifier une réduction type ne change pas les réductions déjà accordées : il faut la choisir de nouveau pour chaque élève concerné.": "لا يؤدي تعديل التخفيض النموذجي إلى تغيير التخفيضات الممنوحة سابقًا: يجب اختياره مجددًا لكل تلميذ معني."
+    "Modifier une réduction type ne change pas les réductions déjà accordées : il faut la choisir de nouveau pour chaque élève concerné.": "لا يؤدي تعديل التخفيض النموذجي إلى تغيير التخفيضات الممنوحة سابقًا: يجب اختياره مجددًا لكل تلميذ معني.",
+    "Ajouter à d'autres écoles": "إضافة إلى مؤسسات أخرى",
+    "Ajouter :name à d'autres écoles": "إضافة :name إلى مؤسسات أخرى",
+    "Cochez au moins une école.": "حدد مؤسسة واحدة على الأقل.",
+    "Cet e-mail a déjà un compte. Si cette personne est dans votre organisation, utilisez « Ajouter à d'autres écoles » dans la liste des utilisateurs.": "هذا البريد الإلكتروني لديه حساب بالفعل. إذا كان هذا الشخص ضمن مؤسستك، فاستخدم « إضافة إلى مؤسسات أخرى » في قائمة المستخدمين."
 }

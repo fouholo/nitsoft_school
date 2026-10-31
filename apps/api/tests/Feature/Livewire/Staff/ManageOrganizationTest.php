@@ -21,7 +21,7 @@ test('un GENERAL_ADMIN d’une école indépendante peut créer, supprimer et no
     test()->actingAs($generalAdmin);
 
     Livewire::test(ManageOrganization::class)
-        ->set('staff_establishment_id', $establishment->id)
+        ->set('staff_establishment_ids', [$establishment->id])
         ->set('staff_name', 'Caissier Test')
         ->set('staff_email', 'caissier.test@nitsoft.test')
         ->set('staff_role', 'caissier')
@@ -52,7 +52,7 @@ test('un GENERAL_ADMIN peut créer un compte Directeur ou Gestionnaire depuis "M
     test()->actingAs($generalAdmin);
 
     Livewire::test(ManageOrganization::class)
-        ->set('staff_establishment_id', $establishment->id)
+        ->set('staff_establishment_ids', [$establishment->id])
         ->set('staff_name', 'Directeur Test')
         ->set('staff_email', 'directeur.test@nitsoft.test')
         ->set('staff_role', 'directeur')
@@ -66,7 +66,7 @@ test('un GENERAL_ADMIN peut créer un compte Directeur ou Gestionnaire depuis "M
         ->is_active->toBeTrue();
 
     Livewire::test(ManageOrganization::class)
-        ->set('staff_establishment_id', $establishment->id)
+        ->set('staff_establishment_ids', [$establishment->id])
         ->set('staff_name', 'Gestionnaire Test')
         ->set('staff_email', 'gestionnaire.test@nitsoft.test')
         ->set('staff_role', 'gestionnaire')

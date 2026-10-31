@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Staff;
 
+use App\Domain\Academics\Models\Teacher;
 use App\Domain\Establishments\Enums\EstablishmentType;
 use App\Domain\Establishments\Models\Direction;
 use App\Domain\Establishments\Models\Establishment;
@@ -45,7 +46,25 @@ class ManageOrganization extends Component
 
     public string $staff_role = 'enseignant';
 
-    public ?int $staff_establishment_id = null;
+    /**
+     * Écoles cochées à la création du compte (fondation) — voir
+     * docs/superpowers/specs/2026-10-31-personnel-plusieurs-ecoles-design.md.
+     *
+     * @var array<int, int|string>
+     */
+    public array $staff_establishment_ids = [];
+
+    /**
+     * Ligne de la personne qu'on ajoute à d'autres écoles.
+     */
+    public ?int $addingPivotId = null;
+
+    public string $add_role = '';
+
+    /**
+     * @var array<int, int|string>
+     */
+    public array $add_establishment_ids = [];
 
     public ?string $generatedPassword = null;
 
@@ -87,10 +106,6 @@ class ManageOrganization extends Component
         abort_if($organization === null, 403);
 
         $this->organization = $organization;
-
-        if ($organization instanceof Establishment) {
-            $this->staff_establishment_id = $organization->id;
-        }
     }
 
     public function create(): void
@@ -102,30 +117,134 @@ class ManageOrganization extends Component
 
         $establishmentIds = $this->organizationEstablishmentIds();
 
+        // Une école indépendante n'a rien à cocher : son école est prise d'office.
+        if ($this->organization instanceof Establishment) {
+            $this->staff_establishment_ids = [$this->organization->id];
+        }
+
+        $messages = ['staff_establishment_ids.required' => __('Cochez au moins une école.')];
+
+        if ($this->organization instanceof Foundation) {
+            $messages['staff_email.unique'] = __("Cet e-mail a déjà un compte. Si cette personne est dans votre organisation, utilisez « Ajouter à d'autres écoles » dans la liste des utilisateurs.");
+        }
+
         $data = $this->validate([
             'staff_name' => ['required', 'string', 'max:255'],
             'staff_email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'staff_role' => ['required', Rule::in(self::ASSIGNABLE_ROLES)],
-            'staff_establishment_id' => ['required', Rule::in($establishmentIds)],
-        ]);
+            'staff_establishment_ids' => ['required', 'array'],
+            'staff_establishment_ids.*' => [Rule::in($establishmentIds)],
+        ], $messages);
 
-        $user = User::create([
-            'name' => $data['staff_name'],
-            'email' => $data['staff_email'],
-            'password' => User::DEFAULT_PASSWORD,
-            'must_change_password' => true,
-        ]);
+        $user = DB::transaction(function () use ($data): User {
+            $user = User::create([
+                'name' => $data['staff_name'],
+                'email' => $data['staff_email'],
+                'password' => User::DEFAULT_PASSWORD,
+                'must_change_password' => true,
+            ]);
 
-        EstablishmentUserPivot::create([
-            'establishment_id' => $data['staff_establishment_id'],
-            'user_id' => $user->id,
-            'role' => $data['staff_role'],
-            'is_active' => true,
-        ]);
+            $this->attachToEstablishments($user, $data['staff_establishment_ids'], $data['staff_role']);
+
+            return $user;
+        });
 
         $this->generatedPassword = User::DEFAULT_PASSWORD;
         $this->generatedPasswordFor = $user->email;
-        $this->reset(['staff_name', 'staff_email', 'staff_establishment_id']);
+        $this->reset(['staff_name', 'staff_email', 'staff_establishment_ids']);
+    }
+
+    public function startAddingToEstablishments(int $pivotId): void
+    {
+        $this->authorize('manageOrganization', $this->organization);
+
+        $pivot = $this->findAddablePivot($pivotId);
+
+        $this->resetValidation();
+        $this->addingPivotId = $pivot->id;
+        $this->add_role = $pivot->role;
+        $this->add_establishment_ids = [];
+    }
+
+    /**
+     * Ajoute une personne de l'organisation à d'autres écoles. Elle est
+     * résolue depuis une ligne de la liste, jamais depuis un e-mail saisi :
+     * un compte extérieur à l'organisation reste inaccessible.
+     */
+    public function saveAddToEstablishments(): void
+    {
+        $this->authorize('manageOrganization', $this->organization);
+
+        $pivot = $this->findAddablePivot((int) $this->addingPivotId);
+
+        $data = $this->validate([
+            'add_role' => ['required', Rule::in(self::ASSIGNABLE_ROLES)],
+            'add_establishment_ids' => ['required', 'array'],
+            'add_establishment_ids.*' => [Rule::in($this->availableEstablishmentIdsFor($pivot->user_id))],
+        ], [
+            'add_establishment_ids.required' => __('Cochez au moins une école.'),
+        ]);
+
+        DB::transaction(fn () => $this->attachToEstablishments(
+            User::findOrFail($pivot->user_id),
+            $data['add_establishment_ids'],
+            $data['add_role'],
+        ));
+
+        $this->cancelAddToEstablishments();
+    }
+
+    public function cancelAddToEstablishments(): void
+    {
+        $this->resetValidation();
+        $this->reset(['addingPivotId', 'add_role', 'add_establishment_ids']);
+    }
+
+    /**
+     * @param  array<int, int|string>  $establishmentIds
+     */
+    private function attachToEstablishments(User $user, array $establishmentIds, string $role): void
+    {
+        foreach (array_unique(array_map('intval', $establishmentIds)) as $establishmentId) {
+            EstablishmentUserPivot::create([
+                'establishment_id' => $establishmentId,
+                'user_id' => $user->id,
+                'role' => $role,
+                'is_active' => true,
+            ]);
+
+            if ($role === 'enseignant') {
+                Teacher::create([
+                    'establishment_id' => $establishmentId,
+                    'user_id' => $user->id,
+                    'name' => $user->name,
+                ]);
+            }
+        }
+    }
+
+    private function findAddablePivot(int $pivotId): EstablishmentUserPivot
+    {
+        abort_unless($this->organization instanceof Foundation, 404);
+
+        $pivot = $this->findStaffPivot($pivotId);
+
+        abort_unless(in_array($pivot->role, self::ASSIGNABLE_ROLES, true), 403);
+
+        return $pivot;
+    }
+
+    /**
+     * Écoles de l'organisation où la personne n'a encore aucune ligne, active
+     * ou non : roleFor() ne lit qu'un rôle par école.
+     *
+     * @return list<int>
+     */
+    private function availableEstablishmentIdsFor(int $userId): array
+    {
+        $taken = EstablishmentUserPivot::where('user_id', $userId)->pluck('establishment_id')->all();
+
+        return array_values(array_diff($this->organizationEstablishmentIds(), $taken));
     }
 
     public function createEstablishment(): void
@@ -331,12 +450,14 @@ class ManageOrganization extends Component
         $user = Auth::user();
         $isGeneralAdmin = $user->isGeneralAdminOf($this->organization);
         $establishmentIds = $this->organizationEstablishmentIds();
+        $establishments = $this->organization instanceof Foundation
+            ? $this->organization->establishments()->orderBy('name')->get()
+            : collect([$this->organization]);
 
         return view('livewire.staff.manage-organization', [
             'isGeneralAdmin' => $isGeneralAdmin,
-            'establishments' => $this->organization instanceof Foundation
-                ? $this->organization->establishments()->orderBy('name')->get()
-                : collect([$this->organization]),
+            'establishments' => $establishments,
+            'assignableRoleCodes' => self::ASSIGNABLE_ROLES,
             'staffMembers' => $isGeneralAdmin
                 ? EstablishmentUserPivot::whereIn('establishment_id', $establishmentIds)->with(['user', 'establishment'])->orderBy('role')->get()
                 : collect(),

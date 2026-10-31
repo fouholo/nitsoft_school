@@ -174,6 +174,48 @@
 
         <section class="mt-6">
             <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500">{{ __('Utilisateurs') }}</h2>
+
+            @php
+                $schoolIdsByUser = $staffMembers->groupBy('user_id')->map(fn ($rows) => $rows->pluck('establishment_id'));
+                $availableSchoolsFor = fn (int $userId) => $establishments->whereNotIn('id', $schoolIdsByUser->get($userId, collect())->all());
+                $addingMember = $addingPivotId ? $staffMembers->firstWhere('id', $addingPivotId) : null;
+            @endphp
+
+            @if ($addingMember)
+                <form wire:submit="saveAddToEstablishments" class="mt-2 max-w-md space-y-3 rounded-lg border border-stone-200 bg-white p-4">
+                    <h3 class="text-sm font-medium text-stone-900">{{ __('Ajouter :name à d\'autres écoles', ['name' => $addingMember->user->fullName()]) }}</h3>
+
+                    <fieldset>
+                        <legend class="block text-xs font-medium text-stone-700">{{ __('Établissements') }}</legend>
+                        <div class="mt-1 space-y-1">
+                            @foreach ($availableSchoolsFor($addingMember->user_id) as $school)
+                                <label class="flex items-center gap-2 text-sm text-stone-700" wire:key="add-school-{{ $school->id }}">
+                                    <input type="checkbox" wire:model="add_establishment_ids" value="{{ $school->id }}" class="rounded border-stone-300 text-orange-700 focus:ring-orange-600">
+                                    {{ $school->name }}
+                                </label>
+                            @endforeach
+                        </div>
+                        @error('add_establishment_ids') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        @error('add_establishment_ids.*') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </fieldset>
+
+                    <div>
+                        <label for="add_role" class="block text-xs font-medium text-stone-700">{{ __('Rôle') }}</label>
+                        <select id="add_role" wire:model="add_role" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                            @foreach ($assignableRoles as $assignableRole)
+                                <option value="{{ $assignableRole->code }}">{{ $assignableRole->wording }}</option>
+                            @endforeach
+                        </select>
+                        @error('add_role') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button type="submit" class="rounded-lg bg-orange-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-800">{{ __('Ajouter') }}</button>
+                        <button type="button" wire:click="cancelAddToEstablishments" class="rounded-lg border border-stone-300 px-3 py-1.5 text-sm text-stone-700 hover:bg-stone-50">{{ __('Annuler') }}</button>
+                    </div>
+                </form>
+            @endif
+
             <div class="mt-2 overflow-hidden rounded-lg border border-stone-200 bg-white">
                 <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-stone-200 text-sm">
@@ -219,6 +261,10 @@
                                             <button wire:click="nominateLocalAdmin({{ $member->id }})" class="text-orange-700 hover:text-orange-900">{{ __('Nommer admin local') }}</button>
                                         @endif
 
+                                        @if ($organization instanceof \App\Domain\Establishments\Models\Foundation && in_array($member->role, $assignableRoleCodes, true) && $availableSchoolsFor($member->user_id)->isNotEmpty())
+                                            <button wire:click="startAddingToEstablishments({{ $member->id }})" class="text-orange-700 hover:text-orange-900">{{ __("Ajouter à d'autres écoles") }}</button>
+                                        @endif
+
                                         <button wire:click="delete({{ $member->id }})" wire:confirm="{{ __('Supprimer ce compte ? Cette action est irréversible.') }}" class="text-red-600 hover:text-red-800">{{ __('Supprimer') }}</button>
                                     @else
                                         <span class="text-xs text-stone-500">{{ __('Vous') }}</span>
@@ -237,17 +283,20 @@
         <form wire:submit="create" class="mt-6 max-w-md space-y-3 rounded-lg border border-stone-200 bg-white p-4">
             <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500">{{ __('Créer un compte') }}</h2>
 
-            @if ($establishments->count() > 1)
-                <div>
-                    <label for="staff_establishment_id" class="block text-xs font-medium text-stone-700">{{ __('Établissement') }}</label>
-                    <select id="staff_establishment_id" wire:model="staff_establishment_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
-                        <option value="">{{ __('Sélectionner…') }}</option>
+            @if ($organization instanceof \App\Domain\Establishments\Models\Foundation)
+                <fieldset>
+                    <legend class="block text-xs font-medium text-stone-700">{{ __('Établissements') }}</legend>
+                    <div class="mt-1 space-y-1">
                         @foreach ($establishments as $establishment)
-                            <option value="{{ $establishment->id }}">{{ $establishment->name }}</option>
+                            <label class="flex items-center gap-2 text-sm text-stone-700" wire:key="staff-school-{{ $establishment->id }}">
+                                <input type="checkbox" wire:model="staff_establishment_ids" value="{{ $establishment->id }}" class="rounded border-stone-300 text-orange-700 focus:ring-orange-600">
+                                {{ $establishment->name }}
+                            </label>
                         @endforeach
-                    </select>
-                    @error('staff_establishment_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-                </div>
+                    </div>
+                    @error('staff_establishment_ids') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    @error('staff_establishment_ids.*') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                </fieldset>
             @endif
 
             <div>

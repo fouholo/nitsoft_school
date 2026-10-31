@@ -1031,5 +1031,9 @@
     "Réduction libre": "Free-entry discount",
     "Cette réduction a été saisie librement : seul le fondateur ou le directeur peut la modifier.": "This discount was entered freely: only the founder or the principal can change it.",
     "Retirer cette réduction ? Les parties concernées seront remises aux montants standards du niveau.": "Remove this discount? The affected parts will be reset to the standard level amounts.",
-    "Modifier une réduction type ne change pas les réductions déjà accordées : il faut la choisir de nouveau pour chaque élève concerné.": "Changing a preset does not change discounts already granted: choose it again for each student concerned."
+    "Modifier une réduction type ne change pas les réductions déjà accordées : il faut la choisir de nouveau pour chaque élève concerné.": "Changing a preset does not change discounts already granted: choose it again for each student concerned.",
+    "Ajouter à d'autres écoles": "Add to other schools",
+    "Ajouter :name à d'autres écoles": "Add :name to other schools",
+    "Cochez au moins une école.": "Select at least one school.",
+    "Cet e-mail a déjà un compte. Si cette personne est dans votre organisation, utilisez « Ajouter à d'autres écoles » dans la liste des utilisateurs.": "This email already has an account. If this person is in your organization, use “Add to other schools” in the user list."
 }
