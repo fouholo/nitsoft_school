@@ -13,9 +13,10 @@ dataset('billing_models', [
     'level_fees' => [LevelFee::class],
 ]);
 
-test('admin et caissier peuvent gérer la facturation, l’enseignant non', function (string $modelClass) {
+test('seul le fondateur gère les tarifs, les autres rôles financiers les lisent, l’enseignant n’y accède pas', function (string $modelClass) {
     $establishment = Establishment::factory()->create();
-    $admin = createUserWithRole($establishment, 'directeur');
+    $founder = createUserWithRole($establishment, 'fondateur');
+    $director = createUserWithRole($establishment, 'directeur');
     $accountant = createUserWithRole($establishment, 'caissier');
     $teacher = createUserWithRole($establishment, 'enseignant');
 
@@ -23,10 +24,14 @@ test('admin et caissier peuvent gérer la facturation, l’enseignant non', func
 
     $record = $modelClass::factory()->create(['establishment_id' => $establishment->id]);
 
-    expect($admin->can('create', $modelClass))->toBeTrue()
-        ->and($admin->can('update', $record))->toBeTrue()
-        ->and($accountant->can('create', $modelClass))->toBeTrue()
-        ->and($accountant->can('update', $record))->toBeTrue()
+    expect($founder->can('create', $modelClass))->toBeTrue()
+        ->and($founder->can('update', $record))->toBeTrue()
+        ->and($director->can('viewAny', $modelClass))->toBeTrue()
+        ->and($director->can('create', $modelClass))->toBeFalse()
+        ->and($director->can('update', $record))->toBeFalse()
+        ->and($accountant->can('viewAny', $modelClass))->toBeTrue()
+        ->and($accountant->can('create', $modelClass))->toBeFalse()
+        ->and($accountant->can('update', $record))->toBeFalse()
         ->and($teacher->can('viewAny', $modelClass))->toBeFalse()
         ->and($teacher->can('create', $modelClass))->toBeFalse();
 })->with('billing_models');
@@ -54,8 +59,8 @@ test('fondateur et gestionnaire voient les factures/paiements mais ne les gèren
 
     expect($manager->can('viewAny', Payment::class))->toBeTrue()
         ->and($manager->can('create', Payment::class))->toBeFalse()
-        ->and($manager->can('create', Installment::class))->toBeTrue()
-        ->and($manager->can('create', LevelFee::class))->toBeTrue()
+        ->and($manager->can('create', Installment::class))->toBeFalse()
+        ->and($manager->can('create', LevelFee::class))->toBeFalse()
         ->and($founder->can('viewAny', Payment::class))->toBeTrue()
         ->and($founder->can('create', Payment::class))->toBeFalse()
         ->and($founder->can('create', Installment::class))->toBeTrue()

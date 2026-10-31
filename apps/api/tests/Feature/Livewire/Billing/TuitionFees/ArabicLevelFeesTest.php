@@ -15,9 +15,9 @@ use Livewire\Livewire;
 
 beforeEach(function () {
     $this->establishment = Establishment::factory()->create(['type' => EstablishmentType::Secondaire, 'is_arabe' => true]);
-    $this->directeur = createUserWithRole($this->establishment, 'directeur');
+    $this->fondateur = createUserWithRole($this->establishment, 'fondateur');
     actingInEstablishment($this->establishment);
-    $this->actingAs($this->directeur);
+    $this->actingAs($this->fondateur);
 
     $this->schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $this->arabicLevel = ArabicLevel::factory()->create(['wording_fr' => 'Niveau arabe 1', 'cycle' => Cycle::Secondaire->value]);
@@ -44,7 +44,7 @@ test('l’onglet des niveaux arabes n’existe pas hors école franco-arabe', fu
     Livewire::test(ArabicLevelFees::class, ['schoolYearId' => $this->schoolYear->id])->assertForbidden();
 });
 
-test('un directeur configure les frais d’un niveau arabe', function () {
+test('un fondateur configure les frais d’un niveau arabe', function () {
     Livewire::test(ArabicLevelFees::class, ['schoolYearId' => $this->schoolYear->id])
         ->assertSee('Niveau arabe 1')
         ->call('configureLevel', $this->arabicLevel->id)
@@ -106,3 +106,16 @@ test('un enseignant n’a pas accès aux frais des niveaux arabes', function () 
 
     expect(ArabicLevelFee::count())->toBe(0);
 });
+
+test('les autres rôles financiers lisent les frais arabes sans pouvoir les modifier', function (string $role) {
+    $this->actingAs(createUserWithRole($this->establishment, $role));
+
+    Livewire::test(ArabicLevelFees::class, ['schoolYearId' => $this->schoolYear->id])
+        ->assertOk()
+        ->assertSee('Niveau arabe 1')
+        ->assertDontSeeHtml('wire:click="configureLevel(')
+        ->call('configureLevel', $this->arabicLevel->id)
+        ->assertForbidden();
+
+    expect(ArabicLevelFee::count())->toBe(0);
+})->with(['directeur', 'gestionnaire', 'caissier', 'educateur']);

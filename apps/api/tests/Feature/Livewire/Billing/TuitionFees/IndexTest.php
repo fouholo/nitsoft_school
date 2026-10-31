@@ -13,9 +13,9 @@ use Livewire\Livewire;
 
 test('la rubrique "Tarifs par niveau" n’affiche que les niveaux du cycle de l’établissement', function () {
     $establishment = Establishment::factory()->create(['type' => EstablishmentType::PrescolairePrimaire]);
-    $directeur = createUserWithRole($establishment, 'directeur');
+    $fondateur = createUserWithRole($establishment, 'fondateur');
     actingInEstablishment($establishment);
-    test()->actingAs($directeur);
+    test()->actingAs($fondateur);
 
     $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $primaireLevel = Level::factory()->primaire()->create();
@@ -27,11 +27,11 @@ test('la rubrique "Tarifs par niveau" n’affiche que les niveaux du cycle de l�
         ->assertDontSee($secondaireLevel->level_wording);
 });
 
-test('un directeur crée une tranche', function () {
+test('un fondateur crée une tranche', function () {
     $establishment = Establishment::factory()->create();
-    $directeur = createUserWithRole($establishment, 'directeur');
+    $fondateur = createUserWithRole($establishment, 'fondateur');
     actingInEstablishment($establishment);
-    test()->actingAs($directeur);
+    test()->actingAs($fondateur);
 
     $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
 
@@ -50,11 +50,11 @@ test('un directeur crée une tranche', function () {
         ->and($installment->school_year_id)->toBe($schoolYear->id);
 });
 
-test('un directeur peut recréer une tranche à la même position après suppression de l’ancienne', function () {
+test('un fondateur peut recréer une tranche à la même position après suppression de l’ancienne', function () {
     $establishment = Establishment::factory()->create();
-    $directeur = createUserWithRole($establishment, 'directeur');
+    $fondateur = createUserWithRole($establishment, 'fondateur');
     actingInEstablishment($establishment);
-    test()->actingAs($directeur);
+    test()->actingAs($fondateur);
 
     $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $installment = Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 1]);
@@ -79,11 +79,11 @@ test('un directeur peut recréer une tranche à la même position après suppres
     expect($newInstallment->position)->toBe(1);
 });
 
-test('un directeur configure les tarifs d’un niveau en laissant une tranche vide', function () {
+test('un fondateur configure les tarifs d’un niveau en laissant une tranche vide', function () {
     $establishment = Establishment::factory()->create();
-    $directeur = createUserWithRole($establishment, 'directeur');
+    $fondateur = createUserWithRole($establishment, 'fondateur');
     actingInEstablishment($establishment);
-    test()->actingAs($directeur);
+    test()->actingAs($fondateur);
 
     $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $level = Level::factory()->create();
@@ -105,11 +105,11 @@ test('un directeur configure les tarifs d’un niveau en laissant une tranche vi
         ->and($levelFee->installmentAmounts()->where('installment_id', $installment2->id)->exists())->toBeFalse();
 });
 
-test('un directeur peut reconfigurer un niveau dont le tarif avait été supprimé (soft delete)', function () {
+test('un fondateur peut reconfigurer un niveau dont le tarif avait été supprimé (soft delete)', function () {
     $establishment = Establishment::factory()->create();
-    $directeur = createUserWithRole($establishment, 'directeur');
+    $fondateur = createUserWithRole($establishment, 'fondateur');
     actingInEstablishment($establishment);
-    test()->actingAs($directeur);
+    test()->actingAs($fondateur);
 
     $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $level = Level::factory()->create();
@@ -138,9 +138,9 @@ test('un directeur peut reconfigurer un niveau dont le tarif avait été supprim
 
 test('reconfigurer un niveau retire un montant de tranche précédemment saisi', function () {
     $establishment = Establishment::factory()->create();
-    $directeur = createUserWithRole($establishment, 'directeur');
+    $fondateur = createUserWithRole($establishment, 'fondateur');
     actingInEstablishment($establishment);
-    test()->actingAs($directeur);
+    test()->actingAs($fondateur);
 
     $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $level = Level::factory()->create();
@@ -175,9 +175,9 @@ test('un enseignant n’a aucun accès à l’écran des tarifs', function () {
 
 test('le champ frais d’inscription affecté n’apparaît que pour un niveau secondaire', function () {
     $establishment = Establishment::factory()->create(['type' => EstablishmentType::Secondaire]);
-    $directeur = createUserWithRole($establishment, 'directeur');
+    $fondateur = createUserWithRole($establishment, 'fondateur');
     actingInEstablishment($establishment);
-    test()->actingAs($directeur);
+    test()->actingAs($fondateur);
 
     $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $secondaireLevel = Level::factory()->create();
@@ -190,9 +190,9 @@ test('le champ frais d’inscription affecté n’apparaît que pour un niveau s
 
 test('le champ frais d’inscription affecté n’apparaît pas pour un niveau primaire', function () {
     $establishment = Establishment::factory()->create(['type' => EstablishmentType::PrescolairePrimaire]);
-    $directeur = createUserWithRole($establishment, 'directeur');
+    $fondateur = createUserWithRole($establishment, 'fondateur');
     actingInEstablishment($establishment);
-    test()->actingAs($directeur);
+    test()->actingAs($fondateur);
 
     $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $primaireLevel = Level::factory()->primaire()->create();
@@ -205,9 +205,9 @@ test('le champ frais d’inscription affecté n’apparaît pas pour un niveau p
 
 test('un message confirme l’enregistrement d’une tranche puis d’un tarif de niveau', function () {
     $establishment = Establishment::factory()->create(['type' => EstablishmentType::Secondaire]);
-    $directeur = createUserWithRole($establishment, 'directeur');
+    $fondateur = createUserWithRole($establishment, 'fondateur');
     actingInEstablishment($establishment);
-    test()->actingAs($directeur);
+    test()->actingAs($fondateur);
 
     $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $level = Level::factory()->create();
@@ -233,9 +233,9 @@ test('un message confirme l’enregistrement d’une tranche puis d’un tarif d
 
 test('changer d’année scolaire efface les messages de confirmation affichés', function () {
     $establishment = Establishment::factory()->create(['type' => EstablishmentType::Secondaire]);
-    $directeur = createUserWithRole($establishment, 'directeur');
+    $fondateur = createUserWithRole($establishment, 'fondateur');
     actingInEstablishment($establishment);
-    test()->actingAs($directeur);
+    test()->actingAs($fondateur);
 
     $schoolYearA = SchoolYear::factory()->create(['is_current' => true]);
     $schoolYearB = SchoolYear::factory()->create();
@@ -254,9 +254,9 @@ test('changer d’année scolaire efface les messages de confirmation affichés'
 
 test('dupliquer les montants depuis un autre niveau déjà configuré pré-remplit le formulaire', function () {
     $establishment = Establishment::factory()->create(['type' => EstablishmentType::Secondaire]);
-    $directeur = createUserWithRole($establishment, 'directeur');
+    $fondateur = createUserWithRole($establishment, 'fondateur');
     actingInEstablishment($establishment);
-    test()->actingAs($directeur);
+    test()->actingAs($fondateur);
 
     $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $installment = Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'position' => 1]);
@@ -292,9 +292,9 @@ test('dupliquer les montants depuis un autre niveau déjà configuré pré-rempl
 
 test('le sélecteur de duplication n’apparaît pas quand aucun autre niveau n’est configuré', function () {
     $establishment = Establishment::factory()->create(['type' => EstablishmentType::Secondaire]);
-    $directeur = createUserWithRole($establishment, 'directeur');
+    $fondateur = createUserWithRole($establishment, 'fondateur');
     actingInEstablishment($establishment);
-    test()->actingAs($directeur);
+    test()->actingAs($fondateur);
 
     $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
     $level = Level::factory()->create();
@@ -304,3 +304,32 @@ test('le sélecteur de duplication n’apparaît pas quand aucun autre niveau n�
         ->call('configureLevel', $level->id)
         ->assertDontSee('Dupliquer les montants depuis un autre niveau');
 });
+
+test('les autres rôles financiers lisent les tarifs sans pouvoir les modifier', function (string $role) {
+    $establishment = Establishment::factory()->create(['type' => EstablishmentType::PrescolairePrimaire]);
+    actingInEstablishment($establishment);
+    test()->actingAs(createUserWithRole($establishment, $role));
+
+    $schoolYear = SchoolYear::factory()->create(['is_current' => true]);
+    $installment = Installment::factory()->create(['establishment_id' => $establishment->id, 'school_year_id' => $schoolYear->id, 'label' => 'Tranche visible']);
+    $level = Level::factory()->primaire()->create();
+
+    Livewire::test(Index::class)
+        ->assertOk()
+        ->assertSee('Tranche visible')
+        ->assertDontSeeHtml('wire:click="createInstallment"')
+        ->assertDontSeeHtml('wire:click="editInstallment(')
+        ->assertDontSeeHtml('wire:click="deleteInstallment(')
+        ->assertDontSeeHtml('wire:click="configureLevel(');
+
+    foreach ([
+        ['createInstallment', []],
+        ['editInstallment', [$installment->id]],
+        ['deleteInstallment', [$installment->id]],
+        ['configureLevel', [$level->id]],
+    ] as [$action, $arguments]) {
+        Livewire::test(Index::class)->call($action, ...$arguments)->assertForbidden();
+    }
+
+    expect(Installment::whereKey($installment->id)->exists())->toBeTrue();
+})->with(['directeur', 'gestionnaire', 'caissier', 'educateur']);
