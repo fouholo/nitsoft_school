@@ -6,6 +6,7 @@ namespace App\Domain\Establishments\Models;
 
 use App\Domain\Academics\Enums\Cycle;
 use App\Domain\Establishments\Enums\EstablishmentType;
+use App\Domain\Establishments\Enums\PdfHeaderStyle;
 use App\Domain\Sync\Concerns\Syncable;
 use App\Domain\Timetable\Enums\DayOfWeek;
 use App\Models\User;
@@ -41,6 +42,7 @@ class Establishment extends Model
         'is_arabe',
         'arabic_timetable_days',
         'logo_path',
+        'pdf_header_style',
         'uid_local',
         'uid_serveur',
         'device_id',
@@ -50,6 +52,7 @@ class Establishment extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'type' => EstablishmentType::class,
+        'pdf_header_style' => PdfHeaderStyle::class,
         'is_arabe' => 'boolean',
         'arabic_timetable_days' => 'array',
         'client_updated_at' => 'datetime',

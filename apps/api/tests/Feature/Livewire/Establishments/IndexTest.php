@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Domain\Establishments\Enums\EstablishmentType;
+use App\Domain\Establishments\Enums\PdfHeaderStyle;
 use App\Domain\Establishments\Models\Direction;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\Foundation;
@@ -275,4 +276,24 @@ test('refuser une demande la supprime', function () {
 
     expect(SchoolRegistration::count())->toBe(0)
         ->and(Establishment::where('name', 'École Les Palmiers')->exists())->toBeFalse();
+});
+
+test('l’administrateur SaaS choisit le modèle d’en-tête depuis la fiche', function () {
+    $establishment = Establishment::factory()->create(['type' => EstablishmentType::Secondaire, 'direction_id' => Direction::create(['code' => 'DR-HDR', 'direction_name' => 'Direction En-tête'])->id]);
+
+    Livewire::test(Index::class)
+        ->call('edit', $establishment->id)
+        ->assertSet('pdf_header_style', 'official')
+        ->set('pdf_header_style', 'logo')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect($establishment->fresh()->pdf_header_style)->toBe(PdfHeaderStyle::Logo);
+
+    Livewire::test(Index::class)
+        ->call('edit', $establishment->id)
+        ->assertSet('pdf_header_style', 'logo')
+        ->set('pdf_header_style', 'inconnu')
+        ->call('save')
+        ->assertHasErrors('pdf_header_style');
 });

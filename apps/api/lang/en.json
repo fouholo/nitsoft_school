@@ -1035,5 +1035,8 @@
     "Ajouter à d'autres écoles": "Add to other schools",
     "Ajouter :name à d'autres écoles": "Add :name to other schools",
     "Cochez au moins une école.": "Select at least one school.",
-    "Cet e-mail a déjà un compte. Si cette personne est dans votre organisation, utilisez « Ajouter à d'autres écoles » dans la liste des utilisateurs.": "This email already has an account. If this person is in your organization, use “Add to other schools” in the user list."
+    "Cet e-mail a déjà un compte. Si cette personne est dans votre organisation, utilisez « Ajouter à d'autres écoles » dans la liste des utilisateurs.": "This email already has an account. If this person is in your organization, use “Add to other schools” in the user list.",
+    "En-tête des documents": "Document header",
+    "Officiel": "Official",
+    "Officiel : ministère, direction et inspection à gauche. Logo : votre logo seul, en grand, à gauche. La colonne de droite ne change pas.": "Official: ministry, regional office and inspectorate on the left. Logo: your logo alone, large, on the left. The right column does not change."
 }

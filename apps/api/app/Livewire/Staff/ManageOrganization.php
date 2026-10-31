@@ -6,6 +6,7 @@ namespace App\Livewire\Staff;
 
 use App\Domain\Academics\Models\Teacher;
 use App\Domain\Establishments\Enums\EstablishmentType;
+use App\Domain\Establishments\Enums\PdfHeaderStyle;
 use App\Domain\Establishments\Models\Direction;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\EstablishmentUserPivot;
@@ -152,6 +153,23 @@ class ManageOrganization extends Component
         $this->generatedPassword = User::DEFAULT_PASSWORD;
         $this->generatedPasswordFor = $user->email;
         $this->reset(['staff_name', 'staff_email', 'staff_establishment_ids']);
+    }
+
+    public function setPdfHeaderStyle(int $establishmentId, string $style): void
+    {
+        $this->authorize('manageOrganization', $this->organization);
+
+        abort_unless(in_array($establishmentId, $this->organizationEstablishmentIds(), true), 404);
+
+        $headerStyle = PdfHeaderStyle::tryFrom($style);
+
+        abort_if($headerStyle === null, 422);
+
+        Establishment::findOrFail($establishmentId)->update(['pdf_header_style' => $headerStyle]);
+
+        if ($this->organization instanceof Establishment) {
+            $this->organization->refresh();
+        }
     }
 
     public function startAddingToEstablishments(int $pivotId): void
@@ -458,6 +476,7 @@ class ManageOrganization extends Component
             'isGeneralAdmin' => $isGeneralAdmin,
             'establishments' => $establishments,
             'assignableRoleCodes' => self::ASSIGNABLE_ROLES,
+            'pdfHeaderStyles' => PdfHeaderStyle::cases(),
             'staffMembers' => $isGeneralAdmin
                 ? EstablishmentUserPivot::whereIn('establishment_id', $establishmentIds)->with(['user', 'establishment'])->orderBy('role')->get()
                 : collect(),

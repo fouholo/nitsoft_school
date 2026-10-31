@@ -9,6 +9,7 @@ use App\Domain\Academics\Models\Subject;
 use App\Domain\Academics\Models\TeacherAssignment;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
+use App\Domain\Establishments\Enums\PdfHeaderStyle;
 use App\Domain\Establishments\Models\Establishment;
 use App\Domain\Establishments\Models\GeneralInformation;
 use App\Domain\Grading\Models\AppreciationScale;
@@ -115,6 +116,25 @@ test('l’en-tête n’affiche pas de texte République, seulement le logo à ga
         ->and($html)->toContain('td class="right"')
         ->and($html)->toContain('class="armoirie"')
         ->and($html)->toContain('class="establishment-name"');
+});
+
+test('en modèle logo, le relevé prend l’en-tête partagé à la place de son tableau', function () {
+    $establishment = Establishment::factory()->create(['pdf_header_style' => PdfHeaderStyle::Logo, 'logo_path' => 'logos/ecole.png']);
+    actingInEstablishment($establishment);
+
+    $reportCard = makePrimaireReportCard($establishment);
+    $reportCard->loadMissing(['student', 'classroom.level', 'establishment']);
+
+    $html = view('pdf.report-card-primaire', [
+        'reportCard' => $reportCard,
+        'rows' => app(ReportCardService::class)->primaryGradeRows($reportCard),
+        'generalInformation' => GeneralInformation::current(),
+    ])->render();
+
+    expect($html)->toContain('REPUBLIQUE DE')
+        ->and($html)->toContain('height: 100pt')
+        ->and($html)->not->toContain('class="establishment-name"')
+        ->and($html)->not->toContain('td class="logo-col"');
 });
 
 test('la civilité et le résultat s’accordent au genre de l’élève', function (?string $gender, string $expectedCivilite, string $expectedResultat) {

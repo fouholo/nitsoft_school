@@ -257,6 +257,16 @@
                 @error('logo') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
+            <div>
+                <label for="pdf_header_style" class="block text-sm font-medium text-stone-700">{{ __('En-tête des documents') }}</label>
+                <select id="pdf_header_style" wire:model="pdf_header_style" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                    @foreach (\App\Domain\Establishments\Enums\PdfHeaderStyle::cases() as $headerStyle)
+                        <option value="{{ $headerStyle->value }}">{{ $headerStyle->label() }}</option>
+                    @endforeach
+                </select>
+                @error('pdf_header_style') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
             <label class="flex items-center gap-2 text-sm text-stone-600">
                 <input type="checkbox" wire:model="is_active" class="rounded border-stone-300">
                 {{ __('Actif') }}

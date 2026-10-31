@@ -47,6 +47,9 @@
             $headerLines[] = "INSPECTION DE L'ENSEIGNEMENT PRESCOLAIRE ET PRIMAIRE ".\Illuminate\Support\Str::upper($establishment->inspection->inspection_name);
         }
     @endphp
+    @if ($establishment->pdf_header_style === \App\Domain\Establishments\Enums\PdfHeaderStyle::Logo)
+        @include('pdf.partials.reports-header', ['establishment' => $establishment, 'generalInformation' => $generalInformation])
+    @else
     <table class="report-header">
         <tr>
             <td class="logo-col">
@@ -68,6 +71,7 @@
             </td>
         </tr>
     </table>
+    @endif
 
     <h1>Relevé de notes - Composition N°{{ $reportCard->composition_number }}</h1>
     <hr class="title-separator">

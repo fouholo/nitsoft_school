@@ -1,7 +1,17 @@
-@php $showRepublicColumn = $showRepublicColumn ?? true; @endphp
+@php
+    $showRepublicColumn = $showRepublicColumn ?? true;
+    $usesLogoHeader = $establishment->pdf_header_style === \App\Domain\Establishments\Enums\PdfHeaderStyle::Logo;
+@endphp
 <table style="width:100%; border-collapse:collapse; margin-bottom:20px; table-layout:fixed;">
     <tr>
         <td style="width: {{ $showRepublicColumn ? '50%' : '100%' }}; vertical-align:top; text-align:center;">
+            @if ($usesLogoHeader)
+                @if ($establishment->logo_path)
+                    <img src="{{ public_path('storage/'.$establishment->logo_path) }}" style="height: 100pt;">
+                @else
+                    <p style="margin:0; font-weight:bold;">{{ $establishment->name }}</p>
+                @endif
+            @else
             @php $leftLinePrinted = false; @endphp
             @if ($generalInformation->nom_ministere)
                 @if ($leftLinePrinted)
@@ -30,6 +40,7 @@
             <p style="margin:4px 0 0; font-weight:bold;">{{ $establishment->name }}</p>
             @if ($establishment->logo_path)
                 <img src="{{ public_path('storage/'.$establishment->logo_path) }}" style="height: 50px; margin-top: 4px;">
+            @endif
             @endif
         </td>
         @if ($showRepublicColumn)

@@ -173,6 +173,37 @@
         @endif
 
         <section class="mt-6">
+            <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500">{{ __('En-tête des documents') }}</h2>
+            <p class="mt-1 text-sm text-stone-500">{{ __('Officiel : ministère, direction et inspection à gauche. Logo : votre logo seul, en grand, à gauche. La colonne de droite ne change pas.') }}</p>
+            <div class="mt-2 overflow-hidden rounded-lg border border-stone-200 bg-white">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-stone-200 text-sm">
+                        <tbody class="divide-y divide-stone-100">
+                            @foreach ($establishments as $headerEstablishment)
+                                <tr wire:key="header-style-{{ $headerEstablishment->id }}">
+                                    <td class="px-4 py-2 text-stone-900">
+                                        <label for="pdf_header_style_{{ $headerEstablishment->id }}">{{ $headerEstablishment->name }}</label>
+                                    </td>
+                                    <td class="px-4 py-2 text-end">
+                                        <select
+                                            id="pdf_header_style_{{ $headerEstablishment->id }}"
+                                            wire:change="setPdfHeaderStyle({{ $headerEstablishment->id }}, $event.target.value)"
+                                            class="rounded-lg border-stone-300 text-sm"
+                                        >
+                                            @foreach ($pdfHeaderStyles as $headerStyle)
+                                                <option value="{{ $headerStyle->value }}" @selected($headerEstablishment->pdf_header_style === $headerStyle)>{{ $headerStyle->label() }}</option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="mt-6">
             <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500">{{ __('Utilisateurs') }}</h2>
 
             @php

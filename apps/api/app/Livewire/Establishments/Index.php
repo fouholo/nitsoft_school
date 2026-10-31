@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Establishments;
 
 use App\Domain\Establishments\Enums\EstablishmentType;
+use App\Domain\Establishments\Enums\PdfHeaderStyle;
 use App\Domain\Establishments\Exceptions\SchoolRegistrationConflictException;
 use App\Domain\Establishments\Models\Direction;
 use App\Domain\Establishments\Models\Establishment;
@@ -69,6 +70,8 @@ class Index extends Component
 
     public string $existingLogoPath = '';
 
+    public string $pdf_header_style = 'official';
+
     /** @var array<int, string> Erreur de validation par demande (id => message). */
     public array $registrationErrors = [];
 
@@ -109,6 +112,7 @@ class Index extends Component
         $this->email = (string) $establishment->email;
         $this->is_arabe = $establishment->is_arabe;
         $this->existingLogoPath = (string) $establishment->logo_path;
+        $this->pdf_header_style = $establishment->pdf_header_style->value;
         $this->showForm = true;
     }
 
@@ -138,6 +142,7 @@ class Index extends Component
             'email' => ['nullable', 'email', 'max:255'],
             'is_arabe' => ['boolean'],
             'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:1024'],
+            'pdf_header_style' => ['required', Rule::enum(PdfHeaderStyle::class)],
         ]);
 
         foreach (['name_ar', 'city', 'inspection_id', 'direction_id', 'opening_code', 'dsps_code', 'latitude', 'longitude', 'email'] as $field) {
@@ -253,7 +258,7 @@ class Index extends Component
         $this->reset([
             'editingId', 'name', 'foundation_id', 'type', 'address', 'phone', 'is_active',
             'name_ar', 'city', 'inspection_id', 'direction_id', 'opening_code', 'dsps_code', 'latitude', 'longitude', 'email',
-            'is_arabe', 'logo', 'existingLogoPath',
+            'is_arabe', 'logo', 'existingLogoPath', 'pdf_header_style',
         ]);
         $this->is_active = true;
     }
