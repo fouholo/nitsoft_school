@@ -24,6 +24,7 @@ class Discount extends Model
     protected $fillable = [
         'establishment_id',
         'student_id',
+        'discount_preset_id',
         'school_year_id',
         'type',
         'value',
@@ -48,6 +49,18 @@ class Discount extends Model
         return '242';
     }
 
+    /**
+     * Libellé d'une réduction : pourcentage, montant, ou tiret sans réduction.
+     */
+    public static function formatReduction(?string $type, mixed $value): string
+    {
+        return match ($type) {
+            null => '—',
+            'percentage' => number_format((float) $value, 2).' %',
+            default => money((float) $value),
+        };
+    }
+
     public function hasTuitionDiscount(): bool
     {
         return $this->type !== null;
@@ -56,6 +69,14 @@ class Discount extends Model
     public function hasRegistrationDiscount(): bool
     {
         return $this->registration_type !== null;
+    }
+
+    /**
+     * @return BelongsTo<DiscountPreset, $this>
+     */
+    public function discountPreset(): BelongsTo
+    {
+        return $this->belongsTo(DiscountPreset::class);
     }
 
     /**

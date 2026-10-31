@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace App\Livewire\Billing\Enrollments;
 
+use App\Domain\Billing\Models\Discount;
+use App\Domain\Billing\Models\DiscountPreset;
 use App\Domain\Billing\Models\Payment;
+use App\Domain\Billing\Services\DiscountService;
 use App\Domain\Billing\Services\PaymentService;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -36,6 +40,8 @@ class Show extends Component
 
     public string $reference = '';
 
+    public ?int $discount_preset_id = null;
+
     public function mount(Enrollment $enrollment): void
     {
         $this->authorize('viewAny', Payment::class);
@@ -45,7 +51,7 @@ class Show extends Component
 
     public function editAmounts(): void
     {
-        $this->authorize('create', Payment::class);
+        $this->authorize('editAmounts', $this->enrollment);
 
         $this->registration_amount = (float) ($this->enrollment->registration_amount ?? 0);
 
@@ -61,7 +67,7 @@ class Show extends Component
 
     public function saveAmounts(): void
     {
-        $this->authorize('create', Payment::class);
+        $this->authorize('editAmounts', $this->enrollment);
 
         $data = $this->validate([
             'registration_amount' => ['required', 'numeric', 'min:0'],
@@ -126,6 +132,61 @@ class Show extends Component
         $this->showPaymentForm = false;
     }
 
+    public function applyDiscountPreset(DiscountService $discountService): void
+    {
+        abort_unless($this->enrollment->status === 'active', 403);
+
+        $current = $this->currentDiscount();
+
+        $this->authorize($current ? 'update' : 'create', $current ?? Discount::class);
+
+        $data = $this->validate([
+            'discount_preset_id' => [
+                'required',
+                Rule::exists('discount_presets', 'id')
+                    ->where('establishment_id', $this->enrollment->establishment_id)
+                    ->where('is_active', true),
+            ],
+        ], [], [
+            'discount_preset_id' => __('réduction type'),
+        ]);
+
+        $discountService->applyPreset(
+            $this->enrollment->student_id,
+            $this->enrollment->school_year_id,
+            DiscountPreset::findOrFail($data['discount_preset_id']),
+            (int) Auth::id(),
+        );
+
+        $this->enrollment->refresh();
+        $this->discount_preset_id = null;
+    }
+
+    public function removeDiscount(DiscountService $discountService): void
+    {
+        abort_unless($this->enrollment->status === 'active', 403);
+
+        $discount = $this->currentDiscount();
+
+        if ($discount === null) {
+            return;
+        }
+
+        $this->authorize('delete', $discount);
+
+        $discount->delete();
+        $discountService->removeFromEnrollment($this->enrollment, $discount);
+
+        $this->enrollment->refresh();
+    }
+
+    private function currentDiscount(): ?Discount
+    {
+        return Discount::where('school_year_id', $this->enrollment->school_year_id)
+            ->where('student_id', $this->enrollment->student_id)
+            ->first();
+    }
+
     public function render()
     {
         $registrationAmount = (float) ($this->enrollment->registration_amount ?? 0);
@@ -139,6 +200,8 @@ class Show extends Component
             'registrationAmountPaid' => $this->enrollment->registrationAmountPaid(),
             'totalDue' => $totalDue,
             'balance' => $totalDue - (float) $this->enrollment->total_paid,
+            'currentDiscount' => $this->currentDiscount(),
+            'discountPresets' => DiscountPreset::active()->get(),
         ])->title(__('Situation financière'));
     }
 }

@@ -86,9 +86,9 @@ test('le détail des montants dus affiche le montant versé par poste', function
         ->assertSee(money(4000.0));
 });
 
-test('un caissier modifie les montants d’une inscription', function () {
+test('un directeur modifie les montants d’une inscription', function () {
     $establishment = Establishment::factory()->create();
-    $accountant = createUserWithRole($establishment, 'caissier');
+    $accountant = createUserWithRole($establishment, 'directeur');
     actingInEstablishment($establishment);
     test()->actingAs($accountant);
 
@@ -141,7 +141,7 @@ test('un caissier enregistre un paiement, le total versé de l’inscription est
 
 test('ouvrir le formulaire de paiement referme celui des montants et inversement', function () {
     $establishment = Establishment::factory()->create();
-    $accountant = createUserWithRole($establishment, 'caissier');
+    $accountant = createUserWithRole($establishment, 'directeur');
     actingInEstablishment($establishment);
     test()->actingAs($accountant);
 

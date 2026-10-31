@@ -5,18 +5,81 @@ declare(strict_types=1);
 namespace App\Domain\Billing\Services;
 
 use App\Domain\Billing\Models\Discount;
+use App\Domain\Billing\Models\DiscountPreset;
 use App\Domain\Enrollment\Models\Enrollment;
+use InvalidArgumentException;
 
 /**
  * Applique une réduction (Discount) à une inscription, sur ses tranches de
  * scolarité et sur ses frais d'inscription, indépendamment — voir
  * docs/superpowers/specs/2026-08-18-refonte-factures-scolarite-design.md,
- * section 3, et 2026-10-31-reductions-droits-inscription-design.md.
+ * section 3, 2026-10-31-reductions-droits-inscription-design.md et
+ * 2026-10-31-catalogue-reductions-design.md.
  */
 class DiscountService
 {
     public function __construct(private readonly LevelFeeDefaultsService $levelFeeDefaults)
     {
+    }
+
+    /**
+     * Accorde à l'élève une réduction du catalogue, ou remplace sa réduction
+     * de l'année. Les valeurs sont copiées : modifier l'entrée plus tard ne
+     * change pas cette réduction.
+     */
+    public function applyPreset(int $studentId, int $schoolYearId, DiscountPreset $preset, int $userId): Discount
+    {
+        if (! $preset->is_active || $preset->establishment_id !== (int) app('currentEstablishmentId')) {
+            throw new InvalidArgumentException('Réduction type inactive ou d\'un autre établissement.');
+        }
+
+        $existing = Discount::where('school_year_id', $schoolYearId)
+            ->where('student_id', $studentId)
+            ->first();
+
+        $hadTuitionDiscount = (bool) $existing?->hasTuitionDiscount();
+        $hadRegistrationDiscount = (bool) $existing?->hasRegistrationDiscount();
+
+        if (! $existing) {
+            $this->restoreDeleted($studentId, $schoolYearId);
+        }
+
+        $discount = Discount::updateOrCreate(
+            ['school_year_id' => $schoolYearId, 'student_id' => $studentId],
+            [
+                'discount_preset_id' => $preset->id,
+                'type' => $preset->type,
+                'value' => $preset->value,
+                'registration_type' => $preset->registration_type,
+                'registration_value' => $preset->registration_value,
+                'reason' => $preset->name,
+                'created_by' => $userId,
+            ],
+        );
+
+        $enrollment = Enrollment::where('school_year_id', $schoolYearId)
+            ->where('student_id', $studentId)
+            ->where('status', 'active')
+            ->first();
+
+        if ($enrollment) {
+            $this->applyToEnrollment($enrollment, $discount, $hadTuitionDiscount, $hadRegistrationDiscount);
+        }
+
+        return $discount;
+    }
+
+    /**
+     * Une réduction supprimée en douceur occupe encore la contrainte unique
+     * (élève, année) : on la réactive au lieu d'en créer une autre.
+     */
+    public function restoreDeleted(int $studentId, int $schoolYearId): void
+    {
+        Discount::onlyTrashed()
+            ->where('school_year_id', $schoolYearId)
+            ->where('student_id', $studentId)
+            ->first()
+            ?->restore();
     }
 
     /**

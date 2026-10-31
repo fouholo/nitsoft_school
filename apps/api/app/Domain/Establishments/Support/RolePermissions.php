@@ -33,6 +33,11 @@ final class RolePermissions
         'expenses.create' => ['fondateur', 'directeur', 'gestionnaire', 'caissier', 'educateur'],
         'expenses.delete' => ['fondateur', 'directeur'],
 
+        'discount_presets.manage' => ['fondateur'],
+        'discounts.apply_preset' => ['fondateur', 'directeur', 'caissier', 'educateur'],
+        'discounts.free_entry' => ['fondateur', 'directeur'],
+        'enrollments.edit_amounts' => ['fondateur', 'directeur'],
+
         'grades.enter' => ['educateur'],
         'terms.write' => ['educateur'],
         'report_cards.generate' => ['educateur'],

@@ -6,11 +6,15 @@ namespace App\Livewire\Billing\Discounts;
 
 use App\Domain\Academics\Models\SchoolYear;
 use App\Domain\Billing\Models\Discount;
+use App\Domain\Billing\Models\DiscountPreset;
+use App\Domain\Billing\Rules\MaxPercentage;
 use App\Domain\Billing\Services\DiscountService;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Enrollment\Models\Student;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -30,6 +34,11 @@ class Index extends Component
     public string $studentSearch = '';
 
     public string $editingStudentLabel = '';
+
+    /**
+     * Entrée du catalogue choisie ; sans elle, la réduction est en saisie libre.
+     */
+    public ?int $discount_preset_id = null;
 
     public string $type = 'percentage';
 
@@ -64,6 +73,7 @@ class Index extends Component
 
         $this->editingId = $discount->id;
         $this->student_id = $discount->student_id;
+        $this->discount_preset_id = $discount->discountPreset?->is_active ? $discount->discount_preset_id : null;
         $this->editingStudentLabel = trim($discount->student->last_name.' '.$discount->student->first_name);
         $this->type = $discount->type ?? 'percentage';
         $this->value = $discount->hasTuitionDiscount() ? (float) $discount->value : null;
@@ -75,6 +85,12 @@ class Index extends Component
 
     public function save(DiscountService $discountService): void
     {
+        if ($this->discount_preset_id !== null || ! Gate::allows('freeEntry', Discount::class)) {
+            $this->saveFromPreset($discountService);
+
+            return;
+        }
+
         $data = $this->validate([
             'student_id' => ['required', 'exists:students,id'],
             'type' => ['required', 'in:percentage,fixed_amount'],
@@ -83,14 +99,14 @@ class Index extends Component
                 'nullable',
                 'numeric',
                 'min:0',
-                $this->maxPercentageRule($this->type),
+                new MaxPercentage($this->type),
             ],
             'registration_type' => ['required', 'in:percentage,fixed_amount'],
             'registration_value' => [
                 'nullable',
                 'numeric',
                 'min:0',
-                $this->maxPercentageRule($this->registration_type),
+                new MaxPercentage($this->registration_type),
             ],
             'reason' => ['nullable', 'string', 'max:255'],
         ], [
@@ -106,19 +122,14 @@ class Index extends Component
         $hadTuitionDiscount = (bool) $existing?->hasTuitionDiscount();
         $hadRegistrationDiscount = (bool) $existing?->hasRegistrationDiscount();
 
-        // Une réduction supprimée en douceur occupe encore la contrainte
-        // unique (élève, année) : on la réactive au lieu d'en créer une autre.
         if (! $existing) {
-            Discount::onlyTrashed()
-                ->where('school_year_id', $this->school_year_id)
-                ->where('student_id', $data['student_id'])
-                ->first()
-                ?->restore();
+            $discountService->restoreDeleted((int) $data['student_id'], (int) $this->school_year_id);
         }
 
         $discount = Discount::updateOrCreate(
             ['school_year_id' => $this->school_year_id, 'student_id' => $data['student_id']],
             [
+                'discount_preset_id' => null,
                 'type' => $data['value'] !== null ? $data['type'] : null,
                 'value' => $data['value'],
                 'registration_type' => $data['registration_value'] !== null ? $data['registration_type'] : null,
@@ -159,13 +170,37 @@ class Index extends Component
         }
     }
 
-    private function maxPercentageRule(string $type): \Closure
+    private function saveFromPreset(DiscountService $discountService): void
     {
-        return function (string $attribute, mixed $value, \Closure $fail) use ($type): void {
-            if ($type === 'percentage' && (float) $value > 100) {
-                $fail(__('Le pourcentage ne peut pas dépasser 100.'));
-            }
-        };
+        $establishmentId = (int) app('currentEstablishmentId');
+
+        $data = $this->validate([
+            'school_year_id' => ['required', 'exists:school_years,id'],
+            'student_id' => ['required', Rule::exists('students', 'id')->where('establishment_id', $establishmentId)],
+            'discount_preset_id' => [
+                'required',
+                Rule::exists('discount_presets', 'id')->where('establishment_id', $establishmentId)->where('is_active', true),
+            ],
+        ], [], [
+            'student_id' => __('élève'),
+            'discount_preset_id' => __('réduction type'),
+        ]);
+
+        $existing = Discount::where('school_year_id', $data['school_year_id'])
+            ->where('student_id', $data['student_id'])
+            ->first();
+
+        $this->authorize($existing ? 'update' : 'create', $existing ?? Discount::class);
+
+        $discountService->applyPreset(
+            (int) $data['student_id'],
+            (int) $data['school_year_id'],
+            DiscountPreset::findOrFail($data['discount_preset_id']),
+            (int) Auth::id(),
+        );
+
+        $this->resetForm();
+        $this->showForm = false;
     }
 
     public function cancel(): void
@@ -176,7 +211,7 @@ class Index extends Component
 
     protected function resetForm(): void
     {
-        $this->reset(['editingId', 'student_id', 'studentSearch', 'editingStudentLabel', 'value', 'registration_value', 'reason']);
+        $this->reset(['editingId', 'student_id', 'discount_preset_id', 'studentSearch', 'editingStudentLabel', 'value', 'registration_value', 'reason']);
         $this->type = 'percentage';
         $this->registration_type = 'percentage';
     }
@@ -217,6 +252,7 @@ class Index extends Component
         return view('livewire.billing.discounts.index', [
             'discounts' => $discounts,
             'students' => $this->studentOptions(),
+            'discountPresets' => DiscountPreset::active()->get(),
             'schoolYears' => SchoolYear::orderByDesc('starts_on')->get(),
         ])->title(__('Réductions'));
     }

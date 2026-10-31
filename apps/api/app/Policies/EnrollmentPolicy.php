@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Domain\Enrollment\Models\Enrollment;
+use App\Domain\Establishments\Support\RolePermissions;
 use App\Models\User;
 use App\Policies\Concerns\ChecksEstablishmentMembership;
 
@@ -31,6 +32,15 @@ class EnrollmentPolicy
     {
         return $this->belongsToSameEstablishment($user, $enrollment->establishment_id)
             && $this->canManageEnrollments($user);
+    }
+
+    /**
+     * Modification à la main des frais et des tranches sur la fiche financière.
+     */
+    public function editAmounts(User $user, Enrollment $enrollment): bool
+    {
+        return $this->belongsToSameEstablishment($user, $enrollment->establishment_id)
+            && RolePermissions::can($user->currentRole(), 'enrollments.edit_amounts');
     }
 
     public function delete(User $user, Enrollment $enrollment): bool

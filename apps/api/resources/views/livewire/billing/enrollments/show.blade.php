@@ -10,10 +10,12 @@
         </div>
 
         <div class="flex flex-col gap-2 sm:flex-row">
-            @can('create', \App\Domain\Billing\Models\Payment::class)
+            @can('editAmounts', $enrollment)
                 <button type="button" wire:click="editAmounts" class="rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-medium text-stone-700 hover:bg-stone-50">
                     {{ __('Modifier les montants') }}
                 </button>
+            @endcan
+            @can('create', \App\Domain\Billing\Models\Payment::class)
                 <button type="button" wire:click="addPayment" class="rounded-lg bg-orange-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-800">
                     {{ __('Enregistrer un paiement') }}
                 </button>
@@ -117,6 +119,67 @@
             </div>
         </form>
     @endif
+
+    @php
+        $canChangeDiscount = $enrollment->status === 'active'
+            && ($currentDiscount ? auth()->user()->can('update', $currentDiscount) : auth()->user()->can('create', \App\Domain\Billing\Models\Discount::class));
+    @endphp
+
+    <h2 class="mt-8 text-sm font-semibold uppercase tracking-wide text-stone-500">{{ __('Réduction') }}</h2>
+
+    <div class="mt-2 rounded-lg border border-stone-200 bg-white p-4">
+        @if ($currentDiscount)
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="text-sm text-stone-700">
+                    <p class="font-medium text-stone-900">{{ $currentDiscount->discount_preset_id ? $currentDiscount->reason : __('Réduction libre') }}</p>
+                    <p>
+                        {{ __('Scolarité') }} : {{ \App\Domain\Billing\Models\Discount::formatReduction($currentDiscount->type, $currentDiscount->value) }}
+                        — {{ __("Frais d'inscription") }} : {{ \App\Domain\Billing\Models\Discount::formatReduction($currentDiscount->registration_type, $currentDiscount->registration_value) }}
+                    </p>
+                </div>
+
+                @if ($canChangeDiscount)
+                    <button
+                        type="button"
+                        wire:click="removeDiscount"
+                        wire:confirm="{{ __('Retirer cette réduction ? Les parties concernées seront remises aux montants standards du niveau.') }}"
+                        class="inline-flex min-h-11 items-center text-sm text-red-600 hover:text-red-700"
+                    >
+                        {{ __('Retirer') }}
+                    </button>
+                @endif
+            </div>
+
+            @if (! $canChangeDiscount && ! $currentDiscount->discount_preset_id && auth()->user()->can('create', \App\Domain\Billing\Models\Discount::class))
+                <p class="mt-2 text-xs text-stone-500">{{ __('Cette réduction a été saisie librement : seul le fondateur ou le directeur peut la modifier.') }}</p>
+            @endif
+        @else
+            <p class="text-sm text-stone-500">{{ __('Aucune réduction pour cette inscription.') }}</p>
+        @endif
+
+        @if ($canChangeDiscount)
+            @if ($discountPresets->isEmpty())
+                <p class="mt-2 text-sm text-amber-800">{{ __("Aucune réduction type n'est disponible : le fondateur doit d'abord en créer.") }}</p>
+            @else
+                <form wire:submit="applyDiscountPreset" class="mt-3 flex flex-col gap-3 sm:flex-row sm:items-start">
+                    <div class="w-full sm:max-w-xs">
+                        <label for="discount_preset_id" class="sr-only">{{ __('Réduction type') }}</label>
+                        <select id="discount_preset_id" wire:model="discount_preset_id" class="block w-full rounded-lg border-stone-300 text-sm">
+                            <option value="">{{ __('— Choisir une réduction —') }}</option>
+                            @foreach ($discountPresets as $discountPreset)
+                                <option value="{{ $discountPreset->id }}">{{ $discountPreset->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('discount_preset_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+
+                    <button type="submit" class="self-start rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-medium text-stone-700 hover:bg-stone-50">
+                        {{ __('Appliquer') }}
+                    </button>
+                </form>
+            @endif
+        @endif
+    </div>
 
     <h2 class="mt-8 text-sm font-semibold uppercase tracking-wide text-stone-500">{{ __('Détail des montants dus') }}</h2>
 

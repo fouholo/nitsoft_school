@@ -58,35 +58,36 @@
             </div>
 
             <div class="sm:col-span-2">
-                <label for="reason" class="block text-sm font-medium text-stone-700">{{ __('Motif (optionnel)') }}</label>
-                <input id="reason" type="text" wire:model="reason" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
-                @error('reason') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                <label for="discount_preset_id" class="block text-sm font-medium text-stone-700">{{ __('Réduction type') }}</label>
+                <select id="discount_preset_id" wire:model.live="discount_preset_id" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                    @can('freeEntry', \App\Domain\Billing\Models\Discount::class)
+                        <option value="">{{ __('— Saisie libre —') }}</option>
+                    @else
+                        <option value="">{{ __('— Choisir une réduction —') }}</option>
+                    @endcan
+                    @foreach ($discountPresets as $discountPreset)
+                        <option value="{{ $discountPreset->id }}">{{ $discountPreset->name }}</option>
+                    @endforeach
+                </select>
+                @error('discount_preset_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                @cannot('freeEntry', \App\Domain\Billing\Models\Discount::class)
+                    @if ($discountPresets->isEmpty())
+                        <p class="mt-1 text-sm text-amber-800">{{ __("Aucune réduction type n'est disponible : le fondateur doit d'abord en créer.") }}</p>
+                    @endif
+                @endcannot
             </div>
 
-            @foreach ([
-                ['legend' => __('Scolarité'), 'typeField' => 'type', 'valueField' => 'value'],
-                ['legend' => __("Frais d'inscription"), 'typeField' => 'registration_type', 'valueField' => 'registration_value'],
-            ] as $block)
-                <fieldset class="grid grid-cols-2 gap-4 sm:col-span-2" wire:key="discount-block-{{ $block['valueField'] }}">
-                    <legend class="col-span-2 text-sm font-semibold text-stone-900">{{ $block['legend'] }}</legend>
-
-                    <div>
-                        <label for="{{ $block['typeField'] }}" class="block text-sm font-medium text-stone-700">{{ __('Type') }}</label>
-                        <select id="{{ $block['typeField'] }}" wire:model="{{ $block['typeField'] }}" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
-                            <option value="percentage">{{ __('Pourcentage') }}</option>
-                            <option value="fixed_amount">{{ __('Montant fixe') }}</option>
-                        </select>
+            @can('freeEntry', \App\Domain\Billing\Models\Discount::class)
+                @if ($discount_preset_id === null)
+                    <div class="sm:col-span-4">
+                        <label for="reason" class="block text-sm font-medium text-stone-700">{{ __('Motif (optionnel)') }}</label>
+                        <input id="reason" type="text" wire:model="reason" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
+                        @error('reason') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
 
-                    <div>
-                        <label for="{{ $block['valueField'] }}" class="block text-sm font-medium text-stone-700">{{ __('Valeur') }}</label>
-                        <input id="{{ $block['valueField'] }}" type="number" step="0.01" wire:model="{{ $block['valueField'] }}" class="mt-1 block w-full rounded-lg border-stone-300 text-sm">
-                        @error($block['valueField']) <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-                    </div>
-                </fieldset>
-            @endforeach
-
-            <p class="text-xs text-stone-500 sm:col-span-4">{{ __('Laissez la valeur vide pour ne pas accorder de réduction sur cette partie.') }}</p>
+                    @include('livewire.billing.discounts.partials.amount-blocks')
+                @endif
+            @endcan
 
             <div class="flex gap-2 sm:col-span-4">
                 <button type="submit" class="rounded-lg bg-orange-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-800">
@@ -115,11 +116,6 @@
                 <tbody class="divide-y divide-stone-100">
                     @forelse ($discounts as $discount)
                         @php
-                            $discountLabel = fn (?string $type, mixed $value): string => match ($type) {
-                                null => '—',
-                                'percentage' => number_format((float) $value, 2).' %',
-                                default => money((float) $value),
-                            };
                             $studentName = trim($discount->student->last_name.' '.$discount->student->first_name);
                             $deleteConfirmation = match (true) {
                                 $discount->hasTuitionDiscount() && $discount->hasRegistrationDiscount() => __("Supprimer cette réduction ? Les tranches de scolarité et les frais d'inscription de :name seront remis aux montants standards du niveau.", ['name' => $studentName]),
@@ -129,8 +125,8 @@
                         @endphp
                         <tr wire:key="discount-{{ $discount->id }}">
                             <td class="whitespace-nowrap px-4 py-2 text-stone-900">{{ $discount->student->last_name }} {{ $discount->student->first_name }}</td>
-                            <td class="whitespace-nowrap px-4 py-2 text-stone-600">{{ $discountLabel($discount->type, $discount->value) }}</td>
-                            <td class="whitespace-nowrap px-4 py-2 text-stone-600">{{ $discountLabel($discount->registration_type, $discount->registration_value) }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-stone-600">{{ \App\Domain\Billing\Models\Discount::formatReduction($discount->type, $discount->value) }}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-stone-600">{{ \App\Domain\Billing\Models\Discount::formatReduction($discount->registration_type, $discount->registration_value) }}</td>
                             <td class="whitespace-nowrap px-4 py-2 text-stone-600">{{ $discount->reason ?: '—' }}</td>
                             <td class="whitespace-nowrap px-4 py-2 text-stone-600">{{ $discount->createdBy?->name }}</td>
                             <td class="whitespace-nowrap px-4 py-2 text-end">

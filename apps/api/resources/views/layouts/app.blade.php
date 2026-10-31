@@ -56,6 +56,7 @@
                     ['label' => __('Dépenses'), 'route' => 'billing.expenses.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Expense::class],
                     ['label' => __('Suivi des paiements'), 'route' => 'billing.payment-tracking.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Payment::class],
                     ['label' => __('Réductions'), 'route' => 'billing.discounts.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Discount::class],
+                    ['label' => __('Réductions types'), 'route' => 'billing.discount-presets.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\DiscountPreset::class],
                     ['label' => __('Bilan financier'), 'route' => 'billing.financial-summary.index', 'ability' => 'viewAny', 'model' => \App\Domain\Billing\Models\Payment::class],
                 ]],
                 ['type' => 'group', 'label' => __('SMS'), 'icon' => 'chat', 'active' => 'notifications.*', 'children' => [
